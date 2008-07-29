@@ -1,0 +1,7 @@
+// ip_auth.idl
+
+C_DEF #include <string.h>
+
+[async] test_rpc1([IN] int r1, [IN] int r2["1"], [OUT] int r3["1"], [OUT("1")] int r4["2"]);
+
+[async] test_rpc2([IN OUT] int r1["1"], [IN("1") OUT] int r2["2"], [IN OUT("1")] int r3["2"], [IN("1") OUT("2")] int r4["3"]);
