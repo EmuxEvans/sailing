@@ -1,0 +1,63 @@
+FDWATCH_USE=select
+
+DBAPI_ORACLE=DISABLE
+DBAPI_MYSQL=DISABLE
+DBAPI_SQLRELAY=DISABLE
+
+
+.if $(DBAPI_SQLRELAY) == "ENABLE"
+  SQLRELAY_LIB=-lsqlrclientwrapper
+.else
+  SQLRELAY_LIB=
+.endif
+
+CC=gcc
+REL_CC_FLAG=-D__FREEBSD__ -D__USE_GNU -Wall -Werror -O2
+DBG_CC_FLAG=-D__FREEBSD__ -D__USE_GNU -Wall -Werror -g
+OBJ_CC_FLAG=-c -o
+EXE_CC_FLAG=-o
+DLL_CC_FLAG=-shared -o
+
+EXE_PREFIX=
+DLL_PREFIX=.so
+DLL_LIB_PREFIX=.so
+STA_LIB_PREFIX=.a
+
+LEX=flex
+YACC=bison
+LEX_FLAG=-c
+YACC_FLAG=-d
+
+OS_LIB=-lpthread -lc $(SQLRELAY_LIB)
+OS_INC_DIR=
+OS_LIB_DIR=
+
+.if !defined(CONFIG_NAME)
+  CONFIG_NAME=debug
+.endif
+
+.if $(CONFIG_NAME) == "debug"
+  CC_FLAG=$(DBG_CC_FLAG)
+.endif
+.if $(CONFIG_NAME) == "release"
+  CC_FLAG=$(REL_CC_FLAG)
+.endif
+
+OUTPUT_DIR=$(BASE_DIR)/$(CONFIG_NAME)
+
+.if $(DBAPI_ORACLE) == "ENABLE"
+  DBAPI_ORACLE_FILE = dbapi_oracle.o
+.else
+  DBAPI_ORACLE_FILE =
+.endif
+.if $(DBAPI_MYSQL) == "ENABLE"
+  DBAPI_MYSQL_FILE=dbapi_mysql.o
+.else
+  DBAPI_MYSQL_FILE=
+.endif
+.if $(DBAPI_SQLRELAY) == "ENABLE"
+  DBAPI_SQLRELAY_FILE=dbapi_sqlrelay.o
+.else
+  DBAPI_SQLRELAY_FILE=
+.endif
+
