@@ -5,9 +5,9 @@ struct NETWORK_CONNECTION;
 typedef struct NETWORK_CONNECTION* NETWORK_HANDLE;
 
 typedef void (*NETWORK_ONACCEPT)(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname);
-typedef int (*NETWORK_ONCONNECT)(NETWORK_HANDLE handle, void* userptr);
-typedef int (*NETWORK_ONDATA)(NETWORK_HANDLE handle, void* userptr, unsigned char* buf, unsigned int* len);
-typedef int (*NETWORK_ONDISCONNECT)(NETWORK_HANDLE handle, void* userptr);
+typedef void (*NETWORK_ONCONNECT)(NETWORK_HANDLE handle, void* userptr);
+typedef void (*NETWORK_ONDATA)(NETWORK_HANDLE handle, void* userptr);
+typedef void (*NETWORK_ONDISCONNECT)(NETWORK_HANDLE handle, void* userptr);
 
 typedef struct NETWORK_EVENT {
 	NETWORK_ONCONNECT		OnConnect;
@@ -16,13 +16,13 @@ typedef struct NETWORK_EVENT {
 
 	MEMPOOL_HANDLE			recvbuf_pool;
 	unsigned char*			recvbuf_buf;
-	unsigned int			recvbuf_len;
+	unsigned int			recvbuf_max;
 } NETWORK_EVENT;
 
 typedef struct NETWORK_DOWNBUF {
-	struct NETWORK_DOWNBUF* next;
-	int len;
-	char buf[0];
+	RLIST_ITEM		item;
+	unsigned int	len;
+	char			buf[0];
 } NETWORK_DOWNBUF;
 
 ZION_API void network_init(unsigned int downbuf_size);
@@ -38,7 +38,14 @@ ZION_API unsigned int network_downbuf_size();
 ZION_API NETWORK_DOWNBUF* network_downbuf_alloc();
 ZION_API void network_downbuf_free(NETWORK_DOWNBUF* downbuf);
 
+ZION_API unsigned int network_recvbuf_len(NETWORK_HANDLE handle);
+ZION_API int network_recvbuf_get(NETWORK_HANDLE handle, unsigned int start, void* buf, unsigned int len);
+ZION_API int network_recvbuf_commit(NETWORK_HANDLE handle, unsigned int len);
+
 ZION_API int network_send(NETWORK_HANDLE handle, NETWORK_DOWNBUF* downbufs[], unsigned int count);
 ZION_API int network_disconnect(NETWORK_HANDLE handle);
+
+ZION_API SOCK_HANDLE network_get_sock(NETWORK_HANDLE handle);
+ZION_API void* network_get_userptr(NETWORK_HANDLE handle);
 
 #endif
