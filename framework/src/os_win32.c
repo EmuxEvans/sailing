@@ -6,6 +6,82 @@
 #include <errno.h>
 #include <direct.h>
 
+#define CONDITION_SEQ(v)						((v)>>16)
+#define CONDITION_TCOUNT(v)						(((v)>>8)&0xff)
+#define CONDITION_SCOUNT(v)						((v)&0xff)
+#define CONDITION_MAKE(seq, tcount, scount)		(((((DWORD)(seq))&0xffff)<<16) | ((((DWORD)(tcount))&0xff)<<8) | (((DWORD)(scount))&0xff))
+
+int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx)
+{
+	DWORD v, c, ret;
+
+	while(1) {
+		c = cond->count;
+		v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c)+1, CONDITION_SCOUNT(c));
+		if(c==InterlockedCompareExchange(&cond->count, v, c)) break;
+	}
+
+	LeaveCriticalSection(mtx);
+
+	ret = WaitForSingleObject(cond->sem, INFINITE);
+
+	while(1) {
+		c = cond->count;
+		v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c), CONDITION_SCOUNT(c)+1);
+		if(c==InterlockedCompareExchange(&cond->count, v, c)) break;
+	}
+
+	EnterCriticalSection(mtx);
+
+	return ret==WAIT_OBJECT_0?0:GetLastError();
+}
+
+int os_condition_signal(os_condition_t* cond)
+{
+	DWORD v, c;
+
+	while(1) {
+		c = cond->count;
+		if(CONDITION_SCOUNT(c)<CONDITION_TCOUNT(c)+1) {
+			v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c), CONDITION_SCOUNT(c)+1);
+		} else {
+			v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c), CONDITION_SCOUNT(c));
+		}
+		if(c==InterlockedCompareExchange(&cond->count, v, c)) break;
+	}
+
+	if(CONDITION_SCOUNT(c)<CONDITION_TCOUNT(c)+1) {
+		BOOL ret;
+		ret = ReleaseSemaphore(cond->sem, 1, NULL);
+		return ret?0:GetLastError();
+	} else {
+		return 0;
+	}
+}
+
+int os_condition_boardcast(os_condition_t* cond)
+{
+	DWORD v, c;
+
+	while(1) {
+		c = cond->count;
+		if(CONDITION_TCOUNT(c)>CONDITION_SCOUNT(c)) {
+			v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c), CONDITION_TCOUNT(c));
+		} else {
+			v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c), CONDITION_SCOUNT(c));
+		}
+		if(c==InterlockedCompareExchange(&cond->count, v, c)) break;
+	}
+
+	if(CONDITION_TCOUNT(c)>CONDITION_SCOUNT(c)) {
+		BOOL ret;
+		ret = ReleaseSemaphore(cond->sem, CONDITION_TCOUNT(c) - CONDITION_SCOUNT(c), NULL);
+		return ret?0:GetLastError();
+	} else {
+		return 0;
+	}
+}
+
 int os_shm_create(os_shm_t* sm, const char* name, unsigned int size)
 {
 	HANDLE handle;
