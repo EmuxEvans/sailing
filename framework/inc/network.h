@@ -38,6 +38,10 @@ ZION_API unsigned int network_downbuf_size();
 ZION_API NETWORK_DOWNBUF* network_downbuf_alloc();
 ZION_API void network_downbuf_free(NETWORK_DOWNBUF* downbuf);
 
+ZION_API unsigned int network_downbufs_alloc(NETWORK_DOWNBUF* downbufs[], unsigned int count, unsigned int size);
+ZION_API int network_downbufs_fill(NETWORK_DOWNBUF* downbufs[], unsigned int count, unsigned int start, const void* data, unsigned int data_len);
+ZION_API void network_downbufs_free(NETWORK_DOWNBUF* downbufs[], unsigned int count);
+
 ZION_API unsigned int network_recvbuf_len(NETWORK_HANDLE handle);
 ZION_API int network_recvbuf_get(NETWORK_HANDLE handle, void* buf, unsigned int start, unsigned int len);
 ZION_API int network_recvbuf_commit(NETWORK_HANDLE handle, unsigned int len);
