@@ -113,8 +113,8 @@ int gameroom_class_init(GAMEROOM_CLASS* gc)
 		gc->state_map[gc->states[i].id] = &gc->states[i];
 	}
 
-	gc->room_pool = mempool_create(sizeof(GAMEROOM)+gc->room_size+sizeof(GAMEROOM_MEMBER*)*gc->member_max, 0);
-	gc->memb_pool = mempool_create(sizeof(GAMEROOM_MEMBER)+gc->memb_size, 0);
+	gc->room_pool = mempool_create("GAMEROOM_ROOM", sizeof(GAMEROOM)+gc->room_size+sizeof(GAMEROOM_MEMBER*)*gc->member_max, 0);
+	gc->memb_pool = mempool_create("GAMEROOM_MEMB", sizeof(GAMEROOM_MEMBER)+gc->memb_size, 0);
 	assert(gc->room_pool);
 	assert(gc->memb_pool);
 	if(gc->room_pool==NULL || gc->memb_pool==NULL) {

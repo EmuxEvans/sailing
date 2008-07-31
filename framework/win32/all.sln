@@ -50,6 +50,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2A756595-F
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_rqueue", "test_rqueue.vcproj", "{A6BB8F06-C379-435D-B89B-4E3C701BD345}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sailing", "sailing", "{2EAA31A0-5485-4BAC-A231-CC2EF68FB1F3}"
+	ProjectSection(SolutionItems) = preProject
+		..\CHANGELOG = ..\CHANGELOG
+		..\README = ..\README
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32

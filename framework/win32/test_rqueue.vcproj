@@ -337,6 +337,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\hashmap.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\mempool.c"
 				>
 			</File>
@@ -372,6 +376,10 @@
 			</File>
 			<File
 				RelativePath="..\inc\fdwatch.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\hashmap.h"
 				>
 			</File>
 			<File

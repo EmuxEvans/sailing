@@ -208,7 +208,7 @@ int	timer_init(int interval)
 	hctx->exitflag = 0;
 	
 	//init pool
-	hctx->hpool	= mempool_create(sizeof(wtimer), 0);
+	hctx->hpool	= mempool_create("TIMER", sizeof(wtimer), 0);
 	if(hctx->hpool == NULL)
 	{
 		//SYSLOG(LOG_ERROR, MODULE_NAME, "timer_initialize : mempool_create return NULL\n");

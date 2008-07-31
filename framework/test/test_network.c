@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 	mempool_init();
 	network_init(20000);
 
-	recvbuf_pool = mempool_create(recvbuf_size, 0);
+	recvbuf_pool = mempool_create("RECVBUF", recvbuf_size, 0);
 	network_tcp_register(sock_str2addr("0.0.0.0:1980", &sa), onaccept_proc, NULL);
 
 	getchar();
