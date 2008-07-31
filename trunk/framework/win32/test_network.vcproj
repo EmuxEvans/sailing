@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="test_package"
+	Name="test_network"
 	ProjectGUID="{8A978E8B-73C8-4EC1-B744-502C84795B60}"
 	RootNamespace="test_package"
 	TargetFrameworkVersion="131072"

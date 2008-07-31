@@ -39,11 +39,12 @@ ZION_INLINE void os_mutex_destroy(os_mutex_t* mtx);
 ZION_INLINE int os_mutex_lock(os_mutex_t* mtx);
 ZION_INLINE int os_mutex_unlock(os_mutex_t* mtx);
 
-typedef HANDLE os_condition_t;
+typedef struct { HANDLE sem; DWORD count; } os_condition_t;
 ZION_INLINE void os_condition_init(os_condition_t* cond);
 ZION_INLINE void os_condition_destroy(os_condition_t* cond);
-ZION_INLINE int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx);
-ZION_INLINE int os_condition_signal(os_condition_t* cond);
+ZION_API int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx);
+ZION_API int os_condition_signal(os_condition_t* cond);
+ZION_API int os_condition_boardcast(os_condition_t* cond);
 
 typedef HANDLE os_sem_t;
 ZION_INLINE int os_sem_init(os_sem_t* sem, unsigned int init);
@@ -140,29 +141,14 @@ ZION_INLINE int os_mutex_unlock(os_mutex_t* mtx)
 
 ZION_INLINE void os_condition_init(os_condition_t* cond)
 {
-	*cond = CreateEvent( NULL, FALSE, FALSE, NULL );
+	cond->sem = CreateSemaphore(NULL, 0, 5000, NULL);
+	cond->count = 0;
 }
 
 ZION_INLINE void os_condition_destroy(os_condition_t* cond)
 {
-	CloseHandle( *cond );
-}
-
-ZION_INLINE int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx)
-{
-	int ret;
-
-	LeaveCriticalSection(mtx);
-	ret = WaitForSingleObject( *cond, INFINITE );
-	EnterCriticalSection(mtx);
-
-	return WAIT_OBJECT_0 == ret ? 0 : GetLastError();
-}
-
-ZION_INLINE int os_condition_signal(os_condition_t* cond)
-{
-	int ret = SetEvent( *cond );
-	return 0 == ret ? GetLastError() : 0;
+	CloseHandle(cond->sem);
+	cond->sem = NULL;
 }
 
 ZION_INLINE int os_sem_init(os_sem_t* sem, unsigned int init)

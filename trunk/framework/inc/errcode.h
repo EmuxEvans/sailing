@@ -1,9 +1,9 @@
 #ifndef _ERRCODE_INCLUDE_
 #define _ERRCODE_INCLUDE_
 
-#define ERR_NOERROR                     (0)
-#define ERR_UNKNOWN                     (-1)
-#define ERR_NO_ENOUGH_MEMORY            (-2)
+#define ERR_NOERROR						(0)
+#define ERR_UNKNOWN						(-1)
+#define ERR_NOT_ENOUGH					(-2)
 #define ERR_INVALID_PARAMETER			(-3)
 #define ERR_FDOPEN						(-4)
 #define ERR_THREAD_CREATE				(-5)
@@ -28,6 +28,8 @@
 #define ERR_AGAIN						(-27)
 #define ERR_ALREADY						(-28)
 #define ERR_EMPTY						(-29)
+#define ERR_TOO_LONG					(-30)
+#define ERR_NO_ENOUGH_MEMORY			(-31)
 
 #endif
 
