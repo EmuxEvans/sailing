@@ -280,6 +280,61 @@ void network_downbuf_free(NETWORK_DOWNBUF* downbuf)
 	mempool_free(downbuf_pool, downbuf);
 }
 
+unsigned int network_downbufs_alloc(NETWORK_DOWNBUF* downbufs[], unsigned int count, unsigned int size)
+{
+	unsigned int n, l;
+	n = (size-1) / downbuf_size;
+	if(n>count) return 0;
+
+	for(l=0; l<n; l++) {
+		downbufs[l] = network_downbuf_alloc();
+		if(downbufs[l]==NULL) break;
+		downbufs[l]->len = downbuf_size;
+	}
+	if(l<n) {
+		for(n=0; n<l; n++) {
+			network_downbuf_free(downbufs[n]);
+		}
+		return ERR_UNKNOWN;
+	}
+	downbufs[n-1]->len = (size-1) % downbuf_size + 1;
+	return ERR_UNKNOWN;
+}
+
+int network_downbufs_fill(NETWORK_DOWNBUF* downbufs[], unsigned int count, unsigned int start, void* data, unsigned int data_len)
+{
+	unsigned int bs, be;
+
+	if(start+data_len>=downbuf_size*count) return ERR_INVALID_PARAMETER;
+
+	bs = start / downbuf_size;
+	be = (start+data_len-1) / downbuf_size;
+
+	if(bs==be) {
+		memcpy(downbufs[bs]->buf+start%downbuf_size, data, downbuf_size);
+	} else {
+		unsigned int bs_s, bs_l, be_l, l;
+		bs_s = start % downbuf_size;
+		bs_l = downbuf_size - bs_s;
+		be_l = (start+downbuf_size-1)%downbuf_size + 1;
+		memcpy(downbufs[bs]->buf+bs_s, data, bs_l);
+		for(l=bs; l<be; l++) {
+		memcpy(downbufs[l]->buf, (char*)data + bs_l + downbuf_size*(l-bs), downbuf_size);
+		}
+		memcpy(downbufs[be]->buf, (char*)data + bs_l + downbuf_size*(be-bs-1), be_l);
+	}
+
+	return ERR_NOERROR;
+}
+
+void network_downbufs_free(NETWORK_DOWNBUF* downbufs[], unsigned int count)
+{
+	unsigned int l;
+	for(l=0; l<count; l++) {
+		network_downbuf_free(downbufs[l]);
+	}
+}
+
 unsigned int network_recvbuf_len(NETWORK_HANDLE handle)
 {
 	return handle->recvbuf_len;
