@@ -100,10 +100,10 @@ void network_init(unsigned int size)
 	int l;
 
 	downbuf_size = size;
-	downbuf_pool = mempool_create(sizeof(NETWORK_DOWNBUF)+size, 0);
+	downbuf_pool = mempool_create("NETWORK_DOWNBUF", sizeof(NETWORK_DOWNBUF)+size, 0);
 	os_mutex_init(&downbuf_mutex);
 //	os_mutex_init(&recvbuf_mutex);
-	conn_pool = mempool_create(sizeof(NETWORK_CONNECTION), 0);
+	conn_pool = mempool_create("NETWORK_CONNECTION", sizeof(NETWORK_CONNECTION), 0);
 
 	memset(&tcp_eps, 0, sizeof(tcp_eps));
 	for(l=0; l<sizeof(tcp_eps)/sizeof(tcp_eps[0]); l++) {
@@ -285,7 +285,7 @@ unsigned int network_recvbuf_len(NETWORK_HANDLE handle)
 	return handle->recvbuf_len;
 }
 
-int network_recvbuf_get(NETWORK_HANDLE handle, unsigned int start, void* buf, unsigned int len)
+int network_recvbuf_get(NETWORK_HANDLE handle, void* buf, unsigned int start, unsigned int len)
 {
 	unsigned int t;
 

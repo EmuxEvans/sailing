@@ -6,6 +6,8 @@
 #include "../inc/os.h"
 #include "../inc/rlist.h"
 #include "../inc/mempool.h"
+#include "../inc/log.h"
+#include "../inc/applog.h"
 
 // STATIC CONFIG : Start
 #define MEMPOOL_ARRAY_SIZE 30
@@ -16,9 +18,10 @@ typedef struct MEMPOOL_ITEM MEMPOOL_ITEM;
 
 struct MEMPOOL_ITEM {
 	union {
-		MEMPOOL_ITEM*			next;
-		ATOM_SLIST_ENTRY		entry;
+		MEMPOOL_ITEM*		next;
+		ATOM_SLIST_ENTRY	entry;
 	};
+
 #ifdef MEMPOOL_DEBUG
 	const char*				filename;
 	int						lineno;
@@ -31,8 +34,11 @@ struct MEMPOOL_ITEM {
 
 struct MEMPOOL_CB {
 	ATOM_SLIST_HEADER		unuse_list;
-	int size;
-	int res_count, unuse_count;
+	const char*				name;
+	int						size;
+	int						res_count;
+	int						unuse_count;
+	int						init_count;
 
 #ifdef MEMPOOL_DEBUG
 	MEMPOOL_ITEM* use_list;
@@ -81,7 +87,7 @@ void mempool_final()
 }
 
 #ifdef MEMPOOL_DEBUG
-MEMPOOL_HANDLE mempool_create_debug(const char* filename, unsigned int lineno, unsigned int size, unsigned int initcount)
+MEMPOOL_HANDLE mempool_create_debug(const char* filename, unsigned int lineno, const char* name, unsigned int size, unsigned int initcount)
 #else
 MEMPOOL_HANDLE mempool_create(unsigned int size, unsigned int initcount)
 #endif
@@ -92,7 +98,8 @@ MEMPOOL_HANDLE mempool_create(unsigned int size, unsigned int initcount)
 	if(handle==NULL) return NULL;
 
 	atom_slist_init(&handle->unuse_list);
-	handle->size			= size;
+	handle->name		= name;
+	handle->size		= size;
 	handle->res_count	= 0;
 	handle->unuse_count	= 0;
 
@@ -110,20 +117,22 @@ void mempool_destroy(MEMPOOL_HANDLE handle)
 	MEMPOOL_ITEM* item;
 
 	if(handle->res_count!=handle->unuse_count) {
-		assert(0);
-//#ifdef MEMPOOL_DEBUG
-//		SYSLOG(LOG_WARNING,	MODULE_NAME, "%s (%d): mempool resource leak. %d/%d",
-//							handle->filename, handle->lineno,
-//							handle->unuse_count, handle->res_count);
-//#else
-//		SYSLOG(LOG_WARNING, MODULE_NAME, "mempool : mempool(%d) resource leak. %d/%d", handle, handle->unuse_count, handle->res_count);
-//#endif
+#ifdef MEMPOOL_DEBUG
+		SYSLOG(LOG_WARNING,	MODULE_NAME, "%s(%s:%d): mempool resource leak. %d/%d",
+							handle->name, handle->filename, handle->lineno,
+							handle->unuse_count, handle->res_count);
+#else
+		SYSLOG(LOG_WARNING, MODULE_NAME, "%s(%d): mempool resource leak. %d/%d",
+							handle->name, handle-cb_array,
+							handle->unuse_count, handle->res_count);
+#endif
 	}
 
 #ifdef MEMPOOL_DEBUG
 	while(handle->use_list!=NULL) {
-		//SYSLOG(LOG_WARNING, MODULE_NAME, "%s (%d): mempool[%d] leak.", handle->use_list->filename, handle->use_list->lineno, handle);
-		assert(0);
+		SYSLOG(LOG_WARNING, MODULE_NAME, "%p %s:%d",
+							handle->use_list+1,
+							handle->use_list->filename, handle->use_list->lineno);
 		mempool_free(handle, (void*)(handle->use_list+1));
 	}
 #endif
@@ -202,6 +211,11 @@ void mempool_free(MEMPOOL_HANDLE handle, void* ptr)
 	
 	atom_inc((unsigned int*)&handle->unuse_count);
 	atom_slist_push(&handle->unuse_list, &item->entry);
+}
+
+int mempool_get_info(MEMPOOL_INFO* info, int count)
+{
+	return 0;
 }
 
 MEMPOOL_HANDLE cb_alloc()

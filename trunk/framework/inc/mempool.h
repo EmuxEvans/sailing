@@ -19,25 +19,30 @@ void ZION_API mempool_init();
 void ZION_API mempool_final();
 
 #ifndef MEMPOOL_DEBUG
-	#define mempool_create_debug(file, line, size, initcount)	mempool_create(size, initcount)
-	#define mempool_alloc_debug(file, line, handle)				mempool_alloc(handle)
-	#define mempool_free_debug(file, line, handle, ptr)			mempool_free(handle, ptr)
+	#define mempool_create_debug(file, line, size, name, initcount)	mempool_create(name, size, initcount)
+	#define mempool_alloc_debug(file, line, handle)					mempool_alloc(handle)
+	#define mempool_free_debug(file, line, handle, ptr)				mempool_free(handle, ptr)
 
-	MEMPOOL_HANDLE ZION_API mempool_create(unsigned int size, unsigned int initcount);
+	ZION_API MEMPOOL_HANDLE mempool_create(const char* name, unsigned int size, unsigned int initcount);
 	ZION_API void* mempool_alloc(MEMPOOL_HANDLE handle);
 	ZION_API void mempool_free(MEMPOOL_HANDLE handle, void* ptr);
 	ZION_API void mempool_destroy(MEMPOOL_HANDLE handle);
 #else
-	#define mempool_create(size, initcount)		mempool_create_debug(__FILE__, __LINE__, size, initcount)
-	#define mempool_alloc(handle)				mempool_alloc_debug(__FILE__, __LINE__, handle)
-	#define mempool_free(handle, ptr)			mempool_free_debug(__FILE__, __LINE__, handle, ptr)
+	#define mempool_create(name, size, initcount)					mempool_create_debug(__FILE__, __LINE__, name, size, initcount)
+	#define mempool_alloc(handle)									mempool_alloc_debug(__FILE__, __LINE__, handle)
+	#define mempool_free(handle, ptr)								mempool_free_debug(__FILE__, __LINE__, handle, ptr)
 
-	ZION_API MEMPOOL_HANDLE mempool_create_debug(const char* filename, unsigned int lineno, unsigned int size, unsigned int initcount);
+	ZION_API MEMPOOL_HANDLE mempool_create_debug(const char* filename, unsigned int lineno, const char* name, unsigned int size, unsigned int initcount);
 	ZION_API void* mempool_alloc_debug(const char* filename, unsigned int lineno, MEMPOOL_HANDLE handle);
 	ZION_API void mempool_free_debug(const char* filename, unsigned int lineno, MEMPOOL_HANDLE handle, void* ptr);
 	ZION_API void mempool_destroy(MEMPOOL_HANDLE handle);
 #endif
 
+typedef struct MEMPOOL_INFO {
+	char	name[100];
+	int		count, free;
+} MEMPOOL_INFO;
+
+ZION_API int mempool_get_info(MEMPOOL_INFO* info, int count);
 
 #endif
-

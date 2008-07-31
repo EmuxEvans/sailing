@@ -156,8 +156,8 @@ int rpcnet_init()
 	os_mutex_init(&group_mutex);
 	os_mutex_init(&ep2idx_mutex);
 	// create pools, how many items to be inited
-	conn_pool	= mempool_create(sizeof(RPCNET_CONNECTION), 0);
-	group_pool	= mempool_create(sizeof(RPCNET_GROUP), 0);
+	conn_pool	= mempool_create("RPCNET_CONN", sizeof(RPCNET_CONNECTION), 0);
+	group_pool	= mempool_create("RPCNET_GROUP", sizeof(RPCNET_GROUP), 0);
 	if(conn_pool==NULL || group_pool==NULL) {
 		SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_initialize: respool_create() failed.\n");
 		if(conn_pool!=NULL)		{ mempool_destroy(conn_pool); conn_pool = NULL; }

@@ -51,7 +51,7 @@ int dbapi_init(const char* libpath, int maxsize)
 	os_mutex_init(&conn_mtx);
 	conn_map = hashmap_create(5, NULL, 0);
 	rs_maxsize = maxsize;
-	rs_pool = mempool_create(sizeof(DBAPI_RECORDSET)+rs_maxsize, 0);
+	rs_pool = mempool_create("DBAPI_RECORDSET", sizeof(DBAPI_RECORDSET)+rs_maxsize, 0);
 	if(conn_map==NULL || rs_pool==NULL) {
 		if(conn_map!=NULL)	hashmap_destroy(conn_map);
 		if(rs_pool!=NULL)	mempool_destroy(rs_pool);

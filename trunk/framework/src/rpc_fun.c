@@ -114,7 +114,7 @@ int rpcfun_init()
 	memstream_init(&s, &i, sizeof(i), 0);
 	memcpy(&stream_interface, s.i, sizeof(STREAM_INTERFACE));
 	stream_interface.destroy = rpcfun_stream_free;
-	stream_pool = mempool_create(sizeof(RPCFUN_STREAM)+RPCNET_PACKAGE_LENGTH, 0);
+	stream_pool = mempool_create("RPCFUN_STREAM", sizeof(RPCFUN_STREAM)+RPCNET_PACKAGE_LENGTH, 0);
 	if(stream_pool==NULL) return ERR_UNKNOWN;
 
 	atom_slist_init(&seq_header);
