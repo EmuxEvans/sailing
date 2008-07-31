@@ -132,6 +132,11 @@ int ZION_API threadpool_getindex()
 	return(tc!=NULL?tc->index:-1);
 }
 
+int threadpool_getcount()
+{
+	return thread_count;
+}
+
 unsigned int ZION_CALLBACK workthread_proc(void* arg)
 {
 	int ret;

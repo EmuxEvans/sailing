@@ -11,6 +11,7 @@ ZION_API int threadpool_final();
 
 ZION_API int threadpool_queueitem(THREAD_PROC proc, void* arg);
 ZION_API int threadpool_getindex();
+ZION_API int threadpool_getcount();
 
 ZION_API int threadpool_begin(os_thread_t* handle, unsigned int (ZION_CALLBACK *proc)(void*), void* arg);
 

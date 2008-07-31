@@ -11,6 +11,9 @@
 #ifndef ZION_API
 #define ZION_API
 #endif
+#ifndef ZION_CLASS
+#define ZION_CLASS
+#endif
 #ifndef ZION_INLINE
 #define ZION_INLINE		__inline
 #endif
@@ -68,13 +71,6 @@ ZION_INLINE void os_thread_switch();
 typedef HANDLE os_process_t;
 ZION_INLINE os_process_t os_process_get();
 ZION_INLINE int os_process_getid();
-
-typedef HANDLE os_shm_t;
-ZION_API int os_shm_create(os_shm_t* sm, const char* name, unsigned int size);
-ZION_API int os_shm_open(os_shm_t* sm, const char* name);
-ZION_API int os_shm_close(os_shm_t sm);
-ZION_API void* os_shm_map(os_shm_t sm, unsigned int* size);
-ZION_API int os_shm_unmap(os_shm_t sm, void* ptr, unsigned int size);
 
 #define OS_LIBARAY_PREFIX		".dll"
 typedef HMODULE os_library_t;

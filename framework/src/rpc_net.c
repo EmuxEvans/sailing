@@ -91,7 +91,8 @@ static int conn_incoming_count = 0;
 static int conn_outgoing_count = 0;
 // local listener & group
 static RPCNET_CONNECTION listener;
-static RPCNET_GROUP local_group;
+static RPCNET_GROUP* local_group = NULL;
+static RPCNET_GROUP local_group_i;
 // connction operator
 static RPCNET_CONNECTION* conn_alloc(int fd, int type);
 static void conn_free(RPCNET_CONNECTION* conn);
@@ -147,6 +148,7 @@ int rpcnet_init()
 	int ret;
 	threads_ctx_count = 0;
 	ep2idx_count = 0;
+
 	// data init
 	memset(subsys_events, 0, sizeof(subsys_events));
 	memset(threads_ctx, 0, sizeof(threads_ctx));
@@ -277,11 +279,17 @@ int rpcnet_bind(SOCK_ADDR* endpoint)
 	SOCK_HANDLE sock;
 	int ret;
 
+	if(threadpool_getcount()<=0) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_init: threadpool_getcount()<=0");
+		return ERR_UNKNOWN;
+	}
+
 	// bind tcp port
 	sock = sock_bind(endpoint, SOCK_REUSEADDR|SOCK_NONBLOCK);
 	if(sock==SOCK_INVALID_HANDLE) return ERR_UNKNOWN;
 
-	memcpy(&local_group.endpoint, endpoint, sizeof(SOCK_ADDR));
+	memcpy(&local_group_i.endpoint, endpoint, sizeof(SOCK_ADDR));
+	local_group = &local_group_i;
 
 	// add listener_fd to epoll_fd
 	listener.fd = sock;
@@ -294,6 +302,7 @@ int rpcnet_bind(SOCK_ADDR* endpoint)
 	if(ret!=ERR_NOERROR) {
 		SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_bind : epoll_ctl() failed at %d.\n", ret);
 		sock_unbind(sock);
+		local_group = NULL;
 		return ERR_UNKNOWN;
 	}
 
@@ -302,6 +311,7 @@ int rpcnet_bind(SOCK_ADDR* endpoint)
 
 int rpcnet_unbind()
 {
+	local_group = NULL;
 	// del listener_fd from epoll_fd
 	atom_cmp_exchg((unsigned int*)&listener.st_flag, RPCCONN_STATE_SHUTDOWN, RPCCONN_STATE_AVAILABLE);
 	// wait listener
@@ -313,8 +323,9 @@ int rpcnet_unbind()
 
 const SOCK_ADDR* rpcnet_get_bindep()
 {
-	return &local_group.endpoint;
+	return local_group?&local_group->endpoint:NULL;
 }
+
 #include <stdio.h>
 void accept_callback(FDWATCH_ITEM* item, int events)
 {
@@ -437,7 +448,7 @@ RPCNET_GROUP* rpcnet_getgroup(const SOCK_ADDR* endpoint)
 {
 	RPCNET_GROUP *group;
 
-	if(endpoint==NULL || is_local_endpoint(endpoint)) return &local_group;
+	if(endpoint==NULL || is_local_endpoint(endpoint)) return local_group;
 
 	os_mutex_lock(&group_mutex);
 	group = group_get(endpoint);
@@ -481,8 +492,7 @@ int rpcnet_ep2idx(const SOCK_ADDR* ep)
 
 int rpcnet_group_islocal(RPCNET_GROUP *group)
 {
-	return group==&local_group?1:0;
-//	return 0;
+	return group==local_group?1:0;
 }
 
 const SOCK_ADDR* rpcnet_group_get_endpoint(RPCNET_GROUP* group, SOCK_ADDR* addr)
@@ -571,7 +581,7 @@ RPCNET_CONNECTION* rpcnet_context_getconn(RPCNET_THREAD_CONTEXT* ctx, RPCNET_GRO
 		return NULL; 
 	}
 	assert(endp.ip!=0);
-	endp.port = local_group.endpoint.port;
+	endp.port = local_group?local_group->endpoint.port:0;
 	if(sock_writebuf(sock, &endp, sizeof(endp))!=0) {
 		SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_context_getconn : fail to getsockname(), ret = %d\n", errno);
 		sock_close(sock); 
@@ -620,7 +630,7 @@ RPCNET_CONNECTION* rpcnet_context_getconn_force(RPCNET_THREAD_CONTEXT* ctx, RPCN
 		return NULL; 
 	}
 	assert(endp.ip!=0);
-	endp.port = local_group.endpoint.port;
+	endp.port = local_group?local_group->endpoint.port:0;
 	if(sock_writebuf(sock, &endp, sizeof(endp))!=0) {
 		SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_context_getconn : fail to getsockname(), ret = %d\n", errno);
 		sock_close(sock); 
@@ -801,7 +811,8 @@ void rpcnet_memory_setbase(RPCNET_THREAD_CONTEXT* context, int base)
 // Internal functions
 int is_local_endpoint(const SOCK_ADDR* endpoint)
 {
-	return memcmp(endpoint, &local_group.endpoint, sizeof(SOCK_ADDR))==0?1:0;
+	if(!local_group) return 0;
+	return memcmp(endpoint, &local_group->endpoint, sizeof(SOCK_ADDR))==0?1:0;
 }
 
 RPCNET_CONNECTION * conn_alloc(int fd, int conn_type)

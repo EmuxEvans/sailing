@@ -11,6 +11,9 @@
 #ifndef ZION_API
 #define ZION_API
 #endif
+#ifndef ZION_CLASS
+#define ZION_CLASS
+#endif
 #ifndef ZION_INLINE
 #define ZION_INLINE		static inline
 #endif
@@ -44,6 +47,7 @@ ZION_INLINE void os_condition_init(os_condition_t* cond);
 ZION_INLINE void os_condition_destroy(os_condition_t* cond);
 ZION_INLINE int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx);
 ZION_INLINE int os_condition_signal(os_condition_t* cond);
+ZION_INLINE int os_condition_boardcast(os_condition_t* cond);
 
 typedef sem_t os_sem_t;
 ZION_INLINE int os_sem_init(os_sem_t* sem, unsigned int init);
@@ -66,13 +70,6 @@ ZION_INLINE int os_thread_key_set(os_thread_key_t* key, void* value);
 typedef pid_t os_process_t;
 ZION_INLINE os_process_t os_process_get();
 ZION_INLINE int os_process_getid();
-
-typedef int os_shm_t;
-ZION_API int os_shm_create(os_shm_t* sm, const char* name, unsigned int size);
-ZION_API int os_shm_open(os_shm_t* sm, const char* name);
-ZION_API int os_shm_close(os_shm_t sm);
-ZION_API void* os_shm_map(os_shm_t sm, unsigned int* size);
-ZION_API int os_shm_unmap(os_shm_t sm, void* ptr, unsigned int size);
 
 #define OS_LIBARAY_PREFIX		".so"
 typedef void* os_library_t;
@@ -155,6 +152,11 @@ ZION_INLINE int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx)
 ZION_INLINE int os_condition_signal(os_condition_t* cond)
 {
 	return pthread_cond_signal(cond);
+}
+
+ZION_INLINE int os_condition_boardcast(os_condition_t* cond)
+{
+	return pthread_cond_boardcast(cond);
 }
 
 ZION_INLINE int os_sem_init(os_sem_t* sem, unsigned int init)

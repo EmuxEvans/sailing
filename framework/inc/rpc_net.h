@@ -3,7 +3,7 @@
 
 #define RPCNET_PACKAGE_LENGTH				(64 *1024)	// (2*1024*1024)
 #define RPCNET_MEMORYBLOCK_LENGTH			(256*1024)	// (4*1024*1204)
-#define RPCNEWTORK_EPINDEX_MAXVALUE				(1000)
+#define RPCNEWTORK_EPINDEX_MAXVALUE			(1000)
 #define RPCNET_SUBSYS_MAXCOUNT				5
 
 #define RPCNET_EVENTTYPE_DATA				1
@@ -70,4 +70,3 @@ ZION_API int rpcnet_memory_getbase(RPCNET_THREAD_CONTEXT* context);
 ZION_API void rpcnet_memory_setbase(RPCNET_THREAD_CONTEXT* context, int base);
 
 #endif
-

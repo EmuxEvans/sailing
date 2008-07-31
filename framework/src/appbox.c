@@ -6,7 +6,6 @@
 #include <assert.h>
 
 #include "../inc/skates.h"
-#include "../inc/octopus.h"
 #include "../inc/appbox_main.h"
 
 #define MODULE_MAXCOUNT			30
@@ -261,22 +260,12 @@ int appbox_init()
 		if(ret!=ERR_NOERROR) { SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_bind() fail, ret=%d", ret); return appbox_quit(ERR_UNKNOWN); }
 	}
 
-#ifndef APPBOX_WITHOUT_OCTOPUS
-	gameroom_init();
-	fes_userctx_init();
-#endif
-
 	return ERR_NOERROR;
 }
 
 int appbox_final()
 {
 	int ret;
-
-#ifndef APPBOX_WITHOUT_OCTOPUS
-	fes_userctx_final();
-	gameroom_final();
-#endif
 
 	if(config_rpc_endpoint.ip!=0xffffffff && config_rpc_endpoint.port!=0xffff) {
 		ret = rpcnet_unbind();
