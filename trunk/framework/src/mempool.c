@@ -89,7 +89,7 @@ void mempool_final()
 #ifdef MEMPOOL_DEBUG
 MEMPOOL_HANDLE mempool_create_debug(const char* filename, unsigned int lineno, const char* name, unsigned int size, unsigned int initcount)
 #else
-MEMPOOL_HANDLE mempool_create(unsigned int size, unsigned int initcount)
+MEMPOOL_HANDLE mempool_create(const char* name, unsigned int size, unsigned int initcount)
 #endif
 {
 	MEMPOOL_HANDLE handle;
