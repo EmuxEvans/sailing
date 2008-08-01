@@ -120,12 +120,12 @@ int sock_set_tcp_option(SOCK_HANDLE handle, const SOCK_TCP_OPTION* option)
 	if(option->keep_alive) {
 		setsockopt(handle, SOL_SOCKET, SO_KEEPALIVE, (const char *)&option->keep_alive, sizeof(option->keep_alive));
 	}
-	if(option->linger!=-1) {
+/*	if(option->linger!=-1) {
 		LINGER linger;
 		linger.l_onoff = 1;
 		linger.l_linger = option->linger;
 		setsockopt(handle, SOL_SOCKET, SO_LINGER, (const char *)&linger, sizeof(linger));
-	}
+	}*/
 	return 0;
 }
 

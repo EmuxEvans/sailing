@@ -15,7 +15,7 @@ typedef struct NETWORK_EVENT {
 	NETWORK_ONDISCONNECT	OnDisconnect;
 
 	MEMPOOL_HANDLE			recvbuf_pool;
-	unsigned char*			recvbuf_buf;
+	char*					recvbuf_buf;
 	unsigned int			recvbuf_max;
 } NETWORK_EVENT;
 

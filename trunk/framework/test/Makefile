@@ -4,18 +4,16 @@ include ../Makefile.def
 
 INCLUDES=$(OS_INC_DIR) -I../inc
 LIBS=$(OS_LIB_DIR) $(OS_LIB)
-BINS=test_fdwatch$(EXE_PREFIX) test_rqueue$(EXE_PREFIX) test_console$(EXE_PREFIX) test_log$(EXE_PREFIX) test_sock$(EXE_PREFIX) test_threadpool$(EXE_PREFIX) test_timer$(EXE_PREFIX) test_gameroom$(EXE_PREFIX) test_shm$(EXE_PREFIX) test_rpcnet$(EXE_PREFIX) test_rpcfun$(EXE_PREFIX) test_syncrpc$(EXE_PREFIX) test_asyncrpc$(EXE_PREFIX)
+BINS=test_network$(EXE_PREFIX) test_fdwatch$(EXE_PREFIX) test_rqueue$(EXE_PREFIX) test_console$(EXE_PREFIX) test_log$(EXE_PREFIX) test_sock$(EXE_PREFIX) test_threadpool$(EXE_PREFIX) test_timer$(EXE_PREFIX) test_rpcnet$(EXE_PREFIX) test_rpcfun$(EXE_PREFIX) test_syncrpc$(EXE_PREFIX) test_asyncrpc$(EXE_PREFIX)
 
-OBJS_NETWORK=
+OBJS_NETWORK=test_network.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o ../src/network.o ../src/mempool.o ../src/os_unix.o
 OBJS_FDWATCH=test_fdwatch.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o
-OBJS_RQUEUE=test_rqueue.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o ../src/rqueue.o ../src/mempool.o fake_applog.o ../src/os_unix.o
+OBJS_RQUEUE=test_rqueue.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o ../src/network.o ../src/hashmap.o ../src/mempool.o ../src/rqueue.o fake_applog.o ../src/os_unix.o
 OBJS_CONSOLE=test_console.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o ../src/misc.o ../src/os_unix.o ../src/console.o
 OBJS_LOG=test_log.o ../src/log.o ../src/os_unix.o
 OBJS_SOCK=test_sock.o ../src/sock.o ../src/os_unix.o
 OBJS_THREADPOOL=test_threadpool.o ../src/os_unix.o ../src/threadpool.o
 OBJS_TIMER=test_timer.o ../src/mempool.o ../src/os_unix.o ../src/threadpool.o ../src/timer.o
-OBJS_GAMEROOM=test_gameroom.o ../src/mempool.o ../src/os_unix.o ../src/threadpool.o ../src/timer.o ../src/gameroom.o ../src/rpc_net.o ../src/sock.o ../src/stream.o ../src/hashmap.o fake_applog.o ../src/fdwatch_$(FDWATCH_USE).o
-OBJS_SHM=test_shm.o ../src/os_unix.o
 OBJS_RPCNET=test_rpcnet.o fake_applog.o ../src/os_unix.o ../src/fdwatch_$(FDWATCH_USE).o ../src/mempool.o ../src/rpc_net.o ../src/sock.o ../src/stream.o ../src/threadpool.o
 OBJS_RPCFUN=test_rpcfun.o fake_applog.o ../src/os_unix.o ../src/fdwatch_$(FDWATCH_USE).o ../src/mempool.o ../src/rpc_net.o ../src/sock.o ../src/stream.o ../src/threadpool.o ../src/rpc_fun.o ../src/hashmap.o
 OBJS_SYNCRPC=fake_applog.o ../src/os_unix.o ../src/fdwatch_$(FDWATCH_USE).o ../src/mempool.o ../src/rpc_net.o ../src/sock.o ../src/stream.o ../src/threadpool.o ../src/rpc_fun.o ../src/hashmap.o sync_rpc.clt.o sync_rpc.svr.o test_syncrpc.o

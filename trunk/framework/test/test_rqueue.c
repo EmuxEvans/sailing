@@ -69,10 +69,10 @@ int main(int argc, char* argv[])
 	quit_flag = 1;
 
 	for(l=0; l<sizeof(s_tids)/sizeof(s_tids[0]); l++) {
-		os_thread_wait(&s_tids[l], NULL);
+		os_thread_wait(s_tids[l], NULL);
 	}
 	for(l=0; l<sizeof(c_tids)/sizeof(c_tids[0]); l++) {
-		os_thread_wait(&c_tids[l], NULL);
+		os_thread_wait(c_tids[l], NULL);
 	}
 
 	rqueue_final();

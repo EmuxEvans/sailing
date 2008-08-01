@@ -4,7 +4,7 @@ include ../Makefile.def
 
 INCS=$(OS_INC_DIR) -DDBAPI_ORACLE_$(DBAPI_ORACLE) -DDBAPI_MYSQL_$(DBAPI_MYSQL) -DDBAPI_SQLRELAY_$(DBAPI_SQLREALY)
 LIBS=$(OS_LIB_DIR) $(OS_LIB)
-OBJS=os_unix.o misc.o mempool.o hashmap.o sock.o log.o stream.o dbapi.o threadpool.o timer.o fdwatch_$(FDWATCH_USE).o rqueue.o console.o rpc_net.o rpc_fun.o appbox.o applog.o appbox_unix.o gameroom.o fes_userctx.o player.o
+OBJS=os_unix.o misc.o mempool.o hashmap.o sock.o log.o stream.o dbapi.o threadpool.o timer.o fdwatch_$(FDWATCH_USE).o console.o network.o rqueue.o rpc_net.o rpc_fun.o appbox.o applog.o appbox_unix.o
 MAIN_OBJS=appbox_main.o
 
 .c.o:

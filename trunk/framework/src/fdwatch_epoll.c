@@ -35,23 +35,22 @@ int fdwatch_final()
 	return ERR_NOERROR;
 }
 
-int fdwatch_create(FDWATCH_HANDLE* ret)
+FDWATCH_HANDLE fdwatch_create()
 {
 	int i;
 
 	for(i=0; i<sizeof(array)/sizeof(array[0]); i++) {
 		if(array[i].epollfd==-1) break;
 	}
-	if(i==sizeof(array)/sizeof(array[0])) return ERR_NO_ENOUGH_MEMORY;
+	if(i==sizeof(array)/sizeof(array[0]))
+		return NULL;
 
 	array[i].epollfd = epoll_create(1000);
-	if(array[i].epollfd==-1) {
-		return ERR_UNKNOWN;
-	}
+	if(array[i].epollfd==-1)
+		return NULL;
 
 	array[i].quit_flag = 0;
-	*ret = &array[i];
-	return ERR_NOERROR;
+	return &array[i];
 }
 
 int fdwatch_destroy(FDWATCH_HANDLE handle)

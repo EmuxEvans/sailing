@@ -39,23 +39,22 @@ unsigned int ZION_CALLBACK TcpThreadFunc(void * point)
 	SOCK_HANDLE handle;
 	SOCK_ADDR  sock_addr;
 	char read_buf[1024];
-	int ret = ERR_NOERROR;
-	
+
 	sock_init();
 	if(sock_str2addr(p, &sock_addr)==NULL) 
 	{
 		printf("tcp sock_str2addr function error\n");
 		goto FINISH_STATE;
 	}
-	
-	
+
+
 	handle = sock_bind(&sock_addr, 0);
 	if(handle == SOCK_INVALID_HANDLE)
 	{
 		printf("tcp bind function error\n");
 		goto ERROR_STATE;
 	}
-	
+
 	printf("tcp %s wait for client connect....\n", p);
 
 	handle =  sock_accept(handle, NULL);

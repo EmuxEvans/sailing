@@ -78,12 +78,12 @@ ZION_INLINE int os_library_close(os_library_t handle);
 ZION_INLINE void* os_library_get(os_library_t handle, const char* name);
 ZION_INLINE const char* os_library_error();
 
-#define atom_inc(p)				atom_unix_inc((os_dword volatile*)p);
-#define atom_dec(p, v)			atom_unix_dec((os_dword volatile*)p);
-#define atom_swap(p, v)			atom_unix_swap((os_dword volatile*)p, (os_dword)v);
-#define atom_cas(p, v, c)		atom_unix_cas((os_dword volatile*)p, (os_dword)v, (os_dword)c);
-#define atom_cas_ptr(p, v, c)	atom_unix_cas_ptr((void* volatile*)p, (void*)v, (void*)c);
-#define atom_exchg_add(p, v)	atom_unix_exchg_add((os_dword volatile*)p, (os_dword)v);
+#define atom_inc(p)				atom_unix_inc((os_dword volatile*)p)
+#define atom_dec(p)				atom_unix_dec((os_dword volatile*)p)
+#define atom_swap(p, v)			atom_unix_swap((os_dword volatile*)p, (os_dword)v)
+#define atom_cas(p, v, c)		atom_unix_cas((os_dword volatile*)p, (os_dword)v, (os_dword)c)
+#define atom_cas_ptr(p, v, c)	atom_unix_cas_ptr((void* volatile*)p, (void*)v, (void*)c)
+#define atom_exchg_add(p, v)	atom_unix_exchg_add((os_dword volatile*)p, (os_dword)v)
 
 typedef struct ATOM_SLIST_ENTRY			{ struct ATOM_SLIST_ENTRY *Next; }		ATOM_SLIST_ENTRY;
 typedef struct ATOM_SLIST_HEADER		{ ATOM_SLIST_ENTRY* First; long Count;}	ATOM_SLIST_HEADER;

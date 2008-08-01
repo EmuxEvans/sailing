@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <string.h>
 
 #include "../inc/errcode.h"
 #include "../inc/os.h"
@@ -43,7 +44,7 @@ typedef struct NETWORK_CONNECTION {
 	NETWORK_ONDISCONNECT	OnDisconnect;
 
 	MEMPOOL_HANDLE			recvbuf_pool;
-	unsigned char*			recvbuf_buf;
+	char*					recvbuf_buf;
 	unsigned int			recvbuf_cur;
 	unsigned int			recvbuf_len;
 	unsigned int			recvbuf_max;
@@ -303,7 +304,7 @@ unsigned int network_downbufs_alloc(NETWORK_DOWNBUF* downbufs[], unsigned int co
 	return ERR_UNKNOWN;
 }
 
-int network_downbufs_fill(NETWORK_DOWNBUF* downbufs[], unsigned int count, unsigned int start, void* data, unsigned int data_len)
+int network_downbufs_fill(NETWORK_DOWNBUF* downbufs[], unsigned int count, unsigned int start, const void* data, unsigned int data_len)
 {
 	unsigned int bs, be;
 
