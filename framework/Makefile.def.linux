@@ -6,8 +6,8 @@ DBAPI_SQLRELAY=DISABLE
 
 MAKE=gmake
 CC=gcc
-REL_CC_FLAG=-D__LINUX__ -D__USE_GNU -D__USE_XOPEN2K -DNDEBUG -Wall -Werror -O2
-DBG_CC_FLAG=-D__LINUX__ -D__USE_GNU -D__USE_XOPEN2K -D_DEBUG -Wall -Werror -g
+REL_CC_FLAG=-D__LINUX__ -DNDEBUG -Wall -Werror -O2
+DBG_CC_FLAG=-D__LINUX__ -D_DEBUG -Wall -Werror -g
 OBJ_CC_FLAG=-c -fPIC -o
 EXE_CC_FLAG=-o
 DLL_CC_FLAG=-shared -o
@@ -31,7 +31,11 @@ ifeq ($(DBAPI_SQLRELAY),ENABLE)
 endif
 
 ifeq ($(CONFIG_NAME),)
-  CONFIG_NAME=debug
+	ifeq ($(NODEBUG),1)
+		CONFIG_NAME=release
+	else
+		CONFIG_NAME=debug
+	endif
 endif
 
 ifeq ($(CONFIG_NAME),debug)
