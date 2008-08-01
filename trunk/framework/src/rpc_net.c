@@ -313,7 +313,7 @@ int rpcnet_unbind()
 {
 	local_group = NULL;
 	// del listener_fd from epoll_fd
-	atom_cmp_exchg((unsigned int*)&listener.st_flag, RPCCONN_STATE_SHUTDOWN, RPCCONN_STATE_AVAILABLE);
+	atom_cas((unsigned int*)&listener.st_flag, RPCCONN_STATE_SHUTDOWN, RPCCONN_STATE_AVAILABLE);
 	// wait listener
 	while(listener.st_flag!=RPCCONN_STATE_CLOSED);
 	sock_unbind(listener.fd);
@@ -344,7 +344,7 @@ unsigned int ZION_CALLBACK ionthread_proc(void* param)
 	int ret;
 
 	while(0==rpcnet_quitflag) {
-		if(RPCCONN_STATE_SHUTDOWN==atom_cmp_exchg((unsigned int*)&listener.st_flag, RPCCONN_STATE_CLOSED, RPCCONN_STATE_SHUTDOWN)) {
+		if(RPCCONN_STATE_SHUTDOWN==atom_cas((unsigned int*)&listener.st_flag, RPCCONN_STATE_CLOSED, RPCCONN_STATE_SHUTDOWN)) {
 			ret = fdwatch_remove(epoll_fd, &listener.item_fdw);
 			if(ret!=ERR_NOERROR) {
 				SYSLOG(LOG_ERROR, MODULE_NAME, "ionthread_proc(): epoll_ctl(listener.item_fdw) failed at %d.\n", ret);
@@ -851,7 +851,7 @@ void conn_free(RPCNET_CONNECTION *conn)
 
 void conn_shutdown(RPCNET_CONNECTION* conn)
 {
-	if(RPCCONN_STATE_AVAILABLE==atom_cmp_exchg((unsigned int*)&conn->st_flag, RPCCONN_STATE_SHUTDOWN, RPCCONN_STATE_AVAILABLE)) {
+	if(RPCCONN_STATE_AVAILABLE==atom_cas((unsigned int*)&conn->st_flag, RPCCONN_STATE_SHUTDOWN, RPCCONN_STATE_AVAILABLE)) {
 		if(sock_disconnect(conn->fd)!=0) {
 			SYSLOG(LOG_ERROR, MODULE_NAME, "error in here");
 		}
@@ -1015,7 +1015,7 @@ RPCNET_CONNECTION* group_get_outgoing(RPCNET_GROUP* group, RPCNET_THREAD_CONTEXT
 	RPCNET_CONNECTION* conn = NULL;
 	for(item=rlist_front(&group->out_conns_list); !rlist_is_head(&group->out_conns_list, item); item=rlist_next(item)) {
 		conn = (RPCNET_CONNECTION*)rlist_get_userdata(rlist_front(&group->out_conns_list));
-		if(atom_cmp_exchg_ptr((void* volatile *)(void*)&conn->ctx, ctx, NULL)==NULL) {
+		if(atom_cas_ptr((void* volatile *)(void*)&conn->ctx, ctx, NULL)==NULL) {
 			break;
 		}
 	}

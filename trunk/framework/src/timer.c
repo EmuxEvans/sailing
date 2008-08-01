@@ -406,7 +406,7 @@ int	timer_remove(TIMER handle)
 		return ERR_NOERROR;
 	}
 	
-	temp_flag = atom_cmp_exchg((unsigned int*)&timer->flag, TFLAG_TERMINATE, TFLAG_IDLE);
+	temp_flag = atom_cas((unsigned int*)&timer->flag, TFLAG_TERMINATE, TFLAG_IDLE);
 	
 	if(temp_flag == TFLAG_IDLE)
 	{
@@ -476,7 +476,7 @@ unsigned int ZION_CALLBACK wtimer_thread(void* param)
 				//call back				
 				
 				//fire event
-				tflag = atom_cmp_exchg((unsigned int*)(&((wtimer*)fire)->flag), TFLAG_INPROCESS, TFLAG_IDLE);
+				tflag = atom_cas((unsigned int*)(&((wtimer*)fire)->flag), TFLAG_INPROCESS, TFLAG_IDLE);
 				if(tflag==TFLAG_TERMINATE)
 				{
 					free_timer((wtimer*)fire);
