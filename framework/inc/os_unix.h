@@ -47,7 +47,7 @@ ZION_INLINE void os_condition_init(os_condition_t* cond);
 ZION_INLINE void os_condition_destroy(os_condition_t* cond);
 ZION_INLINE int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx);
 ZION_INLINE int os_condition_signal(os_condition_t* cond);
-ZION_INLINE int os_condition_boardcast(os_condition_t* cond);
+ZION_INLINE int os_condition_broadcast(os_condition_t* cond);
 
 typedef sem_t os_sem_t;
 ZION_INLINE int os_sem_init(os_sem_t* sem, unsigned int init);
@@ -154,9 +154,9 @@ ZION_INLINE int os_condition_signal(os_condition_t* cond)
 	return pthread_cond_signal(cond);
 }
 
-ZION_INLINE int os_condition_boardcast(os_condition_t* cond)
+ZION_INLINE int os_condition_broadcast(os_condition_t* cond)
 {
-	return pthread_cond_boardcast(cond);
+	return pthread_cond_broadcast(cond);
 }
 
 ZION_INLINE int os_sem_init(os_sem_t* sem, unsigned int init)

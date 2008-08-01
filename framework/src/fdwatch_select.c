@@ -144,6 +144,8 @@ int fdwatch_dispatch(FDWATCH_HANDLE handle, int timeout)
 	count = 0;
 
 	while(1) {
+		os_sleep(10);
+
 		os_mutex_lock(&handle->list_mtx);
 		item = (FDWATCH_ITEM*)rlist_front(&handle->enable_list);
 		while(!rlist_is_head(&handle->enable_list, &item->item) && count<FD_SETSIZE) {

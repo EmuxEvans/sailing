@@ -209,4 +209,3 @@ HASHMAP_ITEM* hashmap_erase_bykey(HASHMAP_HANDLE map, const void* key, unsigned 
 
 	return(item);
 }
-

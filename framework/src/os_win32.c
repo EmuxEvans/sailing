@@ -27,7 +27,7 @@ int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx)
 
 	while(1) {
 		c = cond->count;
-		v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c), CONDITION_SCOUNT(c)+1);
+		v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c)-1, CONDITION_SCOUNT(c)-1);
 		if(c==InterlockedCompareExchange(&cond->count, v, c)) break;
 	}
 
@@ -59,7 +59,7 @@ int os_condition_signal(os_condition_t* cond)
 	}
 }
 
-int os_condition_boardcast(os_condition_t* cond)
+int os_condition_broadcast(os_condition_t* cond)
 {
 	DWORD v, c;
 

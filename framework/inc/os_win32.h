@@ -47,7 +47,7 @@ ZION_INLINE void os_condition_init(os_condition_t* cond);
 ZION_INLINE void os_condition_destroy(os_condition_t* cond);
 ZION_API int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx);
 ZION_API int os_condition_signal(os_condition_t* cond);
-ZION_API int os_condition_boardcast(os_condition_t* cond);
+ZION_API int os_condition_broadcast(os_condition_t* cond);
 
 typedef HANDLE os_sem_t;
 ZION_INLINE int os_sem_init(os_sem_t* sem, unsigned int init);
