@@ -31,7 +31,11 @@ ifeq ($(DBAPI_SQLRELAY),ENABLE)
 endif
 
 ifeq ($(CONFIG_NAME),)
-  CONFIG_NAME=debug
+	ifeq ($(NODEBUG),1)
+		CONFIG_NAME=release
+	else
+		CONFIG_NAME=debug
+	endif
 endif
 
 ifeq ($(CONFIG_NAME),debug)
