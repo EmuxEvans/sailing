@@ -9,7 +9,7 @@
 #include "../inc/errcode.h"
 #include "../inc/os.h"
 
-unsigned int atom_inc(unsigned int volatile* mem)
+unsigned int atom_unix_inc(unsigned int volatile* mem)
 {
 	unsigned int val;
 
@@ -22,7 +22,7 @@ unsigned int atom_inc(unsigned int volatile* mem)
 	return val;
 }
 
-unsigned int atom_dec(unsigned int volatile* mem)
+unsigned int atom_unix_dec(unsigned int volatile* mem)
 {
 	unsigned int val;
 
@@ -36,7 +36,7 @@ unsigned int atom_dec(unsigned int volatile* mem)
 	return val;
 }
 
-unsigned int atom_swap(unsigned int volatile* mem, unsigned int prev)
+unsigned int atom_unix_swap(unsigned int volatile* mem, unsigned int prev)
 {
     asm volatile( "lock; xchg %0, %1"
                 : "=r" (prev)
@@ -45,7 +45,7 @@ unsigned int atom_swap(unsigned int volatile* mem, unsigned int prev)
 	return prev;
 }
 
-unsigned int atom_cas(unsigned int volatile* mem, unsigned int val, unsigned int cmp)
+unsigned int atom_unix_cas(unsigned int volatile* mem, unsigned int val, unsigned int cmp)
 {
 	unsigned int prev;
 
@@ -57,7 +57,7 @@ unsigned int atom_cas(unsigned int volatile* mem, unsigned int val, unsigned int
 	return prev;
 }
 
-void* atom_cmp_exchg_ptr(void* volatile *p, void* v, void* c)
+void* atom_unix_cas_ptr(void* volatile *p, void* v, void* c)
 {
 	void* prev;
 
@@ -69,7 +69,7 @@ void* atom_cmp_exchg_ptr(void* volatile *p, void* v, void* c)
 	return prev;
 }
 
-unsigned int atom_exchg_add(unsigned int volatile* mem, unsigned int val)
+unsigned int atom_unix_exchg_add(unsigned int volatile* mem, unsigned int val)
 {
     asm volatile( "lock; xadd %0,%1"
                 : "=r"(val), "=m"(*mem)
@@ -78,7 +78,7 @@ unsigned int atom_exchg_add(unsigned int volatile* mem, unsigned int val)
 	return val;
 }
 
-void atom_slist_init(ATOM_SLIST_HEADER* header)
+void atom_unix_slist_init(ATOM_SLIST_HEADER* header)
 {
 	header->First = NULL;
 	header->Count = 0;

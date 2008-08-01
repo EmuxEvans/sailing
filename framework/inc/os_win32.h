@@ -66,7 +66,6 @@ ZION_INLINE int os_thread_key_init(os_thread_key_t* key);
 ZION_INLINE int os_thread_key_destroy(os_thread_key_t* key);
 ZION_INLINE void* os_thread_key_get(os_thread_key_t* key);
 ZION_INLINE int os_thread_key_set(os_thread_key_t* key, void* value);
-ZION_INLINE void os_thread_switch();
 
 typedef HANDLE os_process_t;
 ZION_INLINE os_process_t os_process_get();
@@ -81,9 +80,9 @@ ZION_INLINE const char* os_library_error();
 
 #define atom_inc(p)						(long)InterlockedIncrement((LONG*)p)
 #define atom_dec(p)						(long)InterlockedDecrement((LONG*)p)
-#define atom_exchg(p, v)				(long)InterlockedExchange((LONG*), (LONG*)v)
-#define atom_cmp_exchg(p, v, c)			(long)InterlockedCompareExchange((LONG*)p, (LONG)v, (LONG)c)
-#define atom_cmp_exchg_ptr(p, v, c)		InterlockedCompareExchangePointer(p, v, c)
+#define atom_swap(p, v)					(long)InterlockedExchange((LONG*), (LONG*)v)
+#define atom_cas(p, v, c)				(long)InterlockedCompareExchange((LONG*)p, (LONG)v, (LONG)c)
+#define atom_cas_ptr(p, v, c)			InterlockedCompareExchangePointer(p, v, c)
 #define atom_exchg_add(p, v)			(long)InterlockedExchangeAdd((LONG*)p, (LONG)v)
 
 #define ATOM_SLIST_ENTRY				SLIST_ENTRY
@@ -213,10 +212,6 @@ ZION_INLINE int os_thread_key_destroy(os_thread_key_t* key)
 ZION_INLINE void* os_thread_key_get(os_thread_key_t* key)
 {
 	return TlsGetValue(*key);
-}
-
-ZION_INLINE void os_thread_switch()
-{
 }
 
 ZION_INLINE int os_thread_key_set(os_thread_key_t* key, void* value)
