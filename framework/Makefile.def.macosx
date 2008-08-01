@@ -1,0 +1,49 @@
+FDWATCH_USE=kqueue
+
+DBAPI_ORACLE=DISABLE
+DBAPI_MYSQL=DISABLE
+DBAPI_SQLRELAY=DISABLE
+
+MAKE=make
+CC=gcc
+REL_CC_FLAG=-D__MACOSX__ -DNDEBUG -Wall -Werror -O2 -fPIC
+DBG_CC_FLAG=-D__MACOSX__ -D_DEBUG -Wall -Werror -g -fPIC
+OBJ_CC_FLAG=-c -o
+EXE_CC_FLAG=-o
+DLL_CC_FLAG=-dynamiclib -o
+
+EXE_PREFIX=.exe
+DLL_PREFIX=.so
+DLL_LIB_PREFIX=.so
+STA_LIB_PREFIX=.a
+
+LEX=flex
+YACC=bison
+LEX_FLAG=-c
+YACC_FLAG=-d
+
+OS_LIB=-pthread -lc
+OS_INC_DIR=
+OS_LIB_DIR=
+
+ifeq ($(DBAPI_SQLRELAY),ENABLE)
+  OS_LIB=-lsqlrclientwrapper
+endif
+
+ifeq ($(CONFIG_NAME),)
+	ifeq ($(NODEBUG),1)
+		CONFIG_NAME=release
+	else
+		CONFIG_NAME=debug
+	endif
+endif
+
+ifeq ($(CONFIG_NAME),debug)
+  CC_FLAG=$(DBG_CC_FLAG)
+endif
+ifeq ($(CONFIG_NAME),release)
+  CC_FLAG=$(REL_CC_FLAG)
+endif
+
+OUTPUT_DIR=$(BASE_DIR)/$(CONFIG_NAME)
+
