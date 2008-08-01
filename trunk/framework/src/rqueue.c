@@ -352,7 +352,7 @@ int rqueue_internal_write(RQUEUE* queue, const void* buf, unsigned int size)
 
 	os_mutex_unlock(&queue->buffer_mutex);
 
-	if(ret==ERR_NOERROR) os_condition_boardcast(&queue->queue_cond);
+	if(ret==ERR_NOERROR) os_condition_broadcast(&queue->queue_cond);
 
 	return ret;
 }

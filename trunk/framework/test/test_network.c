@@ -66,12 +66,22 @@ void onaccept_proc(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 
 void onconnect_proc(NETWORK_HANDLE handle, void* userptr)
 {
+	char addr[50];
+	sock_addr2str(network_get_peername(handle), addr);
+	printf("%p connected. from %s\n", handle, addr);
 }
 
 void ondata_proc(NETWORK_HANDLE handle, void* userptr)
 {
+	char addr[50];
+	sock_addr2str(network_get_peername(handle), addr);
+	printf("%p ondata(%d).\n", handle, network_recvbuf_len(handle));
+	network_recvbuf_commit(handle, network_recvbuf_len(handle));
 }
 
 void ondisconnect_proc(NETWORK_HANDLE handle, void* userptr)
 {
+	char addr[50];
+	sock_addr2str(network_get_peername(handle), addr);
+	printf("%p disconnect. from %s\n", handle, addr);
 }

@@ -22,7 +22,7 @@
 #define SD_BOTH						SHUT_RD
 #define WSAEINTR					EINTR
 #define WSAGetLastError()			errno
-#define WSAEWOULDBLOCK				EINPROGRESS
+#define WSAEWOULDBLOCK				EAGAIN
 
 #else
 #define socklen_t					int
@@ -272,8 +272,13 @@ int sock_read(SOCK_HANDLE fd, void* buf, int buf_len)
 
 	for(;;) {
 		ret = recv(fd, buf, buf_len, 0);
-		if(ret>=0) return ret;
-		if(WSAGetLastError()!=WSAEINTR) return -1;
+		if(ret>0) return ret;
+		if(ret==0) return -1;
+		switch(WSAGetLastError()) {
+		case WSAEINTR: break;
+		case WSAEWOULDBLOCK: return 0;
+		default: return -1;
+		}
 	}
 }
 
@@ -283,8 +288,13 @@ int sock_write(SOCK_HANDLE fd, const void* buf, int buf_len)
 
 	for(;;) {
 		ret = send(fd, buf, buf_len, 0);
-		if(ret>=0) return ret;
-		if(WSAGetLastError()!=WSAEINTR) return ERR_UNKNOWN;
+		if(ret>0) return ret;
+		if(ret==0) return -1;
+		switch(WSAGetLastError()) {
+		case WSAEINTR: break;
+		case WSAEWOULDBLOCK: return 0;
+		default: return -1;
+		}
 	}
 }
 

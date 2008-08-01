@@ -35,6 +35,7 @@ typedef struct TCP_ENDPOINT {
 typedef struct NETWORK_CONNECTION {
 	FDWATCH_ITEM fdwitem;
 	SOCK_HANDLE sock;
+	SOCK_ADDR peername;
 	void* userptr;
 
 	NETWORK_ONCONNECT		OnConnect;
@@ -222,6 +223,7 @@ NETWORK_HANDLE network_add(SOCK_HANDLE handle, NETWORK_EVENT* event, void* userp
 
 	fdwatch_set(&conn->fdwitem, handle, FDWATCH_READ|FDWATCH_WRITE, connection_event, conn);
 	conn->sock			= handle;
+	sock_peername(handle, &conn->peername);
 	conn->userptr		= userptr;
 	conn->OnConnect		= event->OnConnect;
 	conn->OnData		= event->OnData;
@@ -404,6 +406,11 @@ void* network_get_userptr(NETWORK_HANDLE handle)
 	return handle->userptr;
 }
 
+const SOCK_ADDR* network_get_peername(NETWORK_HANDLE handle)
+{
+	return &handle->peername;
+}
+
 unsigned int ZION_CALLBACK notify_proc(void* arg)
 {
 	while(!notify_thread_quit) {
@@ -542,8 +549,8 @@ int event_opt_read(NETWORK_CONNECTION* conn)
 		int ret;
 
 		start = (conn->recvbuf_cur+conn->recvbuf_len)%conn->recvbuf_max;
-		if(start==0) {
-			len = conn->recvbuf_cur;
+		if(start<conn->recvbuf_cur) {
+			len = conn->recvbuf_cur - start;
 		} else {
 			len = conn->recvbuf_max - start;
 		}
