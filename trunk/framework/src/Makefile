@@ -16,15 +16,15 @@ all: $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX)
 clean:
 	rm -rf $(OBJS) $(MAIN_OBJS) *.S $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/appbox$(DLL_PREFIX)
 
-$(OUTPUT_DIR)/appbox_main$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(DLL_PREFIX) appbox_unix.o
+$(OUTPUT_DIR)/appbox_main$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(MAIN_OBJS)
 	cp -f $(OUTPUT_DIR)/appbox$(DLL_PREFIX) .
-	$(CC) $(CC_FLAG) ./appbox$(DLL_PREFIX) appbox_unix.o $(LIBS) $(EXE_CC_FLAG) appbox_main$(EXE_PREFIX)
+	$(CC) $(CC_FLAG) ./appbox$(DLL_PREFIX) $(MAIN_OBJS) $(LIBS) $(EXE_CC_FLAG) appbox_main$(EXE_PREFIX)
 	cp -f appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/
 	rm -f appbox$(DLL_PREFIX) appbox_main$(EXE_PREFIX)
 
-$(OUTPUT_DIR)/appbox$(DLL_PREFIX): $(OBJS) $(MAIN_OBJS)
+$(OUTPUT_DIR)/appbox$(DLL_PREFIX): $(OBJS)
 	mkdir -p $(OUTPUT_DIR)
-	$(CC) $(CC_FLAG) $(OBJS) $(MAIN_OBJS) $(LIBS) $(DLL_CC_FLAG) $@
+	$(CC) $(CC_FLAG) $(OBJS) $(LIBS) $(DLL_CC_FLAG) $@
 	rm -f appbox$(DLL_PREFIX)
 
 

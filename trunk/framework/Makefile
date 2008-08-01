@@ -15,3 +15,6 @@ linux:
 freebsd:
 	cp -f Makefile.def.$@ Makefile.def
 
+macosx:
+	cp -f Makefile.def.$@ Makefile.def
+
