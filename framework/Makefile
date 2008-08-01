@@ -1,13 +1,13 @@
 
 all:
-	cd src; make $@; cd ..
-	cd tools; make $@; cd ..
-	cd test; make $@; cd ..
+	cd src; $(MAKE) $@; cd ..
+	cd tools; $(MAKE) $@; cd ..
+	cd test; $(MAKE) $@; cd ..
 
 clean:
-	cd src; make $@; cd ..
-	cd tools; make $@; cd ..
-	cd test; make $@; cd ..
+	cd src; $(MAKE) $@; cd ..
+	cd tools; $(MAKE) $@; cd ..
+	cd test; $(MAKE) $@; cd ..
 
 linux:
 	cp -f Makefile.def.$@ Makefile.def
