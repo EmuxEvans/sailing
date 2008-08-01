@@ -78,7 +78,7 @@ unsigned int atom_unix_exchg_add(unsigned int volatile* mem, unsigned int val)
 	return val;
 }
 
-void atom_unix_slist_init(ATOM_SLIST_HEADER* header)
+void atom_slist_init(ATOM_SLIST_HEADER* header)
 {
 	header->First = NULL;
 	header->Count = 0;

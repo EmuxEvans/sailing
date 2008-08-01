@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "../inc/errcode.h"
 #include "../inc/os.h"
@@ -113,7 +114,7 @@ void rqueue_final()
 	int i, count;
 
 	rqueue_thread_flag = 0;
-	os_thread_wait(&rqueue_thread_tid, NULL);
+	os_thread_wait(rqueue_thread_tid, NULL);
 
 	for(i=0; i<rqueue_count; i++) {
 		char tmp[100];
