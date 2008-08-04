@@ -4,11 +4,12 @@ include ../Makefile.def
 
 INCLUDES=$(OS_INC_DIR) -I../inc
 LIBS=$(OS_LIB_DIR) $(OS_LIB)
-BINS=test_network$(EXE_PREFIX) test_fdwatch$(EXE_PREFIX) test_rqueue$(EXE_PREFIX) test_console$(EXE_PREFIX) test_log$(EXE_PREFIX) test_sock$(EXE_PREFIX) test_threadpool$(EXE_PREFIX) test_timer$(EXE_PREFIX) test_rpcnet$(EXE_PREFIX) test_rpcfun$(EXE_PREFIX) test_syncrpc$(EXE_PREFIX) test_asyncrpc$(EXE_PREFIX)
+BINS=test_network$(EXE_PREFIX) test_fdwatch$(EXE_PREFIX) test_rqueue$(EXE_PREFIX) test_dbapi$(EXE_PREFIX) test_console$(EXE_PREFIX) test_log$(EXE_PREFIX) test_sock$(EXE_PREFIX) test_threadpool$(EXE_PREFIX) test_timer$(EXE_PREFIX) test_rpcnet$(EXE_PREFIX) test_rpcfun$(EXE_PREFIX) test_syncrpc$(EXE_PREFIX) test_asyncrpc$(EXE_PREFIX)
 
 OBJS_NETWORK=test_network.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o ../src/network.o ../src/mempool.o ../src/os_unix.o
 OBJS_FDWATCH=test_fdwatch.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o
 OBJS_RQUEUE=test_rqueue.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o ../src/network.o ../src/hashmap.o ../src/mempool.o ../src/rqueue.o fake_applog.o ../src/os_unix.o
+OBJS_DBAPI=test_dbapi.o ../src/os_unix.o ../src/mempool.o ../src/hashmap.o ../src/dbapi.o ../src/sqlite/sqlite3.o ../src/dbapi_sqlite.o
 OBJS_CONSOLE=test_console.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o ../src/misc.o ../src/os_unix.o ../src/console.o
 OBJS_LOG=test_log.o ../src/log.o ../src/os_unix.o
 OBJS_SOCK=test_sock.o ../src/sock.o ../src/os_unix.o
@@ -41,6 +42,9 @@ test_fdwatch$(EXE_PREFIX): $(OBJS_FDWATCH)
 test_rqueue$(EXE_PREFIX): $(OBJS_RQUEUE)
 	gcc $(INCLUDES) $(LIBS) $(OBJS_RQUEUE) -o $@
 
+test_dbapi$(EXE_PREFIX): $(OBJS_DBAPI)
+	gcc $(INCLUDES) $(LIBS) $(OBJS_DBAPI) -o $@
+
 test_console$(EXE_PREFIX): $(OBJS_CONSOLE)
 	gcc $(INCLUDES) $(LIBS) $(OBJS_CONSOLE) -o $@
 
@@ -55,12 +59,6 @@ test_threadpool$(EXE_PREFIX): $(OBJS_THREADPOOL)
 
 test_timer$(EXE_PREFIX): $(OBJS_TIMER)
 	gcc $(INCLUDES) $(LIBS) $(OBJS_TIMER) -o $@
-
-test_gameroom$(EXE_PREFIX): $(OBJS_GAMEROOM)
-	gcc $(INCLUDES) $(LIBS) $(OBJS_GAMEROOM) -o $@
-
-test_shm$(EXE_PREFIX): $(OBJS_SHM)
-	gcc $(INCLUDES) $(LIBS) $(OBJS_SHM) -o $@
 
 test_rpcnet$(EXE_PREFIX): $(OBJS_RPCNET)
 	gcc $(INCLUDES) $(LIBS) $(OBJS_RPCNET) -o $@

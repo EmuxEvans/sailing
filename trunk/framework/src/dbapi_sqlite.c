@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "../inc/os.h"
 #include "../inc/errcode.h"
 #include "../inc/rlist.h"
@@ -29,7 +31,7 @@ static int dbapi_sqlite_execute(DBAPI_HANDLE handle,const char *sql);
 static int dbapi_sqlite_query(DBAPI_HANDLE handle, const char *sql, DBAPI_RECORDSET *rs, int row_max);
 static int dbapi_sqlite_get_errcode(DBAPI_HANDLE handle);
 static const char* dbapi_sqlite_get_errmsg(DBAPI_HANDLE handle);
-extern DBAPI_PROVIDER dbapi_sqlite_provider =
+DBAPI_PROVIDER dbapi_sqlite_provider =
 {
 	0x00000001,
 	"sqlite",
@@ -111,7 +113,7 @@ int dbapi_sqlite_disconnect(DBAPI_HANDLE handle)
 
 int dbapi_sqlite_release(DBAPI_HANDLE handle)
 {
-	DBAPI_SQLITE* conn = (DBAPI_SQLITE*)handle;
+//	DBAPI_SQLITE* conn = (DBAPI_SQLITE*)handle;
 
 	return ERR_NOERROR;
 }
@@ -184,7 +186,7 @@ int dbapi_sqlite_query(DBAPI_HANDLE handle, const char *sql, DBAPI_RECORDSET *rs
             case SQLITE_FLOAT:
             case SQLITE_TEXT:
             case SQLITE_BLOB:
-				ret = dbapi_recordset_put(rs, row_idx, col_idx, sqlite3_column_text(stmt, col_idx), 0);
+				ret = dbapi_recordset_put(rs, row_idx, col_idx, (char*)sqlite3_column_text(stmt, col_idx), 0);
 				if(ret!=ERR_NOERROR) {
 					sqlite3_finalize(stmt);
 					return ERR_NO_ENOUGH_MEMORY;
