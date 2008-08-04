@@ -286,7 +286,7 @@ void network_downbuf_free(NETWORK_DOWNBUF* downbuf)
 unsigned int network_downbufs_alloc(NETWORK_DOWNBUF* downbufs[], unsigned int count, unsigned int size)
 {
 	unsigned int n, l;
-	n = (size-1) / downbuf_size;
+	n = (size-1) / downbuf_size + 1;
 	if(n>count) return 0;
 
 	for(l=0; l<n; l++) {
@@ -298,10 +298,10 @@ unsigned int network_downbufs_alloc(NETWORK_DOWNBUF* downbufs[], unsigned int co
 		for(n=0; n<l; n++) {
 			network_downbuf_free(downbufs[n]);
 		}
-		return ERR_UNKNOWN;
+		return 0;
 	}
 	downbufs[n-1]->len = (size-1) % downbuf_size + 1;
-	return ERR_UNKNOWN;
+	return n;
 }
 
 int network_downbufs_fill(NETWORK_DOWNBUF* downbufs[], unsigned int count, unsigned int start, const void* data, unsigned int data_len)
@@ -314,14 +314,14 @@ int network_downbufs_fill(NETWORK_DOWNBUF* downbufs[], unsigned int count, unsig
 	be = (start+data_len-1) / downbuf_size;
 
 	if(bs==be) {
-		memcpy(downbufs[bs]->buf+start%downbuf_size, data, downbuf_size);
+		memcpy(downbufs[bs]->buf+start%downbuf_size, data, data_len);
 	} else {
 		unsigned int bs_s, bs_l, be_l, l;
 		bs_s = start % downbuf_size;
 		bs_l = downbuf_size - bs_s;
 		be_l = (start+downbuf_size-1)%downbuf_size + 1;
 		memcpy(downbufs[bs]->buf+bs_s, data, bs_l);
-		for(l=bs; l<be; l++) {
+		for(l=bs+1; l<be; l++) {
 		memcpy(downbufs[l]->buf, (char*)data + bs_l + downbuf_size*(l-bs), downbuf_size);
 		}
 		memcpy(downbufs[be]->buf, (char*)data + bs_l + downbuf_size*(be-bs-1), be_l);

@@ -3,6 +3,10 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "../inc/errcode.h"
+#include "../inc/os.h"
+#include "../inc/misc.h"
+
 void strtrim(char* str)
 {
 	size_t s;
@@ -204,3 +208,26 @@ char* strput4float_space(char* str, size_t len, float value)
 	return strput_space(str, len, sval);
 }
 
+int loal_textfile(const char* filename, char* buf, int buflen)
+{
+	FILE* fp;
+	int len = 0;
+
+	fp = fopen(filename, "rt");
+	if(fp==NULL) return 0;
+
+	for(;;) {
+		if(fgets(buf+len, buflen-len, fp)==NULL) {
+			break;
+		}
+		len += (int)strlen(buf+len);
+	}
+
+	fclose(fp);
+	return len+1;
+}
+
+int save_textfile(const char* filename, char* buf, int buflen)
+{
+	return 0;
+}

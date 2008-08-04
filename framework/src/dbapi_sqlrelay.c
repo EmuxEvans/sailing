@@ -1,8 +1,3 @@
-#include <assert.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sqlrelay/sqlrclientwrapper.h>
-
 #include "../inc/os.h"
 #include "../inc/errcode.h"
 #include "../inc/rlist.h"
@@ -11,247 +6,156 @@
 #include "../inc/dbapi.h"
 #include "dbapi_provider.h"
 
-typedef struct DBAPI_SQLREALY
-{
-	DBAPI_CONNECTION  con;
-	sqlrcon relaycon;
-	sqlrcur curcon;
-	DBAPI_PARAMETER param[5];
-	int errcode;
+
+typedef struct DBAPI_SQLRELAY {
+	DBAPI_CONNECTION	con;
+	DBAPI_PARAMETER		param[5];
+	int					inuse;
+
 }DBAPI_SQLRELAY;
 
-
-static int DB_Init(void);
-static int DB_Final(void);
-static DBAPI_HANDLE DB_Connect(const char *connstr);
-static int DB_Disconnect(DBAPI_HANDLE handle);
-static int DB_Release(DBAPI_HANDLE handle);
-static int DB_Begin(DBAPI_HANDLE handle);
-static int DB_Commit(DBAPI_HANDLE handle);
-static int DB_Rollback(DBAPI_HANDLE handle);
-static int DB_Execute(DBAPI_HANDLE handle,const char *sql);
-static int DB_Query(DBAPI_HANDLE handle, const char *sql, DBAPI_RECORDSET **result_set, int row_max);
-static int DB_GetErrorCode(DBAPI_HANDLE handle);
-static const char * DB_GetErrorMsg(DBAPI_HANDLE handle);
-
-static MEMPOOL_HANDLE  mem_handle;
-
-
-DBAPI_PROVIDER dbapi_sqlrelay_provider =
+static int dbapi_sqlrelay_init();
+static int dbapi_sqlrelay_final();
+static DBAPI_HANDLE dbapi_sqlrelay_connect(DBAPI_PARAMETER* param, int count);
+static int dbapi_sqlrelay_disconnect(DBAPI_HANDLE handle);
+static int dbapi_sqlrelay_release(DBAPI_HANDLE handle);
+static int dbapi_sqlrelay_begin(DBAPI_HANDLE handle);
+static int dbapi_sqlrelay_commit(DBAPI_HANDLE handle);
+static int dbapi_sqlrelay_rollback(DBAPI_HANDLE handle);
+static int dbapi_sqlrelay_execute(DBAPI_HANDLE handle,const char *sql);
+static int dbapi_sqlrelay_query(DBAPI_HANDLE handle, const char *sql, DBAPI_RECORDSET *rs, int row_max);
+static int dbapi_sqlrelay_get_errcode(DBAPI_HANDLE handle);
+static const char* dbapi_sqlrelay_get_errmsg(DBAPI_HANDLE handle);
+extern DBAPI_PROVIDER dbapi_sqlrelay_provider =
 {
-	1,
+	0x00000001,
 	"sqlrelay",
-	1,
-	DB_Init,
-	DB_Final,
-	DB_Connect,
-	DB_Disconnect,
-	DB_Release,
-	DB_Begin,
-	DB_Commit,
-	DB_Rollback,
-	DB_Execute,
-	DB_Query,
-	DB_GetErrorCode,
-	DB_GetErrorMsg	
+	dbapi_sqlrelay_init,
+	dbapi_sqlrelay_final,
+	dbapi_sqlrelay_connect,
+	dbapi_sqlrelay_disconnect,
+	dbapi_sqlrelay_release,
+	dbapi_sqlrelay_begin,
+	dbapi_sqlrelay_commit,
+	dbapi_sqlrelay_rollback,
+	dbapi_sqlrelay_execute,
+	dbapi_sqlrelay_query,
+	dbapi_sqlrelay_get_errcode,
+	dbapi_sqlrelay_get_errmsg
 };
 
+static DBAPI_SQLRELAY sqlrelay_list[100];
+static os_mutex_t sqlrelay_mutex;
 
-int DB_Init(void)
+static DBAPI_SQLRELAY* sqlrelay_alloc()
 {
-	mem_handle = NULL;
-	mem_handle = mempool_create(sizeof(DBAPI_SQLRELAY), 0);
-	if(mem_handle == NULL)
-	{
-		return ERR_UNKNOWN;
-	}
-	else
-	{
-		return ERR_NOERROR;
-	}
+	int ret;
+	os_mutex_lock(&sqlrelay_mutex);
+	for(ret=0; ret<sizeof(sqlrelay_list)/sizeof(sqlrelay_list[0]); ret++)
+		if(!sqlrelay_list[ret].inuse) { sqlrelay_list[ret].inuse = 1; break; }
+	os_mutex_unlock(&sqlrelay_mutex);
+	if(ret==sizeof(sqlrelay_list)/sizeof(sqlrelay_list[0])) return NULL;
+	return &sqlrelay_list[ret];
 }
 
-int DB_Final(void)
+static void sqlrelay_free(DBAPI_SQLRELAY* conn)
 {
-	if(mem_handle != NULL)
-	{
-		mempool_destroy(mem_handle);
-	}
-
-	return ERR_NOERROR ;
+	os_mutex_lock(&sqlrelay_mutex);
+	conn->inuse = 0;
+	os_mutex_unlock(&sqlrelay_mutex);
 }
 
-
-DBAPI_HANDLE DB_Connect(const char * connstr)
+int dbapi_sqlrelay_init()
 {
-	char *ip = NULL;
-	char *port = NULL;
-	char *user = NULL;
-	char *pwd =NULL;
-	DBAPI_SQLRELAY *handle = (DBAPI_SQLRELAY*)mempool_alloc(mem_handle);
-	if (handle == NULL) return NULL;
-
-	if (dbapi_crack_connstr(connstr, handle->param, sizeof(handle->param)) != ERR_NOERROR) return NULL;
-	
-	ip =(char*) dbapi_parameter_get(handle->param, 5, "ip");
-	port = (char*)dbapi_parameter_get(handle->param, 5, "port");	
-	user =(char*) dbapi_parameter_get(handle->param, 5, "user");
-	pwd = (char*)dbapi_parameter_get(handle->param, 5, "pwd");
-
-	if(ip==NULL || port==NULL || user==NULL || pwd==NULL)
-	{
-		mempool_free(mem_handle, handle);
-		return NULL;
-	}
-	handle->relaycon = sqlrcon_alloc(ip, atoi(port), "", user, pwd, 0, 1);
-
-	handle->curcon=sqlrcur_alloc(handle->relaycon);
-	handle->errcode = ERR_NOERROR;
-	handle->con.dbi = &dbapi_sqlrelay_provider;
-	return (DBAPI_HANDLE) &(handle->con); 
-}
-
-int DB_Disconnect(DBAPI_HANDLE handle) 
-{
-	DBAPI_SQLRELAY *p=(DBAPI_SQLRELAY*)handle;
-	sqlrcur_free(p->curcon);
-	sqlrcon_free(p->relaycon);
-	//handle alloc memory int the connect function
-	mempool_free(mem_handle, handle);	
-	p=NULL;
-	return ERR_NOERROR ;
-}
-
-int DB_Release(DBAPI_HANDLE handle)
-{
-	DBAPI_SQLRELAY *p=(DBAPI_SQLRELAY*)handle;
-	sqlrcon_endSession(p->relaycon);
+	memset(sqlrelay_list, 0, sizeof(sqlrelay_list));
+	os_mutex_init(&sqlrelay_mutex);
 	return ERR_NOERROR;
 }
 
-int DB_Begin(DBAPI_HANDLE handle)
+int dbapi_sqlrelay_final()
 {
-	return ERR_NOERROR ;
-	//THERE IS NO FUNTION TO CARRY OUT this function ,so this function do nothing 
-
+	os_mutex_destroy(&sqlrelay_mutex);
+	return ERR_NOERROR;
 }
 
-int DB_Commit(DBAPI_HANDLE handle)
+DBAPI_HANDLE dbapi_sqlrelay_connect(DBAPI_PARAMETER* param, int count);
 {
-	DBAPI_SQLRELAY *p=(DBAPI_SQLRELAY*)handle;
-	p->errcode =  sqlrcon_commit(p->relaycon);
-	return p->errcode;
-	//1 means success,0 means fail,-1 means an error 
+	int ret;
+	DBAPI_SQLRELAY* conn;
+
+	conn = sqlrelay_alloc();
+	if(conn==NULL) return NULL;
+
+	conn->con.dbi = &dbapi_sqlrelay_provider;
+	return (DBAPI_HANDLE) &(conn->con); 
 }
 
-int DB_Rollback(DBAPI_HANDLE handle)
+int dbapi_sqlrelay_disconnect(DBAPI_HANDLE handle) 
 {
-	DBAPI_SQLRELAY *p=(DBAPI_SQLRELAY*)handle;
-	p->errcode = sqlrcon_rollback(p->relaycon);
-	return p->errcode;
-	//1 means success,0 means fail,-1 means an error 
+	DBAPI_SQLRELAY* conn = (DBAPI_SQLRELAY*)handle;
+
+	sqlrelay_free(conn);
+	return ERR_NOERROR;
 }
 
-int DB_Execute(DBAPI_HANDLE handle,const char *sql)
+int dbapi_sqlrelay_release(DBAPI_HANDLE handle)
 {
-	DBAPI_SQLRELAY *p=(DBAPI_SQLRELAY*)handle;
-	p->errcode = ERR_NOERROR;
-	assert(sql);
-	if(!sql)
-	{
-		p->errcode = ERR_UNKNOWN;
-	}
-	else
-	{	
-		if(!sqlrcur_sendQuery(p->curcon, sql))
-		{
-			p->errcode = ERR_UNKNOWN;
-		}
-		else
-		{
-			if(sqlrcur_affectedRows(p->curcon) == 0)
-			{
-                                p->errcode = ERR_NOT_FOUND;
-                        }
-		}
-	}
-	return p->errcode;	
+	DBAPI_SQLRELAY* conn = (DBAPI_SQLRELAY*)handle;
+
+	return ERR_NOERROR;
 }
 
-int DB_Query(DBAPI_HANDLE handle,const char *sql,DBAPI_RECORDSET **result_set,  int row_max)
+int dbapi_sqlrelay_begin(DBAPI_HANDLE handle)
 {
-	char* pBuffer = NULL;
-	int colnum=0;
-	DBAPI_SQLRELAY *p=(DBAPI_SQLRELAY*)handle;
-	p->errcode = ERR_NOERROR;
-	assert(sql);
-	if(!sql)
-	{
-		p->errcode = ERR_UNKNOWN;
-		*result_set = NULL;
-		return p->errcode;
-	}
+	DBAPI_SQLRELAY* conn = (DBAPI_SQLRELAY*)handle;
 
-	//select return the recordset;
-	if( !sqlrcur_sendQuery(p->curcon,sql) )
-	{
-		p->errcode = ERR_UNKNOWN;
-		*result_set = NULL;
-		 return p->errcode;
-	}	
-	
-	//get column number of result
-	colnum=sqlrcur_colCount(p->curcon);
-	//get row number of result
-	int rownum=sqlrcur_rowCount(p->curcon);
-		
-	if(rownum == 0)
-	{	
-		p->errcode = ERR_NOT_FOUND;
-		*result_set = NULL;
-		 return p->errcode;
-	}
-	
-
-	//you need  to buffer the result
-	*result_set=dbapi_recordset_alloc(colnum,row_max);
-	//assert(recordset);
-	if(!*result_set)
-	{
-		//alloc error
-		p->errcode = ERR_UNKNOWN;
-		return p->errcode;
-	}
-
-	int row,col;
-	for(row=0; row<(row_max > rownum? rownum:row_max ); row++)
-	{
-		for(col=0; col<colnum; col++)
-		{
-			pBuffer=(char*)sqlrcur_getFieldByIndex(p->curcon, row, col);
-			//insert the recordset
-			if(dbapi_recordset_put(*result_set, col, row, pBuffer, strlen(pBuffer)+1) == ERR_OUT_OF_RANGE)
-			{
-				p->errcode = ERR_OUT_OF_RANGE;
-				dbapi_recordset_free(*result_set);
-				return p->errcode;
-			}
-		}
-	}
-	p->errcode = ERR_NOERROR;
-	return p->errcode;
-	
+	return ERR_NOERROR;
 }
 
-int DB_GetErrorCode(DBAPI_HANDLE handle)
+int dbapi_sqlrelay_commit(DBAPI_HANDLE handle)
 {
-	DBAPI_SQLRELAY *p=(DBAPI_SQLRELAY*)handle;
-	return p->errcode;
+	DBAPI_SQLRELAY* conn = (DBAPI_SQLRELAY*)handle;
+
+	return ERR_NOERROR;
 }
 
-const char* DB_GetErrorMsg(DBAPI_HANDLE handle)
+int dbapi_sqlrelay_rollback(DBAPI_HANDLE handle)
 {
-	DBAPI_SQLRELAY *p=(DBAPI_SQLRELAY*)handle;     
-	return sqlrcur_errorMessage(p->curcon);
+	DBAPI_SQLRELAY* conn = (DBAPI_SQLRELAY*)handle;
+
+	return ERR_NOERROR;
 }
 
+int dbapi_sqlrelay_execute(DBAPI_HANDLE handle,const char *sql)
+{
+	DBAPI_SQLRELAY* conn = (DBAPI_SQLRELAY*)handle;
+
+	return ERR_NOERROR;
+}
+
+int dbapi_sqlrelay_query(DBAPI_HANDLE handle, const char *sql, DBAPI_RECORDSET *rs, int row_max)
+{
+	int ret;
+	DBAPI_SQLRELAY* conn = (DBAPI_SQLRELAY*)handle;
+
+	dbapi_recordset_set(rs, 1, 2); // row_max, col_count
+
+	ret = dbapi_recordset_put(rs, 0, 0, "value", 6);
+	if(ret!=ERR_NOERROR) return ret;
+	ret = dbapi_recordset_put(rs, 0, 1, "string", 0);
+	if(ret!=ERR_NOERROR) return ret;
+
+	return ERR_NOERROR;
+}
+
+int dbapi_sqlrelay_get_errcode(DBAPI_HANDLE handle)
+{
+	DBAPI_SQLRELAY* conn = (DBAPI_SQLRELAY*)handle;
+	return 0;
+}
+
+const char* dbapi_sqlrelay_get_errmsg(DBAPI_HANDLE handle)
+{
+	DBAPI_SQLRELAY* conn = (DBAPI_SQLRELAY*)handle;
+	return 0;
+}

@@ -85,7 +85,7 @@ int fdwatch_add(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 	epevt.data.ptr	= item;
 
 	if(epoll_ctl(handle->epollfd, EPOLL_CTL_ADD, fdwatch_getfd(item), &epevt)==-1) {
-//		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_add(epoll) : epoll_ctl() fail, errno()=%s", errno);
+		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_add(epoll) : epoll_ctl() fail, errno()=%s", errno);
 		return ERR_UNKNOWN;
 	}
 
@@ -95,7 +95,7 @@ int fdwatch_add(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 int fdwatch_remove(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 {
 	if(epoll_ctl(handle->epollfd, EPOLL_CTL_MOD, fdwatch_getfd(item), NULL)==-1) {
-//		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_add(epoll) : epoll_ctl() fail, errno()=%s", errno);
+		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_remove(epoll) : epoll_ctl() fail, errno()=%s", errno);
 		return ERR_UNKNOWN;
 	}
 
@@ -115,7 +115,7 @@ int fdwatch_rearm(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 	epevt.data.ptr  = item;
 
 	if(epoll_ctl(handle->epollfd, EPOLL_CTL_MOD, fdwatch_getfd(item), &epevt)==-1) {
-//		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_rearm(epoll) : epoll_ctl() fail, errno()=%d", errno);
+		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_rearm(epoll) : epoll_ctl() fail, errno()=%d", errno);
 		return ERR_UNKNOWN;
 	}
 
@@ -139,7 +139,7 @@ int fdwatch_dispatch(FDWATCH_HANDLE handle, int timeout)
 		ret = epoll_wait(handle->epollfd, epevts, sizeof(epevts)/sizeof(epevts[0]), timeout);
 		if(ret>=0) break;
 		if(errno!=EINTR) {
-//			SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_wait(epoll) : epoll_wait fail, errno()=%d", errno);
+			SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_dispatch(epoll) : epoll_wait() fail, errno()=%d", errno);
 			return ERR_UNKNOWN;
 		}
 	}

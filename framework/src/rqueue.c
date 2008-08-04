@@ -50,8 +50,8 @@ struct RQUEUE_CLIENT {
 static int rqueue_internal_write(RQUEUE* queue, const void* buf, unsigned int size);
 static int rqueue_internal_connect(RQUEUE_CLIENT* client, const SOCK_ADDR* sa);
 
-static void rqueue_buffer_read(RQUEUE* queue, void* buf, unsigned int size);
-static void rqueue_buffer_write(RQUEUE* queue, const void* buf, unsigned int size);
+static void rqueue_buffer_read(RQUEUE* queue, unsigned int start, void* buf, unsigned int size);
+static void rqueue_buffer_write(RQUEUE* queue, unsigned int start, const void* buf, unsigned int size);
 
 static void rqueue_accept_event(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname);
 static void rqueue_ondata_event(NETWORK_HANDLE handle, void* userptr);
@@ -168,33 +168,41 @@ RQUEUE* rqueue_create(const SOCK_ADDR* sa, unsigned int bufsize, unsigned int fl
 
 	os_mutex_lock(&rqueue_mutex);
 
-	if(rqueue_count<sizeof(rqueue_list)/sizeof(rqueue_list[0]) && rqueue_clt_count<sizeof(rqueue_clt_list)/sizeof(rqueue_clt_list[0])) {
-		memcpy(&rqueue_list[rqueue_count].queue_addr, sa, sizeof(SOCK_ADDR));
-		rqueue_list[rqueue_count].queue_flags = flags;
-		rqueue_list[rqueue_count].buffer = buffer;
-		rqueue_list[rqueue_count].buffer_max = bufsize;
-
-		os_mutex_lock(&rqueue_list[rqueue_count].buffer_mutex);
-		if(network_tcp_register(&rqueue_list[rqueue_count].queue_addr, rqueue_accept_event, &rqueue_list[rqueue_count])!=ERR_NOERROR) {
-			queue = &rqueue_list[rqueue_count];
-			client = &rqueue_clt_list[rqueue_clt_count];
-
-			client->queue = queue;
-			client->clt_handle = NULL;
-			memcpy(&client->clt_sa, sa, sizeof(*sa));
-
-			queue->queue_enable = 1;
-			hashmap_add(rqueue_map, &queue->hmitem, &queue->queue_addr, sizeof(queue->queue_addr));
-			hashmap_add(rqueue_clt_map, &client->hmitem, &client->clt_sa, sizeof(client->clt_sa));
-			rqueue_count++;
-			rqueue_clt_count++;
-		}
-		os_mutex_unlock(&rqueue_list[rqueue_count].buffer_mutex);
+	if(rqueue_count==sizeof(rqueue_list)/sizeof(rqueue_list[0]) || rqueue_clt_count==sizeof(rqueue_clt_list)/sizeof(rqueue_clt_list[0])) {
+		os_mutex_unlock(&rqueue_mutex);
+		return NULL;
 	}
 
+	memcpy(&rqueue_list[rqueue_count].queue_addr, sa, sizeof(SOCK_ADDR));
+	rqueue_list[rqueue_count].queue_flags = flags;
+	rqueue_list[rqueue_count].buffer = buffer;
+	rqueue_list[rqueue_count].buffer_max = bufsize;
+
+	os_mutex_lock(&rqueue_list[rqueue_count].buffer_mutex);
+
+	if(network_tcp_register(&rqueue_list[rqueue_count].queue_addr, rqueue_accept_event, &rqueue_list[rqueue_count])!=ERR_NOERROR) {
+		os_mutex_unlock(&rqueue_list[rqueue_count].buffer_mutex);
+		os_mutex_unlock(&rqueue_mutex);
+		free(buffer);
+		return NULL;
+	}
+
+	queue = &rqueue_list[rqueue_count];
+	client = &rqueue_clt_list[rqueue_clt_count];
+
+	client->queue = queue;
+	client->clt_handle = NULL;
+	memcpy(&client->clt_sa, sa, sizeof(*sa));
+
+	queue->queue_enable = 1;
+	hashmap_add(rqueue_map, &queue->hmitem, &queue->queue_addr, sizeof(queue->queue_addr));
+	hashmap_add(rqueue_clt_map, &client->hmitem, &client->clt_sa, sizeof(client->clt_sa));
+	rqueue_count++;
+	rqueue_clt_count++;
+
+	os_mutex_unlock(&queue->buffer_mutex);
 	os_mutex_unlock(&rqueue_mutex);
 
-	if(queue==NULL) free(buffer);
 	return queue;
 }
 
@@ -213,7 +221,7 @@ void rqueue_destroy(RQUEUE* queue)
 		if(queue->clt_list[l]==NULL) continue;
 		network_disconnect(queue->clt_list[l]);
 	}
-	os_mutex_lock(&queue->buffer_mutex);
+	os_mutex_unlock(&queue->buffer_mutex);
 
 	do {
 		os_sleep(50);
@@ -241,7 +249,7 @@ int rqueue_read(RQUEUE* queue, void* buf, unsigned int* size)
 		}
 
 		if(queue->buffer_len>sizeof(r_size)) {
-			rqueue_buffer_read(queue, &r_size, sizeof(r_size));
+			rqueue_buffer_read(queue, 0, &r_size, sizeof(r_size));
 			if(r_size>*size) {
 				ret = ERR_NOT_ENOUGH;
 				break;
@@ -250,9 +258,9 @@ int rqueue_read(RQUEUE* queue, void* buf, unsigned int* size)
 				ret = ERR_INVALID_DATA;
 				break;
 			}
-			queue->buffer_cur = (queue->buffer_cur+sizeof(r_size)) % queue->buffer_max;
-			rqueue_buffer_read(queue, buf, r_size);
-			queue->buffer_cur = (queue->buffer_cur+r_size) % queue->buffer_max;
+			rqueue_buffer_read(queue, sizeof(r_size), buf, r_size);
+			queue->buffer_cur += sizeof(r_size) + r_size;
+			queue->buffer_len -= sizeof(r_size) + r_size;
 			ret = ERR_NOERROR;
 			break;
 		}
@@ -261,12 +269,16 @@ int rqueue_read(RQUEUE* queue, void* buf, unsigned int* size)
 			break;
 		}
 
-		os_condition_wait(&queue->buffer_cond, &queue->buffer_mutex);
+		os_condition_wait(&queue->queue_cond, &queue->buffer_mutex);
 	}
 
 	os_mutex_unlock(&queue->buffer_mutex);
 
-	if(ret==ERR_NOERROR) *size = r_size;
+	if(ret==ERR_NOERROR) {
+		os_condition_broadcast(&queue->buffer_cond);
+		*size = r_size;
+	}
+
 	return ret;
 }
 
@@ -336,10 +348,9 @@ int rqueue_internal_write(RQUEUE* queue, const void* buf, unsigned int size)
 		}
 
 		if(queue->buffer_len+sizeof(size)+size<=queue->buffer_max) {
-			rqueue_buffer_write(queue, &size, sizeof(size));
-			queue->buffer_len += sizeof(size);
-			rqueue_buffer_write(queue, buf, size);
-			queue->buffer_len += size;
+			rqueue_buffer_write(queue, 0, &size, sizeof(size));
+			rqueue_buffer_write(queue, sizeof(size), buf, size);
+			queue->buffer_len += sizeof(size) + size;
 			ret = ERR_NOERROR;
 			break;
 		}
@@ -361,11 +372,12 @@ int rqueue_internal_write(RQUEUE* queue, const void* buf, unsigned int size)
 int rqueue_internal_connect(RQUEUE_CLIENT* client, const SOCK_ADDR* sa)
 {
 	SOCK_HANDLE sock;
-	NETWORK_HANDLE handle;
 	NETWORK_EVENT event;
 
 	sock = sock_connect(sa, 0);
 	if(sock==SOCK_INVALID_HANDLE) return ERR_UNKNOWN;
+
+	sock_nonblock(sock);
 
 	event.OnConnect = NULL;
 	event.OnData = rqueue_clt_ondata_event;
@@ -373,8 +385,8 @@ int rqueue_internal_connect(RQUEUE_CLIENT* client, const SOCK_ADDR* sa)
 	event.recvbuf_pool = NULL;
 	event.recvbuf_buf = client->recvbuf;
 	event.recvbuf_max = sizeof(client->recvbuf);
-	handle = network_add(sock, &event, client);
-	if(handle==NULL) {
+	client->clt_handle = network_add(sock, &event, client);
+	if(client->clt_handle==NULL) {
 		sock_disconnect(sock);
 		sock_close(sock);
 		return ERR_UNKNOWN;
@@ -383,25 +395,35 @@ int rqueue_internal_connect(RQUEUE_CLIENT* client, const SOCK_ADDR* sa)
 	return ERR_NOERROR;
 }
 
-void rqueue_buffer_read(RQUEUE* queue, void* buf, unsigned int size)
+void rqueue_buffer_read(RQUEUE* queue, unsigned int start, void* buf, unsigned int size)
 {
-	unsigned int k = queue->buffer_max - queue->buffer_cur;
-	if(k<size) {
-		memcpy(buf, queue->buffer+queue->buffer_cur, k);
-		memcpy((char*)buf+k, queue->buffer, size-k);
+	unsigned int end;
+
+	start = (queue->buffer_cur+start) % queue->buffer_max;
+	end = (start+size) % queue->buffer_max;
+
+	if(start<=end) {
+		memcpy(buf, queue->buffer+start, size);
 	} else {
-		memcpy(buf, queue->buffer+queue->buffer_cur, size);
+		unsigned int k = queue->buffer_max - start;
+		memcpy(buf, queue->buffer+start, k);
+		memcpy((char*)buf+k, queue->buffer, size-k);
 	}
 }
 
-void rqueue_buffer_write(RQUEUE* queue, const void* buf, unsigned int size)
+void rqueue_buffer_write(RQUEUE* queue, unsigned int start, const void* buf, unsigned int size)
 {
-	unsigned int k = queue->buffer_max - (queue->buffer_cur+queue->buffer_len);
-	if(k<size) {
-		memcpy(queue->buffer+queue->buffer_cur, buf, k);
-		memcpy(queue->buffer, (char*)buf+k, size-k);
+	unsigned int end;
+
+	start = (queue->buffer_cur+queue->buffer_len+start) % queue->buffer_max;
+	end = (start+size) % queue->buffer_max;
+
+	if(start<=end) {
+		memcpy(queue->buffer+start, buf, size);
 	} else {
-		memcpy(queue->buffer+queue->buffer_cur, buf, size);
+		unsigned int k = queue->buffer_max - start;
+		memcpy(queue->buffer+start, buf, k);
+		memcpy(queue->buffer, (const char*)buf+k, size-k);
 	}
 }
 

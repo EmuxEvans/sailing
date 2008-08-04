@@ -15,8 +15,8 @@
 static RQUEUE* queue;
 static RQUEUE_CLIENT* client;
 
-static os_thread_t s_tids[3];
-static os_thread_t c_tids[10];
+static os_thread_t s_tids[1];
+static os_thread_t c_tids[1];
 
 static int quit_flag = 0;
 
@@ -98,7 +98,7 @@ unsigned int ZION_CALLBACK server_proc(void* arg)
 		}
 		if(buf[0]=='\0') break;
 
-		printf("\t\t%s\n", buf+sizeof(int));
+		printf("\t\t%p %s\n", buf, buf);
 	}
 
 	printf("server_thread quit.\n");
@@ -121,7 +121,7 @@ unsigned int ZION_CALLBACK client_proc(void* arg)
 			continue;
 		}
 
-		os_sleep(100);
+		os_sleep(10);
 	}
 
 	return 0;

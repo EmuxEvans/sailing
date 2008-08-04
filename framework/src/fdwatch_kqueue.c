@@ -42,7 +42,7 @@ FDWATCH_HANDLE fdwatch_create()
 
 	array[i].kq = kqueue();
 	if(array[i].kq==-1) {
-//		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_create(kqueue) : kqueue() fail, errno=%d", errno);
+		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_create(kqueue) : kqueue() fail, errno=%d", errno);
 		return NULL;
 	}
 
@@ -97,7 +97,7 @@ int fdwatch_add(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 	default: return ERR_INVALID_PARAMETER;
 	}
 	if(ret==-1) {
-//		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_add(epoll) : epoll_ctl() fail, errno()=%s", errno);
+		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_add(queue) : kevent() fail, errno()=%s", errno);
 		return ERR_UNKNOWN;
 	}
 
@@ -130,7 +130,7 @@ int fdwatch_remove(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 	default: return ERR_INVALID_PARAMETER;
 	}
 	if(ret==-1) {
-//		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_add(epoll) : epoll_ctl() fail, errno()=%s", errno);
+		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_add(kqueue) : kevent() fail, errno()=%s", errno);
 		return ERR_UNKNOWN;
 	}
 
@@ -165,7 +165,7 @@ int fdwatch_rearm(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 	default: return ERR_INVALID_PARAMETER;
 	}
 	if(ret==-1) {
-//		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_add(epoll) : epoll_ctl() fail, errno()=%s", errno);
+		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_rearm(kqueue) : kevent() fail, errno()=%s", errno);
 		return ERR_UNKNOWN;
 	}
 
@@ -196,7 +196,7 @@ int fdwatch_dispatch(FDWATCH_HANDLE handle, int timeout)
 		}
 		if(ret>=0) break;
 		if(errno!=EINTR) {
-//			SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_add(epoll) : epoll_ctl() fail, errno()=%s", errno);
+			SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_dispatch(kqueue) : kevent() fail, errno()=%s", errno);
 			return ERR_UNKNOWN;
 		}
 	}
