@@ -9600,8 +9600,10 @@ SQLITE_PRIVATE void sqlite3ScratchFree(void*);
 SQLITE_PRIVATE void *sqlite3PageMalloc(int);
 SQLITE_PRIVATE void sqlite3PageFree(void*);
 SQLITE_PRIVATE void sqlite3MemSetDefault(void);
+#ifdef SQLITE_ENABLE_MEMSYS5
 SQLITE_PRIVATE const sqlite3_mem_methods *sqlite3MemGetMemsys5(void);
 SQLITE_PRIVATE const sqlite3_mem_methods *sqlite3MemGetMemsys3(void);
+#endif
 SQLITE_PRIVATE void sqlite3BenignMallocHooks(void (*)(void), void (*)(void));
 
 #ifndef SQLITE_MUTEX_NOOP
