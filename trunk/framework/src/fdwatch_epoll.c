@@ -6,6 +6,7 @@
 #include "../inc/os.h"
 #include "../inc/rlist.h"
 #include "../inc/fdwatch.h"
+#include "../inc/applog.h"
 
 // STATIC CONFIG : Start
 #define FDWATCH_EPOLL_EVENT_SIZE	2000
