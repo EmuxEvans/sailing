@@ -26,6 +26,8 @@ ZION_API const char* dbapi_get_errmsg(DBAPI_HANDLE handle);
 
 ZION_API int dbapi_recordset_free(DBAPI_RECORDSET* recordset);
 
+ZION_API const char* dbapi_recordset_get_fieldname(DBAPI_RECORDSET* rs, int col);
+
 ZION_API int dbapi_recordset_row_count(DBAPI_RECORDSET* recordset);
 ZION_API int dbapi_recordset_col_count(DBAPI_RECORDSET* recordset);
 ZION_API const char* dbapi_recordset_get(DBAPI_RECORDSET* recordset, int row, int col);

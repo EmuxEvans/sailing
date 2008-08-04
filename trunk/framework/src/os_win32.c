@@ -23,7 +23,9 @@ int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx)
 
 	LeaveCriticalSection(mtx);
 
-	ret = WaitForSingleObject(cond->sem, INFINITE);
+	do {
+		ret = WaitForSingleObject(cond->sem, INFINITE);
+	} while(ret!=WAIT_OBJECT_0);
 
 	while(1) {
 		c = cond->count;
@@ -65,17 +67,17 @@ int os_condition_broadcast(os_condition_t* cond)
 
 	while(1) {
 		c = cond->count;
-		if(CONDITION_TCOUNT(c)>CONDITION_SCOUNT(c)) {
-			v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c), CONDITION_TCOUNT(c));
+		if(CONDITION_SCOUNT(c)<CONDITION_TCOUNT(c)+1) {
+			v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c), CONDITION_TCOUNT(c)+1);
 		} else {
 			v = CONDITION_MAKE(CONDITION_SEQ(c)+1, CONDITION_TCOUNT(c), CONDITION_SCOUNT(c));
 		}
 		if(c==InterlockedCompareExchange(&cond->count, v, c)) break;
 	}
 
-	if(CONDITION_TCOUNT(c)>CONDITION_SCOUNT(c)) {
+	if(CONDITION_SCOUNT(c)<CONDITION_TCOUNT(c)+1) {
 		BOOL ret;
-		ret = ReleaseSemaphore(cond->sem, CONDITION_TCOUNT(c) - CONDITION_SCOUNT(c), NULL);
+		ret = ReleaseSemaphore(cond->sem, CONDITION_TCOUNT(c) - CONDITION_SCOUNT(c) + 1, NULL);
 		return ret?0:GetLastError();
 	} else {
 		return 0;

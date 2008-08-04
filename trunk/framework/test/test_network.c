@@ -27,8 +27,6 @@ static void client_do();
 
 int main(int argc, char* argv[])
 {
-	srandom((int)time(NULL));
-
 	if(argc!=3) { print_usage(); exit(0); }
 	if(sock_str2addr(argv[2], &sa)==NULL) { print_usage(); exit(0); }
 
@@ -135,10 +133,9 @@ void client_do()
 unsigned int ZION_CALLBACK client_thread_proc(void* arg)
 {
 	SOCK_HANDLE sock = SOCK_INVALID_HANDLE;
-	char str[100];
-
-	memset(str, 'a', sizeof(str));
-	str[97] = '\0';
+	char str_out[100];
+	char str_in[104];
+	int k = 0, len;
 
 	while(!quit_flag) {
 		os_sleep(10);
@@ -149,17 +146,50 @@ unsigned int ZION_CALLBACK client_thread_proc(void* arg)
 		if(sock==SOCK_INVALID_HANDLE) continue;
 
 		if((rand()%100)<95) {
-			if(sock_writebuf(sock, str, strlen(str)+1)==ERR_NOERROR) {
-				printf("%p send\n", str);
-				continue;
+			sprintf(str_out+4, "%p %d ", &sock, k++);
+			len = strlen(str_out+4);
+			memset(str_out+4+len, 'a'+k%26, sizeof(str_out)-4-len);
+			str_out[sizeof(str_out)/sizeof(str_out[0])-1] = '\0';
+			*((int*)str_out) = sizeof(str_out)-4;
+			if(sock_writebuf(sock, str_out, sizeof(str_out))==ERR_NOERROR) {
+				if(sock_readbuf(sock, str_in, sizeof(str_in))==ERR_NOERROR) {
+					if(memcmp(str_in, str_out, sizeof(str_in))==0) {
+						continue;
+					} else {
+						printf("failed to memcmp\n");
+					}
+				} else {
+					printf("failed to sock_readbuf\n");
+				}
+			} else {
+				printf("failed to sock_writebuf\n");
 			}
-			printf("failed to sock_writebuf\n");
 		}
 
 		sock_disconnect(sock);
 		sock_close(sock);
 		sock = SOCK_INVALID_HANDLE;
 	}
+	if(sock!=SOCK_INVALID_HANDLE) return 0;
+
+	sprintf(str_out+4, "quit");
+	len = strlen(str_out+4)+1;
+	*((int*)str_out) = len;
+	if(sock_writebuf(sock, str_out, 4+len)==ERR_NOERROR) {
+		if(sock_readbuf(sock, str_in, 4+len)==ERR_NOERROR) {
+			if(memcmp(str_in, str_out, 4+len)==0) {
+				printf("very well\n");
+			} else {
+				printf("E failed to memcmp\n");
+			}
+		} else {
+			printf("E failed to sock_readbuf\n");
+		}
+	} else {
+		printf("E failed to sock_writebuf\n");
+	}
+
+
 	return 0;
 }
 
