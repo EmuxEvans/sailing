@@ -449,6 +449,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\src\dymempool.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\fdwatch_epoll.c"
 				>
 				<FileConfiguration
@@ -576,6 +580,10 @@
 			</File>
 			<File
 				RelativePath="..\src\dbapi_provider.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\dymempool.h"
 				>
 			</File>
 			<File
