@@ -1,3 +1,7 @@
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "../inc/errcode.h"
 #include "../inc/os.h"
 #include "../inc/dymempool.h"
@@ -73,8 +77,8 @@ void* dymempool_realloc(unsigned int new_size, void* ptr)
 	DYMEM_BLOCK* new_block;
 	unsigned int bits;
 	old_block = (DYMEM_BLOCK*)ptr - 1;
-	if(new_size<(2^(dymempool_min_bits+old_block->block_index))) return ptr;
-	if(new_size>(2^dymempool_max_bits)) return NULL;
+	if(new_size<dymempool_min) return ptr;
+	if(new_size>dymempool_max) return NULL;
 	bits = get_bits(new_size);
 	new_block = (DYMEM_BLOCK*)atom_slist_pop(&dymempool_hds[bits-dymempool_min_bits]);
 	if(new_block==NULL) {
@@ -89,6 +93,7 @@ void* dymempool_realloc(unsigned int new_size, void* ptr)
 
 void dymempool_free(void* ptr)
 {
-	DYMEM_BLOCK* block = (DYMEM_BLOCK*)ptr + 1;
+	DYMEM_BLOCK* block = (DYMEM_BLOCK*)ptr - 1;
 	atom_slist_push(&dymempool_hds[block->block_index], &block->entry);
 }
+
