@@ -1,6 +1,10 @@
 #ifndef _APPLOG_H_
 #define _APPLOG_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define LOG_ERROR				0
 #define LOG_WARNING				1
 #define LOG_INFO				2
@@ -29,6 +33,10 @@ ZION_API int dbglog_open(const char* url);
 ZION_API void dbglog_enable(int enable);
 ZION_API int dbglog_close();
 ZION_API void dbglog(int level, const char* src, const char* fmt, ...);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif

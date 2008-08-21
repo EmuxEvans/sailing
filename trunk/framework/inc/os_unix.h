@@ -8,6 +8,10 @@
 #include <unistd.h>
 #include <time.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef ZION_API
 #define ZION_API
 #endif
@@ -29,6 +33,8 @@ typedef char				os_char;
 typedef short				os_short;
 typedef int					os_int;
 typedef long long			os_long;
+typedef float				os_float;
+typedef double				os_double;
 
 ZION_INLINE int os_last_error();
 
@@ -264,3 +270,7 @@ ZION_API os_dword atom_unix_swap(os_dword volatile *p, os_dword v);
 ZION_API os_dword atom_unix_cas(os_dword volatile *p, os_dword v, unsigned c);
 ZION_API void* atom_unix_cas_ptr(void* volatile *p, void* v, void* c);
 ZION_API os_dword atom_unix_exchg_add(os_dword volatile *p, os_dword v);
+
+#ifdef __cplusplus
+}
+#endif

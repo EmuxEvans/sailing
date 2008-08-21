@@ -1,6 +1,10 @@
 #ifndef _THREADPOOL_INCLUDE_
 #define _THREADPOOL_INCLUDE_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define THREADPOOL_MAX_WORKERTHREAD			20
 
 // thread pool
@@ -27,5 +31,9 @@ typedef struct {
 
 ZION_API int threadpool_getinfo(int index, THREADPOOL_INFO* info);
 ZION_API void threadpool_getstatus(THREADPOOL_STATUS* status);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

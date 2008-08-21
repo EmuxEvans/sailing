@@ -1,6 +1,10 @@
 #ifndef __DBAPI_PROVIDE_INCLUDE_
 #define __DBAPI_PROVIDE_INCLUDE_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DBAPI_CONNSTR_MAXLEN	170
 
 typedef struct DBAPI_PARAMETER {
@@ -67,6 +71,10 @@ ZION_API int dbapi_recordset_set_fieldname(DBAPI_RECORDSET* rs, int col, const c
 ZION_API int dbapi_recordset_put(DBAPI_RECORDSET* recordset, int row, int col, const char* value, int len);
 ZION_API char* dbapi_recordset_getbuf(DBAPI_RECORDSET* recordset);
 ZION_API int dbapi_recordset_getbuflen(DBAPI_RECORDSET* recordset);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

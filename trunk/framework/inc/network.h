@@ -1,6 +1,10 @@
 #ifndef _NETWORK_INCLUDE_
 #define _NETWORK_INCLUDE_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct NETWORK_CONNECTION;
 typedef struct NETWORK_CONNECTION* NETWORK_HANDLE;
 
@@ -52,5 +56,9 @@ ZION_API int network_disconnect(NETWORK_HANDLE handle);
 ZION_API SOCK_HANDLE network_get_sock(NETWORK_HANDLE handle);
 ZION_API void* network_get_userptr(NETWORK_HANDLE handle);
 ZION_API const SOCK_ADDR* network_get_peername(NETWORK_HANDLE handle);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

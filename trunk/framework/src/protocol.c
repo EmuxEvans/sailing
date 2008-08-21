@@ -17,6 +17,7 @@ static const char* get_token_number(const char* buf, char* value, int size);
 static const char* escape_blank(const char* buf);
 
 static const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
+static const char* parse_const(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
 static const char* parse_field_def(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
 static const char* parse_array_def(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
 static const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
@@ -100,7 +101,7 @@ const char* get_token_keyword(const char* buf, const char* keyword, char* value)
 	buf = get_token_id(buf, id, sizeof(id));
 	if(buf==NULL) return NULL;
 	if(strcmp(id, keyword)!=0) return NULL;
-	strcpy(value, keyword);
+	if(keyword) strcpy(value, keyword);
 	return buf;
 }
 
@@ -138,15 +139,14 @@ const char* escape_blank(const char* buf)
 const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 {
 	const char* tbuf;
-	char name[100];
 
-	buf = get_token_id(buf, name, sizeof(name));
+	buf = get_token_id(buf, callback->name, callback->name_len);
 	if(buf==NULL) return NULL;
 	buf = get_token_char(buf, '{');
 	if(buf==NULL) return NULL;
 
 	// add node
-	callback->new_node(ptr, name);
+	if(!callback->new_node_begin(ptr, callback->name)) return NULL;
 
 	// node body
 	tbuf = buf;
@@ -172,50 +172,78 @@ const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 		return NULL;
 	}
 
+	// add node
+	if(!callback->new_node_end(ptr)) return NULL;
+
+	return tbuf;
+}
+
+const char* parse_const(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
+{
+	const char* tbuf;
+
+	buf = get_token_keyword(buf, "const", NULL);
+	if(buf==NULL) return NULL;
+
+	buf = get_token_id(buf, callback->type, callback->type_len);
+	if(buf==NULL) return NULL;
+	buf = get_token_id(buf, callback->name, callback->name_len);
+	if(buf==NULL) return NULL;
+	tbuf = get_token_string(buf, callback->value, callback->value_len);
+	if(tbuf==NULL) {
+		tbuf = get_token_id(buf, callback->value, callback->value_len);
+		if(tbuf==NULL) {
+			tbuf = get_token_number(buf, callback->value, callback->value_len);
+			if(tbuf==NULL) {
+				return NULL;
+			}
+		}
+	}
+
+	if(!callback->new_const(ptr, callback->type, callback->name, callback->value)) return NULL;
+
 	return tbuf;
 }
 
 const char* parse_field_def(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 {
 	const char* tbuf;
-	char type[100];
-	char mode[50];
-	char name[100];
-	char value[100];
 
 	tbuf = buf;
-	tbuf = get_token_keyword(buf, "option", mode);
+	tbuf = get_token_keyword(buf, "option", callback->mode);
 	if(tbuf==NULL) {
-		tbuf = get_token_keyword(buf, "acquire", mode);
+		tbuf = get_token_keyword(buf, "acquire", callback->mode);
 		if(tbuf==NULL) return NULL;
 	}
 	buf = tbuf;
 
-	buf = get_token_id(buf, type, sizeof(type));
+	buf = get_token_id(buf, callback->type, callback->type_len);
 	if(buf==NULL) return NULL;
-	buf = get_token_id(buf, name, sizeof(name));
+	buf = get_token_id(buf, callback->name, callback->name_len);
 	if(buf==NULL) return NULL;
 
 	tbuf = get_token_char(buf, '=');
 	if(tbuf!=NULL) {
-		tbuf = get_token_string(buf, value, sizeof(value));
+		buf = tbuf;
+		tbuf = get_token_string(buf, callback->value, callback->value_len);
 		if(tbuf==NULL) {
-			tbuf = get_token_number(buf, value, sizeof(value));
+			tbuf = get_token_number(buf, callback->value, callback->value_len);
 			if(tbuf==NULL) {
-				tbuf = get_token_id(buf, value, sizeof(value));
+				tbuf = get_token_id(buf, callback->value, callback->value_len);
 				if(tbuf==NULL) {
 					return NULL;
 				}
 			}
 		}
+		buf = tbuf;
 	} else {
-		value[0] = '\0';
+		callback->value[0] = '\0';
 	}
 
 	buf = get_token_char(buf, ';');
 	if(buf==NULL) return NULL;
 
-	callback->new_field_def(ptr, mode, type, name, value);
+	if(!callback->new_field_def(ptr, callback->mode, callback->type, callback->name, callback->value)) return NULL;
 
 	return buf;
 }
@@ -223,35 +251,35 @@ const char* parse_field_def(PROTOCOL_CALLBACK* callback, void* ptr, const char* 
 const char* parse_array_def(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 {
 	const char* tbuf;
-	char mode[50];
-	char type[100];
-	char name[100];
-	char max[100];
 
 	tbuf = buf;
-	tbuf = get_token_keyword(buf, "option", mode);
+	tbuf = get_token_keyword(buf, "option", callback->mode);
 	if(tbuf==NULL) {
-		tbuf = get_token_keyword(buf, "acquire", mode);
+		tbuf = get_token_keyword(buf, "acquire", callback->mode);
 		if(tbuf==NULL) return NULL;
 	}
 	buf = tbuf;
 
-	buf = get_token_id(buf, name, sizeof(name));
+	buf = get_token_id(buf, callback->type, callback->type_len);
 	if(buf==NULL) return NULL;
-	buf = get_token_id(buf, type, sizeof(type));
+	buf = get_token_id(buf, callback->name, callback->name_len);
 	if(buf==NULL) return NULL;
 
 	buf = get_token_char(buf, '[');
 	if(buf==NULL) return NULL;
-	buf = get_token_number(buf, max, sizeof(max));
-	if(buf==NULL) return NULL;
+	tbuf = get_token_number(buf, callback->value, callback->value_len);
+	if(tbuf==NULL) {
+		tbuf = get_token_id(buf, callback->value, callback->value_len);
+		if(tbuf==NULL) return NULL;
+	}
+	buf = tbuf;
 	buf = get_token_char(buf, ']');
 	if(buf==NULL) return NULL;
 
 	buf = get_token_char(buf, ';');
 	if(buf==NULL) return NULL;
 
-	callback->new_array_def(ptr, mode, type, name);
+	if(!callback->new_array_def(ptr, callback->mode, callback->type, callback->name, callback->value)) return NULL;
 
 	return buf;
 }
@@ -259,22 +287,21 @@ const char* parse_array_def(PROTOCOL_CALLBACK* callback, void* ptr, const char* 
 const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 {
 	const char* tbuf;
-	char name[100];
-	char value[5000];
 
-	buf = get_token_id(buf, name, sizeof(name));
+	buf = get_token_id(buf, callback->name, callback->name_len);
 	if(buf==NULL) return NULL;
 
 	buf = get_token_char(buf, '=');
 	if(buf==NULL) return NULL;
 
-	tbuf = get_token_id(buf, value, sizeof(value));
+	tbuf = get_token_id(buf, callback->value, callback->value_len);
 	if(tbuf==NULL) {
-		tbuf = get_token_string(buf, value, sizeof(value));
+		tbuf = get_token_string(buf, callback->value, callback->value_len);
 		if(tbuf==NULL) {
-			tbuf = get_token_number(buf, value, sizeof(value));
+			tbuf = get_token_number(buf, callback->value, callback->value_len);
 			if(tbuf==NULL) {
-				return NULL;
+				if(!callback->new_field(ptr, callback->name, NULL)) return NULL;
+				return parse_array_item(callback, ptr, buf);
 			}
 		}
 	}
@@ -283,17 +310,14 @@ const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	buf = get_token_char(buf, ';');
 	if(buf==NULL) return NULL;
 
-	callback->new_field(ptr, name, value);
+	if(!callback->new_field(ptr, callback->name, callback->value)) return NULL;
 
 	return buf;
 }
 
 const char* parse_array(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 {
-	const char* tbuf;
-	char name[100];
-
-	buf = get_token_id(buf, name, sizeof(name));
+	buf = get_token_id(buf, callback->name, callback->name_len);
 	if(buf==NULL) return NULL;
 
 	buf = get_token_char(buf, '[');
@@ -302,28 +326,58 @@ const char* parse_array(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	if(buf==NULL) return NULL;
 	buf = get_token_char(buf, '=');
 	if(buf==NULL) return NULL;
-	buf = get_token_char(buf, '{');
+
+	if(!callback->new_array(ptr, callback->name)) return NULL;
+
+	buf = parse_array_item(callback, ptr, buf);
 	if(buf==NULL) return NULL;
-
-	callback->new_array(ptr, name);
-	callback->new_array_start(ptr);
-
-	tbuf = buf;
-	for(;;) {
-		buf = tbuf;
-
-		tbuf = get_token_char(buf, '}');
-		if(tbuf!=NULL) break;
-
-		return NULL;
-	}
-
-	callback->new_array_end(ptr);
 
 	return buf;
 }
 
 const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 {
-	return NULL;
+	const char* tbuf;
+
+	buf = get_token_char(buf, '{');
+	if(buf==NULL) return NULL;
+
+	if(!callback->new_begin(ptr)) return NULL;
+
+	tbuf = buf;
+	for(;;) {
+
+		if(buf!=tbuf) {
+			tbuf = get_token_char(tbuf, ',');
+			if(tbuf==NULL) return NULL;
+			buf = tbuf;
+		}
+
+		tbuf = get_token_char(buf, '}');
+		if(tbuf!=NULL) break;
+
+		tbuf = get_token_string(buf, callback->value, callback->value_len);
+		if(tbuf==NULL) {
+			tbuf = get_token_id(buf, callback->value, callback->value_len);
+			if(tbuf==NULL) {
+				tbuf = get_token_number(buf, callback->value, callback->value_len);
+				if(tbuf==NULL) {
+					tbuf = parse_array_item(callback, ptr, buf);
+					if(tbuf==NULL) {
+						return NULL;
+					} else {
+						continue;
+					}
+				}
+			}
+		}
+
+		if(!callback->new_item(ptr, callback->value)) return NULL;
+
+		return NULL;
+	}
+
+	if(!callback->new_end(ptr)) return NULL;
+
+	return tbuf;
 }

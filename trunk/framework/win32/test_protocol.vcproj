@@ -337,6 +337,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\tools\ProtocolParser.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\tools\ProtocolSample.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\tools\ProtocolSyntaxParser.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\test\test_protocol.c"
 				>
 			</File>
@@ -352,6 +364,18 @@
 			</File>
 			<File
 				RelativePath="..\inc\protocol.h"
+				>
+			</File>
+			<File
+				RelativePath="..\tools\ProtocolParser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\tools\ProtocolSample.h"
+				>
+			</File>
+			<File
+				RelativePath="..\tools\ProtocolSyntaxParser.h"
 				>
 			</File>
 		</Filter>

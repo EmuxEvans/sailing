@@ -1,6 +1,10 @@
 #ifndef	__RLIST_H__
 #define	__RLIST_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct RLIST_ITEM;
 typedef struct RLIST_ITEM RLIST_ITEM;
 struct RLIST_HEAD;
@@ -99,5 +103,9 @@ ZION_INLINE RLIST_ITEM* rlist_remove(RLIST_HEAD* list, RLIST_ITEM* item)//ÒÆ³ı½Ú
 #define rlist_push_back(list, aitem)		rlist_insert((list), &(list)->item, aitem)
 #define rlist_pop_front(list)				(rlist_empty(list)?NULL:rlist_remove(list, (list)->item.next))
 #define rlist_pop_back(list)				(rlist_empty(list)?NULL:rlist_remove(list, (list)->item.prev))
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

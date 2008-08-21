@@ -1,6 +1,10 @@
 #ifndef _RPC_FUN_H_
 #define _RPC_FUN_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // define rpc_net:subsys
 #define RPCNET_SUBSYS_SYNCRPC				0
 #define RPCNET_SUBSYS_ASYNCRPC_REQUEST		1
@@ -90,5 +94,9 @@ ZION_API int rpcfun_localasync_post(STREAM* stream, RPCFUN_ASYNC_OVERLAPPED* ove
 ZION_API STREAM* rpcfun_stream_alloc();
 ZION_API void rpcfun_stream_free(STREAM* stream);
 ZION_API int rpcfun_stream_isvalid(STREAM* stream);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

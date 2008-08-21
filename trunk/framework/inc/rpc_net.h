@@ -1,6 +1,10 @@
 #ifndef _RPCNET_H_
 #define _RPCNET_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define RPCNET_PACKAGE_LENGTH				(64 *1024)	// (2*1024*1024)
 #define RPCNET_MEMORYBLOCK_LENGTH			(256*1024)	// (4*1024*1204)
 #define RPCNEWTORK_EPINDEX_MAXVALUE			(1000)
@@ -68,5 +72,9 @@ ZION_API int rpcnet_conn_read(RPCNET_GROUP* group, RPCNET_CONNECTION* conn, unsi
 ZION_API void* rpcnet_memory_alloc(RPCNET_THREAD_CONTEXT* context, int size);
 ZION_API int rpcnet_memory_getbase(RPCNET_THREAD_CONTEXT* context); 
 ZION_API void rpcnet_memory_setbase(RPCNET_THREAD_CONTEXT* context, int base);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,6 +1,10 @@
 #ifndef _SOCK_H_
 #define _SOCK_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int		SOCK_HANDLE;
 
 #define SOCK_READ			(1<<1)
@@ -69,5 +73,9 @@ ZION_API SOCK_HANDLE sock_dgram_bind(SOCK_ADDR* endpoint, int broadcast);
 ZION_API int sock_dgram_unbind(SOCK_HANDLE handle);
 ZION_API int sock_dgram_send(SOCK_HANDLE handle, const SOCK_ADDR* addr, const char* buf, int buf_len);
 ZION_API int sock_dgram_recv(SOCK_HANDLE handle, SOCK_ADDR* addr, char* buf, int buf_len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
