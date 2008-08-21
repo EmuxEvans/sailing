@@ -1,6 +1,10 @@
 #ifndef _STREAM_INCLUDE_
 #define _STREAM_INCLUDE_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct STREAM;
 struct STREAM_INTERFACE;
 typedef struct STREAM			STREAM;
@@ -59,6 +63,10 @@ ZION_API int memstream_get_length(MEM_STREAM* stream);
 #define stream_put(stream, buf, len)	((STREAM*)(stream))->i->put((STREAM*)stream, buf, len)
 //int stream_get(STREAM* stream, void* buf, unsigned int len);
 #define stream_get(stream, buf, len)	((STREAM*)(stream))->i->get((STREAM*)stream, buf, len)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

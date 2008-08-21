@@ -2,6 +2,10 @@
 #ifndef _FDWATCH_INCLUDE_
 #define _FDWATCH_INCLUDE_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FDWATCH_MAX					20
 
 #define FDWATCH_ONCE				(1<<0)
@@ -44,6 +48,10 @@ ZION_API int fdwatch_break(FDWATCH_HANDLE handle);
 #define fdwatch_getfd(item)			((item)->fd)
 #define fdwatch_getptr(item)		rlist_get_userdata(&((item)->item))
 #define fdwatch_setptr(item, ptr)	rlist_set_userdata(&((item)->item), ptr)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

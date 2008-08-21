@@ -1,6 +1,10 @@
 #ifndef _MEMPOOL_INCLUDE_
 #define _MEMPOOL_INCLUDE_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef _DEBUG
 #	define MEMPOOL_DEBUG
 #endif
@@ -44,5 +48,9 @@ typedef struct MEMPOOL_INFO {
 } MEMPOOL_INFO;
 
 ZION_API int mempool_get_info(MEMPOOL_INFO* info, int count);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

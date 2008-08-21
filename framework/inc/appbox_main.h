@@ -1,6 +1,10 @@
 #ifndef _APPBOXMAIN_H_
 #define _APPBOXMAIN_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int (*APPBOXMAIN_PROC)();
 
 ZION_API int appbox_run_debug(APPBOXMAIN_PROC start, APPBOXMAIN_PROC stop);
@@ -28,5 +32,9 @@ extern SOCK_ADDR config_rpc_endpoint;
 extern SOCK_ADDR config_con_endpoint;
 extern unsigned int config_con_maxconns;
 extern unsigned int config_con_maxhooker;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

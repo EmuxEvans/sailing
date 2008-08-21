@@ -8,6 +8,10 @@
 
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef ZION_API
 #define ZION_API
 #endif
@@ -29,6 +33,8 @@ typedef char				os_char;
 typedef short				os_short;
 typedef int					os_int;
 typedef __int64				os_long;
+typedef float				os_float;
+typedef double				os_double;
 
 ZION_INLINE int os_last_error();
 
@@ -252,3 +258,7 @@ ZION_INLINE const char* os_library_error()
 {
 	return "";
 }
+
+#ifdef __cplusplus
+}
+#endif

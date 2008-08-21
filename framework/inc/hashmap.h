@@ -1,6 +1,10 @@
 #ifndef _HASHMAP_H_
 #define _HASHMAP_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct HASHMAP;
 typedef struct HASHMAP		HASHMAP;
 typedef struct HASHMAP*		HASHMAP_HANDLE;
@@ -27,5 +31,9 @@ HASHMAP_ITEM* hashmap_add(HASHMAP_HANDLE map, HASHMAP_ITEM* item, const void* ke
 HASHMAP_ITEM* hashmap_get(HASHMAP_HANDLE map, const void* key, unsigned int klen);
 void hashmap_erase(HASHMAP_HANDLE map, HASHMAP_ITEM* item);
 HASHMAP_ITEM* hashmap_erase_bykey(HASHMAP_HANDLE map, const void* key, unsigned int klen);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

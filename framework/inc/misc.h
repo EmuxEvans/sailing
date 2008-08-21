@@ -1,6 +1,17 @@
 #ifndef _NEW_MISC_H_
 #define _NEW_MISC_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef _WIN32
+#	include <stdio.h>
+#	define snprintf	_snprintf
+#else
+#	include <stdio.h>
+#endif
+
 // string
 ZION_API void strtrim(char* str);
 ZION_API void strltrim(char* str);
@@ -27,5 +38,9 @@ ZION_API char* strput4float_space(char* str, size_t len, float value);
 // file
 ZION_API int loal_textfile(const char* filename, char* buf, int buflen);
 ZION_API int save_textfile(const char* filename, char* buf, int buflen);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

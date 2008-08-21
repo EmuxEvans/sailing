@@ -1,11 +1,14 @@
 #ifndef _APPBOX_H_
 #define _APPBOX_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define ENTRY_REASON_ATTACH 	1 
 #define ENTRY_REASON_DETACH 	2
 
-typedef struct APPBOX_SETTING
-{
+typedef struct APPBOX_SETTING {
 	char*	name;
 	int		type;
 	void*	ptr;
@@ -46,5 +49,9 @@ ZION_API int appbox_unload_modules();
 
 ZION_API int appbox_reg_command(const char* module, const char* name, CONSOLE_CALLBACK callback);
 ZION_API int appbox_unreg_command(const char* module, const char* name, CONSOLE_CALLBACK callback);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

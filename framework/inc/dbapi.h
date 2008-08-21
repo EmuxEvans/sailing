@@ -1,6 +1,10 @@
 #ifndef __DBAPI_INCLUDE_
 #define __DBAPI_INCLUDE_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct DBAPI_CONNECTION;
 typedef struct DBAPI_CONNECTION DBAPI_CONNECTION;
 typedef DBAPI_CONNECTION* DBAPI_HANDLE;
@@ -31,6 +35,10 @@ ZION_API const char* dbapi_recordset_get_fieldname(DBAPI_RECORDSET* rs, int col)
 ZION_API int dbapi_recordset_row_count(DBAPI_RECORDSET* recordset);
 ZION_API int dbapi_recordset_col_count(DBAPI_RECORDSET* recordset);
 ZION_API const char* dbapi_recordset_get(DBAPI_RECORDSET* recordset, int row, int col);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

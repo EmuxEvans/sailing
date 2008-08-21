@@ -1,6 +1,10 @@
 #ifndef _CONSOLE_INCLUDE_
 #define _CONSOLE_INCLUDE_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define CONSOLE_HOOKERNAME_LEN			30
 #define CONSOLE_ITEM_NAME_LEN			20
 #define CONSOLE_ITEM_TYPE_LEN			15
@@ -23,5 +27,9 @@ ZION_API int console_unhook(CONSOLE_INSTANCE* instance, const char* name, CONSOL
 
 ZION_API int console_puts(CONSOLE_CONNECTION* conn, int code, const char* str);
 ZION_API int console_print(CONSOLE_CONNECTION* conn, int code, const char* fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
