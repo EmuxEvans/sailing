@@ -26,10 +26,10 @@ ZION_INLINE unsigned int get_bits(unsigned int n)
 int dymempool_init(unsigned int min, unsigned int max)
 {
 	unsigned int i;
-	dymempool_min = min;
 	dymempool_min_bits = get_bits(dymempool_min);
-	dymempool_max = max;
+	dymempool_min = min;
 	dymempool_max_bits = get_bits(dymempool_max);
+	dymempool_max = 1<<(dymempool_bits-1);
 	if(dymempool_min_bits<0 || dymempool_max_bits<dymempool_min_bits) return ERR_UNKNOWN;
 	if(dymempool_max_bits-dymempool_min_bits+1>sizeof(dymempool_hds)/sizeof(dymempool_hds[0])) return ERR_UNKNOWN;
 	for(i=0; i<sizeof(dymempool_hds)/sizeof(dymempool_hds[0]); i++) {
