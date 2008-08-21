@@ -4,7 +4,7 @@ include ../Makefile.def
 
 INCLUDES=$(OS_INC_DIR) -I../inc
 LIBS=$(OS_LIB_DIR) $(OS_LIB)
-BINS=test_network$(EXE_PREFIX) test_fdwatch$(EXE_PREFIX) test_rqueue$(EXE_PREFIX) test_dbapi$(EXE_PREFIX) test_console$(EXE_PREFIX) test_log$(EXE_PREFIX) test_sock$(EXE_PREFIX) test_threadpool$(EXE_PREFIX) test_timer$(EXE_PREFIX) test_rpcnet$(EXE_PREFIX) test_rpcfun$(EXE_PREFIX) test_syncrpc$(EXE_PREFIX) test_asyncrpc$(EXE_PREFIX)
+BINS=test_network$(EXE_PREFIX) test_fdwatch$(EXE_PREFIX) test_rqueue$(EXE_PREFIX) test_dbapi$(EXE_PREFIX) test_console$(EXE_PREFIX) test_log$(EXE_PREFIX) test_dymempool$(EXE_PREFIX) test_sock$(EXE_PREFIX) test_threadpool$(EXE_PREFIX) test_timer$(EXE_PREFIX) test_rpcnet$(EXE_PREFIX) test_rpcfun$(EXE_PREFIX) test_syncrpc$(EXE_PREFIX) test_asyncrpc$(EXE_PREFIX)
 
 OBJS_NETWORK=test_network.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o ../src/network.o ../src/mempool.o ../src/os_unix.o
 OBJS_FDWATCH=test_fdwatch.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o
@@ -12,6 +12,7 @@ OBJS_RQUEUE=test_rqueue.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o ../src/n
 OBJS_DBAPI=test_dbapi.o ../src/os_unix.o ../src/mempool.o ../src/hashmap.o ../src/dbapi.o ../src/sqlite/sqlite3.o ../src/dbapi_sqlite.o
 OBJS_CONSOLE=test_console.o ../src/sock.o ../src/fdwatch_$(FDWATCH_USE).o ../src/misc.o ../src/os_unix.o ../src/console.o
 OBJS_LOG=test_log.o ../src/log.o ../src/os_unix.o
+OBJS_DYMEMPOOL=test_dymempool.o ../src/dymempool.o ../src/os_unix.o
 OBJS_SOCK=test_sock.o ../src/sock.o ../src/os_unix.o
 OBJS_THREADPOOL=test_threadpool.o ../src/os_unix.o ../src/threadpool.o
 OBJS_TIMER=test_timer.o ../src/mempool.o ../src/os_unix.o ../src/threadpool.o ../src/timer.o
@@ -50,6 +51,9 @@ test_console$(EXE_PREFIX): $(OBJS_CONSOLE)
 
 test_log$(EXE_PREFIX): $(OBJS_LOG)
 	gcc $(INCLUDES) $(LIBS) $(OBJS_LOG) -o $@
+
+test_dymempool$(EXE_PREFIX): $(OBJS_DYMEMPOOL)
+	gcc $(INCLUDES) $(LIBS) $(OBJS_DYMEMPOOL) -o $@
 
 test_sock$(EXE_PREFIX): $(OBJS_SOCK)
 	gcc $(INCLUDES) $(LIBS) $(OBJS_SOCK) -o $@
