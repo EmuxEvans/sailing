@@ -10,6 +10,7 @@
 
 #include "../inc/skates.h"
 #include "../inc/appbox_svc.h"
+#include "../inc/appbox_args.h"
 
 static void init_daemon(const char* pid);
 static void signal_proc(int signal);
