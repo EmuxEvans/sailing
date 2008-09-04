@@ -3,8 +3,8 @@
 #include <string.h>
 
 #include "../inc/skates.h"
-#include "../inc/appbox_args.h"
 #include "../inc/appbox_svc.h"
+#include "../inc/appbox_args.h"
 
 static HANDLE	quit_event = NULL;
 static SERVICE_STATUS_HANDLE service_status = NULL;
