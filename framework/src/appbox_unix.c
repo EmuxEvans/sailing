@@ -15,6 +15,45 @@ static void init_daemon(const char* pid);
 static void signal_proc(int signal);
 static void wait_signal();
 
+static int flag_daemon = 0;
+static char pid_file[100] = "";
+
+int appbox_service(const APPBOX_SERVICE* svc, int argc, char* argv[])
+{
+	int ret;
+
+	ret = appbox_args_parse(argc, argv);
+	if(ret!=ERR_NOERROR) {
+		svc->svc_usage();
+		return ret;
+	}
+
+	if(appbox_args_get("daemon", NULL))
+		flag_daemon = 1;
+	if(appbox_args_get("debug", NULL))
+		flag_daemon = 0;
+
+	strcpy(pid_file, appbox_args_get("pid", "appbox.pid"));
+
+	ret = svc->svc_init();
+	if(ret!=ERR_NOERROR)
+		return ret;
+
+	if(flag_daemon) {
+		ret = appbox_run_daemon(svc->svc_start, svc->svc_stop, pid_file);
+	} else {
+		ret = appbox_run_debug(svc->svc_start, svc->svc_stop);
+	}
+	if(ret!=ERR_NOERROR)
+		return ret;
+
+	ret = svc->svc_final();
+	if(ret!=ERR_NOERROR)
+		return ret;
+
+	return ERR_NOERROR;
+}
+
 int appbox_run_debug(APPBOXMAIN_PROC start, APPBOXMAIN_PROC stop)
 {
 	int ret;
@@ -112,64 +151,3 @@ void wait_signal()
 		if(res==0 && (signo==SIGINT || signo==SIGQUIT || signo==SIGTERM)) break;
 	}
 }
-
-#ifdef APPBOX_MAIN
-
-#ifndef _DEBUG
-static int flag_daemon		= 1;
-static char config_path[100] = "../conf/config.conf";
-static char pid_file[100] = "appbox.pid";
-#else
-static int flag_daemon		= 0;
-static char config_path[100] = "../conf/config.conf";
-static char pid_file[100] = "appbox.pid";
-#endif
-
-static void print_usage();
-static void parse_cmdline(int argc, char* argv[]);
-
-int appbox_main(int argc, char* argv[])
-{
-	int ret;
-
-	parse_cmdline(argc-1, argv+1);
-
-	ret = appbox_main_load(config_path);
-	if(ret!=ERR_NOERROR) return ret;
-
-	if(flag_daemon) {
-		ret = appbox_run_daemon(appbox_main_start, appbox_main_stop, pid_file);
-	} else {
-		ret = appbox_run_debug(appbox_main_start, appbox_main_stop);
-	}
-	if(ret!=ERR_NOERROR) return ret;
-
-	return ERR_NOERROR;
-}
-
-void print_usage()
-{
-	printf("usage : appbox_main [-daemon] [-debug] [-config=file] [-pid=file]\n");
-	printf("\n");
-}
-
-void parse_cmdline(int argc, char* argv[])
-{
-	int ret;
-
-	ret = appbox_args_parse(argc, argv);
-	if(ret!=ERR_NOERROR) {
-		print_usage();
-		exit(-1);
-	}
-
-	if(appbox_args_get("daemon", NULL))		flag_daemon = 1;
-	if(appbox_args_get("debug", NULL))		flag_daemon = 0;
-	strcpy(config_path, appbox_args_get("config", "../conf/config.conf");
-	strcpy(pid_file, appbox_args_get("pid", "appbox.pid");
-	strtrim(pid_file);
-	strltrim(pid_file);
-}
-
-#endif
-
