@@ -104,7 +104,6 @@ void network_init(unsigned int size)
 	downbuf_size = size;
 	downbuf_pool = mempool_create("NETWORK_DOWNBUF", sizeof(NETWORK_DOWNBUF)+size, 0);
 	os_mutex_init(&downbuf_mutex);
-//	os_mutex_init(&recvbuf_mutex);
 	conn_pool = mempool_create("NETWORK_CONNECTION", sizeof(NETWORK_CONNECTION), 0);
 
 	memset(&tcp_eps, 0, sizeof(tcp_eps));
