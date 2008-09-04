@@ -6,7 +6,6 @@
 #include <assert.h>
 
 #include "../inc/skates.h"
-#include "../inc/appbox_main.h"
 
 #define MODULE_MAXCOUNT			30
 
@@ -32,19 +31,17 @@ static int module_count;
 static CONFIG_ITEM configs[1000];
 static int config_count = 0;
 
-#ifdef APPBOX_MAIN
-char config_syslog[200] = "console://";
-char config_dbglog[200] = "console://";
-int config_syslog_enable = 1;
-int	config_dbglog_enable = 1;
-int	config_worker_count = 5;
-int	config_timer_interval = 100;
-char config_module_list[300] = "";
-SOCK_ADDR config_rpc_endpoint = { 0xffffffff, 0xffff };
-SOCK_ADDR config_con_endpoint = { 0xffffffff, 0xffff };
-unsigned int config_con_maxconns = 10;
-unsigned int config_con_maxhooker = 100;
-#endif
+static char config_syslog[200] = "console://";
+static char config_dbglog[200] = "console://";
+static int config_syslog_enable = 1;
+static int	config_dbglog_enable = 1;
+static int	config_worker_count = 5;
+static int	config_timer_interval = 100;
+static char config_module_list[300] = "";
+static SOCK_ADDR config_rpc_endpoint = { 0xffffffff, 0xffff };
+static SOCK_ADDR config_con_endpoint = { 0xffffffff, 0xffff };
+static unsigned int config_con_maxconns = 10;
+static unsigned int config_con_maxhooker = 100;
 
 APPBOX_SETTING_BEGIN(appbox_settings)
 	APPBOX_SETTING_STRING("syslog", config_syslog, sizeof(config_syslog))
@@ -456,65 +453,6 @@ const CONFIG_ITEM* get_config_item(const char* name)
 
 	return NULL;
 }
-
-#ifdef APPBOX_MAIN
-
-int appbox_main_load(const char* config_path)
-{
-	int ret;
-
-	ret = appbox_config_load(config_path);
-	if(ret!=ERR_NOERROR) {
-		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to appbox_config_load(%s), ret=%d", config_path, ret);
-		return ret;
-	}
-	ret = appbox_config_init();
-	if(ret!=ERR_NOERROR) {
-		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to appbox_config_init(), ret=%d", ret);
-		return ret;
-	}
-
-	return ERR_NOERROR;
-}
-
-int appbox_main_start()
-{
-	int ret;
-	ret = appbox_init();
-	if(ret!=ERR_NOERROR) {
-		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to appbox_init(), ret=%d\n", ret);
-		return ret;
-	}
-	ret = appbox_load_modules();
-	if(ret!=ERR_NOERROR) {
-		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to appbox_load_modules(), ret=%d\n", ret);
-		ret = appbox_final();
-		if(ret!=ERR_NOERROR) {
-			SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to appbox_final(), ret=%d\n", ret);
-		}
-		return ret;
-	}
-
-	return ret;
-}
-
-int appbox_main_stop()
-{
-	int ret;
-
-	ret = appbox_unload_modules();
-	if(ret!=ERR_NOERROR) {
-		printf("Failed to appbox_unload_modules(), ret=%d\n", ret);
-	}
-	ret = appbox_final();
-	if(ret!=ERR_NOERROR) {
-		printf("Failed to appbox_final(), ret=%d\n", ret);
-	}
-
-	return ERR_NOERROR;
-}
-
-#endif
 
 int appbox_console_set(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 {

@@ -155,42 +155,20 @@ void print_usage()
 
 void parse_cmdline(int argc, char* argv[])
 {
-	char name[100], value[100];
-	char* s, *flag;
-	int cur;
+	int ret;
 
-	for(cur=0; cur<argc; cur++) {
-		s = argv[cur];
-		if(s[0]!='-') break;
-		flag = strchr(s, '=');
-		if(flag==NULL) {
-			strcpy(name, s+1);
-			value[0] = '\0';
-		} else {
-			*flag = '\0';
-			strcpy(name, s+1);
-			strcpy(value, flag+1);
-		}
-
-		if(			strcmp(name, "daemon")==0) {
-			flag_daemon = 1;
-		} else if(	strcmp(name, "debug")==0) {
-			flag_daemon = 0;
-		} else if(	strcmp(name, "config")==0) {
-			strcpy(config_path, value);
-		} else if(	strcmp(name, "pid")==0) {
-			strcpy(pid_file, value);
-			strtrim(pid_file);
-			strltrim(pid_file);
-		} else {
-			break;
-		}
-	}
-
-	if(cur!=argc) {
+	ret = appbox_args_parse(argc, argv);
+	if(ret!=ERR_NOERROR) {
 		print_usage();
 		exit(-1);
 	}
+
+	if(appbox_args_get("daemon", NULL))		flag_daemon = 1;
+	if(appbox_args_get("debug", NULL))		flag_daemon = 0;
+	strcpy(config_path, appbox_args_get("config", "../conf/config.conf");
+	strcpy(pid_file, appbox_args_get("pid", "appbox.pid");
+	strtrim(pid_file);
+	strltrim(pid_file);
 }
 
 #endif

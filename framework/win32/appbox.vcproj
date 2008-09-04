@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="$(SolutionDir)Dep\Mysql\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=__declspec(dllexport);APPBOX_MAIN"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=__declspec(dllexport)"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -125,7 +125,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="$(SolutionDir)Dep\Mysql\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=__declspec(dllexport);APPBOX_MAIN"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=__declspec(dllexport)"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -349,6 +349,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\appbox_args.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\appbox_win32.c"
 				>
 			</File>
@@ -563,7 +567,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\inc\appbox_main.h"
+				RelativePath="..\inc\appbox_args.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\appbox_svc.h"
 				>
 			</File>
 			<File
