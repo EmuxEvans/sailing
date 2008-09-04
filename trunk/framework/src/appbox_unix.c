@@ -9,7 +9,7 @@
 #include <assert.h>
 
 #include "../inc/skates.h"
-#include "../inc/appbox_main.h"
+#include "../inc/appbox_svc.h"
 
 static void init_daemon(const char* pid);
 static void signal_proc(int signal);
@@ -44,13 +44,13 @@ int appbox_run_daemon(APPBOXMAIN_PROC start, APPBOXMAIN_PROC stop, const char* p
 	return ERR_NOERROR;;
 }
 
-int appbox_install(const char* name, int argc, char* argv[])
+int appbox_install(const char* name, const char* dispname, const char* args)
 {
 	printf("not support\n");
 	return ERR_UNKNOWN;
 }
 
-int appbox_uninstall(const char* name, int argc, char* argv[])
+int appbox_uninstall(const char* name)
 {
 	printf("not support\n");
 	return ERR_UNKNOWN;

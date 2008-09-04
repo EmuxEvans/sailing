@@ -20,4 +20,5 @@ ZION_API int appbox_run_daemon(APPBOXMAIN_PROC start, APPBOXMAIN_PROC stop, cons
 ZION_API int appbox_install(const char* name, const char* dispname, const char* args);
 ZION_API int appbox_uninstall(const char* name);
 
-#endif _APPBOX_SVC_H_
+#endif
+
