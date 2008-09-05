@@ -346,7 +346,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="cd $(SolutionDir)test&#x0D;&#x0A;$(SolutionDir)..\$(ConfigurationName)-$(PlatformName)\idl_cc &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="cd $(ProjectDir)..\test\skates&#x0D;&#x0A;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\idl_cc &quot;$(InputPath)&quot;"
 						AdditionalDependencies=""
 						Outputs="$(ProjectDir)..\test\async_rpc.h;$(ProjectDir)..\test\async_rpc.svr.c;$(ProjectDir)..\test\async_rpc.clt.c"
 					/>
@@ -356,7 +356,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="cd $(SolutionDir)test&#x0D;&#x0A;$(SolutionDir)..\$(ConfigurationName)-$(PlatformName)\idl_cc &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						CommandLine="cd $(ProjectDir)..\test\skates&#x0D;&#x0A;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\idl_cc &quot;$(InputPath)&quot;"
 						AdditionalDependencies=""
 						Outputs="$(ProjectDir)..\test\async_rpc.h;$(ProjectDir)..\test\async_rpc.svr.c;$(ProjectDir)..\test\async_rpc.clt.c"
 					/>
