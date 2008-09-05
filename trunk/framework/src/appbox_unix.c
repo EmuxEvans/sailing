@@ -19,7 +19,7 @@ static void wait_signal();
 static int flag_daemon = 0;
 static char pid_file[100] = "";
 
-int appbox_service(const APPBOX_SERVICE* svc, int argc, char* argv[])
+int appbox_service(APPBOX_SERVICE* svc, int argc, char* argv[])
 {
 	int ret;
 
@@ -55,6 +55,11 @@ int appbox_service(const APPBOX_SERVICE* svc, int argc, char* argv[])
 	return ERR_NOERROR;
 }
 
+int appbox_service_log(const char* fmt, ...)
+{
+	return ERR_NOERROR;
+}
+
 int appbox_run_debug(APPBOXMAIN_PROC start, APPBOXMAIN_PROC stop)
 {
 	int ret;
@@ -84,7 +89,7 @@ int appbox_run_daemon(APPBOXMAIN_PROC start, APPBOXMAIN_PROC stop, const char* p
 	return ERR_NOERROR;;
 }
 
-int appbox_install(const char* name, const char* dispname, const char* args)
+int appbox_install(const char* name, const char* args)
 {
 	printf("not support\n");
 	return ERR_UNKNOWN;
