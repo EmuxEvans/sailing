@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-#include "../inc/skates.h"
-#include "../inc/appbox_svc.h"
-#include "../inc/appbox_args.h"
+#include "../inc/skates/skates.h"
+#include "../inc/skates/appbox_svc.h"
+#include "../inc/skates/appbox_args.h"
 
 static char mapfile[100] = "";
 static SOCK_ADDR listen_ep;

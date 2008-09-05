@@ -329,11 +329,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\misc.c"
+				RelativePath="..\src\skates\misc.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\protocol.c"
+				RelativePath="..\src\skates\protocol.c"
 				>
 			</File>
 			<File
@@ -349,7 +349,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\test\test_protocol.c"
+				RelativePath="..\test\skates\test_protocol.c"
 				>
 			</File>
 		</Filter>
@@ -386,7 +386,7 @@
 			>
 		</Filter>
 		<File
-			RelativePath="..\test\test_protocol.sample"
+			RelativePath="..\test\skates\test_protocol.sample"
 			>
 		</File>
 	</Files>

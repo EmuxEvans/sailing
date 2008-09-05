@@ -335,27 +335,27 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\dbapi.c"
+				RelativePath="..\src\skates\dbapi.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\dbapi_sqlite.c"
+				RelativePath="..\src\skates\dbapi_sqlite.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\hashmap.c"
+				RelativePath="..\src\skates\hashmap.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\mempool.c"
+				RelativePath="..\src\skates\mempool.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\os_win32.c"
+				RelativePath="..\src\skates\os_win32.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\sqlite\sqlite3.c"
+				RelativePath="..\src\skates\sqlite\sqlite3.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -367,7 +367,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\test\test_dbapi.c"
+				RelativePath="..\test\skates\test_dbapi.c"
 				>
 			</File>
 		</Filter>

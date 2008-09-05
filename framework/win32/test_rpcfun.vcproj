@@ -333,43 +333,43 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\fdwatch_select.c"
+				RelativePath="..\src\skates\fdwatch_select.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\hashmap.c"
+				RelativePath="..\src\skates\hashmap.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\mempool.c"
+				RelativePath="..\src\skates\mempool.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\os_win32.c"
+				RelativePath="..\src\skates\os_win32.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\rpc_fun.c"
+				RelativePath="..\src\skates\rpc_fun.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\rpc_net.c"
+				RelativePath="..\src\skates\rpc_net.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\sock.c"
+				RelativePath="..\src\skates\sock.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\stream.c"
+				RelativePath="..\src\skates\stream.c"
 				>
 			</File>
 			<File
-				RelativePath="..\test\test_rpcfun.c"
+				RelativePath="..\test\skates\test_rpcfun.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\threadpool.c"
+				RelativePath="..\src\skates\threadpool.c"
 				>
 			</File>
 		</Filter>
