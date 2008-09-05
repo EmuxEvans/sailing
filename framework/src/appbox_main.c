@@ -15,12 +15,11 @@ int main(int argc, char* argv[])
 {
 	APPBOX_SERVICE svc = {
 		"appbox",
-		"AppBox",
 		appbox_main_init,
 		appbox_main_final,
 		appbox_main_start,
 		appbox_main_stop,
-		appbox_main_usage
+		appbox_main_usage,
 	};
 
 	return appbox_service(&svc, argc, argv);
