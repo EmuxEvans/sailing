@@ -433,59 +433,59 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\inc\appbox.h"
+				RelativePath="..\inc\skates\appbox.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\console.h"
+				RelativePath="..\inc\skates\console.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\errcode.h"
+				RelativePath="..\inc\skates\errcode.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\fdwatch.h"
+				RelativePath="..\inc\skates\fdwatch.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\hashmap.h"
+				RelativePath="..\inc\skates\hashmap.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\log.h"
+				RelativePath="..\inc\skates\log.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\mempool.h"
+				RelativePath="..\inc\skates\mempool.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os.h"
+				RelativePath="..\inc\skates\os.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os_unix.h"
+				RelativePath="..\inc\skates\os_unix.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os_win32.h"
+				RelativePath="..\inc\skates\os_win32.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\rlist.h"
+				RelativePath="..\inc\skates\rlist.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\rpc_net.h"
+				RelativePath="..\inc\skates\rpc_net.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\sock.h"
+				RelativePath="..\inc\skates\sock.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\stream.h"
+				RelativePath="..\inc\skates\stream.h"
 				>
 			</File>
 			<File
@@ -493,7 +493,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\inc\threadpool.h"
+				RelativePath="..\inc\skates\threadpool.h"
 				>
 			</File>
 		</Filter>

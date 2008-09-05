@@ -327,23 +327,23 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\inc\errcode.h"
+				RelativePath="..\inc\skates\errcode.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\fdwatch.h"
+				RelativePath="..\inc\skates\fdwatch.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\network.h"
+				RelativePath="..\inc\skates\network.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os.h"
+				RelativePath="..\inc\skates\os.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\sock.h"
+				RelativePath="..\inc\skates\sock.h"
 				>
 			</File>
 		</Filter>

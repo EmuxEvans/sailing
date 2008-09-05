@@ -20,7 +20,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)..\$(ConfigurationName)-$(PlatformName)"
+			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
 			ConfigurationType="1"
 			>
@@ -91,7 +91,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)..\$(ConfigurationName)-$(PlatformName)"
+			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
 			ConfigurationType="1"
 			>

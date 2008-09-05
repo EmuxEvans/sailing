@@ -347,15 +347,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\inc\os.h"
+				RelativePath="..\inc\skates\os.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os_win32.h"
+				RelativePath="..\inc\skates\os_win32.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\threadpool.h"
+				RelativePath="..\inc\skates\threadpool.h"
 				>
 			</File>
 		</Filter>

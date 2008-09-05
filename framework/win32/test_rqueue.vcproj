@@ -371,47 +371,47 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\inc\errcode.h"
+				RelativePath="..\inc\skates\errcode.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\fdwatch.h"
+				RelativePath="..\inc\skates\fdwatch.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\hashmap.h"
+				RelativePath="..\inc\skates\hashmap.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\mempool.h"
+				RelativePath="..\inc\skates\mempool.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\network.h"
+				RelativePath="..\inc\skates\network.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os.h"
+				RelativePath="..\inc\skates\os.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os_unix.h"
+				RelativePath="..\inc\skates\os_unix.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os_win32.h"
+				RelativePath="..\inc\skates\os_win32.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\rlist.h"
+				RelativePath="..\inc\skates\rlist.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\rqueue.h"
+				RelativePath="..\inc\skates\rqueue.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\sock.h"
+				RelativePath="..\inc\skates\sock.h"
 				>
 			</File>
 		</Filter>
