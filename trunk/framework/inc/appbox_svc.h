@@ -5,7 +5,6 @@ typedef int (*APPBOXMAIN_PROC)();
 
 typedef struct APPBOX_SERVICE {
 	const char*			name;
-	const char*			dispname;
 
 	APPBOXMAIN_PROC		svc_init;
 	APPBOXMAIN_PROC		svc_final;
@@ -14,10 +13,12 @@ typedef struct APPBOX_SERVICE {
 	APPBOXMAIN_PROC		svc_usage;
 } APPBOX_SERVICE;
 
-ZION_API int appbox_service(const APPBOX_SERVICE* svc, int argc, char* argv[]);
+ZION_API int appbox_service(APPBOX_SERVICE* svc, int argc, char* argv[]);
+ZION_API int appbox_service_log(const char* fmt, ...);
+
 ZION_API int appbox_run_debug(APPBOXMAIN_PROC start, APPBOXMAIN_PROC stop);
 ZION_API int appbox_run_daemon(APPBOXMAIN_PROC start, APPBOXMAIN_PROC stop, const char* name);
-ZION_API int appbox_install(const char* name, const char* dispname, const char* args);
+ZION_API int appbox_install(const char* name, const char* args);
 ZION_API int appbox_uninstall(const char* name);
 
 #endif

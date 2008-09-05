@@ -18,12 +18,11 @@ int main(int argc, char* argv[])
 {
 	APPBOX_SERVICE svc = {
 		"csmng",
-		"Console Manager",
 		csmng_init,
 		csmng_final,
 		csmng_start,
 		csmng_stop,
-		csmng_usage
+		csmng_usage,
 	};
 
 	return appbox_service(&svc, argc, argv);
