@@ -355,31 +355,31 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\inc\errcode.h"
+				RelativePath="..\inc\skates\errcode.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\mempool.h"
+				RelativePath="..\inc\skates\mempool.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os.h"
+				RelativePath="..\inc\skates\os.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os_win32.h"
+				RelativePath="..\inc\skates\os_win32.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\rlist.h"
+				RelativePath="..\inc\skates\rlist.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\threadpool.h"
+				RelativePath="..\inc\skates\threadpool.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\timer.h"
+				RelativePath="..\inc\skates\timer.h"
 				>
 			</File>
 		</Filter>

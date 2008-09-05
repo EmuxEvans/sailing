@@ -21,7 +21,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)..\$(ConfigurationName)-$(PlatformName)"
+			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="0"
@@ -101,7 +101,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)..\$(ConfigurationName)-$(PlatformName)"
+			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
 			ConfigurationType="2"
 			CharacterSet="0"
@@ -563,27 +563,27 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\inc\appbox.h"
+				RelativePath="..\inc\skates\appbox.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\appbox_args.h"
+				RelativePath="..\inc\skates\appbox_args.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\appbox_svc.h"
+				RelativePath="..\inc\skates\appbox_svc.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\applog.h"
+				RelativePath="..\inc\skates\applog.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\console.h"
+				RelativePath="..\inc\skates\console.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\dbapi.h"
+				RelativePath="..\inc\skates\dbapi.h"
 				>
 			</File>
 			<File
@@ -591,87 +591,87 @@
 				>
 			</File>
 			<File
-				RelativePath="..\inc\dymempool.h"
+				RelativePath="..\inc\skates\dymempool.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\errcode.h"
+				RelativePath="..\inc\skates\errcode.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\fdwatch.h"
+				RelativePath="..\inc\skates\fdwatch.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\hashmap.h"
+				RelativePath="..\inc\skates\hashmap.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\log.h"
+				RelativePath="..\inc\skates\log.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\mempool.h"
+				RelativePath="..\inc\skates\mempool.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\misc.h"
+				RelativePath="..\inc\skates\misc.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\network.h"
+				RelativePath="..\inc\skates\network.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os.h"
+				RelativePath="..\inc\skates\os.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os_unix.h"
+				RelativePath="..\inc\skates\os_unix.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\os_win32.h"
+				RelativePath="..\inc\skates\os_win32.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\protocol.h"
+				RelativePath="..\inc\skates\protocol.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\rlist.h"
+				RelativePath="..\inc\skates\rlist.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\rpc_fun.h"
+				RelativePath="..\inc\skates\rpc_fun.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\rpc_net.h"
+				RelativePath="..\inc\skates\rpc_net.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\rqueue.h"
+				RelativePath="..\inc\skates\rqueue.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates.h"
+				RelativePath="..\inc\skates\skates.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\sock.h"
+				RelativePath="..\inc\skates\sock.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\stream.h"
+				RelativePath="..\inc\skates\stream.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\threadpool.h"
+				RelativePath="..\inc\skates\threadpool.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\timer.h"
+				RelativePath="..\inc\skates\timer.h"
 				>
 			</File>
 		</Filter>

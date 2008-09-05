@@ -158,7 +158,7 @@ const char* strget_space(const char* str, char* out, size_t out_size)
 	end = strchr(str, ' ');
 	if(end==NULL) {
 		len = strlen(str);
-		if(len>=out_size) return NULL;
+		if(len==0 || len>=out_size) return NULL;
 		strcpy(out, str);
 		return str+len;
 	} else {

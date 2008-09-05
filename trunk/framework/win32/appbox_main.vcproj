@@ -21,7 +21,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)..\$(ConfigurationName)-$(PlatformName)"
+			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="0"
@@ -65,7 +65,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="appbox.lib"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -99,7 +101,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)..\$(ConfigurationName)-$(PlatformName)"
+			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
 			ConfigurationType="1"
 			CharacterSet="0"
@@ -141,7 +143,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="appbox.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"

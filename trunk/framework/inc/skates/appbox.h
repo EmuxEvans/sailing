@@ -22,6 +22,9 @@ typedef struct APPBOX_SETTING {
 #define CONFIGDATA_STRING				3
 #define CONFIGDATA_BINARY				4
 #define CONFIGDATA_ENDPOINT				5
+#define CONFIGDATA_ARRAY_INTEGER		6
+#define CONFIGDATA_ARRAY_FLOAT			7
+#define CONFIGDATA_ARRAY_ENDPOINT		8
 
 #define APPBOX_SETTING_BEGIN(name)						\
 	APPBOX_SETTING name [] = {
@@ -35,6 +38,12 @@ typedef struct APPBOX_SETTING {
 	{ name, CONFIGDATA_BINARY, (void*)value, &len, maxlen },
 #define APPBOX_SETTING_ENDPOINT(name, value)	\
 	{ name, CONFIGDATA_ENDPOINT, (void*)&value, NULL, 0 },
+#define APPBOX_SETTING_ARRAY_INTEGER(name, value, len, maxlen)	\
+	{ name, CONFIGDATA_ARRAY_INTEGER, (void*)&value, &len, maxlen },
+#define APPBOX_SETTING_ARRAY_FLOAT(name, value, len, maxlen)	\
+	{ name, CONFIGDATA_ARRAY_FLOAT, (void*)&value, &len, maxlen },
+#define APPBOX_SETTING_ARRAY_ENDPOINT(name, value, len, maxlen)	\
+	{ name, CONFIGDATA_ARRAY_ENDPOINT, (void*)&value, &len, maxlen },
 #define APPBOX_SETTING_END(name)						\
 	{ NULL, 0, NULL, NULL, 0 } };
 

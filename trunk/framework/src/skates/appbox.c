@@ -108,6 +108,9 @@ int appbox_config_load(const char* filename)
 				if(strcmp(ttype, "S")==0) type = CONFIGDATA_STRING;
 				if(strcmp(ttype, "B")==0) type = CONFIGDATA_BINARY;
 				if(strcmp(ttype, "E")==0) type = CONFIGDATA_ENDPOINT;
+				if(strcmp(ttype, "AI")==0) type = CONFIGDATA_ARRAY_INTEGER;
+				if(strcmp(ttype, "AF")==0) type = CONFIGDATA_ARRAY_FLOAT;
+				if(strcmp(ttype, "AE")==0) type = CONFIGDATA_ARRAY_ENDPOINT;
 			}
 
 			if(tvalue==NULL || type==CONFIGDATA_UNKNOWN) {
@@ -179,12 +182,48 @@ int appbox_config_get(const char* module_name, APPBOX_SETTING* tab)
 				SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to get config(%s), too long.", key);
 				return ERR_UNKNOWN;
 			}
-			hex2bin(item->value, tab[loopi].ptr, (int)strlen(item->value)/2);
+			*tab[loopi].len = (unsigned int)strlen(item->value)/2;
+			hex2bin(item->value, tab[loopi].ptr, *tab[loopi].len);
 			break;						
 		case CONFIGDATA_ENDPOINT:
 			if(sock_str2addr(item->value, (SOCK_ADDR*)tab[loopi].ptr)==NULL) {
 				SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to get config(%s), invalid data.", key);
 				return ERR_UNKNOWN;
+			}
+			break;
+		case CONFIGDATA_ARRAY_INTEGER:
+			{
+				unsigned int i;
+				const char* next = item->value;
+				for(i=0; i<tab[loopi].maxlen; i++) {
+					next = strget2int_space(next, (int*)tab[loopi].ptr);
+					if(!next) break;
+				}
+				*tab[loopi].len = i;
+			}
+			break;
+		case CONFIGDATA_ARRAY_FLOAT:
+			{
+				unsigned int i;
+				const char* next = item->value;
+				for(i=0; i<tab[loopi].maxlen; i++) {
+					next = strget2float_space(next, (float*)tab[loopi].ptr);
+					if(!next) break;
+				}
+				*tab[loopi].len = i;
+			}
+			break;
+		case CONFIGDATA_ARRAY_ENDPOINT:
+			{
+				unsigned int i;
+				const char* next = item->value;
+				char value[100];
+				for(i=0; i<tab[loopi].maxlen; i++) {
+					next = strget_space(next, value, sizeof(value));
+					if(!next) break;
+					if(!sock_str2addr(value, (SOCK_ADDR*)tab[loopi].ptr + i)) break;
+				}
+				*tab[loopi].len = i;
 			}
 			break;
 		}
@@ -356,7 +395,7 @@ int appbox_load_modules()
 				if(modules[count].entry==NULL) {
 					SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to find module_entry(%s)", filename);
 				} else {
-					modules[count].ret = ERR_UNKNOWN;
+					modules[count].ret = ERR_NOERROR;
 				}
 			} else {
 				SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to dlopen(%s), errno = %d, desc = %s", filename, ret, os_library_error());

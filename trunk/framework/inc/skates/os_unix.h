@@ -24,6 +24,9 @@ extern "C" {
 #ifndef ZION_CALLBACK
 #define ZION_CALLBACK
 #endif
+#ifndef ZION_EXPORT
+#define ZION_EXPORT
+#endif
 
 typedef unsigned char		os_uchar;
 typedef unsigned short		os_word;

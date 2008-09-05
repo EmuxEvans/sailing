@@ -359,11 +359,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\inc\misc.h"
+				RelativePath="..\inc\skates\misc.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\protocol.h"
+				RelativePath="..\inc\skates\protocol.h"
 				>
 			</File>
 			<File
