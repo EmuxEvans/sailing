@@ -333,27 +333,27 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\console.c"
+				RelativePath="..\src\skates\console.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\fdwatch_select.c"
+				RelativePath="..\src\skates\fdwatch_select.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\misc.c"
+				RelativePath="..\src\skates\misc.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\os_win32.c"
+				RelativePath="..\src\skates\os_win32.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\sock.c"
+				RelativePath="..\src\skates\sock.c"
 				>
 			</File>
 			<File
-				RelativePath="..\test\test_console.c"
+				RelativePath="..\test\skates\test_console.c"
 				>
 			</File>
 		</Filter>

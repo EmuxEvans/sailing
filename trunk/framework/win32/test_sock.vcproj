@@ -334,15 +334,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\os_win32.c"
+				RelativePath="..\src\skates\os_win32.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\sock.c"
+				RelativePath="..\src\skates\sock.c"
 				>
 			</File>
 			<File
-				RelativePath="..\test\test_sock.c"
+				RelativePath="..\test\skates\test_sock.c"
 				>
 			</File>
 		</Filter>
