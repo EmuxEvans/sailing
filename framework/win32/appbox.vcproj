@@ -66,9 +66,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib sqlite.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories=""
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
 				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -144,8 +144,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib sqlite.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
 				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -672,38 +673,6 @@
 			</File>
 			<File
 				RelativePath="..\inc\skates\timer.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="sqlite"
-			>
-			<File
-				RelativePath="..\src\skates\sqlite\sqlite3.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						WarningLevel="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						WarningLevel="0"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\src\skates\sqlite\sqlite3.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\sqlite\sqlite3ext.h"
 				>
 			</File>
 		</Filter>

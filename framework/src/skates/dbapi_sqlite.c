@@ -163,11 +163,16 @@ int dbapi_sqlite_query(DBAPI_HANDLE handle, const char *sql, DBAPI_RECORDSET *rs
     if(ret!=SQLITE_OK) return _set_errcode(conn, ret);
 
 	col_count = sqlite3_column_count(stmt);
+	ret = dbapi_recordset_set(rs, row_max, col_count);
+	if(ret!=ERR_NOERROR)
+		return ret;
 
 	for(col_idx=0; col_idx<col_count; col_idx++) {
 		ret = dbapi_recordset_set_fieldname(rs, col_idx, sqlite3_column_name(stmt, col_idx));
-		sqlite3_finalize(stmt);
-		return ERR_NO_ENOUGH_MEMORY;
+		if(ret!=ERR_NOERROR) {
+			sqlite3_finalize(stmt);
+			return ERR_NO_ENOUGH_MEMORY;
+		}
 	}
 
 	for(row_idx=0; row_idx<row_max; row_idx++) {

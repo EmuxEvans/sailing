@@ -65,8 +65,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib sqlite.lib"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
@@ -139,8 +140,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib"
+				AdditionalDependencies="ws2_32.lib sqlite.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -353,18 +355,6 @@
 			<File
 				RelativePath="..\src\skates\os_win32.c"
 				>
-			</File>
-			<File
-				RelativePath="..\src\skates\sqlite\sqlite3.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						WarningLevel="0"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\test\skates\test_dbapi.c"
