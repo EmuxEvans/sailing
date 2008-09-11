@@ -65,7 +65,7 @@ void do_test()
 			char fmt[100];
 			memset(colw, 0, sizeof(colw));
 			
-			ret = dbapi_query(handle, line, &rs, 90000);
+			ret = dbapi_query(handle, line, &rs, 100);
 			if(ret==ERR_NOT_FOUND) { printf("not found\n"); continue; }
 			if(ret!=ERR_NOERROR) {
 				printf("SQLERR: %d %s\n", dbapi_get_errcode(handle), dbapi_get_errmsg(handle));

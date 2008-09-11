@@ -380,7 +380,7 @@
 						Name="VCCustomBuildTool"
 						CommandLine="cd $(ProjectDir)..\test\skates&#x0D;&#x0A;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\idl_cc &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies=""
-						Outputs="$(ProjectDir)..\test\sync_rpc.h;$(ProjectDir)..\test\sync_rpc.svr.c;$(ProjectDir)..\test\sync_rpc.clt.c"
+						Outputs="$(ProjectDir)..\test\skates\sync_rpc.h;$(ProjectDir)..\test\skates\sync_rpc.svr.c;$(ProjectDir)..\test\skates\sync_rpc.clt.c"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -390,7 +390,7 @@
 						Name="VCCustomBuildTool"
 						CommandLine="cd $(ProjectDir)..\test\skates&#x0D;&#x0A;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\idl_cc &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies=""
-						Outputs="$(ProjectDir)..\test\sync_rpc.h;$(ProjectDir)..\test\sync_rpc.svr.c;$(ProjectDir)..\test\sync_rpc.clt.c"
+						Outputs="$(ProjectDir)..\test\skates\sync_rpc.h;$(ProjectDir)..\test\skates\sync_rpc.svr.c;$(ProjectDir)..\test\skates\sync_rpc.clt.c"
 					/>
 				</FileConfiguration>
 				<FileConfiguration

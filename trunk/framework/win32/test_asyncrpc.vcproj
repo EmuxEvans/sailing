@@ -346,9 +346,9 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="cd $(ProjectDir)..\test\skates&#x0D;&#x0A;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\idl_cc &quot;$(InputPath)&quot;"
+						CommandLine="cd $(ProjectDir)..\test\skates&#x0D;&#x0A;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\idl_cc &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies=""
-						Outputs="$(ProjectDir)..\test\async_rpc.h;$(ProjectDir)..\test\async_rpc.svr.c;$(ProjectDir)..\test\async_rpc.clt.c"
+						Outputs="$(ProjectDir)..\test\skates\async_rpc.h;$(ProjectDir)..\test\skates\async_rpc.svr.c;$(ProjectDir)..\test\skates\async_rpc.clt.c"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -356,9 +356,9 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="cd $(ProjectDir)..\test\skates&#x0D;&#x0A;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\idl_cc &quot;$(InputPath)&quot;"
+						CommandLine="cd $(ProjectDir)..\test\skates&#x0D;&#x0A;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\idl_cc &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						AdditionalDependencies=""
-						Outputs="$(ProjectDir)..\test\async_rpc.h;$(ProjectDir)..\test\async_rpc.svr.c;$(ProjectDir)..\test\async_rpc.clt.c"
+						Outputs="$(ProjectDir)..\test\skates\async_rpc.h;$(ProjectDir)..\test\skates\async_rpc.svr.c;$(ProjectDir)..\test\skates\async_rpc.clt.c"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
