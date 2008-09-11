@@ -8,9 +8,9 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#include "../inc/skates.h"
-#include "../inc/appbox_svc.h"
-#include "../inc/appbox_args.h"
+#include "../../inc/skates/skates.h"
+#include "../../inc/skates/appbox_svc.h"
+#include "../../inc/skates/appbox_args.h"
 
 static void init_daemon(const char* pid);
 static void signal_proc(int signal);
@@ -19,7 +19,7 @@ static void wait_signal();
 static int flag_daemon = 0;
 static char pid_file[100] = "";
 
-int appbox_service(const APPBOX_SERVICE* svc, int argc, char* argv[])
+int appbox_service(APPBOX_SERVICE* svc, int argc, char* argv[])
 {
 	int ret;
 
@@ -84,7 +84,7 @@ int appbox_run_daemon(APPBOXMAIN_PROC start, APPBOXMAIN_PROC stop, const char* p
 	return ERR_NOERROR;;
 }
 
-int appbox_install(const char* name, const char* dispname, const char* args)
+int appbox_install(const char* name, const char* args)
 {
 	printf("not support\n");
 	return ERR_UNKNOWN;
