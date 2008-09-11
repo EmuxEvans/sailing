@@ -1,8 +1,8 @@
-BASE_DIR=..
+BASE_DIR=../..
 
-include ../Makefile.def
+include $(BASE_DIR)/Makefile.def
 
-INCLUDES=$(OS_INC_DIR) -I../inc
+INCLUDES=$(OS_INC_DIR) -I$(BASE_DIR)/inc
 LIBS=$(OS_LIB_DIR) $(OS_LIB)
 BINS=test_network$(EXE_PREFIX) test_fdwatch$(EXE_PREFIX) test_rqueue$(EXE_PREFIX) test_dbapi$(EXE_PREFIX) test_console$(EXE_PREFIX) test_log$(EXE_PREFIX) test_dymempool$(EXE_PREFIX) test_sock$(EXE_PREFIX) test_threadpool$(EXE_PREFIX) test_timer$(EXE_PREFIX) test_rpcnet$(EXE_PREFIX) test_rpcfun$(EXE_PREFIX) test_syncrpc$(EXE_PREFIX) test_asyncrpc$(EXE_PREFIX)
 

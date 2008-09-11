@@ -6,8 +6,8 @@
 #include <sys/stat.h>
 #include <string.h>
 
-#include "../inc/errcode.h"
-#include "../inc/os.h"
+#include "../../inc/skates/errcode.h"
+#include "../../inc/skates/os.h"
 
 unsigned int atom_unix_inc(unsigned int volatile* mem)
 {
