@@ -274,6 +274,7 @@ int dbapi_recordset_set_fieldname(DBAPI_RECORDSET* rs, int col, const char* name
 	/*if(len<=0)*/ len = (int)strlen(name) + 1;
 	if(rs->buf_len+len>dbapi_rs_maxsize) return ERR_NO_ENOUGH_MEMORY;
 
+	rs->fields_name[col] = rs->buf + rs->buf_len;
 	memcpy(rs->buf+rs->buf_len, name, len);
 	rs->buf_len += len;
 
