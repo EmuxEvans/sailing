@@ -73,12 +73,22 @@ void do_test()
 			}
 
 			for(col=0; col<dbapi_recordset_col_count(rs); col++) {
-				if(strlen(dbapi_recordset_get_fieldname(rs, col))>colw[col]) colw[col] = strlen(dbapi_recordset_get_fieldname(rs, col));
+				if(strlen(dbapi_recordset_get_fieldname(rs, col))>colw[col])
+					colw[col] = strlen(dbapi_recordset_get_fieldname(rs, col));
+
 				for(row=0; row<dbapi_recordset_row_count(rs); row++) 
 					if(strlen(dbapi_recordset_get(rs, row, col))>colw[col]) colw[col] = strlen(dbapi_recordset_get(rs, row, col));
 
+				colw[col] += 1;
 				sprintf(fmt, "%%%ds", colw[col]);
 				printf(fmt, dbapi_recordset_get_fieldname(rs, col));
+			}
+			printf("\n");
+			for(col=0; col<dbapi_recordset_col_count(rs); col++) {
+				printf(" ");
+				for(row=0; row<(int)colw[col]-1; row++) {
+					printf("-");
+				}
 			}
 			printf("\n");
 
@@ -89,6 +99,8 @@ void do_test()
 				}
 				printf("\n");
 			}
+
+			continue;
 		}
 
 		ret = dbapi_execute(handle, line);
