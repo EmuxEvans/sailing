@@ -381,3 +381,116 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 
 	return tbuf;
 }
+
+struct PROTOCOL_VARIABLE {
+	const char*				name;
+	int						type;
+	int						maxlen;
+	const char*				def_value;
+	PROTOCOL_TYPE*			obj_type;
+};
+
+struct PROTOCOL_TYPE {
+	const char*				name;
+	PROTOCOL_VARIABLE*		var_list;
+	int						var_count;
+};
+
+struct PROTOCOL_TABLE {
+	int						need_free;
+
+	PROTOCOL_TYPE*			type_list;
+	int						type_count;
+	int						type_max;
+
+	PROTOCOL_VARIABLE*		var_list;
+	int						var_count;
+	int						var_max;
+};
+
+PROTOCOL_TABLE* protocol_table_alloc(void* buf, unsigned int buf_len, int type_max, int var_max)
+{
+	unsigned int size;
+
+	size = sizeof(PROTOCOL_TABLE) + sizeof(PROTOCOL_TYPE)*type_max + sizeof(PROTOCOL_VARIABLE)*var_max;
+
+	if(buf) {
+		if(size>buf_len)
+			return NULL;
+		((PROTOCOL_TABLE*)buf)->need_free = 0;
+	} else {
+		buf = malloc(size);
+		((PROTOCOL_TABLE*)buf)->need_free = 1;
+	}
+
+	((PROTOCOL_TABLE*)buf)->type_list = (PROTOCOL_TYPE*)((char*)buf + sizeof(PROTOCOL_TABLE));
+	((PROTOCOL_TABLE*)buf)->type_count = 0;
+	((PROTOCOL_TABLE*)buf)->type_max = type_max;
+	memset(((PROTOCOL_TABLE*)buf)->type_list, 0, sizeof(PROTOCOL_TYPE)*type_max);
+
+	((PROTOCOL_TABLE*)buf)->var_list = (PROTOCOL_VARIABLE*)((char*)buf + sizeof(PROTOCOL_TABLE) + sizeof(PROTOCOL_TYPE)*type_max);
+	((PROTOCOL_TABLE*)buf)->var_count = 0;
+	((PROTOCOL_TABLE*)buf)->var_max = var_max;
+	memset(((PROTOCOL_TABLE*)buf)->var_list, 0, sizeof(PROTOCOL_VARIABLE)*var_max);
+
+	return (PROTOCOL_TABLE*)buf;
+}
+
+void protocol_table_free(PROTOCOL_TABLE* table)
+{
+	if(table->need_free)
+		free(table);
+}
+
+void protocol_table_clear(PROTOCOL_TABLE* table)
+{
+	int i;
+
+	for(i=0; i<table->type_count; i++) {
+		if(table->type_list[i].name)
+			free
+	}
+}
+
+int protocol_parse_pfile(const char* text, PROTOCOL_TABLE* table)
+{
+	table->type_count = 0;
+	table->var_count = 0;
+
+	return ERR_NOERROR;
+}
+
+int protocol_generate_cfile(const PROTOCOL_TABLE* table, char* inc, unsigned int inc_len, char* src, unsigned int src_len)
+{
+	return ERR_NOERROR;
+}
+
+int protocol_binary_read(PROTOCOL_TABLE* table, const char* name, const void* data, unsigned int data_len, void* buf)
+{
+	return ERR_NOERROR;
+}
+
+int protocol_binary_write(PROTOCOL_TABLE* table, const char* name, const void* buf, void* data, unsigned int* data_len)
+{
+	return ERR_NOERROR;
+}
+
+int protocol_text_read(PROTOCOL_TABLE* table, const char* name, const char* data, void* buf)
+{
+	return ERR_NOERROR;
+}
+
+int protocol_text_write(PROTOCOL_TABLE* table, const char* name, const void* buf, char* data, unsigned int data_len)
+{
+	return ERR_NOERROR;
+}
+
+int protocol_file_read(PROTOCOL_TABLE* table, const char* name, const char* filename, void* buf)
+{
+	return ERR_NOERROR;
+}
+
+int protocol_file_write(PROTOCOL_TABLE* table, const char* name, const void* buf, const char* filename)
+{
+	return ERR_NOERROR;
+}
