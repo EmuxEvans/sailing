@@ -16,15 +16,9 @@ SQLITE_FULL_SRC=$(foreach src,$(SQLITE_SRC),sqlite/$(src))
 SQLITE_FULL_OBJ=$(subst .c,.o,$(SQLITE_FULL_SRC))
 SQLITE_FULL_LIB=sqlite/sqlite.a
 
-ifeq ($(DBAPI_MYSQL),ENABLE)
-	DBAPI_MYSQL_OBJ=dbapi_mysql.o
-else
-	DBAPI_MYSQL_OBJ=
-endif
-
 INCS=$(OS_INC_DIR) -DDBAPI_MYSQL_$(DBAPI_MYSQL)
 LIBS=$(OS_LIB_DIR) $(OS_LIB) $(APPBOX_LIB)
-OBJS=os_unix.o misc.o mempool.o hashmap.o sock.o log.o dymempool.o stream.o dbapi.o dbapi_sqlite.o threadpool.o timer.o fdwatch_$(FDWATCH_USE).o console.o network.o rqueue.o rpc_net.o rpc_fun.o appbox.o applog.o appbox_unix.o appbox_args.o $(SQLITE_FULL_LIB) $(DBAPI_MYSQL_OBJ)
+OBJS=os_unix.o misc.o mempool.o hashmap.o sock.o log.o dymempool.o stream.o dbapi.o dbapi_sqlite.o dbapi_mysql.o threadpool.o timer.o fdwatch_$(FDWATCH_USE).o console.o network.o rqueue.o rpc_net.o rpc_fun.o appbox.o applog.o appbox_unix.o appbox_args.o $(SQLITE_FULL_LIB)
 MAIN_OBJS=appbox_main.o
 
 .c.o:

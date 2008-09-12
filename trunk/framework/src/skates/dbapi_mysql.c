@@ -1,3 +1,6 @@
+
+#ifdef DBAPI_MYSQL_ENABLE
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -233,3 +236,6 @@ const char* dbapi_mysql_get_errmsg(DBAPI_HANDLE handle)
 	(void)conn;
 	return "JUST ERROR";
 }
+
+#endif
+
