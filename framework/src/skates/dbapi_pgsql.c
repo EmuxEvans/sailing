@@ -1,3 +1,6 @@
+
+#ifdef DBAPI_PGSQL_ENABLE
+
 #include "../../inc/skates/os.h"
 #include "../../inc/skates/errcode.h"
 #include "../../inc/skates/rlist.h"
@@ -273,3 +276,5 @@ int _set_errcode(DBAPI_PGSQL* conn, const char* errcode)
 	conn->errcode = -1;
 	return ERR_UNKNOWN;
 }
+
+#endif

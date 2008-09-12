@@ -1,3 +1,6 @@
+
+#ifdef DBAPI_SQLRELAY_ENABLE
+
 #include "../../inc/skates/os.h"
 #include "../../inc/skates/errcode.h"
 #include "../../inc/skates/rlist.h"
@@ -159,3 +162,5 @@ const char* dbapi_sqlrelay_get_errmsg(DBAPI_HANDLE handle)
 	DBAPI_SQLRELAY* conn = (DBAPI_SQLRELAY*)handle;
 	return 0;
 }
+
+#endif
