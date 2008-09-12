@@ -1,11 +1,15 @@
 FDWATCH_USE=epoll
 
-DBAPI_ORACLE=DISABLE
-DBAPI_MYSQL=DISABLE
-DBAPI_SQLRELAY=DISABLE
+DBAPI_MYSQL=ENABLE
 
 MAKE=gmake
+STA_LIB=ar rcs
 CC=gcc
+LEX=flex
+YACC=bison
+LEX_FLAG=-c
+YACC_FLAG=-d
+
 REL_CC_FLAG=-D__LINUX__ -DNDEBUG -Wall -Werror -O2
 DBG_CC_FLAG=-D__LINUX__ -D_DEBUG -Wall -Werror -g
 OBJ_CC_FLAG=-c -fPIC -o
@@ -17,18 +21,9 @@ DLL_PREFIX=.so
 DLL_LIB_PREFIX=.so
 STA_LIB_PREFIX=.a
 
-LEX=flex
-YACC=bison
-LEX_FLAG=-c
-YACC_FLAG=-d
-
 OS_LIB=-pthread -ldl
 OS_INC_DIR=
 OS_LIB_DIR=
-
-ifeq ($(DBAPI_SQLRELAY),ENABLE)
-  OS_LIB=-lsqlrclientwrapper
-endif
 
 ifeq ($(CONFIG_NAME),)
 	ifeq ($(NODEBUG),1)
@@ -46,4 +41,22 @@ ifeq ($(CONFIG_NAME),release)
 endif
 
 OUTPUT_DIR=$(BASE_DIR)/$(CONFIG_NAME)
+
+#
+
+ifeq ($(DBAPI_MYSQL),ENABLE)
+	MYSQL_INC=
+	MYSQL_LIB=/usr/lib/mysql/libmysqlclient_r.so -lz
+else
+	MYSQL_INC=
+	MYSQL_LIB=
+endif
+
+
+
+
+
+#
+APPBOX_INC=$(MYSQL_INC)
+APPBOX_LIB=$(MYSQL_LIB)
 

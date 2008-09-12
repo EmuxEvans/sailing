@@ -9,7 +9,7 @@ BINS=test_network$(EXE_PREFIX) test_fdwatch$(EXE_PREFIX) test_rqueue$(EXE_PREFIX
 OBJS_NETWORK=test_network.o $(BASE_DIR)/src/skates/sock.o $(BASE_DIR)/src/skates/fdwatch_$(FDWATCH_USE).o $(BASE_DIR)/src/skates/network.o $(BASE_DIR)/src/skates/mempool.o $(BASE_DIR)/src/skates/os_unix.o
 OBJS_FDWATCH=test_fdwatch.o $(BASE_DIR)/src/skates/sock.o $(BASE_DIR)/src/skates/fdwatch_$(FDWATCH_USE).o
 OBJS_RQUEUE=test_rqueue.o $(BASE_DIR)/src/skates/sock.o $(BASE_DIR)/src/skates/fdwatch_$(FDWATCH_USE).o $(BASE_DIR)/src/skates/network.o $(BASE_DIR)/src/skates/hashmap.o $(BASE_DIR)/src/skates/mempool.o $(BASE_DIR)/src/skates/rqueue.o fake_applog.o $(BASE_DIR)/src/skates/os_unix.o
-OBJS_DBAPI=test_dbapi.o $(BASE_DIR)/src/skates/os_unix.o $(BASE_DIR)/src/skates/mempool.o $(BASE_DIR)/src/skates/hashmap.o $(BASE_DIR)/src/skates/dbapi.o $(BASE_DIR)/src/skates/sqlite/sqlite3.o $(BASE_DIR)/src/skates/dbapi_sqlite.o
+OBJS_DBAPI=test_dbapi.o $(BASE_DIR)/src/skates/os_unix.o $(BASE_DIR)/src/skates/mempool.o $(BASE_DIR)/src/skates/hashmap.o $(BASE_DIR)/src/skates/dbapi.o $(BASE_DIR)/src/skates/dbapi_sqlite.o
 OBJS_CONSOLE=test_console.o $(BASE_DIR)/src/skates/sock.o $(BASE_DIR)/src/skates/fdwatch_$(FDWATCH_USE).o $(BASE_DIR)/src/skates/misc.o $(BASE_DIR)/src/skates/os_unix.o $(BASE_DIR)/src/skates/console.o
 OBJS_LOG=test_log.o $(BASE_DIR)/src/skates/log.o $(BASE_DIR)/src/skates/os_unix.o
 OBJS_DYMEMPOOL=test_dymempool.o $(BASE_DIR)/src/skates/dymempool.o $(BASE_DIR)/src/skates/os_unix.o
@@ -44,7 +44,7 @@ test_rqueue$(EXE_PREFIX): $(OBJS_RQUEUE)
 	gcc $(INCLUDES) $(LIBS) $(OBJS_RQUEUE) -o $@
 
 test_dbapi$(EXE_PREFIX): $(OBJS_DBAPI)
-	gcc $(INCLUDES) $(LIBS) $(OBJS_DBAPI) -o $@
+	gcc $(INCLUDES) $(LIBS) $(OBJS_DBAPI) $(BASE_DIR)/src/skates/sqlite/sqlite.a $(OUTPUT_DIR)/appbox.a $(APPBOX_LIB) -o $@
 
 test_console$(EXE_PREFIX): $(OBJS_CONSOLE)
 	gcc $(INCLUDES) $(LIBS) $(OBJS_CONSOLE) -o $@

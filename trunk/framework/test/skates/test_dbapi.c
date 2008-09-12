@@ -7,25 +7,29 @@
 #include <skates/dbapi.h>
 #include <skates/mempool.h>
 
-static void do_test();
+static void do_test(const char* connstr);
 
 int main(int argc, char* argv[])
 {
 	mempool_init();
 	dbapi_init(NULL, 100*1024);
 
-	do_test();
+	if(argc>1) {
+		do_test(argv[1]);
+	} else {
+		do_test("provider=sqlite;dbname=aaaaaa");
+	}
 
 	dbapi_final();
 	mempool_final();
 	return(0);
 }
 
-void do_test()
+void do_test(const char* connstr)
 {
 	DBAPI_HANDLE handle;
 
-	handle = dbapi_connect("provider=sqlite;dbname=aaaaaa");
+	handle = dbapi_connect(connstr);
 	if(handle==NULL) {
 		printf("Failed to dbapi_connect()\n");
 		return;

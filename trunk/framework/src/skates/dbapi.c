@@ -20,8 +20,8 @@ static HASHMAP_HANDLE	group_conn_map;
 static MEMPOOL_HANDLE	dbapi_rs_pool;
 static int				dbapi_rs_maxsize;
 
-#ifdef DBAPI_SQLRELAY_EANBLE
-extern DBAPI_PROVIDER dbapi_sqlrelay_provider;
+#ifdef DBAPI_MYSQL_ENABLE
+extern DBAPI_PROVIDER dbapi_mysql_provider;
 #endif
 
 extern DBAPI_PROVIDER dbapi_sqlite_provider;
@@ -29,8 +29,8 @@ extern DBAPI_PROVIDER dbapi_sqlite_provider;
 static DBAPI_PROVIDER* dbapi_provider_list[20] = {
 &dbapi_sqlite_provider,
 
-#ifdef DBAPI_SQLRELAY_EANBLE
-&dbapi_sqlrelay_provider,
+#ifdef DBAPI_MYSQL_ENABLE
+&dbapi_mysql_provider,
 #endif
 
 NULL
