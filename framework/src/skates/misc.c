@@ -208,7 +208,7 @@ char* strput4float_space(char* str, size_t len, float value)
 	return strput_space(str, len, sval);
 }
 
-int loal_textfile(const char* filename, char* buf, int buflen)
+int load_textfile(const char* filename, char* buf, int buflen)
 {
 	FILE* fp;
 	int len = 0;

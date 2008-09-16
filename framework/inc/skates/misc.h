@@ -36,7 +36,7 @@ ZION_API char* strput4int_space(char* str, size_t len, int value);
 ZION_API char* strput4float_space(char* str, size_t len, float value);
 
 // file
-ZION_API int loal_textfile(const char* filename, char* buf, int buflen);
+ZION_API int load_textfile(const char* filename, char* buf, int buflen);
 ZION_API int save_textfile(const char* filename, char* buf, int buflen);
 
 #ifdef __cplusplus

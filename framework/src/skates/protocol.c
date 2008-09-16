@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 
 #include "../../inc/skates/errcode.h"
 #include "../../inc/skates/os.h"
@@ -383,21 +384,24 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 }
 
 struct PROTOCOL_VARIABLE {
-	const char*				name;
+	char*					name;
 	int						type;
-	int						maxlen;
-	const char*				def_value;
+	char*					maxlen;
+	char*					def_value;
 	PROTOCOL_TYPE*			obj_type;
 };
 
 struct PROTOCOL_TYPE {
-	const char*				name;
+	char*					name;
 	PROTOCOL_VARIABLE*		var_list;
 	int						var_count;
 };
 
 struct PROTOCOL_TABLE {
 	int						need_free;
+	char*					buf;
+	int						buf_count;
+	int						buf_max;
 
 	PROTOCOL_TYPE*			type_list;
 	int						type_count;
@@ -406,7 +410,25 @@ struct PROTOCOL_TABLE {
 	PROTOCOL_VARIABLE*		var_list;
 	int						var_count;
 	int						var_max;
+
 };
+
+static int my_new_node_begin(void* ptr, const char* name);
+static int my_new_node_end(void* ptr);
+static int my_new_const(void* ptr, const char* type, const char* name, const char* value);
+static int my_new_field_def(void* ptr, const char* mode, const char* type, const char* name, const char* value);
+static int my_new_array_def(void* ptr, const char* mode, const char* type, const char* name, const char* count);
+static int my_new_field(void* ptr, const char* name, const char* value);
+static int my_new_array(void* ptr, const char* name);
+static int my_new_begin(void* ptr);
+static int my_new_item(void* ptr, const char* value);
+static int my_new_end(void* ptr);
+
+static char* protocol_strdup(PROTOCOL_TABLE* table, const char* value);
+static PROTOCOL_TYPE* protocol_get_type(PROTOCOL_TABLE* table, const char* name);
+static PROTOCOL_VARIABLE* protocol_get_variable(PROTOCOL_TYPE* table, const char* name);
+static PROTOCOL_TYPE* protocol_push_type(PROTOCOL_TABLE* table, const char* name);
+static PROTOCOL_VARIABLE* protocol_push_variable(PROTOCOL_TABLE* table, char* name, int type, char* maxlen, char* def_value, char* o_type);
 
 PROTOCOL_TABLE* protocol_table_alloc(void* buf, unsigned int buf_len, int type_max, int var_max)
 {
@@ -418,9 +440,15 @@ PROTOCOL_TABLE* protocol_table_alloc(void* buf, unsigned int buf_len, int type_m
 		if(size>buf_len)
 			return NULL;
 		((PROTOCOL_TABLE*)buf)->need_free = 0;
+		((PROTOCOL_TABLE*)buf)->buf = (char*)buf + sizeof(PROTOCOL_TABLE) + sizeof(PROTOCOL_TYPE)*type_max + sizeof(PROTOCOL_VARIABLE)*var_max;
+		((PROTOCOL_TABLE*)buf)->buf_count = 0;
+		((PROTOCOL_TABLE*)buf)->buf_max = buf_len - sizeof(PROTOCOL_TABLE) - sizeof(PROTOCOL_TYPE)*type_max - sizeof(PROTOCOL_VARIABLE)*var_max;
 	} else {
 		buf = malloc(size);
 		((PROTOCOL_TABLE*)buf)->need_free = 1;
+		((PROTOCOL_TABLE*)buf)->buf = 0;
+		((PROTOCOL_TABLE*)buf)->buf_count = 0;
+		((PROTOCOL_TABLE*)buf)->buf_max = 0;
 	}
 
 	((PROTOCOL_TABLE*)buf)->type_list = (PROTOCOL_TYPE*)((char*)buf + sizeof(PROTOCOL_TABLE));
@@ -438,29 +466,50 @@ PROTOCOL_TABLE* protocol_table_alloc(void* buf, unsigned int buf_len, int type_m
 
 void protocol_table_free(PROTOCOL_TABLE* table)
 {
-	if(table->need_free)
+	if(table->need_free) {
+		protocol_table_clear(table);
 		free(table);
+	}
 }
 
 void protocol_table_clear(PROTOCOL_TABLE* table)
 {
-	int i;
-
-	for(i=0; i<table->type_count; i++) {
-		if(table->type_list[i].name)
-			free
+	if(table->need_free) {
+		int i;
+		for(i=0; i<table->type_count; i++) {
+			if(table->type_list[i].name)
+				free(table->type_list[i].name);
+		}
+		for(i=0; i<table->var_count; i++) {
+			if(table->var_list[i].name)
+				free(table->var_list[i].name);
+			if(table->var_list[i].def_value)
+				free(table->var_list[i].def_value);
+		}
 	}
+	memset(table->type_list, 0, sizeof(table->type_list[0])*table->type_max);
+	memset(table->var_list, 0, sizeof(table->var_list[0])*table->var_max);
+	table->type_count = 0;
+	table->var_count = 0;
 }
 
 int protocol_parse_pfile(const char* text, PROTOCOL_TABLE* table)
 {
-	table->type_count = 0;
-	table->var_count = 0;
+	int ret;
+	char mode[100], type[100], name[100], value[2000];
+	PROTOCOL_CALLBACK callback = {
+	my_new_node_begin, my_new_node_end, my_new_const, my_new_field_def, my_new_array_def,
+	my_new_field, my_new_array, my_new_begin, my_new_item, my_new_end,
+	mode, type, name, value,
+	sizeof(mode), sizeof(type), sizeof(name), sizeof(value)
+	};
 
-	return ERR_NOERROR;
+	ret = protocol_parse(text, &callback, table);
+
+	return ret;
 }
 
-int protocol_generate_cfile(const PROTOCOL_TABLE* table, char* inc, unsigned int inc_len, char* src, unsigned int src_len)
+int protocol_generate_cfile(const PROTOCOL_TABLE* table, const char* name, char* inc, unsigned int inc_len, char* src, unsigned int src_len)
 {
 	return ERR_NOERROR;
 }
@@ -493,4 +542,134 @@ int protocol_file_read(PROTOCOL_TABLE* table, const char* name, const char* file
 int protocol_file_write(PROTOCOL_TABLE* table, const char* name, const void* buf, const char* filename)
 {
 	return ERR_NOERROR;
+}
+
+char* protocol_strdup(PROTOCOL_TABLE* table, const char* value)
+{
+	char* ret;
+	if(table->need_free) {
+		ret = malloc(strlen(value)+1);
+		strcpy(ret, value);
+	} else {
+		if(table->buf_count+(int)strlen(value)+1 > table->buf_max) {
+			return NULL;
+		}
+		ret = table->buf + table->buf_count;
+		table->buf_count += strlen(value) + 1;
+		strcpy(ret, value);
+	}
+	return ret;
+}
+
+PROTOCOL_TYPE* protocol_get_type(PROTOCOL_TABLE* table, const char* name)
+{
+	int i;
+	for(i=0; i<table->type_count; i++) {
+		if(strcmp(table->type_list[i].name, name)==0) {
+			return &table->type_list[i];
+		}
+	}
+	return NULL;
+}
+
+PROTOCOL_VARIABLE* protocol_get_variable(PROTOCOL_TYPE* table, const char* name)
+{
+	int i;
+	for(i=0; i<table->var_count; i++) {
+		if(strcmp(table->var_list[i].name, name)==0) {
+			return &table->var_list[i];
+		}
+	}
+	return NULL;
+}
+
+PROTOCOL_TYPE* protocol_push_type(PROTOCOL_TABLE* table, const char* name)
+{
+	if(table->type_count==table->type_max)
+		return NULL;
+
+	if(name==NULL)
+		return NULL;
+
+	table->type_list[table->type_count].name = protocol_strdup(table, name);
+	if(!table->type_list[table->type_count].name)
+		return NULL;
+
+	table->type_list[table->type_count].var_list = &table->var_list[table->var_count];
+	table->type_list[table->type_count].var_count = 0;
+
+	return &table->type_list[table->type_count++];
+}
+
+PROTOCOL_VARIABLE* protocol_push_variable(PROTOCOL_TABLE* table, char* name, int type, char* maxlen, char* def_value, char* o_type)
+{
+	if(table->var_count==table->var_max)
+		return NULL;
+
+	if(name==NULL)
+		return NULL;
+
+	table->var_list[table->var_count].name = protocol_strdup(table, name);
+	if(!table->var_list[table->var_count].name)
+		return NULL;
+
+	if(def_value) {
+		table->var_list[table->var_count].def_value = protocol_strdup(table, def_value);
+		if(!table->var_list[table->var_count].def_value)
+			return NULL;
+	} else {
+		table->var_list[table->var_count].def_value = NULL;
+	}
+
+	return &table->var_list[table->var_count++];
+}
+
+int my_new_node_begin(void* ptr, const char* name)
+{
+	return 1;
+}
+
+int my_new_node_end(void* ptr)
+{
+	return 1;
+}
+
+int my_new_const(void* ptr, const char* type, const char* name, const char* value)
+{
+	return 1;
+}
+
+int my_new_field_def(void* ptr, const char* mode, const char* type, const char* name, const char* value)
+{
+	return 1;
+}
+
+int my_new_array_def(void* ptr, const char* mode, const char* type, const char* name, const char* count)
+{
+	return 1;
+}
+
+int my_new_field(void* ptr, const char* name, const char* value)
+{
+	return 0;
+}
+
+int my_new_array(void* ptr, const char* name)
+{
+	return 0;
+}
+
+int my_new_begin(void* ptr)
+{
+	return 0;
+}
+
+int my_new_item(void* ptr, const char* value)
+{
+	return 0;
+}
+
+int my_new_end(void* ptr)
+{
+	return 0;
 }
