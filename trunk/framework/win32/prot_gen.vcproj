@@ -339,6 +339,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\test\tools\sample_p.p"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

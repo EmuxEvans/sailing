@@ -3,6 +3,7 @@
 
 #include "../../inc/skates/errcode.h"
 #include "../../inc/skates/os.h"
+#include "../../inc/skates/misc.h"
 #include "../../inc/skates/protocol.h"
 
 struct PROTOCOL_PARSER {
@@ -210,13 +211,13 @@ const char* parse_field_def(PROTOCOL_CALLBACK* callback, void* ptr, const char* 
 {
 	const char* tbuf;
 
-	tbuf = buf;
-	tbuf = get_token_keyword(buf, "option", callback->mode);
-	if(tbuf==NULL) {
-		tbuf = get_token_keyword(buf, "acquire", callback->mode);
-		if(tbuf==NULL) return NULL;
-	}
-	buf = tbuf;
+	//tbuf = buf;
+	//tbuf = get_token_keyword(buf, "option", callback->mode);
+	//if(tbuf==NULL) {
+	//	tbuf = get_token_keyword(buf, "acquire", callback->mode);
+	//	if(tbuf==NULL) return NULL;
+	//}
+	//buf = tbuf;
 
 	buf = get_token_id(buf, callback->type, callback->type_len);
 	if(buf==NULL) return NULL;
@@ -383,36 +384,6 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 	return tbuf;
 }
 
-struct PROTOCOL_VARIABLE {
-	char*					name;
-	int						type;
-	char*					maxlen;
-	char*					def_value;
-	PROTOCOL_TYPE*			obj_type;
-};
-
-struct PROTOCOL_TYPE {
-	char*					name;
-	PROTOCOL_VARIABLE*		var_list;
-	int						var_count;
-};
-
-struct PROTOCOL_TABLE {
-	int						need_free;
-	char*					buf;
-	int						buf_count;
-	int						buf_max;
-
-	PROTOCOL_TYPE*			type_list;
-	int						type_count;
-	int						type_max;
-
-	PROTOCOL_VARIABLE*		var_list;
-	int						var_count;
-	int						var_max;
-
-};
-
 static int my_new_node_begin(void* ptr, const char* name);
 static int my_new_node_end(void* ptr);
 static int my_new_const(void* ptr, const char* type, const char* name, const char* value);
@@ -428,7 +399,9 @@ static char* protocol_strdup(PROTOCOL_TABLE* table, const char* value);
 static PROTOCOL_TYPE* protocol_get_type(PROTOCOL_TABLE* table, const char* name);
 static PROTOCOL_VARIABLE* protocol_get_variable(PROTOCOL_TYPE* table, const char* name);
 static PROTOCOL_TYPE* protocol_push_type(PROTOCOL_TABLE* table, const char* name);
-static PROTOCOL_VARIABLE* protocol_push_variable(PROTOCOL_TABLE* table, char* name, int type, char* maxlen, char* def_value, char* o_type);
+static PROTOCOL_VARIABLE* protocol_push_variable(PROTOCOL_TABLE* table, const char* name, const char* type, const char* maxlen, const char* def_value);
+
+static int is_base_type(const char* type);
 
 PROTOCOL_TABLE* protocol_table_alloc(void* buf, unsigned int buf_len, int type_max, int var_max)
 {
@@ -511,6 +484,42 @@ int protocol_parse_pfile(const char* text, PROTOCOL_TABLE* table)
 
 int protocol_generate_cfile(const PROTOCOL_TABLE* table, const char* name, char* inc, unsigned int inc_len, char* src, unsigned int src_len)
 {
+	int l, i;
+	inc[0] = 0;
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_include__\n", name);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_include__\n", name);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	for(l=0; l<table->type_count; l++) {
+		if(l>0) snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "typedef struct %s {\n", table->type_list[l].name);
+		for(i=0; i<table->type_list[l].var_count; i++) {
+			if(table->type_list[l].var_list[i].maxlen) {
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s[%s] %s; //", table->type_list[l].var_list[i].type, table->type_list[l].var_list[i].maxlen, table->type_list[l].var_list[i].name);
+			} else {
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s %s; // default=%s\n", table->type_list[l].var_list[i].type, table->type_list[l].var_list[i].name, table->type_list[l].var_list[i].def_value?table->type_list[l].var_list[i].def_value:"");
+			}
+		}
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "} %s;\n", table->type_list[l].name);
+	}
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "extern PROTOCOL_TABLE __protocol_table_%s;\n", name);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
+	src[0] = 0;
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/protocol_def.h>\n", name);
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.h\"\n", name);
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TABLE __protocol_table_%s = {\n", name);
+	snprintf(src+strlen(src), src_len-strlen(src), "0, NULL, 0, 0,\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "NULL, 0, 0,\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "NULL, 0, 0,\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "};\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+
 	return ERR_NOERROR;
 }
 
@@ -601,7 +610,7 @@ PROTOCOL_TYPE* protocol_push_type(PROTOCOL_TABLE* table, const char* name)
 	return &table->type_list[table->type_count++];
 }
 
-PROTOCOL_VARIABLE* protocol_push_variable(PROTOCOL_TABLE* table, char* name, int type, char* maxlen, char* def_value, char* o_type)
+PROTOCOL_VARIABLE* protocol_push_variable(PROTOCOL_TABLE* table, const char* name, const char* type, const char* maxlen, const char* def_value)
 {
 	if(table->var_count==table->var_max)
 		return NULL;
@@ -613,6 +622,18 @@ PROTOCOL_VARIABLE* protocol_push_variable(PROTOCOL_TABLE* table, char* name, int
 	if(!table->var_list[table->var_count].name)
 		return NULL;
 
+	table->var_list[table->var_count].type = protocol_strdup(table, type);
+	if(!table->var_list[table->var_count].type)
+		return NULL;
+
+	if(maxlen) {
+		table->var_list[table->var_count].maxlen = protocol_strdup(table, maxlen);
+		if(!table->var_list[table->var_count].maxlen)
+			return NULL;
+	} else {
+		table->var_list[table->var_count].maxlen = NULL;
+	}
+
 	if(def_value) {
 		table->var_list[table->var_count].def_value = protocol_strdup(table, def_value);
 		if(!table->var_list[table->var_count].def_value)
@@ -621,11 +642,36 @@ PROTOCOL_VARIABLE* protocol_push_variable(PROTOCOL_TABLE* table, char* name, int
 		table->var_list[table->var_count].def_value = NULL;
 	}
 
+	table->type_list[table->type_count-1].var_count++;
 	return &table->var_list[table->var_count++];
+}
+
+int is_base_type(const char* type)
+{
+	int i;
+	static char* base_type[] = {
+		"os_char",
+		"os_short",
+		"os_int",
+		"os_long",
+		"os_uchar",
+		"os_word",
+		"os_dword",
+		"os_qword",
+		"os_float",
+	};
+	for(i=0; i<sizeof(base_type)/sizeof(base_type[0]); i++) {
+		if(strcmp(base_type[i], type)==0)
+			return 1;
+	}
+	return 0;
 }
 
 int my_new_node_begin(void* ptr, const char* name)
 {
+	PROTOCOL_TYPE* type;
+	type = protocol_push_type((PROTOCOL_TABLE*)ptr, name);
+	if(!type) return 0;
 	return 1;
 }
 
@@ -641,11 +687,17 @@ int my_new_const(void* ptr, const char* type, const char* name, const char* valu
 
 int my_new_field_def(void* ptr, const char* mode, const char* type, const char* name, const char* value)
 {
+	PROTOCOL_VARIABLE* var;
+	var = protocol_push_variable((PROTOCOL_TABLE*)ptr, name, type, NULL, value);
+	if(!var) return 0;
 	return 1;
 }
 
 int my_new_array_def(void* ptr, const char* mode, const char* type, const char* name, const char* count)
 {
+	PROTOCOL_VARIABLE* var;
+	var = protocol_push_variable((PROTOCOL_TABLE*)ptr, name, type, count, NULL);
+	if(!var) return 0;
 	return 1;
 }
 

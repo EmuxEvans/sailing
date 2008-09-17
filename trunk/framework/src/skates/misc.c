@@ -214,7 +214,7 @@ int load_textfile(const char* filename, char* buf, int buflen)
 	int len = 0;
 
 	fp = fopen(filename, "rt");
-	if(fp==NULL) return 0;
+	if(fp==NULL) return -1;
 
 	for(;;) {
 		if(fgets(buf+len, buflen-len, fp)==NULL) {
@@ -229,5 +229,14 @@ int load_textfile(const char* filename, char* buf, int buflen)
 
 int save_textfile(const char* filename, char* buf, int buflen)
 {
-	return 0;
+	FILE* fp;
+	int len = 0;
+
+	fp = fopen(filename, "wt");
+	if(fp==NULL) return -1;
+
+	fputs(buf, fp);
+
+	fclose(fp);
+	return 1;
 }
