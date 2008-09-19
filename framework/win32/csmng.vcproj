@@ -347,6 +347,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\skates\log.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\skates\misc.c"
 				>
 			</File>

@@ -28,6 +28,9 @@ ZION_API int console_unhook(CONSOLE_INSTANCE* instance, const char* name, CONSOL
 ZION_API int console_puts(CONSOLE_CONNECTION* conn, int code, const char* str);
 ZION_API int console_print(CONSOLE_CONNECTION* conn, int code, const char* fmt, ...);
 
+ZION_API const SOCK_ADDR* console_peername(CONSOLE_CONNECTION* conn);
+ZION_API const char* console_peername_str(CONSOLE_CONNECTION* conn);
+
 #ifdef __cplusplus
 }
 #endif

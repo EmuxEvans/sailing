@@ -9,7 +9,7 @@ struct PROTOCOL_PARSER;
 typedef struct PROTOCOL_PARSER PROTOCOL_PARSER;
 
 typedef struct PROTOCOL_CALLBACK {
-	int (*new_include)(void* ptr, const char* file)
+	int (*new_include)(void* ptr, const char* name);
 	int (*new_node_begin)(void* ptr, const char* name);
 	int (*new_node_end)(void* ptr);
 	int (*new_const)(void* ptr, const char* type, const char* name, const char* value);
@@ -26,8 +26,6 @@ typedef struct PROTOCOL_CALLBACK {
 } PROTOCOL_CALLBACK;
 
 ZION_API int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr);
-ZION_API void protocol_break(PROTOCOL_PARSER* p);
-
 
 //
 #include "protocol_def.h"

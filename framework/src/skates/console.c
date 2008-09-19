@@ -12,10 +12,14 @@
 #include "../../inc/skates/fdwatch.h"
 #include "../../inc/skates/misc.h"
 
+#define CONSOLE_SERVER_COUNT	100
+
 struct CONSOLE_CONNECTION {
 	SOCK_HANDLE			sock;
 	FDWATCH_ITEM		fdi;
 	CONSOLE_INSTANCE*	instance;
+	SOCK_ADDR			sa;
+	char				sa_str[40];
 };
 
 typedef struct CONSOLE_HOOKER {
@@ -25,9 +29,14 @@ typedef struct CONSOLE_HOOKER {
 
 typedef struct CONSOLE_MAP_ITEM {
 	char	name[CONSOLE_ITEM_NAME_LEN+1];
-	char	type[CONSOLE_ITEM_TYPE_LEN+1];
 	char	addr[CONSOLE_ITEM_ADDR_LEN+1];
 } CONSOLE_MAP_ITEM;
+
+typedef struct CONSOLE_SERVER {
+	char				name[100];
+	char				ep[100];
+	CONSOLE_CONNECTION*	conn;
+} CONSOLE_SERVER;
 
 struct CONSOLE_INSTANCE {
 	SOCK_HANDLE				sock;
@@ -43,11 +52,14 @@ struct CONSOLE_INSTANCE {
 	CONSOLE_CONNECTION*		conns;
 	CONSOLE_HOOKER*			hookers;
 	CONSOLE_MAP_ITEM*		items;
+	CONSOLE_SERVER*			servers;
 };
+
+static CONSOLE_CALLBACK console_global_hook = NULL;
 
 static int load_config(CONSOLE_INSTANCE* instance, const char* config_file);
 static int save_config(CONSOLE_INSTANCE* instance, const char* config_file);
-static int insert_item(CONSOLE_INSTANCE* instance, const char* name, const char* type, const char* addr);
+static int insert_item(CONSOLE_INSTANCE* instance, const char* name, const char* addr);
 static int remove_item(CONSOLE_INSTANCE* instance, const char* name);
 
 static unsigned int ZION_CALLBACK console_thread(void* arg);
@@ -67,17 +79,20 @@ CONSOLE_INSTANCE* console_create_csmng(SOCK_ADDR* sa, unsigned int maxconns, uns
 	SOCK_HANDLE sock;
 	CONSOLE_INSTANCE* instance;
 	unsigned int i;
+	unsigned int maxserver;
+
+	maxserver = (maxitems>0?CONSOLE_SERVER_COUNT:0);
 
 	sock = sock_bind(sa, SOCK_REUSEADDR);
 	if(sock==SOCK_INVALID_HANDLE) return NULL;
 
-	instance = (CONSOLE_INSTANCE*)malloc(sizeof(CONSOLE_INSTANCE)+sizeof(CONSOLE_CONNECTION)*maxconns+sizeof(CONSOLE_HOOKER)*maxhooker+sizeof(CONSOLE_MAP_ITEM)*maxitems);
+	instance = (CONSOLE_INSTANCE*)malloc(sizeof(CONSOLE_INSTANCE)+sizeof(CONSOLE_CONNECTION)*maxconns+sizeof(CONSOLE_HOOKER)*maxhooker+sizeof(CONSOLE_MAP_ITEM)*maxitems+sizeof(CONSOLE_SERVER)*maxserver);
 	if(instance==NULL) {
 		sock_unbind(sock);
 		return NULL;
 	}
 
-	memset(instance, 0, sizeof(CONSOLE_INSTANCE)+sizeof(CONSOLE_CONNECTION)*maxconns+sizeof(CONSOLE_HOOKER)*maxhooker+sizeof(CONSOLE_MAP_ITEM)*maxitems);
+	memset(instance, 0, sizeof(CONSOLE_INSTANCE)+sizeof(CONSOLE_CONNECTION)*maxconns+sizeof(CONSOLE_HOOKER)*maxhooker+sizeof(CONSOLE_MAP_ITEM)*maxitems+sizeof(CONSOLE_SERVER)*maxserver);
 	instance->sock		= sock;
 	memcpy(&instance->sa, sa, sizeof(SOCK_ADDR));
 	instance->maxconns	= maxconns;
@@ -85,7 +100,13 @@ CONSOLE_INSTANCE* console_create_csmng(SOCK_ADDR* sa, unsigned int maxconns, uns
 	instance->maxitems	= maxitems;
 	instance->conns		= (CONSOLE_CONNECTION*)(instance+1);
 	instance->hookers	= (CONSOLE_HOOKER*)(instance->conns+maxconns);
-	instance->items		= (CONSOLE_MAP_ITEM*)(instance->hookers+maxhooker);
+	if(maxhooker==0) {
+		instance->items		= NULL;
+		instance->servers	= NULL;
+	} else {
+		instance->items		= (CONSOLE_MAP_ITEM*)(instance->hookers+maxhooker);
+		instance->servers	= (CONSOLE_SERVER*)(instance->items+maxitems);
+	}
 	os_mutex_init(&instance->mtx);
 	for(i=0; i<instance->maxconns; i++) instance->conns[i].sock = SOCK_INVALID_HANDLE;
 
@@ -98,12 +119,13 @@ CONSOLE_INSTANCE* console_create_csmng(SOCK_ADDR* sa, unsigned int maxconns, uns
 		}
 
 		console_hook(instance, "csmng.table.list", csmng_func);
-		console_hook(instance, "csmng.table.list_by_type", csmng_func);
 		console_hook(instance, "csmng.table.add", csmng_func);
 		console_hook(instance, "csmng.table.delete", csmng_func);
 		console_hook(instance, "csmng.table.clear", csmng_func);
 		console_hook(instance, "csmng.table.load", csmng_func);
 		console_hook(instance, "csmng.table.save", csmng_func);
+		console_hook(instance, "csmng.servers.register", csmng_func);
+		console_hook(instance, "csmng.servers.list", csmng_func);
 	}
 
 	instance->fdh = fdwatch_create();
@@ -164,6 +186,11 @@ int console_hook(CONSOLE_INSTANCE* instance, const char* name, CONSOLE_CALLBACK 
 {
 	unsigned int i;
 
+	if(name==NULL) {
+		console_global_hook = func;
+		return ERR_NOERROR;
+	}
+
 	if(strlen(name)>CONSOLE_HOOKERNAME_LEN) return ERR_INVALID_PARAMETER;
 	if(func==NULL) return ERR_INVALID_PARAMETER;
 
@@ -183,6 +210,11 @@ int console_hook(CONSOLE_INSTANCE* instance, const char* name, CONSOLE_CALLBACK 
 int console_unhook(CONSOLE_INSTANCE* instance, const char* name, CONSOLE_CALLBACK func)
 {
 	unsigned int i;
+
+	if(console_global_hook==func) {
+		console_global_hook = NULL;
+		return ERR_NOERROR;
+	}
 
 	if(strlen(name)>CONSOLE_HOOKERNAME_LEN) return ERR_INVALID_PARAMETER;
 	if(func==NULL) return ERR_INVALID_PARAMETER;
@@ -226,6 +258,16 @@ int console_print(CONSOLE_CONNECTION* conn, int code, const char* fmt, ...)
 	return sock_writeline(conn->sock, buf);
 }
 
+const SOCK_ADDR* console_peername(CONSOLE_CONNECTION* conn)
+{
+	return &conn->sa;
+}
+
+const char* console_peername_str(CONSOLE_CONNECTION* conn)
+{
+	return conn->sa_str;
+}
+
 unsigned int ZION_CALLBACK console_thread(void* arg)
 {
 	CONSOLE_INSTANCE* instance = (CONSOLE_INSTANCE*)arg;
@@ -239,9 +281,10 @@ static void accept_func(FDWATCH_ITEM* item, int events)
 	SOCK_HANDLE sock;
 	unsigned int i;
 	int ret;
+	SOCK_ADDR sa;
 
 	instance = (CONSOLE_INSTANCE*)fdwatch_getptr(item);
-	sock = sock_accept(instance->sock, NULL);
+	sock = sock_accept(instance->sock, &sa);
 	if(sock==SOCK_INVALID_HANDLE) return;
 
 	for(i=0; i<instance->maxconns; i++) {
@@ -272,6 +315,8 @@ static void accept_func(FDWATCH_ITEM* item, int events)
 
 	instance->conns[i].sock = sock;
 	instance->conns[i].instance = instance;
+	memcpy(&instance->conns[i].sa, &sa, sizeof(sa));
+	sock_addr2str(&sa, instance->conns[i].sa_str);
 }
 
 static void conn_func(FDWATCH_ITEM* item, int events)
@@ -287,6 +332,15 @@ static void conn_func(FDWATCH_ITEM* item, int events)
 
 	ret = sock_readline(conn->sock, line, sizeof(line));
 	if(ret!=ERR_NOERROR) {
+
+		if(conn->instance->maxitems>0) {
+			for(i=0; i<CONSOLE_SERVER_COUNT; i++) {
+				if(conn->instance->servers[i].conn==conn) {
+					memset(&conn->instance->servers[i], 0, sizeof(conn->instance->servers[i]));
+				}
+			}
+		}
+
 		fdwatch_remove(conn->instance->fdh, &conn->fdi);
 		sock_close(conn->sock);
 		conn->sock = SOCK_INVALID_HANDLE;
@@ -297,6 +351,10 @@ static void conn_func(FDWATCH_ITEM* item, int events)
 	end = strget_space(line, name, sizeof(name));
 	if(end==NULL) return;
 	strltrim(name);
+
+	if(console_global_hook) {
+		console_global_hook(conn, NULL, line);
+	}
 
 	if(conn->instance->maxitems>0 && (strcmp(name, "csmng.callremote")==0 || strcmp(name, "@")==0)) {
 		if(remote_func(conn, end)!=ERR_NOERROR) {
@@ -345,27 +403,7 @@ int csmng_func(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 
 		for(i=count=0; i<conn->instance->maxitems; i++) {
 			if(conn->instance->items[i].name[0]=='\0') continue;
-			sprintf(buf, "name=%s type=%s addr=%s", conn->instance->items[i].name, conn->instance->items[i].type, conn->instance->items[i].addr);
-			ret = console_puts(conn, ERR_NOERROR, buf);
-			if(ret!=ERR_NOERROR) return ret;
-			count++;
-		}
-		if(count==0) {
-			return console_puts(conn, ERR_NO_DATA, "the list is empty");
-		}
-		return ERR_NOERROR;
-	} else if(strcmp(name, "csmng.table.list_by_type")==0) {
-		unsigned int i, count;
-		char type[CONSOLE_ITEM_NAME_LEN+1];
-
-		if(strget_space(line, type, sizeof(type))==NULL) {
-			return console_puts(conn, ERR_INVALID_PARAMETER, "invalid parameter");
-		}
-
-		for(i=count=0; i<conn->instance->maxitems; i++) {
-			if(conn->instance->items[i].name[0]=='\0') continue;
-			if(strcmp(conn->instance->items[i].type, type)!=0) continue;
-			sprintf(buf, "name=%s type=%s addr=%s", conn->instance->items[i].name, conn->instance->items[i].type, conn->instance->items[i].addr);
+			sprintf(buf, "name=%s addr=%s", conn->instance->items[i].name, conn->instance->items[i].addr);
 			ret = console_puts(conn, ERR_NOERROR, buf);
 			if(ret!=ERR_NOERROR) return ret;
 			count++;
@@ -376,15 +414,11 @@ int csmng_func(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 		return ERR_NOERROR;
 	} else if(strcmp(name, "csmng.table.add")==0) {
 		char name[CONSOLE_ITEM_NAME_LEN+1];
-		char type[CONSOLE_ITEM_TYPE_LEN+1];
 		char addr[CONSOLE_ITEM_ADDR_LEN+1];
 		SOCK_ADDR sa;
 		const char* buf;
 
 		buf = strget_space(line, name, sizeof(name));
-		if(buf==NULL)
-			return console_puts(conn, ERR_INVALID_PARAMETER, "invalid parameter");
-		buf = strget_space(buf, type, sizeof(type));
 		if(buf==NULL)
 			return console_puts(conn, ERR_INVALID_PARAMETER, "invalid parameter");
 		buf = strget_space(buf, addr, sizeof(addr));
@@ -393,7 +427,7 @@ int csmng_func(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 		if(!sock_str2addr(addr, &sa))
 			return console_puts(conn, ERR_INVALID_PARAMETER, "invalid parameter");
 
-		return console_puts(conn, insert_item(conn->instance, name, type, addr), "");
+		return console_puts(conn, insert_item(conn->instance, name, addr), "");
 	} else if( strcmp(name, "csmng.table.delete")==0 ) {
 		char name[CONSOLE_ITEM_NAME_LEN+1];
 		const char* buf;
@@ -421,9 +455,51 @@ int csmng_func(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 			ret = ERR_UNKNOWN;
 		}
 		return console_puts(conn, ret, "");
+	} else if(strcmp(name, "csmng.servers.register")==0) {
+		int i;
+		char name[100];
+		char ep[100];
+		const char* t;
+
+		if((t=strget_space(line, name, sizeof(name)))==NULL || (t=strget_space(line, ep, sizeof(ep)))==NULL) {
+			return console_puts(conn, ERR_INVALID_PARAMETER, "invalid parameter");
+		}
+
+		for(i=0; i<CONSOLE_SERVER_COUNT; i++) {
+			if(strcmp(conn->instance->servers[i].name, name)==0) {
+				strcpy(conn->instance->servers[i].name, name);
+				strcpy(conn->instance->servers[i].ep, ep);
+				conn->instance->servers[i].conn = conn;
+				break;
+			}
+		}
+		if(i==CONSOLE_SERVER_COUNT) {
+			for(i=0; i<CONSOLE_SERVER_COUNT; i++) {
+				if(strcmp(conn->instance->servers[i].name, "")==0) {
+					strcpy(conn->instance->servers[i].name, name);
+					strcpy(conn->instance->servers[i].ep, ep);
+					conn->instance->servers[i].conn = conn;
+					break;
+				}
+			}
+		}
+
+		return console_puts(conn, ERR_NOERROR, "");
+	} else if(strcmp(name, "csmng.servers.list")==0) {
+		int i, count = 0;
+		for(i=0; i<CONSOLE_SERVER_COUNT; i++) {
+			if(conn->instance->servers[i].name[0]!='\0') {
+				sprintf(buf, "%s %s", conn->instance->servers[i].name, conn->instance->servers[i].ep);
+				console_puts(conn, ERR_NOERROR, buf);
+				count++;
+			}
+		}
+		if(count==0) {
+			console_puts(conn, ERR_NOT_FOUND, "not found");
+		}
 	} else {
 		sprintf(buf, "the command \"%s\" not found", name);
-		return  console_puts(conn, ERR_UNKNOWN, buf);
+		return console_puts(conn, ERR_UNKNOWN, buf);
 	} 
 
 	return ERR_NOERROR;
@@ -482,7 +558,7 @@ int load_config(CONSOLE_INSTANCE* instance, const char* config_file)
 	if(fp==NULL) return ERR_UNKNOWN;
 
 	for(i=0; i<instance->maxitems; i++) {
-		if(fscanf(fp, "%s %s %s", instance->items[i].name, instance->items[i].type, instance->items[i].addr)!=3) {
+		if(fscanf(fp, "%s %s", instance->items[i].name, instance->items[i].addr)!=3) {
 			break;
 		}
 	}
@@ -506,14 +582,14 @@ int save_config(CONSOLE_INSTANCE* instance, const char* config_file)
 
 	for(i=0; i<instance->maxitems; i++) {
 		if(instance->items[i].name=='\0') continue;
-		fprintf(fp, "%s %s %s\n", instance->items[i].name, instance->items[i].type, instance->items[i].addr);
+		fprintf(fp, "%s %s\n", instance->items[i].name, instance->items[i].addr);
 	}
 
 	fclose(fp);
 	return ERR_NOERROR;
 }
 
-int insert_item(CONSOLE_INSTANCE* instance, const char* name, const char* type, const char* addr)
+int insert_item(CONSOLE_INSTANCE* instance, const char* name, const char* addr)
 {
 	unsigned int i;
 
@@ -527,7 +603,6 @@ int insert_item(CONSOLE_INSTANCE* instance, const char* name, const char* type, 
 	if(i==instance->maxitems) return ERR_FULL;
 
 	strcpy(instance->items[i].name, name);
-	strcpy(instance->items[i].type, type);
 	strcpy(instance->items[i].addr, addr);
 
 	return ERR_NOERROR;
