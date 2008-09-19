@@ -519,7 +519,13 @@ int remote_func(CONSOLE_CONNECTION* conn, const char* line)
 	if(end==NULL) return console_puts(conn, ERR_INVALID_PARAMETER, "");
 
 	for(i=0; i<conn->instance->maxitems; i++) {
+		int len;
 		if(strcmp(name, conn->instance->items[i].name)==0) break;
+		len = strlen(conn->instance->items[i].name);
+		if(len<1) continue;
+		if(conn->instance->items[i].name[len-1]!='*') continue;
+		if(len==1) break;
+		if(memcmp(name, conn->instance->items[i].name, len-1)==0) break;
 	}
 	if(i==conn->instance->maxitems) {
 		return console_puts(conn, ERR_NOT_FOUND, "");
