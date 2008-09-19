@@ -55,16 +55,13 @@ int appbox_main_start()
 	int ret;
 	ret = appbox_init();
 	if(ret!=ERR_NOERROR) {
-		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to appbox_init(), ret=%d\n", ret);
+		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to appbox_init(), ret=%d", ret);
 		return ret;
 	}
 	ret = appbox_load_modules();
 	if(ret!=ERR_NOERROR) {
-		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to appbox_load_modules(), ret=%d\n", ret);
-		ret = appbox_final();
-		if(ret!=ERR_NOERROR) {
-			SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to appbox_final(), ret=%d\n", ret);
-		}
+		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to appbox_load_modules(), ret=%d", ret);
+		appbox_final();
 		return ret;
 	}
 

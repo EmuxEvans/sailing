@@ -143,6 +143,76 @@ int sock_set_udp_option(SOCK_HANDLE handle, const SOCK_UDP_OPTION* option)
 	return 0;
 }
 
+int sock_wait_read(SOCK_HANDLE handle, int timeout)
+{
+#ifdef _WIN32
+	int ret;
+	struct fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(handle, &fds);
+	if(timeout<=0) {
+		ret = select(0, &fds, NULL, NULL, NULL);
+	} else {
+		struct timeval tv;
+		tv.tv_sec = timeout / 1000;
+		tv.tv_usec = (timeout % 1000) * 1000;
+		ret = select(0, &fds, NULL, NULL, &tv);
+	}
+	if(ret!=SOCKET_ERROR) {
+		if(FD_ISSET(handle, &fds)) {
+			return ERR_NOERROR;
+		} else {
+			return ERR_TIMEOUT;
+		}
+	}
+	return ERR_UNKNOWN;
+#else
+	int ret;
+	struct pollfd ufds;
+	ufds.fd = handle;
+	ufds.events = POLLIN;
+	ufds.revents = 0;
+	ret = poll(&ufds, 1, timeout<=0?0:timeout);
+	if(ret==-1) return ERR_UNKNOWN;
+	return ufds.revents?ERR_NOERROR:ERR_TIMEOUT;
+#endif
+}
+
+int sock_wait_write(SOCK_HANDLE handle, int timeout)
+{
+#ifdef _WIN32
+	int ret;
+	struct fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(handle, &fds);
+	if(timeout<=0) {
+		ret = select(0, NULL, &fds, NULL, NULL);
+	} else {
+		struct timeval tv;
+		tv.tv_sec = timeout / 1000;
+		tv.tv_usec = (timeout % 1000) * 1000;
+		ret = select(0, &fds, NULL, NULL, &tv);
+	}
+	if(ret!=SOCKET_ERROR) {
+		if(FD_ISSET(handle, &fds)) {
+			return ERR_NOERROR;
+		} else {
+			return ERR_TIMEOUT;
+		}
+	}
+	return ERR_UNKNOWN;
+#else
+	int ret;
+	struct pollfd ufds;
+	ufds.fd = handle;
+	ufds.events = POLLOUT;
+	ufds.revents = 0;
+	ret = poll(&ufds, 1, timeout<=0?0:timeout);
+	if(ret==-1) return ERR_UNKNOWN;
+	return ufds.revents?ERR_NOERROR:ERR_TIMEOUT;
+#endif
+}
+
 SOCK_HANDLE sock_bind(SOCK_ADDR* addr, int flags)
 {
 	struct sockaddr_in sa;

@@ -18,6 +18,7 @@ static const char* get_token_keyword(const char* buf, const char* keyword, char*
 static const char* get_token_number(const char* buf, char* value, int size);
 static const char* escape_blank(const char* buf);
 
+static const char* parse_include(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
 static const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
 static const char* parse_const(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
 static const char* parse_field_def(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
@@ -28,11 +29,19 @@ static const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, cons
 
 int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr)
 {
-	while(*buf!='\0') {
-		buf = parse_node(callback, ptr, buf);
-		if(buf==NULL) return ERR_UNKNOWN;
+	const char* tbuf;
 
-		buf = escape_blank(buf);
+	tbuf = buf;
+	while(*buf!='\0') {
+		buf = escape_blank(tbuf);
+
+		tbuf = parse_include(callback, ptr, buf);
+		if(tbuf) continue;
+
+		tbuf = parse_node(callback, ptr, buf);
+		if(tbuf) continue;
+
+		return ERR_UNKNOWN;
 	}
 
 	return ERR_NOERROR;
@@ -136,6 +145,33 @@ const char* escape_blank(const char* buf)
 		if(*buf<=' ') continue;
 		return buf;
 	}
+}
+
+const char* parse_include(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
+{
+	const char* tbuf;
+
+	buf = get_token_keyword(buf, "include", callback->name);
+	if(buf==NULL) return NULL;
+	buf = escape_blank(buf);
+
+	tbuf = buf;
+	for(;;) {
+		if(*tbuf=='\0') return NULL;
+		if(*tbuf<=' ') return NULL;
+		if(*tbuf==';') break;
+	}
+	if(tbuf==buf) return NULL;
+	if(tbuf-buf>=callback->name_len) return NULL;
+	memcpy(callback->name, buf, tbuf-buf);
+	callback->name[tbuf-buf] = '\0';
+
+	buf = get_token_char(buf, ';');
+	if(buf==NULL) return NULL;
+
+	if(!callback->new_include(ptr, callback->name)) return NULL;
+
+	return buf;
 }
 
 const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
@@ -384,6 +420,7 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 	return tbuf;
 }
 
+static int my_new_include(void* ptr, const char* name);
 static int my_new_node_begin(void* ptr, const char* name);
 static int my_new_node_end(void* ptr);
 static int my_new_const(void* ptr, const char* type, const char* name, const char* value);
@@ -471,8 +508,8 @@ int protocol_parse_pfile(const char* text, PROTOCOL_TABLE* table)
 	int ret;
 	char mode[100], type[100], name[100], value[2000];
 	PROTOCOL_CALLBACK callback = {
-	my_new_node_begin, my_new_node_end, my_new_const, my_new_field_def, my_new_array_def,
-	my_new_field, my_new_array, my_new_begin, my_new_item, my_new_end,
+	my_new_include, my_new_node_begin, my_new_node_end, my_new_const, my_new_field_def,
+	my_new_array_def, my_new_field, my_new_array, my_new_begin, my_new_item, my_new_end,
 	mode, type, name, value,
 	sizeof(mode), sizeof(type), sizeof(name), sizeof(value)
 	};
@@ -484,23 +521,23 @@ int protocol_parse_pfile(const char* text, PROTOCOL_TABLE* table)
 
 int protocol_generate_cfile(const PROTOCOL_TABLE* table, const char* name, char* inc, unsigned int inc_len, char* src, unsigned int src_len)
 {
-	int l, i;
+	int t, v;
+
 	inc[0] = 0;
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_include__\n", name);
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_include__\n", name);
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	for(l=0; l<table->type_count; l++) {
-		if(l>0) snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	for(t=0; t<table->type_count; t++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "typedef struct %s {\n", table->type_list[l].name);
-		for(i=0; i<table->type_list[l].var_count; i++) {
-			if(table->type_list[l].var_list[i].maxlen) {
-				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s[%s] %s; //", table->type_list[l].var_list[i].type, table->type_list[l].var_list[i].maxlen, table->type_list[l].var_list[i].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "typedef struct %s {\n", table->type_list[t].name);
+		for(v=0; v<table->type_list[t].var_count; v++) {
+			if(table->type_list[t].var_list[v].maxlen) {
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s[%s] %s; //", table->type_list[t].var_list[v].type, table->type_list[t].var_list[v].maxlen, table->type_list[t].var_list[v].name);
 			} else {
-				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s %s; // default=%s\n", table->type_list[l].var_list[i].type, table->type_list[l].var_list[i].name, table->type_list[l].var_list[i].def_value?table->type_list[l].var_list[i].def_value:"");
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s %s; // default=%s\n", table->type_list[t].var_list[v].type, table->type_list[t].var_list[v].name, table->type_list[t].var_list[v].def_value?table->type_list[t].var_list[v].def_value:"");
 			}
 		}
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "} %s;\n", table->type_list[l].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "} %s;\n", table->type_list[t].name);
 	}
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "extern PROTOCOL_TABLE __protocol_table_%s;\n", name);
@@ -512,7 +549,10 @@ int protocol_generate_cfile(const PROTOCOL_TABLE* table, const char* name, char*
 	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/protocol_def.h>\n", name);
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.h\"\n", name);
-	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+	for(t=0; t<table->type_count; t++) {
+		for(v=0; v<table->type_list[t].var_count; v++) {
+		}
+	}
 	snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TABLE __protocol_table_%s = {\n", name);
 	snprintf(src+strlen(src), src_len-strlen(src), "0, NULL, 0, 0,\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "NULL, 0, 0,\n");
@@ -665,6 +705,11 @@ int is_base_type(const char* type)
 			return 1;
 	}
 	return 0;
+}
+
+int my_new_include(void* ptr, const char* name)
+{
+	return 1;
 }
 
 int my_new_node_begin(void* ptr, const char* name)

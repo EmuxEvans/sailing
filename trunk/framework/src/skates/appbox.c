@@ -24,13 +24,16 @@ typedef struct CONFIG_ITEM {
 	char	value[300];
 } CONFIG_ITEM;
 
-// 
+//
+static appbox_quit_flag = 0;
+static os_thread_t cs_thread_id;
 static CONSOLE_INSTANCE* con_instance = NULL;
 static MODULE_INFO modules[MODULE_MAXCOUNT];
 static int module_count;
 static CONFIG_ITEM configs[1000];
 static int config_count = 0;
 
+static char config_appname[200] = "appname";
 static char config_syslog[200] = "console://";
 static char config_dbglog[200] = "console://";
 static int config_syslog_enable = 1;
@@ -39,11 +42,13 @@ static int	config_worker_count = 5;
 static int	config_timer_interval = 100;
 static char config_module_list[300] = "";
 static SOCK_ADDR config_rpc_endpoint = { 0xffffffff, 0xffff };
-static SOCK_ADDR config_con_endpoint = { 0xffffffff, 0xffff };
-static unsigned int config_con_maxconns = 10;
-static unsigned int config_con_maxhooker = 100;
+static SOCK_ADDR config_cs_masterep = { 0xffffffff, 0xffff };
+static SOCK_ADDR config_cs_endpoint = { 0xffffffff, 0xffff };
+static unsigned int config_cs_maxconns = 10;
+static unsigned int config_cs_maxhooker = 100;
 
 APPBOX_SETTING_BEGIN(appbox_settings)
+	APPBOX_SETTING_STRING("appname", config_appname, sizeof(config_appname))
 	APPBOX_SETTING_STRING("syslog", config_syslog, sizeof(config_syslog))
 	APPBOX_SETTING_STRING("dbglog", config_dbglog, sizeof(config_dbglog))
 	APPBOX_SETTING_INTEGER("syslog_enable", config_syslog_enable)
@@ -52,9 +57,10 @@ APPBOX_SETTING_BEGIN(appbox_settings)
 	APPBOX_SETTING_INTEGER("timer_interval", config_timer_interval)
 	APPBOX_SETTING_STRING("module_list", config_module_list, sizeof(config_module_list))
 	APPBOX_SETTING_ENDPOINT("rpc_endpoint", config_rpc_endpoint)
-	APPBOX_SETTING_ENDPOINT("con_endpoint", config_con_endpoint)
-	APPBOX_SETTING_INTEGER("con_maxconns", config_con_maxconns)
-	APPBOX_SETTING_INTEGER("con_maxhooker", config_con_maxhooker)
+	APPBOX_SETTING_ENDPOINT("cs_masterep", config_cs_masterep)
+	APPBOX_SETTING_ENDPOINT("cs_endpoint", config_cs_endpoint)
+	APPBOX_SETTING_INTEGER("cs_maxconns", config_cs_maxconns)
+	APPBOX_SETTING_INTEGER("cs_maxhooker", config_cs_maxhooker)
 APPBOX_SETTING_END(appbox_settings)
 
 static int appbox_quit(int ret);
@@ -62,8 +68,14 @@ static const CONFIG_ITEM* get_config_item(const char* name);
 
 static int appbox_console_set(CONSOLE_CONNECTION* conn, const char* name, const char* line);
 static int appbox_console_get(CONSOLE_CONNECTION* conn, const char* name, const char* line);
-static int appbox_console_coredump(CONSOLE_CONNECTION* conn, const char* name, const char* line);
 static int appbox_console_threadpool(CONSOLE_CONNECTION* conn, const char* name, const char* line);
+static int appbox_console_coredump(CONSOLE_CONNECTION* conn, const char* name, const char* line);
+static unsigned int ZION_CALLBACK cs_thread_proc(void* arg);
+
+const char* appbox_get_name()
+{
+	return config_appname;
+}
 
 int appbox_config_load(const char* filename)
 {
@@ -252,19 +264,25 @@ int appbox_init()
 			return appbox_quit(ERR_UNKNOWN);
 		}
 	}
-	SYSLOG(LOG_INFO, MODULE_NAME, "== SYSLOG START ==");
-	DBGLOG(LOG_INFO, MODULE_NAME, "== DBGLOG START ==");
+	SYSLOG(LOG_INFO, MODULE_NAME, "** SYSLOG START **");
+	DBGLOG(LOG_INFO, MODULE_NAME, "** DBGLOG START **");
+
+	SYSLOG(LOG_INFO, MODULE_NAME, "APPNAME=%s", config_appname);
+	SYSLOG(LOG_INFO, MODULE_NAME, "PROCESS=%d", os_process_getid());
 
 	mempool_init();
 	sock_init();
 	ret = fdwatch_init();
-	if(ret!=ERR_NOERROR) { SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_init() fail, ret=%d", ret); return appbox_quit(ERR_UNKNOWN); }
+	if(ret!=ERR_NOERROR) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_init() fail, ret=%d", ret);
+		return appbox_quit(ERR_UNKNOWN);
+	}
 
-	if(config_con_endpoint.ip!=0xffffffff && config_con_endpoint.port!=0xffff) {
-		con_instance = console_create(&config_con_endpoint, config_con_maxconns, config_con_maxhooker);
+	if(config_cs_endpoint.ip!=0xffffffff && config_cs_endpoint.port!=0xffff) {
+		con_instance = console_create(&config_cs_endpoint, config_cs_maxconns, config_cs_maxhooker);
 		if(con_instance==NULL) {
 			char ep[40];
-			sock_addr2str(&config_con_endpoint, ep);
+			sock_addr2str(&config_cs_endpoint, ep);
 			SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to create console instance at %s.", ep);
 			return appbox_quit(ERR_UNKNOWN);
 		}
@@ -281,19 +299,43 @@ int appbox_init()
 		assert(ret==ERR_NOERROR);
 	}
 
+	ret = os_thread_begin(cs_thread_id, cs_thread_proc, NULL);
+	if(ret!=ERR_NOERROR) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to os_thread_begin(cs_thread_proc), ret=%d", ret);
+		return appbox_quit(ERR_UNKNOWN);
+	}
+
 	ret = dbapi_init(NULL, 0);
-	if(ret!=ERR_NOERROR) { SYSLOG(LOG_ERROR, MODULE_NAME, "dbapi_init() fail, ret=%d", ret); return appbox_quit(ERR_UNKNOWN); }
+	if(ret!=ERR_NOERROR) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "dbapi_init() fail, ret=%d", ret);
+		return appbox_quit(ERR_UNKNOWN);
+	}
 	ret = threadpool_init(config_worker_count);
-	if(ret!=ERR_NOERROR) { SYSLOG(LOG_ERROR, MODULE_NAME, "threadpool_init() fail, ret=%d", ret); return appbox_quit(ERR_UNKNOWN); }
+	if(ret!=ERR_NOERROR) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "threadpool_init() fail, ret=%d", ret);
+		return appbox_quit(ERR_UNKNOWN);
+	}
 	ret = timer_init(config_timer_interval);
-	if(ret!=ERR_NOERROR) { SYSLOG(LOG_ERROR, MODULE_NAME, "timer_init() fail, ret=%d", ret); return appbox_quit(ERR_UNKNOWN); }
+	if(ret!=ERR_NOERROR) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "timer_init() fail, ret=%d", ret);
+		return appbox_quit(ERR_UNKNOWN);
+	}
 	ret = rpcnet_init();
-	if(ret!=ERR_NOERROR) { SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_init() fail, ret=%d", ret); return appbox_quit(ERR_UNKNOWN); }
+	if(ret!=ERR_NOERROR) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_init() fail, ret=%d", ret);
+		return appbox_quit(ERR_UNKNOWN);
+	}
 	ret = rpcfun_init();
-	if(ret!=ERR_NOERROR) { SYSLOG(LOG_ERROR, MODULE_NAME, "rpcfun_init() fail, ret=%d", ret); return appbox_quit(ERR_UNKNOWN); }
+	if(ret!=ERR_NOERROR) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "rpcfun_init() fail, ret=%d", ret);
+		return appbox_quit(ERR_UNKNOWN);
+	}
 	if(config_rpc_endpoint.ip!=0xffffffff && config_rpc_endpoint.port!=0xffff) {
 		ret = rpcnet_bind(&config_rpc_endpoint);
-		if(ret!=ERR_NOERROR) { SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_bind() fail, ret=%d", ret); return appbox_quit(ERR_UNKNOWN); }
+		if(ret!=ERR_NOERROR) {
+			SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_bind() fail, ret=%d", ret);
+			return appbox_quit(ERR_UNKNOWN);
+		}
 	}
 
 	return ERR_NOERROR;
@@ -302,6 +344,8 @@ int appbox_init()
 int appbox_final()
 {
 	int ret;
+
+	appbox_quit_flag = 1;
 
 	if(config_rpc_endpoint.ip!=0xffffffff && config_rpc_endpoint.port!=0xffff) {
 		ret = rpcnet_unbind();
@@ -320,6 +364,12 @@ int appbox_final()
 	ret = dbapi_final();
 	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "dbapi_final() fail, ret=%d", ret);
 
+	ret = os_thread_wait(cs_thread_id, NULL);
+	if(ret!=ERR_NOERROR) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to os_thread_begin(cs_thread_proc), ret=%d", ret);
+		return appbox_quit(ERR_UNKNOWN);
+	}
+
 	if(con_instance!=NULL) {
 		ret = appbox_unreg_command(MODULE_NAME, "set", appbox_console_set);
 		assert(ret==ERR_NOERROR);
@@ -333,7 +383,9 @@ int appbox_final()
 		assert(ret==ERR_NOERROR);
 
 		ret = console_destroy(con_instance);
-		if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "console_destroy() fail, ret=%d", ret);
+		if(ret!=ERR_NOERROR) {
+			SYSLOG(LOG_ERROR, MODULE_NAME, "console_destroy() fail, ret=%d", ret);
+		}
 	}
 
 	ret = fdwatch_final();
@@ -341,8 +393,8 @@ int appbox_final()
 	sock_final();
 	mempool_final();
 
-	SYSLOG(LOG_INFO, MODULE_NAME, "== SYSLOG END ==");
-	DBGLOG(LOG_INFO, MODULE_NAME, "== DBGLOG END ==");
+	SYSLOG(LOG_INFO, MODULE_NAME, "** SYSLOG END **");
+	DBGLOG(LOG_INFO, MODULE_NAME, "** DBGLOG END **");
 	if(dbglog_close()!=ERR_NOERROR) {
 	}
 	if(syslog_close()!=ERR_NOERROR) {
@@ -592,4 +644,66 @@ int appbox_console_coredump(CONSOLE_CONNECTION* conn, const char* name, const ch
 	assert(0);
 	*v = 100;
 	return ERR_NOERROR;
+}
+
+unsigned int ZION_CALLBACK cs_thread_proc(void* arg)
+{
+	SOCK_HANDLE sock;
+	int count, ret, c_try;
+
+
+	sock = SOCK_INVALID_HANDLE;
+	c_try = count = 0;
+	while(!appbox_quit_flag) {
+		if(count>0) {
+			count--;
+			os_sleep(100);
+			continue;
+		}
+
+		if(sock==SOCK_INVALID_HANDLE && config_cs_masterep.ip!=0 && config_cs_masterep.port!=0) {
+			sock = sock_connect(&config_cs_masterep, 0);
+			if(sock==SOCK_INVALID_HANDLE) {
+				SYSLOG(LOG_INFO, MODULE_NAME, "cs_master connected");
+				c_try = 0;
+			} else {
+				if(c_try==0) {
+					SYSLOG(LOG_INFO, MODULE_NAME, "Failed to connect(cs_master)");
+					c_try = 1;
+				}
+			}
+		}
+
+		if(sock!=SOCK_INVALID_HANDLE) {
+			char line[100];
+			sprintf(line, "csmng.register %s ", appbox_get_name());
+			sock_addr2str(&config_cs_endpoint, line+strlen(line));
+			ret = sock_writeline(sock, "ping");
+			if(ret==ERR_NOERROR) {
+				for(;;) {
+					ret = sock_readline(sock, line, sizeof(line));
+					if(ret!=ERR_NOERROR)
+						break;
+					if(line[0]=='\0') break;
+				}
+				
+			}
+			if(ret!=ERR_NOERROR) {
+				sock_close(sock);
+				sock = SOCK_INVALID_HANDLE;
+			} else {
+				SYSLOG(LOG_INFO, MODULE_NAME, "cs_master disconnected");
+			}
+		}
+
+		count = 50;
+	}
+
+	if(sock!=SOCK_INVALID_HANDLE) {
+		sock_disconnect(sock);
+		sock_close(sock);
+		SYSLOG(LOG_INFO, MODULE_NAME, "cs_master disconnected, for quit");
+	}
+
+	return 0;
 }

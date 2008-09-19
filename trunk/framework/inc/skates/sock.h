@@ -49,6 +49,8 @@ ZION_API void sock_default_tcp_option(SOCK_TCP_OPTION* option);
 ZION_API void sock_default_udp_option(SOCK_UDP_OPTION* option);
 ZION_API int sock_set_tcp_option(SOCK_HANDLE handle, const SOCK_TCP_OPTION* option);
 ZION_API int sock_set_udp_option(SOCK_HANDLE handle, const SOCK_UDP_OPTION* option);
+ZION_API int sock_wait_read(SOCK_HANDLE handle, int timeout);
+ZION_API int sock_wait_write(SOCK_HANDLE handle, int timeout);
 
 ZION_API SOCK_HANDLE sock_bind(SOCK_ADDR* addr, int flags);
 ZION_API int sock_unbind(SOCK_HANDLE fd);
