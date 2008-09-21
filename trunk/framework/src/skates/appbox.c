@@ -25,7 +25,7 @@ typedef struct CONFIG_ITEM {
 } CONFIG_ITEM;
 
 //
-static appbox_quit_flag = 0;
+static int appbox_quit_flag = 0;
 static os_thread_t cs_thread_id;
 static CONSOLE_INSTANCE* con_instance = NULL;
 static MODULE_INFO modules[MODULE_MAXCOUNT];
@@ -299,7 +299,7 @@ int appbox_init()
 		assert(ret==ERR_NOERROR);
 	}
 
-	ret = os_thread_begin(cs_thread_id, cs_thread_proc, NULL);
+	ret = os_thread_begin(&cs_thread_id, cs_thread_proc, NULL);
 	if(ret!=ERR_NOERROR) {
 		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to os_thread_begin(cs_thread_proc), ret=%d", ret);
 		return appbox_quit(ERR_UNKNOWN);

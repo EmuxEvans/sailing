@@ -230,7 +230,6 @@ int load_textfile(const char* filename, char* buf, int buflen)
 int save_textfile(const char* filename, char* buf, int buflen)
 {
 	FILE* fp;
-	int len = 0;
 
 	fp = fopen(filename, "wt");
 	if(fp==NULL) return -1;
