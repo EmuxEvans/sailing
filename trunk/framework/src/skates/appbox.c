@@ -36,9 +36,10 @@ static int config_count = 0;
 static char config_appname[200] = "appname";
 static char config_syslog[200] = "console://";
 static char config_dbglog[200] = "console://";
-static int config_syslog_enable = 1;
+static int  config_syslog_enable = 1;
 static int	config_dbglog_enable = 1;
 static int	config_worker_count = 5;
+static int  config_network_downbuf_size = 1000;
 static int	config_timer_interval = 100;
 static char config_module_list[300] = "";
 static SOCK_ADDR config_rpc_endpoint = { 0xffffffff, 0xffff };
@@ -54,6 +55,7 @@ APPBOX_SETTING_BEGIN(appbox_settings)
 	APPBOX_SETTING_INTEGER("syslog_enable", config_syslog_enable)
 	APPBOX_SETTING_INTEGER("dbglog_enable", config_dbglog_enable)
 	APPBOX_SETTING_INTEGER("worker_count", config_worker_count)
+	APPBOX_SETTING_INTEGER("network_downbuf_size", config_network_downbuf_size)
 	APPBOX_SETTING_INTEGER("timer_interval", config_timer_interval)
 	APPBOX_SETTING_STRING("module_list", config_module_list, sizeof(config_module_list))
 	APPBOX_SETTING_ENDPOINT("rpc_endpoint", config_rpc_endpoint)
@@ -305,6 +307,8 @@ int appbox_init()
 		return appbox_quit(ERR_UNKNOWN);
 	}
 
+	network_init(config_network_downbuf_size);
+
 	ret = dbapi_init(NULL, 0);
 	if(ret!=ERR_NOERROR) {
 		SYSLOG(LOG_ERROR, MODULE_NAME, "dbapi_init() fail, ret=%d", ret);
@@ -363,6 +367,8 @@ int appbox_final()
 	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "threadpool_final() fail, ret=%d", ret);
 	ret = dbapi_final();
 	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "dbapi_final() fail, ret=%d", ret);
+
+	network_final();
 
 	ret = os_thread_wait(cs_thread_id, NULL);
 	if(ret!=ERR_NOERROR) {

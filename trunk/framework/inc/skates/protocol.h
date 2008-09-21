@@ -5,9 +5,6 @@
 extern "C" {
 #endif
 
-struct PROTOCOL_PARSER;
-typedef struct PROTOCOL_PARSER PROTOCOL_PARSER;
-
 typedef struct PROTOCOL_CALLBACK {
 	int (*new_include)(void* ptr, const char* name);
 	int (*new_node_begin)(void* ptr, const char* name);

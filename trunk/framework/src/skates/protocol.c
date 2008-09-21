@@ -6,11 +6,6 @@
 #include "../../inc/skates/misc.h"
 #include "../../inc/skates/protocol.h"
 
-struct PROTOCOL_PARSER {
-	PROTOCOL_CALLBACK callback;
-	int is_break;
-};
-
 static const char* get_token_char(const char* buf, char c);
 static const char* get_token_string(const char* buf, char* value, int size);
 static const char* get_token_id(const char* buf, char* value, int size);
@@ -45,11 +40,6 @@ int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr)
 	}
 
 	return ERR_NOERROR;
-}
-
-void protocol_break(PROTOCOL_PARSER* p)
-{
-	p->is_break = 1;
 }
 
 const char* get_token_char(const char* buf, char c)
@@ -419,6 +409,12 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 
 	return tbuf;
 }
+
+typedef struct PROTOCOL_TABLE_PARSER {
+	struct {
+		char name[100];
+	} files[10];
+} PROTOCOL_TABLE_PARSER;
 
 static int my_new_include(void* ptr, const char* name);
 static int my_new_node_begin(void* ptr, const char* name);
