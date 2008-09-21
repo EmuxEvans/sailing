@@ -118,14 +118,7 @@ CONSOLE_INSTANCE* console_create_csmng(SOCK_ADDR* sa, unsigned int maxconns, uns
 			strcpy(instance->config_path, config_path);
 		}
 
-		console_hook(instance, "csmng.table.list", csmng_func);
-		console_hook(instance, "csmng.table.add", csmng_func);
-		console_hook(instance, "csmng.table.delete", csmng_func);
-		console_hook(instance, "csmng.table.clear", csmng_func);
-		console_hook(instance, "csmng.table.load", csmng_func);
-		console_hook(instance, "csmng.table.save", csmng_func);
-		console_hook(instance, "csmng.servers.register", csmng_func);
-		console_hook(instance, "csmng.servers.list", csmng_func);
+		console_hook(instance, "csmng.*", csmng_func);
 	}
 
 	instance->fdh = fdwatch_create();
@@ -353,10 +346,10 @@ static void conn_func(FDWATCH_ITEM* item, int events)
 	strltrim(name);
 
 	if(console_global_hook) {
-		console_global_hook(conn, NULL, line);
+		console_global_hook(conn, name, end);
 	}
 
-	if(conn->instance->maxitems>0 && (strcmp(name, "csmng.callremote")==0 || strcmp(name, "@")==0)) {
+	if(conn->instance->maxitems>0 && (strcmp(name, "callremote")==0 || strcmp(name, "@")==0)) {
 		if(remote_func(conn, end)!=ERR_NOERROR) {
 			fdwatch_remove(conn->instance->fdh, &conn->fdi);
 			sock_close(conn->sock);
@@ -369,7 +362,12 @@ static void conn_func(FDWATCH_ITEM* item, int events)
 	os_mutex_lock(&conn->instance->mtx);
 
 	for(i=0; i<conn->instance->maxhooker; i++) {
+		int len;
 		if(strcmp(name, conn->instance->hookers[i].name)==0) break;
+		len = strlen(conn->instance->hookers[i].name);
+		if(len<2) continue;
+		if(conn->instance->hookers[i].name[len-1]!='*') continue;
+		if(memcmp(conn->instance->hookers[i].name, name, len-1)==0) break;
 	}
 	if(i==conn->instance->maxhooker) {
 		os_mutex_unlock(&conn->instance->mtx);

@@ -69,7 +69,7 @@
 				AdditionalDependencies="ws2_32.lib sqlite.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
-				GenerateManifest="true"
+				GenerateManifest="false"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -81,7 +81,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				EmbedManifest="true"
+				EmbedManifest="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"

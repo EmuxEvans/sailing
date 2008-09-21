@@ -18,6 +18,7 @@ extern "C" {
 #include "sock.h"
 #include "rpc_net.h"
 #include "rpc_fun.h"
+#include "network.h"
 #include "dbapi.h"
 #include "misc.h"
 #include "console.h"

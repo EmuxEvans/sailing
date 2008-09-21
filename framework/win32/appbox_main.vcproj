@@ -68,7 +68,7 @@
 				AdditionalDependencies="appbox.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
-				GenerateManifest="true"
+				GenerateManifest="false"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
@@ -81,7 +81,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				EmbedManifest="true"
+				EmbedManifest="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -351,6 +351,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 		</Filter>
+		<File
+			RelativePath="..\conf\appbox.conf"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
