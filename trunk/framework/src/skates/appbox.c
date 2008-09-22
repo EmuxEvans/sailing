@@ -47,22 +47,26 @@ static SOCK_ADDR config_cs_masterep = { 0xffffffff, 0xffff };
 static SOCK_ADDR config_cs_endpoint = { 0xffffffff, 0xffff };
 static unsigned int config_cs_maxconns = 10;
 static unsigned int config_cs_maxhooker = 100;
+static int config_dymempool_min = 0;
+static int config_dymempool_max = 0;
 
 APPBOX_SETTING_BEGIN(appbox_settings)
 	APPBOX_SETTING_STRING("appname", config_appname, sizeof(config_appname))
-	APPBOX_SETTING_STRING("syslog", config_syslog, sizeof(config_syslog))
-	APPBOX_SETTING_STRING("dbglog", config_dbglog, sizeof(config_dbglog))
-	APPBOX_SETTING_INTEGER("syslog_enable", config_syslog_enable)
-	APPBOX_SETTING_INTEGER("dbglog_enable", config_dbglog_enable)
-	APPBOX_SETTING_INTEGER("worker_count", config_worker_count)
-	APPBOX_SETTING_INTEGER("network_downbuf_size", config_network_downbuf_size)
-	APPBOX_SETTING_INTEGER("timer_interval", config_timer_interval)
 	APPBOX_SETTING_STRING("module_list", config_module_list, sizeof(config_module_list))
-	APPBOX_SETTING_ENDPOINT("rpc_endpoint", config_rpc_endpoint)
-	APPBOX_SETTING_ENDPOINT("cs_masterep", config_cs_masterep)
-	APPBOX_SETTING_ENDPOINT("cs_endpoint", config_cs_endpoint)
-	APPBOX_SETTING_INTEGER("cs_maxconns", config_cs_maxconns)
-	APPBOX_SETTING_INTEGER("cs_maxhooker", config_cs_maxhooker)
+	APPBOX_SETTING_STRING("syslog.path", config_syslog, sizeof(config_syslog))
+	APPBOX_SETTING_INTEGER("syslog.enable", config_syslog_enable)
+	APPBOX_SETTING_STRING("dbglog.path", config_dbglog, sizeof(config_dbglog))
+	APPBOX_SETTING_INTEGER("dbglog.enable", config_dbglog_enable)
+	APPBOX_SETTING_INTEGER("threadpool.count", config_worker_count)
+	APPBOX_SETTING_INTEGER("network.downbuf_size", config_network_downbuf_size)
+	APPBOX_SETTING_INTEGER("timer.interval", config_timer_interval)
+	APPBOX_SETTING_ENDPOINT("rpc.endpoint", config_rpc_endpoint)
+	APPBOX_SETTING_ENDPOINT("console.master", config_cs_masterep)
+	APPBOX_SETTING_ENDPOINT("console.endpoint", config_cs_endpoint)
+	APPBOX_SETTING_INTEGER("console.maxconns", config_cs_maxconns)
+	APPBOX_SETTING_INTEGER("console.maxhooker", config_cs_maxhooker)
+	APPBOX_SETTING_INTEGER("dymempool.min", config_dymempool_min)
+	APPBOX_SETTING_INTEGER("dymempool.max", config_dymempool_max)
 APPBOX_SETTING_END(appbox_settings)
 
 static int appbox_quit(int ret);
@@ -309,6 +313,11 @@ int appbox_init()
 
 	network_init(config_network_downbuf_size);
 
+	ret = dymempool_init(config_dymempool_min, config_dymempool_max);
+	if(ret!=ERR_NOERROR) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "dymempool_init() fail, ret=%d", ret);
+		return appbox_quit(ERR_UNKNOWN);
+	}
 	ret = dbapi_init(NULL, 0);
 	if(ret!=ERR_NOERROR) {
 		SYSLOG(LOG_ERROR, MODULE_NAME, "dbapi_init() fail, ret=%d", ret);
@@ -367,6 +376,8 @@ int appbox_final()
 	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "threadpool_final() fail, ret=%d", ret);
 	ret = dbapi_final();
 	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "dbapi_final() fail, ret=%d", ret);
+	ret = dymempool_final();
+	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "dymempool_final() fail, ret=%d", ret);
 
 	network_final();
 
