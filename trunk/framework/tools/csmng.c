@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "../inc/skates/skates.h"
 #include "../inc/skates/appbox_svc.h"
@@ -28,7 +29,7 @@ int main(int argc, char* argv[])
 		csmng_usage,
 	};
 
-	return appbox_service(&svc, argc, argv);
+	return appbox_service(&svc, argc-1, &argv[1]);
 }
 
 int csmng_init()
@@ -101,3 +102,4 @@ int csmng_monitor(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 
 	return ERR_NOERROR;
 }
+

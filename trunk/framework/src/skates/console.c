@@ -585,7 +585,7 @@ int save_config(CONSOLE_INSTANCE* instance, const char* config_file)
 	if(fp==NULL) return ERR_UNKNOWN;
 
 	for(i=0; i<instance->maxitems; i++) {
-		if(instance->items[i].name=='\0') continue;
+		if(instance->items[i].name[0]=='\0') continue;
 		fprintf(fp, "%s %s\n", instance->items[i].name, instance->items[i].addr);
 	}
 
