@@ -124,6 +124,40 @@ int parse_pfile(const char* buf)
 
 int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src, unsigned int src_len)
 {
+	int type, var;
+
+	inc[0] = src[0] = '\0';
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_include__\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_include__\n");
+
+	for(type=0; type<num_type; type++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "typedef struct %s {\n", data_type[type].name);
+
+		for(var=data_type[type].var_start; var<data_type[type].var_start+data_type[type].var_count; var++) {
+			if(data_variable[var].is_const) continue;
+			if(data_variable[var].maxlen[0]=='\0') {
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s;\n", data_variable[var].type, data_variable[var].name);
+			} else {
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s[%s] %s;\n", data_variable[var].type, data_variable[var].maxlen, data_variable[var].name);
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "int PROTOCOL_ARRAY_SIZE(%s);\n", data_variable[var].name);
+			}
+		}
+
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "} %s;\n", data_type[type].name);
+	}
+
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// YIYI & ERIC 2004-2008.\n");
+
+	for(type=0; type<num_type; type++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "extern PROTOCOL_TYPE PROTOCOL_NAME(%s);\n", data_type[type].name);
+	}
+
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
+
 	return ERR_NOERROR;
 }
 
