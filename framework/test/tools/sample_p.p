@@ -1,6 +1,9 @@
 include aaaa.p;
 
-a {
+internal a {
 	os_int a = 100;
 }
 
+extern a {
+	os_int a = 100;
+}

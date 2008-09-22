@@ -21,6 +21,7 @@ extern "C" {
 #include "network.h"
 #include "dbapi.h"
 #include "misc.h"
+#include "dymempool.h"
 #include "console.h"
 #include "applog.h"
 #include "appbox.h"
