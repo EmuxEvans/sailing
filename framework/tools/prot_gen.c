@@ -1,3 +1,4 @@
+#include <time.h>
 #include <stdio.h>
 
 #include <skates/errcode.h>
@@ -28,6 +29,8 @@ static const char* parse_field_def(const char* buf);
 static const char* parse_array_def(const char* buf);
 
 static int check_include_filename(const char* file);
+static void make_define_filename(const char* file, char* out);
+static void make_include_filename(const char* file, char* out);
 
 static int def_include(const char* name);
 static int def_node(const char* mode, const char* name);
@@ -92,23 +95,14 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-/*
-static char* protocol_strdup(PROTOCOL_TABLE* table, const char* value);
-static PROTOCOL_TYPE* protocol_get_type(PROTOCOL_TABLE* table, const char* name);
-static PROTOCOL_VARIABLE* protocol_get_variable(PROTOCOL_TYPE* table, const char* name);
-static PROTOCOL_TYPE* protocol_push_type(PROTOCOL_TABLE* table, const char* name);
-static PROTOCOL_VARIABLE* protocol_push_variable(PROTOCOL_TABLE* table, const char* name, const char* type, const char* maxlen, const char* def_value);
-
-static int is_base_type(const char* type);
-*/
-
 int parse_pfile(const char* buf)
 {
 	const char* tbuf;
 
 	tbuf = buf;
-	while(*buf!='\0') {
+	for(;;) {
 		buf = escape_blank(tbuf);
+		if(*buf=='\0') break;
 
 		tbuf = parse_include(buf);
 		if(tbuf) continue;
@@ -125,11 +119,23 @@ int parse_pfile(const char* buf)
 int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src, unsigned int src_len)
 {
 	int type, var;
+	struct tm   *newTime;
+    time_t      szClock;
+	char buf[100];
 
 	inc[0] = src[0] = '\0';
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_include__\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_include__\n");
+    time(&szClock);
+    newTime = localtime(&szClock);
 
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "//generate by PROT_GEN. %s\n", asctime(newTime));
+	make_define_filename(name, buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_include__\n", buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_include__\n", buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifdef __cplusplus\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "extern \"C\" {\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
 	for(type=0; type<num_type; type++) {
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "typedef struct %s {\n", data_type[type].name);
@@ -137,26 +143,48 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 		for(var=data_type[type].var_start; var<data_type[type].var_start+data_type[type].var_count; var++) {
 			if(data_variable[var].is_const) continue;
 			if(data_variable[var].maxlen[0]=='\0') {
-				snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s;\n", data_variable[var].type, data_variable[var].name);
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s %s;\n", data_variable[var].type, data_variable[var].name);
 			} else {
-				snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s[%s] %s;\n", data_variable[var].type, data_variable[var].maxlen, data_variable[var].name);
-				snprintf(inc+strlen(inc), inc_len-strlen(inc), "int PROTOCOL_ARRAY_SIZE(%s);\n", data_variable[var].name);
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s[%s] %s;\n", data_variable[var].type, data_variable[var].maxlen, data_variable[var].name);
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	int PROTOCOL_ARRAY_SIZE(%s);\n", data_variable[var].name);
 			}
 		}
-
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "} %s;\n", data_type[type].name);
 	}
-
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// YIYI & ERIC 2004-2008.\n");
-
 	for(type=0; type<num_type; type++) {
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "extern PROTOCOL_TYPE PROTOCOL_NAME(%s);\n", data_type[type].name);
 	}
-
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifdef __cplusplus\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "}\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
+
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "//generate by PROT_GEN. %s\n", asctime(newTime));
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <protocol_def.h>\n");
+	for(type=0; type<num_inc; type++) {
+		snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s\"\n", data_include[type].file);
+	}
+	make_include_filename(name, buf);
+	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s\"\n", buf);
+	for(type=0; type<num_type; type++) {
+		int count = 0;
+		snprintf(src+strlen(src), src_len-strlen(src), "\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "static PROTOCOL_VARIABLE __variable_list_%s_[] = {\n");
+		for(var=data_type[type].var_start; var<data_type[type].var_start+data_type[type].var_count; var++) {
+			if(!data_variable[var].is_const) {
+				snprintf(src+strlen(src), src_len-strlen(src), "	{\"%s\", %d, \"%s\", &PROTOCOL_NAME(%s)},\n", data_variable[var].name, 0, data_variable[var].type, data_variable[var].type);
+				count++;
+			}
+		}
+		snprintf(src+strlen(src), src_len-strlen(src), "};\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TYPE PROTOCOL_NAME(name) = {\"%s\", &__variable_list_%s_[0], %d};\n", data_type[type].name, data_type[type].name, count);
+	}
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 
 	return ERR_NOERROR;
 }
@@ -269,13 +297,14 @@ const char* parse_include(const char* buf)
 		if(*tbuf=='\0') return NULL;
 		if(*tbuf<=' ') return NULL;
 		if(*tbuf==';') break;
+		tbuf++;
 	}
 	if(tbuf==buf) return NULL;
 	if(tbuf-buf>=sizeof(name)) return NULL;
 	memcpy(name, buf, tbuf-buf);
 	name[tbuf-buf] = '\0';
 
-	buf = get_token_char(buf, ';');
+	buf = get_token_char(tbuf, ';');
 	if(buf==NULL) return NULL;
 
 	if(!def_include(name)) return NULL;
@@ -358,6 +387,16 @@ const char* parse_field_def(const char* buf)
 {
 	const char* tbuf;
 
+	tbuf = get_token_keyword(buf, "option", mode);
+	if(tbuf==NULL) {
+		tbuf = get_token_keyword(buf, "acquire", mode);
+		if(tbuf==NULL) {
+			strcpy(mode, "acquire");
+		}
+	}
+	if(tbuf)
+		buf = tbuf;
+
 	buf = get_token_id(buf, type, sizeof(type));
 	if(buf==NULL) return NULL;
 	buf = get_token_id(buf, name, sizeof(name));
@@ -393,13 +432,15 @@ const char* parse_array_def(const char* buf)
 {
 	const char* tbuf;
 
-	tbuf = buf;
 	tbuf = get_token_keyword(buf, "option", mode);
 	if(tbuf==NULL) {
 		tbuf = get_token_keyword(buf, "acquire", mode);
-		if(tbuf==NULL) return NULL;
+		if(tbuf==NULL) {
+			strcpy(mode, "acquire");
+		}
 	}
-	buf = tbuf;
+	if(tbuf)
+		buf = tbuf;
 
 	buf = get_token_id(buf, type, sizeof(type));
 	if(buf==NULL) return NULL;
@@ -591,6 +632,28 @@ int check_include_filename(const char* file)
 	if(strlen(file)<=strlen(fk)) return 0;
 	if(memcmp(file+strlen(file)-strlen(fk), fk, strlen(fk))!=0) return 0;
 	return 1;
+}
+
+void make_define_filename(const char* file, char* out)
+{
+	int i;
+	make_include_filename(file, out);
+	for(i=0; i<(int)strlen(out); i++) {
+		if(*out=='.') *out = '_';
+	}
+}
+
+void make_include_filename(const char* file, char* out)
+{
+	char *left, *right;
+	left = strchr(file, '\\');
+	right = strchr(file, '/');
+	if(!left && !right) {
+		strcpy(out, file);
+	} else {
+		if(right>left) left = right;
+		strcpy(out, left+1);
+	}
 }
 
 int def_include(const char* name)
