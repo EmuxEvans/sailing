@@ -1,5 +1,6 @@
 #include <time.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <skates/errcode.h>
 #include <skates/os.h>
@@ -7,7 +8,6 @@
 #include <skates/protocol.h>
 
 static char txt[50*1024];
-static char buf[150*1024];
 static char c_file[50*1024];
 static char h_file[50*1024];
 static char mode[100], type[100], name[100], value[2000];
@@ -40,7 +40,6 @@ static void def_node(const char* mode, const char* name);
 static void def_const(const char* type, const char* name, const char* value);
 static void def_field(const char* mode, const char* type, const char* name, const char* value);
 static void def_array(const char* mode, const char* type, const char* name, const char* count);
-static void def_errmsg(const char* msg);
 
 static struct {
 	char file[100];
@@ -71,13 +70,13 @@ int main(int argc, char* argv[])
 
 	if(argc<2) {
 		printf("invalid parameter\n");
-		exit(0);
+		return 0;
 	}
 
 	ret = load_textfile(argv[1], txt, sizeof(txt));
 	if(ret<0) {
 		printf("can't load file(%s)\n", argv[1]);
-		exit(0);
+		return 0;
 	}
 
 	num_inc = num_var = num_type = 0;
@@ -85,12 +84,12 @@ int main(int argc, char* argv[])
 	ret = parse_pfile(txt);
 	if(ret!=ERR_NOERROR) {
 		printf("error: parse!\n");
-		exit(0);
+		return 0;
 	}
 	ret = generate_cfile(argv[1], h_file, sizeof(h_file), c_file, sizeof(c_file));
 	if(ret!=ERR_NOERROR) {
 		printf("error: parse!\n");
-		exit(0);
+		return 0;
 	}
 
 	sprintf(file, "%s.h", argv[1]);
@@ -645,6 +644,3 @@ void def_array(const char* mode, const char* type, const char* name, const char*
 	return;
 }
 
-void def_errmsg(const char* msg)
-{
-}
