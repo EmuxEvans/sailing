@@ -28,6 +28,9 @@ static const char* parse_const(const char* buf);
 static const char* parse_node_def(const char* buf);
 static const char* parse_field_def(const char* buf);
 static const char* parse_array_def(const char* buf);
+static const char* parse_parameter(const char* buf);
+static const char* parse_function(const char* buf);
+static const char* parse_class(const char* buf);
 
 static int get_type(const char* type);
 static const char* get_type_string(const char* type);
@@ -44,7 +47,6 @@ static void def_array(const char* mode, const char* type, const char* name, cons
 static struct {
 	char file[100];
 } data_include[100];
-
 static struct {
 	int  is_const;
 	char mode[100];
@@ -53,13 +55,27 @@ static struct {
 	char maxlen[100];
 	char value[1000];
 } data_variable[500];
-
 static struct {
 	char mode[100];
 	char name[100];
 	int  var_start;
 	int  var_count;
 } data_type[100];
+
+static struct {
+	char name[100];
+	char type[100];
+} data_parameter[100];
+static struct {
+	char name[100];
+	int class_index;
+	int parameter_start;
+	int parameter_count;
+} data_function[100];
+static struct {
+	int function_start;
+	int function_count;
+} data_class[100];
 
 static int num_inc, num_var, num_type;
 
@@ -115,6 +131,12 @@ int parse_pfile(const char* buf)
 		tbuf = parse_node_def(buf);
 		if(tbuf) continue;
 
+		tbuf = parse_function(buf);
+		if(tbuf) continue;
+
+		tbuf = parse_class(buf);
+		if(tbuf) continue;
+
 		return ERR_UNKNOWN;
 	}
 
@@ -152,10 +174,18 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 		for(var=data_type[type].var_start; var<data_type[type].var_start+data_type[type].var_count; var++) {
 			if(data_variable[var].is_const) continue;
 			if(data_variable[var].maxlen[0]=='\0') {
+				if(get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
+					printf("%s::%s string, no length\n", data_type[type].name, data_variable[var].name);
+					return ERR_UNKNOWN;
+				}
 				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s %s;\n", data_variable[var].type, data_variable[var].name);
 			} else {
-				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s[%s] %s;\n", data_variable[var].type, data_variable[var].maxlen, data_variable[var].name);
-				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	int PROTOCOL_ARRAY_SIZE(%s);\n", data_variable[var].name);
+				if(get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
+					snprintf(inc+strlen(inc), inc_len-strlen(inc), "	char %s[%s+1];\n", data_variable[var].name, data_variable[var].maxlen);
+				} else {
+					snprintf(inc+strlen(inc), inc_len-strlen(inc), "	os_int PROTOCOL_ARRAY_SIZE(%s);\n", data_variable[var].name);
+					snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s %s[%s];\n", data_variable[var].type, data_variable[var].name, data_variable[var].maxlen);
+				}
 			}
 		}
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "} %s;\n", data_type[type].name);
@@ -190,7 +220,12 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 			if(data_variable[var].is_const)
 				continue;
 
-			if(data_variable[var].maxlen[0]=='\0') {
+			if(data_variable[var].maxlen[0]=='\0' && get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
+				printf("%s::%s string, no length\n", data_type[type].name, data_variable[var].name);
+				return ERR_UNKNOWN;
+			}
+
+			if(data_variable[var].maxlen[0]=='\0' || get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
 				sprintf(stype, "%s", get_type_string(data_variable[var].type));
 			} else {
 				sprintf(stype, "%s|PROTOCOL_TYPE_ARRAY", get_type_string(data_variable[var].type));
@@ -269,6 +304,7 @@ const char* get_token_id(const char* buf, char* value, int size)
 const char* get_token_keyword(const char* buf, const char* keyword, char* value)
 {
 	char id[100];
+	buf = escape_blank(buf);
 	buf = get_token_id(buf, id, sizeof(id));
 	if(buf==NULL) return NULL;
 	if(strcmp(id, keyword)!=0) return NULL;
@@ -301,8 +337,14 @@ const char* get_token_number(const char* buf, char* value, int size)
 const char* escape_blank(const char* buf)
 {
 	for(;;buf++) {
+
+		if(*buf=='/' && buf[1]=='/') {
+			buf+=2;
+			while(*buf!='\n' && *buf!='\0') buf++;
+		}
 		if(*buf=='\0') return buf;
 		if(*buf<=' ') continue;
+
 		return buf;
 	}
 }
@@ -376,7 +418,10 @@ const char* parse_node_def(const char* buf)
 		return NULL;
 	}
 
-	return tbuf;
+	buf = get_token_char(tbuf, ';');
+	if(buf==NULL) return NULL;
+
+	return buf;
 }
 
 const char* parse_const(const char* buf)
@@ -489,6 +534,95 @@ const char* parse_array_def(const char* buf)
 	return buf;
 }
 
+const char* parse_parameter(const char* buf)
+{
+	buf = get_token_id(buf, type, sizeof(type));
+	if(buf==NULL)
+		return NULL;
+
+	buf = get_token_id(buf, name, sizeof(name));
+	if(buf==NULL)
+		return NULL;
+
+	// call
+	return buf;
+}
+
+const char* parse_function(const char* buf)
+{
+	const char* tbuf;
+
+	buf = get_token_keyword(buf, "int", mode);
+	if(buf==NULL)
+		return NULL;
+
+	buf = get_token_id(buf, name, sizeof(name));
+	if(buf==NULL) return NULL;
+
+	buf = get_token_char(buf, '(');
+	if(buf==NULL) return NULL;
+
+	tbuf = buf;
+	for(;;) {
+		buf = tbuf;
+
+		tbuf = parse_parameter(buf);
+		if(tbuf) {
+			// call
+			buf = tbuf;
+			tbuf = get_token_char(buf, ',');
+			if(tbuf) continue;
+		}
+
+		buf = get_token_char(buf, ')');
+		if(buf) break;
+
+		return NULL;
+	}
+
+	buf = get_token_char(buf, ';');
+	if(buf==NULL) return NULL;
+
+	return buf;
+}
+
+const char* parse_class(const char* buf)
+{
+	const char* tbuf;
+
+	buf = get_token_keyword(buf, "class", mode);
+	if(buf==NULL)
+		return NULL;
+
+	buf = get_token_id(buf, name, sizeof(name));
+	if(buf==NULL) return NULL;
+	buf = get_token_char(buf, '{');
+	if(buf==NULL) return NULL;
+
+	// call class_begin
+
+	tbuf = buf;
+	for(;;) {
+		buf = tbuf;
+
+		tbuf = get_token_char(buf, '}');
+		if(tbuf!=NULL) break;
+
+		tbuf = parse_function(buf);
+		if(tbuf!=NULL) continue;
+
+		//
+		return NULL;
+	}
+
+	buf = get_token_char(tbuf, ';');
+	if(buf==NULL) return NULL;
+
+	// call class_begin
+
+	return buf;
+}
+
 static struct {
 	const char* name;
 	int type;
@@ -503,6 +637,7 @@ static struct {
 	{"os_dword",	PROTOCOL_TYPE_DWORD,	"PROTOCOL_TYPE_DWORD"},
 	{"os_qword",	PROTOCOL_TYPE_QWORD,	"PROTOCOL_TYPE_QWORD"},
 	{"os_float",	PROTOCOL_TYPE_FLOAT,	"PROTOCOL_TYPE_FLOAT"},
+	{"string",		PROTOCOL_TYPE_STRING,	"PROTOCOL_TYPE_STRING"},
 };
 
 int get_type(const char* type)

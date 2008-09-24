@@ -1,12 +1,15 @@
 include aaaa.proto;
 
+// kikkkk
+
 internal a {
 	os_int a = 100;
 	os_int b[100];
-}
+	string a[1000];
+};
 
 extern a {
 	os_int a = 100;
 	a aaa;
 	a aaaa[100];
-}
+};

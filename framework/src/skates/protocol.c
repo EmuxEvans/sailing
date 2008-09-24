@@ -94,6 +94,7 @@ const char* get_token_id(const char* buf, char* value, int size)
 const char* get_token_keyword(const char* buf, const char* keyword, char* value)
 {
 	char id[100];
+	buf = escape_blank(buf);
 	buf = get_token_id(buf, id, sizeof(id));
 	if(buf==NULL) return NULL;
 	if(strcmp(id, keyword)!=0) return NULL;
@@ -126,8 +127,14 @@ const char* get_token_number(const char* buf, char* value, int size)
 const char* escape_blank(const char* buf)
 {
 	for(;;buf++) {
+
+		if(*buf=='/' && buf[1]=='/') {
+			buf+=2;
+			while(*buf!='\n' && *buf!='\0') buf++;
+		}
 		if(*buf=='\0') return buf;
 		if(*buf<=' ') continue;
+
 		return buf;
 	}
 }
@@ -266,6 +273,16 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 	return tbuf;
 }
 
+#define READ_BUFFER(addr, size)	\
+	if(read_len+size>data_len) return ERR_UNKNOWN;	\
+	memcpy(addr, (char*)data+read_len, size);		\
+	read_len += size;
+
+#define WRITE_BUFFER(addr, size)	\
+	if(write_len+size>*data_len) return ERR_UNKNOWN;	\
+	memcpy((char*)data+write_len, addr, size);		\
+	write_len += size;
+
 int protocol_binary_read(PROTOCOL_TYPE* type, const void* data, unsigned int data_len, void* buf)
 {
 	return ERR_NOERROR;
@@ -273,6 +290,21 @@ int protocol_binary_read(PROTOCOL_TYPE* type, const void* data, unsigned int dat
 
 int protocol_binary_write(PROTOCOL_TYPE* type, const void* buf, void* data, unsigned int* data_len)
 {
+	//int i, ret;
+	//int write_len = 0;
+	//unsigned int len, count;
+
+	//for(i=0; i<type->var_count; i++) {
+	//	if(type->var_list[i].type&PROTOCOL_TYPE_ARRAY) {
+	//		WRITE_BUFFER(&len, 
+	//	} else {
+	//		len = 1;
+	//	}
+
+	//	switch(type->var_list[i].type) {
+	//	}
+	//}
+
 	return ERR_NOERROR;
 }
 
