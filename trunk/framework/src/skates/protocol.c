@@ -23,8 +23,9 @@ int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr)
 	const char* tbuf;
 
 	tbuf = buf;
-	while(*buf!='\0') {
+	for(;;) {
 		buf = escape_blank(tbuf);
+		if(*buf=='\0') break;
 
 		tbuf = parse_node(callback, ptr, buf);
 		if(tbuf) continue;
