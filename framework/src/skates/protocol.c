@@ -22,6 +22,7 @@ int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr)
 {
 	const char* tbuf;
 
+	callback->is_break = 0;
 	tbuf = buf;
 	for(;;) {
 		buf = escape_blank(tbuf);
@@ -141,7 +142,7 @@ const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	if(buf==NULL) return NULL;
 
 	// add node
-	if(!callback->new_node_begin(ptr, callback->name)) return NULL;
+	callback->new_node_begin(ptr, callback->name);
 
 	// node body
 	tbuf = buf;
@@ -162,7 +163,7 @@ const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	}
 
 	// add node
-	if(!callback->new_node_end(ptr)) return NULL;
+	callback->new_node_end(ptr);
 
 	return tbuf;
 }
@@ -183,7 +184,7 @@ const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 		if(tbuf==NULL) {
 			tbuf = get_token_number(buf, callback->value, callback->value_len);
 			if(tbuf==NULL) {
-				if(!callback->new_field(ptr, callback->name, NULL)) return NULL;
+				callback->new_field(ptr, callback->name, NULL);
 				return parse_array_item(callback, ptr, buf);
 			}
 		}
@@ -193,7 +194,7 @@ const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	buf = get_token_char(buf, ';');
 	if(buf==NULL) return NULL;
 
-	if(!callback->new_field(ptr, callback->name, callback->value)) return NULL;
+	callback->new_field(ptr, callback->name, callback->value);
 
 	return buf;
 }
@@ -210,7 +211,7 @@ const char* parse_array(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	buf = get_token_char(buf, '=');
 	if(buf==NULL) return NULL;
 
-	if(!callback->new_array(ptr, callback->name)) return NULL;
+	callback->new_array(ptr, callback->name);
 
 	buf = parse_array_item(callback, ptr, buf);
 	if(buf==NULL) return NULL;
@@ -225,7 +226,7 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 	buf = get_token_char(buf, '{');
 	if(buf==NULL) return NULL;
 
-	if(!callback->new_begin(ptr)) return NULL;
+	callback->new_begin(ptr);
 
 	tbuf = buf;
 	for(;;) {
@@ -255,42 +256,56 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 			}
 		}
 
-		if(!callback->new_item(ptr, callback->value)) return NULL;
+		callback->new_item(ptr, callback->value);
 
 		return NULL;
 	}
 
-	if(!callback->new_end(ptr)) return NULL;
+	callback->new_end(ptr);
 
 	return tbuf;
 }
 
-int protocol_binary_read(PROTOCOL_TYPE* type, const char* name, const void* data, unsigned int data_len, void* buf)
+int protocol_binary_read(PROTOCOL_TYPE* type, const void* data, unsigned int data_len, void* buf)
 {
 	return ERR_NOERROR;
 }
 
-int protocol_binary_write(PROTOCOL_TYPE* type, const char* name, const void* buf, void* data, unsigned int* data_len)
+int protocol_binary_write(PROTOCOL_TYPE* type, const void* buf, void* data, unsigned int* data_len)
 {
 	return ERR_NOERROR;
 }
 
-int protocol_text_read(PROTOCOL_TYPE* type, const char* name, const char* data, void* buf)
+int protocol_text_read(PROTOCOL_TYPE* type, const char* data, void* buf)
 {
 	return ERR_NOERROR;
 }
 
-int protocol_text_write(PROTOCOL_TYPE* type, const char* name, const void* buf, char* data, unsigned int data_len)
+int protocol_text_write(PROTOCOL_TYPE* type, const void* buf, char* data, unsigned int data_len)
 {
 	return ERR_NOERROR;
 }
 
-int protocol_file_read(PROTOCOL_TYPE* type, const char* name, const char* filename, void* buf)
+int protocol_file_read(PROTOCOL_TYPE* type, const char* filename, void* buf)
 {
-	return ERR_NOERROR;
+	int ret;
+	char data[50*1024];
+
+	ret = load_textfile(filename, data, sizeof(data));
+	if(ret!=ERR_NOERROR)
+		return ret;
+
+	return protocol_text_read(type, data, buf);
 }
 
-int protocol_file_write(PROTOCOL_TYPE* type, const char* name, const void* buf, const char* filename)
+int protocol_file_write(PROTOCOL_TYPE* type, const void* buf, const char* filename)
 {
-	return ERR_NOERROR;
+	int ret;
+	char data[50*1024];
+
+	ret = protocol_text_write(type, buf, data, sizeof(data));
+	if(ret!=ERR_NOERROR)
+		return ret;
+
+	return save_textfile(filename, data, sizeof(data));
 }
