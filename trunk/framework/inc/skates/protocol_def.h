@@ -8,6 +8,8 @@ extern "C" {
 #define PROTOCOL_NAME(name) __protocol_0_0_1_##name
 #define PROTOCOL_ARRAY_SIZE(name)	__array_size_##name
 
+#define PROTOCOL_STRUCT_OFFSET(type, var)			((unsigned int)&(((type*)NULL)->var))
+
 #define PROTOCOL_TYPE_ARRAY			0x0100
 #define PROTOCOL_TYPE_OBJECT		0x00ff
 #define PROTOCOL_TYPE_CHAR			0x0001
@@ -30,14 +32,16 @@ typedef struct PROTOCOL_TABLE		PROTOCOL_TABLE;
 struct PROTOCOL_VARIABLE {
 	char*					name;
 	int						type;
-	char*					type_name;
 	PROTOCOL_TYPE*			obj_type;
+	unsigned int			maxlen;
+	unsigned int			offset;
 };
 
 struct PROTOCOL_TYPE {
 	char*					name;
 	PROTOCOL_VARIABLE*		var_list;
 	int						var_count;
+	unsigned int			size;
 };
 
 #ifdef __cplusplus

@@ -11,6 +11,7 @@ static char buf[150*1024];
 static char c_file[50*1024];
 static char h_file[50*1024];
 static char mode[100], type[100], name[100], value[2000];
+static int is_break;
 
 static int parse_pfile(const char* text);
 static int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src, unsigned int src_len);
@@ -34,11 +35,11 @@ static int check_include_filename(const char* file);
 static void make_define_filename(const char* file, char* out);
 static void make_include_filename(const char* file, char* out);
 
-static int def_include(const char* name);
-static int def_node(const char* mode, const char* name);
-static int def_const(const char* type, const char* name, const char* value);
-static int def_field(const char* mode, const char* type, const char* name, const char* value);
-static int def_array(const char* mode, const char* type, const char* name, const char* count);
+static void def_include(const char* name);
+static void def_node(const char* mode, const char* name);
+static void def_const(const char* type, const char* name, const char* value);
+static void def_field(const char* mode, const char* type, const char* name, const char* value);
+static void def_array(const char* mode, const char* type, const char* name, const char* count);
 static void def_errmsg(const char* msg);
 
 static struct {
@@ -66,6 +67,7 @@ static int num_inc, num_var, num_type;
 int main(int argc, char* argv[])
 {
 	int ret;
+	char file[200];
 
 	if(argc<2) {
 		printf("invalid parameter\n");
@@ -85,14 +87,16 @@ int main(int argc, char* argv[])
 		printf("error: parse!\n");
 		exit(0);
 	}
-	ret = generate_cfile("aaaa", h_file, sizeof(h_file), c_file, sizeof(c_file));
+	ret = generate_cfile(argv[1], h_file, sizeof(h_file), c_file, sizeof(c_file));
 	if(ret!=ERR_NOERROR) {
 		printf("error: parse!\n");
 		exit(0);
 	}
 
-	save_textfile("aaaa.h", h_file, 0);
-	save_textfile("aaaa.c", c_file, 0);
+	sprintf(file, "%s.h", argv[1]);
+	save_textfile(file, h_file, 0);
+	sprintf(file, "%s.c", argv[1]);
+	save_textfile(file, c_file, 0);
 
 	return 0;
 }
@@ -130,11 +134,15 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
     newTime = localtime(&szClock);
 
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "//generate by PROT_GEN. %s\n", asctime(newTime));
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// generate by PROT_GEN.\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// %s\n", asctime(newTime));
 	make_define_filename(name, buf);
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_include__\n", buf);
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_include__\n", buf);
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	for(type=0; type<num_inc; type++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#include \"%s.h\"\n", data_include[type].file);
+	}
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifdef __cplusplus\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "extern \"C\" {\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
@@ -166,29 +174,39 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
 
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
-	snprintf(src+strlen(src), src_len-strlen(src), "//generate by PROT_GEN. %s\n", asctime(newTime));
-	snprintf(src+strlen(src), src_len-strlen(src), "#include <protocol_def.h>\n");
-	for(type=0; type<num_inc; type++) {
-		snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s\"\n", data_include[type].file);
-	}
+	snprintf(src+strlen(src), src_len-strlen(src), "// generate by PROT_GEN.\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "// %s\n", asctime(newTime));
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/errcode.h>\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/errcode.h>\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/protocol_def.h>\n");
 	make_include_filename(name, buf);
-	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s\"\n", buf);
+	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.h\"\n", buf);
 	for(type=0; type<num_type; type++) {
 		int count = 0;
 		snprintf(src+strlen(src), src_len-strlen(src), "\n");
-		snprintf(src+strlen(src), src_len-strlen(src), "static PROTOCOL_VARIABLE __variable_list_%s_[] = {\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "static PROTOCOL_VARIABLE __variable_list_%s_[] = {\n", data_type[type].name);
 		for(var=data_type[type].var_start; var<data_type[type].var_start+data_type[type].var_count; var++) {
+			char stype[100], obj_type[100];
+
 			if(data_variable[var].is_const)
 				continue;
 
 			if(data_variable[var].maxlen[0]=='\0') {
+				sprintf(stype, "%s", get_type_string(data_variable[var].type));
 			} else {
+				sprintf(stype, "%s|PROTOCOL_TYPE_ARRAY", get_type_string(data_variable[var].type));
 			}
-			snprintf(src+strlen(src), src_len-strlen(src), "	{\"%s\", %d, \"%s\", &PROTOCOL_NAME(%s)},\n", data_variable[var].name, 0, data_variable[var].type, data_variable[var].type);
+			if(get_type(data_variable[var].type)==PROTOCOL_TYPE_OBJECT) {
+				sprintf(obj_type, "&PROTOCOL_NAME(%s)", data_variable[var].type);
+			} else {
+				sprintf(obj_type, "NULL");
+			}
+			snprintf(src+strlen(src), src_len-strlen(src), "	{\"%s\", %s, %s, %s, PROTOCOL_STRUCT_OFFSET(%s, %s)},\n", data_variable[var].name, stype, obj_type, data_variable[var].maxlen[0]=='\0'?"0":data_variable[var].maxlen, data_type[type].name, data_variable[var].name);
+
 			count++;
 		}
 		snprintf(src+strlen(src), src_len-strlen(src), "};\n");
-		snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TYPE PROTOCOL_NAME(name) = {\"%s\", &__variable_list_%s_[0], %d};\n", data_type[type].name, data_type[type].name, count);
+		snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TYPE PROTOCOL_NAME(name) = {\"%s\", &__variable_list_%s_[0], %d, sizeof(%s)};\n", data_type[type].name, data_type[type].name, count, data_type[type].name);
 	}
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 
@@ -313,7 +331,7 @@ const char* parse_include(const char* buf)
 	buf = get_token_char(tbuf, ';');
 	if(buf==NULL) return NULL;
 
-	if(!def_include(name)) return NULL;
+	def_include(name);
 
 	return buf;
 }
@@ -336,7 +354,7 @@ const char* parse_node_def(const char* buf)
 	if(buf==NULL) return NULL;
 
 	// add node
-	if(!def_node(mode, name)) return NULL;
+	def_node(mode, name);
 
 	// node body
 	tbuf = buf;
@@ -384,7 +402,7 @@ const char* parse_const(const char* buf)
 		}
 	}
 
-	if(!def_const(type, name, value)) return NULL;
+	def_const(type, name, value);
 
 	return tbuf;
 }
@@ -429,7 +447,7 @@ const char* parse_field_def(const char* buf)
 	buf = get_token_char(buf, ';');
 	if(buf==NULL) return NULL;
 
-	if(!def_field(mode, type, name, value)) return NULL;
+	def_field(mode, type, name, value);
 
 	return buf;
 }
@@ -467,7 +485,7 @@ const char* parse_array_def(const char* buf)
 	buf = get_token_char(buf, ';');
 	if(buf==NULL) return NULL;
 
-	if(!def_array(mode, type, name, value)) return NULL;
+	def_array(mode, type, name, value);
 
 	return buf;
 }
@@ -521,15 +539,15 @@ void make_define_filename(const char* file, char* out)
 	int i;
 	make_include_filename(file, out);
 	for(i=0; i<(int)strlen(out); i++) {
-		if(*out=='.') *out = '_';
+		if(out[i]=='.') out[i] = '_';
 	}
 }
 
 void make_include_filename(const char* file, char* out)
 {
 	char *left, *right;
-	left = strchr(file, '\\');
-	right = strchr(file, '/');
+	left = strrchr(file, '\\');
+	right = strrchr(file, '/');
 	if(!left && !right) {
 		strcpy(out, file);
 	} else {
@@ -538,39 +556,43 @@ void make_include_filename(const char* file, char* out)
 	}
 }
 
-int def_include(const char* name)
+void def_include(const char* name)
 {
 	if(!check_include_filename(name)) {
 		printf("invalid include filename(%s)\n", name);
-		return 0;
+		is_break = 1;
+		return;
 	}
 	if(num_inc>=sizeof(data_include)/sizeof(data_include[0])) {
 		printf("so many include filename(%s)\n", name);
-		return 0;
+		is_break = 1;
+		return;
 	}
 	strcpy(data_include[num_inc++].file, name);
-	return 1;
+	return;
 }
 
-int def_node(const char* mode, const char* name)
+void def_node(const char* mode, const char* name)
 {
 	if(num_type>=sizeof(data_type)/sizeof(data_type[0])) {
 		printf("so many type(%s)\n", name);
-		return 0;
+		is_break = 1;
+		return;
 	}
 	strcpy(data_type[num_type].mode, mode);
 	strcpy(data_type[num_type].name, name);
 	data_type[num_type].var_start = num_var;
 	data_type[num_type].var_count = 0;
 	num_type++;
-	return 1;
+	return;
 }
 
-int def_const(const char* type, const char* name, const char* value)
+void def_const(const char* type, const char* name, const char* value)
 {
 	if(num_var>=sizeof(data_variable)/sizeof(data_variable[0])) {
 		printf("so many variable(%s:%s)\n", data_type[num_type-1].name, name);
-		return 0;
+		is_break = 1;
+		return;
 	}
 	data_variable[num_var].is_const = 1;
 	strcpy(data_variable[num_var].mode, "");
@@ -580,14 +602,15 @@ int def_const(const char* type, const char* name, const char* value)
 	strcpy(data_variable[num_var].value, value);
 	data_type[num_type-1].var_count++;
 	num_var++;
-	return 1;
+	return;
 }
 
-int def_field(const char* mode, const char* type, const char* name, const char* value)
+void def_field(const char* mode, const char* type, const char* name, const char* value)
 {
 	if(num_var>=sizeof(data_variable)/sizeof(data_variable[0])) {
 		printf("so many variable(%s:%s)\n", data_type[num_type-1].name, name);
-		return 0;
+		is_break = 1;
+		return;
 	}
 	data_variable[num_var].is_const = 0;
 	strcpy(data_variable[num_var].mode, mode);
@@ -601,14 +624,15 @@ int def_field(const char* mode, const char* type, const char* name, const char* 
 	}
 	data_type[num_type-1].var_count++;
 	num_var++;
-	return 1;
+	return;
 }
 
-int def_array(const char* mode, const char* type, const char* name, const char* count)
+void def_array(const char* mode, const char* type, const char* name, const char* count)
 {
 	if(num_var>=sizeof(data_variable)/sizeof(data_variable[0])) {
 		printf("so many variable(%s:%s)\n", data_type[num_type-1].name, name);
-		return 0;
+		is_break = 1;
+		return;
 	}
 	data_variable[num_var].is_const = 0;
 	strcpy(data_variable[num_var].mode, mode);
@@ -618,7 +642,7 @@ int def_array(const char* mode, const char* type, const char* name, const char* 
 	strcpy(data_variable[num_var].value, "");
 	data_type[num_type-1].var_count++;
 	num_var++;
-	return 1;
+	return;
 }
 
 void def_errmsg(const char* msg)

@@ -1,9 +1,12 @@
-include aaaa.p;
+include aaaa.proto;
 
 internal a {
 	os_int a = 100;
+	os_int b[100];
 }
 
 extern a {
 	os_int a = 100;
+	a aaa;
+	a aaaa[100];
 }
