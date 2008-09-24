@@ -28,7 +28,7 @@ extern "C" {
 #define ZION_EXPORT		__declspec(dllexport)
 #endif
 
-typedef unsigned char		os_uchar;
+typedef unsigned char		os_byte;
 typedef unsigned short		os_word;
 typedef unsigned int		os_dword;
 typedef unsigned __int64	os_qword;
