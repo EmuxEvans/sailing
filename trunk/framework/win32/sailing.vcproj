@@ -329,7 +329,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\sailing\pool.cpp"
+				RelativePath="..\src\sailing\lua_state.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sailing\lua_state.hpp"
 				>
 			</File>
 		</Filter>
@@ -339,7 +343,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\inc\sailing\pool.hpp"
+				RelativePath="..\inc\sailing\pool.inl"
 				>
 			</File>
 		</Filter>
