@@ -41,8 +41,8 @@ static void make_include_filename(const char* file, char* out);
 static void def_include(const char* name);
 static void def_node(const char* mode, const char* name);
 static void def_const(const char* type, const char* name, const char* value);
-static void def_field(const char* mode, const char* type, const char* name, const char* value);
-static void def_array(const char* mode, const char* type, const char* name, const char* count);
+static void def_field(const char* mode, const char* type, const char* prefix, const char* name, const char* value);
+static void def_array(const char* mode, const char* type, const char* prefix, const char* name, const char* count);
 
 static struct {
 	char file[100];
@@ -51,6 +51,7 @@ static struct {
 	int  is_const;
 	char mode[100];
 	char type[100];
+	char prefix[100];
 	char name[100];
 	char maxlen[100];
 	char value[1000];
@@ -175,15 +176,23 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 			if(data_variable[var].is_const) continue;
 			if(data_variable[var].maxlen[0]=='\0') {
 				if(get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
-					printf("%s::%s string, no length\n", data_type[type].name, data_variable[var].name);
-					return ERR_UNKNOWN;
-				}
-				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s %s;\n", data_variable[var].type, data_variable[var].name);
-			} else {
-				if(get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
-					snprintf(inc+strlen(inc), inc_len-strlen(inc), "	char %s[%s+1];\n", data_variable[var].name, data_variable[var].maxlen);
+					if(data_variable[var].prefix[0]=='\0') {
+						printf("%s::%s string, no length\n", data_type[type].name, data_variable[var].name);
+						return ERR_UNKNOWN;
+					}
+					snprintf(inc+strlen(inc), inc_len-strlen(inc), "	char %s[%s+1];\n", data_variable[var].name, data_variable[var].prefix);
 				} else {
-					snprintf(inc+strlen(inc), inc_len-strlen(inc), "	os_int PROTOCOL_ARRAY_SIZE(%s);\n", data_variable[var].name);
+					snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s %s;\n", data_variable[var].type, data_variable[var].name);
+				}
+			} else {
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "	os_int PROTOCOL_ARRAY_SIZE(%s);\n", data_variable[var].name);
+				if(get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
+					if(data_variable[var].prefix[0]=='\0') {
+						printf("%s::%s string, no length\n", data_type[type].name, data_variable[var].name);
+						return ERR_UNKNOWN;
+					}
+					snprintf(inc+strlen(inc), inc_len-strlen(inc), "	char %s[%s][%s+1];\n", data_variable[var].name, data_variable[var].maxlen, data_variable[var].prefix);
+				} else {
 					snprintf(inc+strlen(inc), inc_len-strlen(inc), "	%s %s[%s];\n", data_variable[var].type, data_variable[var].name, data_variable[var].maxlen);
 				}
 			}
@@ -206,7 +215,7 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 	snprintf(src+strlen(src), src_len-strlen(src), "// generate by PROT_GEN.\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "// %s\n", asctime(newTime));
 	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/errcode.h>\n");
-	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/errcode.h>\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/os.h>\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/protocol_def.h>\n");
 	make_include_filename(name, buf);
 	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.h\"\n", buf);
@@ -215,32 +224,37 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 		snprintf(src+strlen(src), src_len-strlen(src), "\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "static PROTOCOL_VARIABLE __variable_list_%s_[] = {\n", data_type[type].name);
 		for(var=data_type[type].var_start; var<data_type[type].var_start+data_type[type].var_count; var++) {
-			char stype[100], obj_type[100];
+			char stype[100], obj_type[100], prelen[100];
 
 			if(data_variable[var].is_const)
 				continue;
 
-			if(data_variable[var].maxlen[0]=='\0' && get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
-				printf("%s::%s string, no length\n", data_type[type].name, data_variable[var].name);
-				return ERR_UNKNOWN;
-			}
-
-			if(data_variable[var].maxlen[0]=='\0' || get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
+			if(data_variable[var].maxlen[0]=='\0') {
 				sprintf(stype, "%s", get_type_string(data_variable[var].type));
+				if(get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
+					sprintf(prelen, "%s+1", data_variable[var].prefix);
+				} else {
+					sprintf(prelen, "sizeof(%s)", data_variable[var].type);
+				}
 			} else {
 				sprintf(stype, "%s|PROTOCOL_TYPE_ARRAY", get_type_string(data_variable[var].type));
+				if(get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
+					sprintf(prelen, "%s+1", data_variable[var].prefix);
+				} else {
+					sprintf(prelen, "sizeof(%s)", data_variable[var].type);
+				}
 			}
 			if(get_type(data_variable[var].type)==PROTOCOL_TYPE_OBJECT) {
 				sprintf(obj_type, "&PROTOCOL_NAME(%s)", data_variable[var].type);
 			} else {
 				sprintf(obj_type, "NULL");
 			}
-			snprintf(src+strlen(src), src_len-strlen(src), "	{\"%s\", %s, %s, %s, PROTOCOL_STRUCT_OFFSET(%s, %s)},\n", data_variable[var].name, stype, obj_type, data_variable[var].maxlen[0]=='\0'?"0":data_variable[var].maxlen, data_type[type].name, data_variable[var].name);
+			snprintf(src+strlen(src), src_len-strlen(src), "	{\"%s\", %s, %s, %s, %s, PROTOCOL_STRUCT_OFFSET(%s, %s)},\n", data_variable[var].name, stype, obj_type, prelen, data_variable[var].maxlen[0]=='\0'?"0":data_variable[var].maxlen, data_type[type].name, data_variable[var].name);
 
 			count++;
 		}
 		snprintf(src+strlen(src), src_len-strlen(src), "};\n");
-		snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TYPE PROTOCOL_NAME(name) = {\"%s\", &__variable_list_%s_[0], %d, sizeof(%s)};\n", data_type[type].name, data_type[type].name, count, data_type[type].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TYPE PROTOCOL_NAME(%s) = {\"%s\", &__variable_list_%s_[0], %d, sizeof(%s)};\n", data_type[type].name, data_type[type].name, data_type[type].name, count, data_type[type].name);
 	}
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 
@@ -454,6 +468,7 @@ const char* parse_const(const char* buf)
 const char* parse_field_def(const char* buf)
 {
 	const char* tbuf;
+	char slen[100];
 
 	tbuf = get_token_keyword(buf, "option", mode);
 	if(tbuf==NULL) {
@@ -467,6 +482,18 @@ const char* parse_field_def(const char* buf)
 
 	buf = get_token_id(buf, type, sizeof(type));
 	if(buf==NULL) return NULL;
+	tbuf = get_token_char(buf, '<');
+	if(tbuf) {
+		const char* end;
+		end = strchr(tbuf, '>');
+		if(!end) return NULL;
+		if(end-tbuf>=sizeof(slen)) return NULL;
+		memcpy(slen, tbuf, end-tbuf);
+		slen[end-tbuf] = '\0';
+		buf = end + 1;
+	} else {
+		slen[0] = '\0';
+	}
 	buf = get_token_id(buf, name, sizeof(name));
 	if(buf==NULL) return NULL;
 
@@ -491,7 +518,7 @@ const char* parse_field_def(const char* buf)
 	buf = get_token_char(buf, ';');
 	if(buf==NULL) return NULL;
 
-	def_field(mode, type, name, value);
+	def_field(mode, type, slen, name, value);
 
 	return buf;
 }
@@ -499,6 +526,7 @@ const char* parse_field_def(const char* buf)
 const char* parse_array_def(const char* buf)
 {
 	const char* tbuf;
+	char slen[100];
 
 	tbuf = get_token_keyword(buf, "option", mode);
 	if(tbuf==NULL) {
@@ -512,6 +540,18 @@ const char* parse_array_def(const char* buf)
 
 	buf = get_token_id(buf, type, sizeof(type));
 	if(buf==NULL) return NULL;
+	tbuf = get_token_char(buf, '<');
+	if(tbuf) {
+		const char* end;
+		end = strchr(tbuf, '>');
+		if(!end) return NULL;
+		if(end-tbuf>=sizeof(slen)) return NULL;
+		memcpy(slen, tbuf, end-tbuf);
+		slen[end-tbuf] = '\0';
+		buf = end + 1;
+	} else {
+		slen[0] = '\0';
+	}
 	buf = get_token_id(buf, name, sizeof(name));
 	if(buf==NULL) return NULL;
 
@@ -529,7 +569,7 @@ const char* parse_array_def(const char* buf)
 	buf = get_token_char(buf, ';');
 	if(buf==NULL) return NULL;
 
-	def_array(mode, type, name, value);
+	def_array(mode, type, slen, name, value);
 
 	return buf;
 }
@@ -739,7 +779,7 @@ void def_const(const char* type, const char* name, const char* value)
 	return;
 }
 
-void def_field(const char* mode, const char* type, const char* name, const char* value)
+void def_field(const char* mode, const char* type, const char* prefix, const char* name, const char* value)
 {
 	if(num_var>=sizeof(data_variable)/sizeof(data_variable[0])) {
 		printf("so many variable(%s:%s)\n", data_type[num_type-1].name, name);
@@ -749,6 +789,7 @@ void def_field(const char* mode, const char* type, const char* name, const char*
 	data_variable[num_var].is_const = 0;
 	strcpy(data_variable[num_var].mode, mode);
 	strcpy(data_variable[num_var].type, type);
+	strcpy(data_variable[num_var].prefix, prefix);
 	strcpy(data_variable[num_var].name, name);
 	strcpy(data_variable[num_var].maxlen, "");
 	if(value) {
@@ -761,7 +802,7 @@ void def_field(const char* mode, const char* type, const char* name, const char*
 	return;
 }
 
-void def_array(const char* mode, const char* type, const char* name, const char* count)
+void def_array(const char* mode, const char* type, const char* prefix, const char* name, const char* count)
 {
 	if(num_var>=sizeof(data_variable)/sizeof(data_variable[0])) {
 		printf("so many variable(%s:%s)\n", data_type[num_type-1].name, name);
@@ -771,6 +812,7 @@ void def_array(const char* mode, const char* type, const char* name, const char*
 	data_variable[num_var].is_const = 0;
 	strcpy(data_variable[num_var].mode, mode);
 	strcpy(data_variable[num_var].type, type);
+	strcpy(data_variable[num_var].prefix, prefix);
 	strcpy(data_variable[num_var].name, name);
 	strcpy(data_variable[num_var].maxlen, count);
 	strcpy(data_variable[num_var].value, "");

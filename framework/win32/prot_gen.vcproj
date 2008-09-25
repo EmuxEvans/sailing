@@ -338,6 +338,10 @@
 				RelativePath="..\inc\skates\protocol.h"
 				>
 			</File>
+			<File
+				RelativePath="..\inc\skates\protocol_def.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="..\test\tools\sample_p.proto"
