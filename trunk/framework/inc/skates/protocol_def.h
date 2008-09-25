@@ -11,7 +11,6 @@ extern "C" {
 #define PROTOCOL_STRUCT_OFFSET(type, var)			((unsigned int)&(((type*)NULL)->var))
 
 #define PROTOCOL_TYPE_ARRAY			0x0100
-#define PROTOCOL_TYPE_OBJECT		0x00ff
 #define PROTOCOL_TYPE_CHAR			0x0001
 #define PROTOCOL_TYPE_SHORT			0x0002
 #define PROTOCOL_TYPE_INT			0x0003
@@ -22,6 +21,7 @@ extern "C" {
 #define PROTOCOL_TYPE_QWORD			0x0008
 #define PROTOCOL_TYPE_FLOAT			0x0009
 #define PROTOCOL_TYPE_STRING		0x000a
+#define PROTOCOL_TYPE_OBJECT		0x00ff
 
 struct PROTOCOL_VARIABLE;
 struct PROTOCOL_TYPE;
@@ -34,6 +34,7 @@ struct PROTOCOL_VARIABLE {
 	char*					name;
 	int						type;
 	PROTOCOL_TYPE*			obj_type;
+	unsigned int			prelen;
 	unsigned int			maxlen;
 	unsigned int			offset;
 };

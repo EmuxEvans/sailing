@@ -18,21 +18,33 @@ static const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const cha
 static const char* parse_array(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
 static const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
 
+static void proto_new_field(void* ptr, const char* name, const char* value);
+static void proto_new_array(void* ptr, const char* name);
+static void proto_new_begin(void* ptr);
+static void proto_new_item(void* ptr, const char* value);
+static void proto_new_end(void* ptr);
+
+typedef struct PROTO_PARSE {
+	struct {
+		PROTOCOL_TYPE*		type;
+		PROTOCOL_VARIABLE*	var;
+		void*				buf;
+		int count;
+	} stack[10];
+	int stack_count;
+} PROTO_PARSE;
+
 int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr)
 {
-	const char* tbuf;
-
 	callback->is_break = 0;
-	tbuf = buf;
-	for(;;) {
-		buf = escape_blank(tbuf);
-		if(*buf=='\0') break;
 
-		tbuf = parse_node(callback, ptr, buf);
-		if(tbuf) continue;
+	buf = get_token_id(buf, callback->name, callback->name_len);
+	if(!buf) return ERR_UNKNOWN;
 
-		return ERR_UNKNOWN;
-	}
+	callback->new_field(ptr, callback->name, NULL);
+
+	buf = parse_node(callback, ptr, buf);
+	if(!buf) return ERR_UNKNOWN;
 
 	return ERR_NOERROR;
 }
@@ -143,13 +155,11 @@ const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 {
 	const char* tbuf;
 
-	buf = get_token_id(buf, callback->name, callback->name_len);
-	if(buf==NULL) return NULL;
 	buf = get_token_char(buf, '{');
 	if(buf==NULL) return NULL;
 
 	// add node
-	callback->new_node_begin(ptr, callback->name);
+	callback->new_begin(ptr);
 
 	// node body
 	tbuf = buf;
@@ -170,7 +180,7 @@ const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	}
 
 	// add node
-	callback->new_node_end(ptr);
+	callback->new_end(ptr);
 
 	return tbuf;
 }
@@ -185,23 +195,27 @@ const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	buf = get_token_char(buf, '=');
 	if(buf==NULL) return NULL;
 
-	tbuf = get_token_id(buf, callback->value, callback->value_len);
-	if(tbuf==NULL) {
-		tbuf = get_token_string(buf, callback->value, callback->value_len);
+	tbuf = get_token_char(buf, '{');
+	if(tbuf) {
+		callback->new_field(ptr, callback->name, NULL);
+		tbuf = parse_node(callback, ptr, buf);
+		if(!tbuf) return NULL;
+	} else {
+		tbuf = get_token_id(buf, callback->value, callback->value_len);
 		if(tbuf==NULL) {
-			tbuf = get_token_number(buf, callback->value, callback->value_len);
+			tbuf = get_token_string(buf, callback->value, callback->value_len);
 			if(tbuf==NULL) {
-				callback->new_field(ptr, callback->name, NULL);
-				return parse_array_item(callback, ptr, buf);
+				tbuf = get_token_number(buf, callback->value, callback->value_len);
+				if(tbuf==NULL) {
+					return NULL;
+				}
 			}
 		}
+		callback->new_field(ptr, callback->name, callback->value);
 	}
 
-	buf = escape_blank(tbuf);
-	buf = get_token_char(buf, ';');
+	buf = get_token_char(tbuf, ';');
 	if(buf==NULL) return NULL;
-
-	callback->new_field(ptr, callback->name, callback->value);
 
 	return buf;
 }
@@ -247,25 +261,26 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 		tbuf = get_token_char(buf, '}');
 		if(tbuf!=NULL) break;
 
-		tbuf = get_token_string(buf, callback->value, callback->value_len);
-		if(tbuf==NULL) {
-			tbuf = get_token_id(buf, callback->value, callback->value_len);
+		tbuf = get_token_char(buf, '{');
+		if(tbuf) {
+			callback->new_item(ptr, NULL);
+			tbuf = parse_node(callback, ptr, buf);
+			if(!tbuf) return NULL;
+		} else {
+			tbuf = get_token_string(buf, callback->value, callback->value_len);
 			if(tbuf==NULL) {
-				tbuf = get_token_number(buf, callback->value, callback->value_len);
+				tbuf = get_token_id(buf, callback->value, callback->value_len);
 				if(tbuf==NULL) {
-					tbuf = parse_array_item(callback, ptr, buf);
+					tbuf = get_token_number(buf, callback->value, callback->value_len);
 					if(tbuf==NULL) {
-						return NULL;
-					} else {
-						continue;
+						tbuf = parse_array_item(callback, ptr, buf);
+						if(!tbuf)
+							return NULL;
 					}
 				}
 			}
+			callback->new_item(ptr, callback->value);
 		}
-
-		callback->new_item(ptr, callback->value);
-
-		return NULL;
 	}
 
 	callback->new_end(ptr);
@@ -274,8 +289,8 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 }
 
 #define READ_BUFFER(addr, size)	\
-	if(read_len+size>data_len) return ERR_UNKNOWN;	\
-	memcpy(addr, (char*)data+read_len, size);		\
+	if(read_len+size>*data_len) return ERR_UNKNOWN;	\
+	memcpy(addr, (const char*)data+read_len, size);		\
 	read_len += size;
 
 #define WRITE_BUFFER(addr, size)	\
@@ -283,38 +298,212 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 	memcpy((char*)data+write_len, addr, size);		\
 	write_len += size;
 
-int protocol_binary_read(PROTOCOL_TYPE* type, const void* data, unsigned int data_len, void* buf)
+int protocol_binary_read(PROTOCOL_TYPE* type, const void* data, unsigned int* data_len, void* buf)
 {
+	int i, j, ret;
+	unsigned int read_len = 0;
+	unsigned int len;
+
+	for(i=0; i<type->var_count; i++) {
+		if(type->var_list[i].type&PROTOCOL_TYPE_ARRAY) {
+			READ_BUFFER(&len, sizeof(len));
+			if(len>type->var_list[i].maxlen)
+				return ERR_INVALID_DATA;
+			*((unsigned int*)((char*)buf+type->var_list[i].offset-sizeof(unsigned int))) = len;
+		} else {
+			len = 1;
+		}
+
+		for(j=0; j<(int)len; j++) {
+			if((type->var_list[i].type&0xff)==PROTOCOL_TYPE_OBJECT) {
+				unsigned int olen;
+				olen = *data_len - read_len;
+				ret = protocol_binary_read(type->var_list[i].obj_type, (const char*)data+read_len, &olen, (char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen);
+				if(ret!=ERR_NOERROR) return ret;
+				read_len += olen;
+				continue;
+			}
+			if((type->var_list[i].type&0xff)==PROTOCOL_TYPE_STRING) {
+				unsigned int slen;
+				slen = strlen((const char*)data+read_len)+1;
+				if(slen>type->var_list[i].prelen) slen = type->var_list[i].prelen;
+				READ_BUFFER((char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen, slen);
+				continue;
+			}
+			READ_BUFFER((char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen, type->var_list[i].prelen);
+		}
+	}
+
+	*data_len = read_len;
+
 	return ERR_NOERROR;
 }
 
 int protocol_binary_write(PROTOCOL_TYPE* type, const void* buf, void* data, unsigned int* data_len)
 {
-	//int i, ret;
-	//int write_len = 0;
-	//unsigned int len, count;
+	int i, j, ret;
+	unsigned int write_len = 0;
+	unsigned int len;
 
-	//for(i=0; i<type->var_count; i++) {
-	//	if(type->var_list[i].type&PROTOCOL_TYPE_ARRAY) {
-	//		WRITE_BUFFER(&len, 
-	//	} else {
-	//		len = 1;
-	//	}
+	for(i=0; i<type->var_count; i++) {
+		if(type->var_list[i].type&PROTOCOL_TYPE_ARRAY) {
+			len = *((const unsigned int*)((const char*)buf+type->var_list[i].offset-sizeof(unsigned int)));
+			if(len>type->var_list[i].maxlen)
+				return ERR_INVALID_DATA;
+			WRITE_BUFFER(&len, sizeof(len));
+		} else {
+			len = 1;
+		}
 
-	//	switch(type->var_list[i].type) {
-	//	}
-	//}
+		for(j=0; j<(int)len; j++) {
+			if((type->var_list[i].type&0xff)==PROTOCOL_TYPE_OBJECT) {
+				unsigned int olen;
+				olen = *data_len - write_len;
+				ret = protocol_binary_write(type->var_list[i].obj_type, (const char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen, (char*)data+write_len, &olen);
+				if(ret!=ERR_NOERROR) return ret;
+				write_len += olen;
+				continue;
+			}
+			if((type->var_list[i].type&0xff)==PROTOCOL_TYPE_STRING) {
+				unsigned int slen;
+				slen = strlen((const char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen)+1;
+				if(slen>type->var_list[i].prelen) slen = type->var_list[i].prelen;
+				WRITE_BUFFER((const char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen, slen);
+				continue;
+			}
+			WRITE_BUFFER((const char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen, type->var_list[i].prelen);
+		}
+	}
+
+	*data_len = write_len;
 
 	return ERR_NOERROR;
 }
+
+#define READ_BUFFER(addr, size)	\
+	if(read_len+size>*data_len) return ERR_UNKNOWN;	\
+	memcpy(addr, (const char*)data+read_len, size);		\
+	read_len += size;
+
+#define WRITE_TEXT(...)	\
+	ret = (int)snprintf(data+write_len, *data_len-write_len, __VA_ARGS__);	\
+	if(ret>=(int)(*data_len-write_len)) return ERR_INVALID_DATA;	\
+	write_len += (unsigned int)ret;
 
 int protocol_text_read(PROTOCOL_TYPE* type, const char* data, void* buf)
 {
+	PROTO_PARSE parse;
+	char callback_type[100];
+	char callback_name[100];
+	char callback_value[100];
+	PROTOCOL_CALLBACK callback = {
+		proto_new_field,
+		proto_new_array,
+		proto_new_begin,
+		proto_new_item,
+		proto_new_end,
+
+		callback_type,
+		callback_name,
+		callback_value,
+		sizeof(callback_type),
+		sizeof(callback_name),
+		sizeof(callback_value),
+
+		0
+	};
+
+	parse.stack[0].type = type;
+	parse.stack[0].var = NULL;
+	parse.stack[0].buf = buf;
+	parse.stack[0].count = 0;
+	parse.stack_count = 1;
 	return ERR_NOERROR;
 }
 
-int protocol_text_write(PROTOCOL_TYPE* type, const void* buf, char* data, unsigned int data_len)
+int text_write_object(PROTOCOL_TYPE* type, const void* buf, char* data, unsigned int* data_len)
 {
+	int ret, i, j;
+	unsigned int write_len = 0, len, count;
+	WRITE_TEXT("{");
+	for(i=0; i<type->var_count; i++) {
+		if(type->var_list[i].type&PROTOCOL_TYPE_ARRAY) {
+			WRITE_TEXT("%s[]=", type->var_list[i].name);
+			count = *((unsigned int*)((const char*)buf+type->var_list[i].offset-4));
+			if(count>type->var_list[i].maxlen) return ERR_INVALID_DATA;
+		} else {
+			WRITE_TEXT("%s=", type->var_list[i].name);
+			count = 1;
+		}
+
+		if(type->var_list[i].type&PROTOCOL_TYPE_ARRAY) {
+			WRITE_TEXT("{");
+		}
+		for(j=0; j<(int)count; j++) {
+			if(j>0) {
+				WRITE_TEXT(",");
+			}
+
+			switch(type->var_list[i].type&0xff) {
+			case PROTOCOL_TYPE_CHAR:
+				WRITE_TEXT("%d", (const os_char*)((char*)buf+type->var_list[i].offset)[j]);
+				break;
+			case PROTOCOL_TYPE_SHORT:
+				WRITE_TEXT("%d", (const os_short*)((char*)buf+type->var_list[i].offset)[j]);
+				break;
+			case PROTOCOL_TYPE_INT:
+				WRITE_TEXT("%d", (const os_int*)((char*)buf+type->var_list[i].offset)[j]);
+				break;
+			case PROTOCOL_TYPE_LONG:
+				WRITE_TEXT("%d", (const os_long*)((char*)buf+type->var_list[i].offset)[j]);
+				break;
+			case PROTOCOL_TYPE_BYTE:
+				WRITE_TEXT("%u", (const os_byte*)((char*)buf+type->var_list[i].offset)[j]);
+				break;
+			case PROTOCOL_TYPE_WORD:
+				WRITE_TEXT("%u", (const os_word*)((char*)buf+type->var_list[i].offset)[j]);
+				break;
+			case PROTOCOL_TYPE_DWORD:
+				WRITE_TEXT("%u", (const os_dword*)((char*)buf+type->var_list[i].offset)[j]);
+				break;
+			case PROTOCOL_TYPE_QWORD:
+				WRITE_TEXT("%u", (const os_qword*)((char*)buf+type->var_list[i].offset)[j]);
+				break;
+			case PROTOCOL_TYPE_FLOAT:
+				WRITE_TEXT("%f", (const os_float*)((char*)buf+type->var_list[i].offset)[j]);
+				break;
+			case PROTOCOL_TYPE_STRING:
+				WRITE_TEXT("\"%s\"", (char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen);
+				break;
+			case PROTOCOL_TYPE_OBJECT:
+				len = *data_len - write_len;
+				ret = text_write_object(type->var_list[i].obj_type, (const char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen, (char*)data+write_len, &len);
+				if(ret!=ERR_NOERROR) return ret;
+				write_len += len;
+				break;
+			}
+		}
+		if(type->var_list[i].type&PROTOCOL_TYPE_ARRAY) {
+			WRITE_TEXT("}");
+		}
+		WRITE_TEXT(";");
+	}
+	WRITE_TEXT("}");
+	*data_len = write_len;
+	return ERR_NOERROR;
+}
+
+int protocol_text_write(PROTOCOL_TYPE* type, const void* buf, char* data, unsigned int* data_len)
+{
+	int ret;
+	unsigned int write_len = 0, len;
+	WRITE_TEXT("%s ", type->name);
+	len = *data_len - write_len - 1;
+	ret = text_write_object(type, buf, data+write_len, &len);
+	if(ret!=ERR_NOERROR) return ret;
+	write_len += len;
+	data[write_len] = '\0';
+	*data_len = write_len + 1;
 	return ERR_NOERROR;
 }
 
@@ -334,10 +523,31 @@ int protocol_file_write(PROTOCOL_TYPE* type, const void* buf, const char* filena
 {
 	int ret;
 	char data[50*1024];
+	unsigned data_len = sizeof(data);
 
-	ret = protocol_text_write(type, buf, data, sizeof(data));
+	ret = protocol_text_write(type, buf, data, &data_len);
 	if(ret!=ERR_NOERROR)
 		return ret;
 
 	return save_textfile(filename, data, sizeof(data));
+}
+
+void proto_new_field(void* ptr, const char* name, const char* value)
+{
+}
+
+void proto_new_array(void* ptr, const char* name)
+{
+}
+
+void proto_new_begin(void* ptr)
+{
+}
+
+void proto_new_item(void* ptr, const char* value)
+{
+}
+
+void proto_new_end(void* ptr)
+{
 }
