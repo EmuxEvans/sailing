@@ -469,28 +469,28 @@ int text_write_object(PROTOCOL_TYPE* type, const void* buf, char* data, unsigned
 
 			switch(type->var_list[i].type&0xff) {
 			case PROTOCOL_TYPE_CHAR:
-				WRITE_TEXT("%d", (const os_char*)((char*)buf+type->var_list[i].offset)[j]);
+				WRITE_TEXT("%d", (int)((const os_char*)((char*)buf+type->var_list[i].offset)[j]));
 				break;
 			case PROTOCOL_TYPE_SHORT:
-				WRITE_TEXT("%d", (const os_short*)((char*)buf+type->var_list[i].offset)[j]);
+				WRITE_TEXT("%d", (int)((const os_short*)((char*)buf+type->var_list[i].offset)[j]));
 				break;
 			case PROTOCOL_TYPE_INT:
-				WRITE_TEXT("%d", (const os_int*)((char*)buf+type->var_list[i].offset)[j]);
+				WRITE_TEXT("%d", (int)((const os_int*)((char*)buf+type->var_list[i].offset)[j]));
 				break;
 			case PROTOCOL_TYPE_LONG:
-				WRITE_TEXT("%d", (const os_long*)((char*)buf+type->var_list[i].offset)[j]);
+				WRITE_TEXT("%I64d", (const os_long*)((char*)buf+type->var_list[i].offset)[j]);
 				break;
 			case PROTOCOL_TYPE_BYTE:
-				WRITE_TEXT("%u", (const os_byte*)((char*)buf+type->var_list[i].offset)[j]);
+				WRITE_TEXT("%u", (unsigned int)((const os_byte*)((char*)buf+type->var_list[i].offset)[j]));
 				break;
 			case PROTOCOL_TYPE_WORD:
-				WRITE_TEXT("%u", (const os_word*)((char*)buf+type->var_list[i].offset)[j]);
+				WRITE_TEXT("%u", (unsigned int)((const os_word*)((char*)buf+type->var_list[i].offset)[j]));
 				break;
 			case PROTOCOL_TYPE_DWORD:
-				WRITE_TEXT("%u", (const os_dword*)((char*)buf+type->var_list[i].offset)[j]);
+				WRITE_TEXT("%u", (unsigned int)((const os_dword*)((char*)buf+type->var_list[i].offset)[j]));
 				break;
 			case PROTOCOL_TYPE_QWORD:
-				WRITE_TEXT("%u", (const os_qword*)((char*)buf+type->var_list[i].offset)[j]);
+				WRITE_TEXT("%I64u", (const os_qword*)((char*)buf+type->var_list[i].offset)[j]);
 				break;
 			case PROTOCOL_TYPE_FLOAT:
 				WRITE_TEXT("%f", (const os_float*)((char*)buf+type->var_list[i].offset)[j]);
