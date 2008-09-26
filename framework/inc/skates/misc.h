@@ -9,7 +9,7 @@ extern "C" {
 #	include <stdio.h>
 #	define snprintf	_snprintf
 #else
-#	include <stdarg.h>
+#	include <stdio.h>
 #endif
 
 // string
