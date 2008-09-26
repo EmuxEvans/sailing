@@ -13,23 +13,28 @@ static const char* get_token_keyword(const char* buf, const char* keyword, char*
 static const char* get_token_number(const char* buf, char* value, int size);
 static const char* escape_blank(const char* buf);
 
-static const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
-static const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
-static const char* parse_array(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
-static const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf);
+static const char* parse_node(PROTOCOL_CALLBACK* callback, const char* buf);
+static const char* parse_field(PROTOCOL_CALLBACK* callback, const char* buf);
+static const char* parse_array(PROTOCOL_CALLBACK* callback, const char* buf);
+static const char* parse_array_item(PROTOCOL_CALLBACK* callback, const char* buf);
 
-static void proto_new_field(void* ptr, const char* name, const char* value);
-static void proto_new_array(void* ptr, const char* name);
-static void proto_new_begin(void* ptr);
-static void proto_new_item(void* ptr, const char* value);
-static void proto_new_end(void* ptr);
+static void proto_new_field(PROTOCOL_CALLBACK* callback, const char* name, const char* value);
+static void proto_new_array(PROTOCOL_CALLBACK* callback, const char* name);
+static void proto_new_begin(PROTOCOL_CALLBACK* callback);
+static void proto_new_item(PROTOCOL_CALLBACK* callback, const char* value);
+static void proto_new_end(PROTOCOL_CALLBACK* callback);
+static int proto_convert(const char* value, void* buf, int type, unsigned int len);
 
 typedef struct PROTO_PARSE {
+	PROTOCOL_TYPE*			root;
+	void*					buf;
 	struct {
-		PROTOCOL_TYPE*		type;
-		PROTOCOL_VARIABLE*	var;
+		int					type;
+		PROTOCOL_TYPE*		obj_type;
 		void*				buf;
-		int count;
+		unsigned int		prelen;
+		unsigned int		max;
+		unsigned int		count;
 	} stack[10];
 	int stack_count;
 } PROTO_PARSE;
@@ -37,16 +42,24 @@ typedef struct PROTO_PARSE {
 int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr)
 {
 	callback->is_break = 0;
+	callback->user_ptr = ptr;
 
 	buf = get_token_id(buf, callback->name, callback->name_len);
 	if(!buf) return ERR_UNKNOWN;
 
-	callback->new_field(ptr, callback->name, NULL);
+	callback->new_field(callback, callback->name, NULL);
+	if(callback->is_break) return ERR_UNKNOWN;
 
-	buf = parse_node(callback, ptr, buf);
+	buf = parse_node(callback, buf);
+	if(callback->is_break) return ERR_UNKNOWN;
 	if(!buf) return ERR_UNKNOWN;
 
 	return ERR_NOERROR;
+}
+
+void protocol_break(PROTOCOL_CALLBACK* callback)
+{
+	callback->is_break = 1;
 }
 
 const char* get_token_char(const char* buf, char c)
@@ -70,7 +83,7 @@ const char* get_token_string(const char* buf, char* value, int size)
 			end++; continue;
 		}
 	}
-	if(end+2<size) return NULL;
+	if(end+2>size) return NULL;
 
 	memcpy(value, buf, end+1);
 	value[end+1] = '\0';
@@ -151,7 +164,7 @@ const char* escape_blank(const char* buf)
 	}
 }
 
-const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
+const char* parse_node(PROTOCOL_CALLBACK* callback, const char* buf)
 {
 	const char* tbuf;
 
@@ -159,7 +172,8 @@ const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	if(buf==NULL) return NULL;
 
 	// add node
-	callback->new_begin(ptr);
+	callback->new_begin(callback);
+	if(callback->is_break) return NULL;
 
 	// node body
 	tbuf = buf;
@@ -169,10 +183,12 @@ const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 		tbuf = get_token_char(buf, '}');
 		if(tbuf!=NULL) break;
 
-		tbuf = parse_field(callback, ptr, buf);
+		tbuf = parse_field(callback, buf);
+		if(callback->is_break) return NULL;
 		if(tbuf!=NULL) continue;
 
-		tbuf = parse_array(callback, ptr, buf);
+		tbuf = parse_array(callback, buf);
+		if(callback->is_break) return NULL;
 		if(tbuf!=NULL) continue;
 
 		//
@@ -180,12 +196,12 @@ const char* parse_node(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	}
 
 	// add node
-	callback->new_end(ptr);
+	callback->new_end(callback);
 
 	return tbuf;
 }
 
-const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
+const char* parse_field(PROTOCOL_CALLBACK* callback, const char* buf)
 {
 	const char* tbuf;
 
@@ -197,8 +213,8 @@ const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 
 	tbuf = get_token_char(buf, '{');
 	if(tbuf) {
-		callback->new_field(ptr, callback->name, NULL);
-		tbuf = parse_node(callback, ptr, buf);
+		callback->new_field(callback, callback->name, NULL);
+		tbuf = parse_node(callback, buf);
 		if(!tbuf) return NULL;
 	} else {
 		tbuf = get_token_id(buf, callback->value, callback->value_len);
@@ -211,7 +227,7 @@ const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 				}
 			}
 		}
-		callback->new_field(ptr, callback->name, callback->value);
+		callback->new_field(callback, callback->name, callback->value);
 	}
 
 	buf = get_token_char(tbuf, ';');
@@ -220,7 +236,7 @@ const char* parse_field(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	return buf;
 }
 
-const char* parse_array(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
+const char* parse_array(PROTOCOL_CALLBACK* callback, const char* buf)
 {
 	buf = get_token_id(buf, callback->name, callback->name_len);
 	if(buf==NULL) return NULL;
@@ -232,22 +248,29 @@ const char* parse_array(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
 	buf = get_token_char(buf, '=');
 	if(buf==NULL) return NULL;
 
-	callback->new_array(ptr, callback->name);
+	callback->new_array(callback, callback->name);
+	if(callback->is_break) return NULL;
 
-	buf = parse_array_item(callback, ptr, buf);
+	buf = parse_array_item(callback, buf);
+	if(callback->is_break) return NULL;
+	if(buf==NULL) return NULL;
+
+	buf = get_token_char(buf, ';');
+	if(callback->is_break) return NULL;
 	if(buf==NULL) return NULL;
 
 	return buf;
 }
 
-const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char* buf)
+const char* parse_array_item(PROTOCOL_CALLBACK* callback, const char* buf)
 {
 	const char* tbuf;
 
 	buf = get_token_char(buf, '{');
 	if(buf==NULL) return NULL;
 
-	callback->new_begin(ptr);
+	callback->new_begin(callback);
+	if(callback->is_break) return NULL;
 
 	tbuf = buf;
 	for(;;) {
@@ -263,8 +286,8 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 
 		tbuf = get_token_char(buf, '{');
 		if(tbuf) {
-			callback->new_item(ptr, NULL);
-			tbuf = parse_node(callback, ptr, buf);
+			callback->new_item(callback, NULL);
+			tbuf = parse_node(callback, buf);
 			if(!tbuf) return NULL;
 		} else {
 			tbuf = get_token_string(buf, callback->value, callback->value_len);
@@ -273,17 +296,18 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, void* ptr, const char*
 				if(tbuf==NULL) {
 					tbuf = get_token_number(buf, callback->value, callback->value_len);
 					if(tbuf==NULL) {
-						tbuf = parse_array_item(callback, ptr, buf);
+						tbuf = parse_array_item(callback, buf);
 						if(!tbuf)
 							return NULL;
 					}
 				}
 			}
-			callback->new_item(ptr, callback->value);
+			callback->new_item(callback, callback->value);
+			if(callback->is_break) return NULL;
 		}
 	}
 
-	callback->new_end(ptr);
+	callback->new_end(callback);
 
 	return tbuf;
 }
@@ -413,12 +437,11 @@ int protocol_text_read(PROTOCOL_TYPE* type, const char* data, void* buf)
 		0
 	};
 
-	parse.stack[0].type = type;
-	parse.stack[0].var = NULL;
-	parse.stack[0].buf = buf;
-	parse.stack[0].count = 0;
-	parse.stack_count = 1;
-	return ERR_NOERROR;
+	parse.root = type;
+	parse.buf = buf;
+	parse.stack_count = 0;
+
+	return protocol_parse(data, &callback, &parse);
 }
 
 int text_write_object(PROTOCOL_TYPE* type, const void* buf, char* data, unsigned int* data_len)
@@ -532,22 +555,201 @@ int protocol_file_write(PROTOCOL_TYPE* type, const void* buf, const char* filena
 	return save_textfile(filename, data, sizeof(data));
 }
 
-void proto_new_field(void* ptr, const char* name, const char* value)
+void proto_new_field(PROTOCOL_CALLBACK* callback, const char* name, const char* value)
 {
+	int i;
+	PROTO_PARSE* parse = (PROTO_PARSE*)callback->user_ptr;
+	if(parse->stack_count==0) {
+		parse->stack[0].type = PROTOCOL_TYPE_OBJECT;
+		parse->stack[0].obj_type = parse->root;
+		parse->stack[0].prelen = parse->root->size;
+		parse->stack[0].buf = parse->buf;
+		parse->stack[0].max = 0;
+		parse->stack[0].count = 0;
+		return;
+	}
+
+	for(i=0; i<parse->stack[parse->stack_count-1].obj_type->var_count; i++) {
+		if(strcmp(parse->stack[parse->stack_count-1].obj_type->var_list[i].name, name)==0) {
+			break;
+		}
+	}
+	if(i==parse->stack[parse->stack_count-1].obj_type->var_count) {
+		protocol_break(callback);
+		return;
+	}
+
+	if(!value) {
+		if(parse->stack[parse->stack_count-1].obj_type->var_list[i].type!=PROTOCOL_TYPE_OBJECT) {
+			protocol_break(callback);
+			return;
+		}
+		parse->stack[parse->stack_count].type = parse->stack[parse->stack_count-1].obj_type->var_list[i].type;
+		parse->stack[parse->stack_count].obj_type = parse->stack[parse->stack_count-1].obj_type->var_list[i].obj_type;
+		parse->stack[parse->stack_count].prelen = parse->stack[parse->stack_count-1].obj_type->var_list[i].prelen;
+		parse->stack[parse->stack_count].buf = (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].obj_type->var_list[i].offset; 
+		parse->stack[parse->stack_count].max = 0;
+		parse->stack[parse->stack_count].count = 0;
+		return;
+	}
+
+	switch(parse->stack[parse->stack_count-1].obj_type->var_list[i].type) {
+	case PROTOCOL_TYPE_STRING:
+	case PROTOCOL_TYPE_CHAR:
+	case PROTOCOL_TYPE_SHORT:
+	case PROTOCOL_TYPE_INT:
+	case PROTOCOL_TYPE_LONG:
+	case PROTOCOL_TYPE_BYTE:
+	case PROTOCOL_TYPE_WORD:
+	case PROTOCOL_TYPE_DWORD:
+	case PROTOCOL_TYPE_QWORD:
+	case PROTOCOL_TYPE_FLOAT:
+		break;
+	default:
+		protocol_break(callback);
+		return;
+	}
+
+	if(proto_convert(value, (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].obj_type->var_list[i].offset, parse->stack[parse->stack_count-1].obj_type->var_list[i].type, parse->stack[parse->stack_count-1].obj_type->var_list[i].prelen)!=ERR_NOERROR) {
+		protocol_break(callback);
+		return;
+	}
+//	memset((char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].obj_type->var_list[i].offset, 0x33, parse->stack[parse->stack_count-1].obj_type->var_list[i].prelen);
 }
 
-void proto_new_array(void* ptr, const char* name)
+void proto_new_array(PROTOCOL_CALLBACK* callback, const char* name)
 {
+	int i;
+	PROTO_PARSE* parse = (PROTO_PARSE*)callback->user_ptr;
+
+	for(i=0; i<parse->stack[parse->stack_count-1].obj_type->var_count; i++) {
+		if(strcmp(parse->stack[parse->stack_count-1].obj_type->var_list[i].name, name)==0) {
+			break;
+		}
+	}
+	if(i==parse->stack[parse->stack_count-1].obj_type->var_count) {
+		protocol_break(callback);
+		return;
+	}
+
+	if((parse->stack[parse->stack_count-1].obj_type->var_list[i].type&PROTOCOL_TYPE_ARRAY)==0) {
+		protocol_break(callback);
+		return;
+	}
+
+	parse->stack[parse->stack_count].type = parse->stack[parse->stack_count-1].obj_type->var_list[i].type;
+	parse->stack[parse->stack_count].obj_type = parse->stack[parse->stack_count-1].obj_type->var_list[i].obj_type;
+	parse->stack[parse->stack_count].prelen = parse->stack[parse->stack_count-1].obj_type->var_list[i].prelen;
+	parse->stack[parse->stack_count].buf = (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].obj_type->var_list[i].offset;
+	parse->stack[parse->stack_count].max = 0;
+	parse->stack[parse->stack_count].count = 0;
 }
 
-void proto_new_begin(void* ptr)
+void proto_new_begin(PROTOCOL_CALLBACK* callback)
 {
+	PROTO_PARSE* parse = (PROTO_PARSE*)callback->user_ptr;
+	parse->stack_count++;
 }
 
-void proto_new_item(void* ptr, const char* value)
+void proto_new_item(PROTOCOL_CALLBACK* callback, const char* value)
 {
+	PROTO_PARSE* parse = (PROTO_PARSE*)callback->user_ptr;
+
+	if(parse->stack[parse->stack_count-1].type==(PROTOCOL_TYPE_ARRAY|PROTOCOL_TYPE_OBJECT)) {
+		if(value) {
+			protocol_break(callback);
+			return;
+		}
+		if(parse->stack[parse->stack_count-1].count>=parse->stack[parse->stack_count-1].max) {
+			protocol_break(callback);
+			return;
+		}
+
+		parse->stack[parse->stack_count].type = parse->stack[parse->stack_count-1].type & 0xff;
+		parse->stack[parse->stack_count].obj_type = parse->stack[parse->stack_count-1].obj_type;
+		parse->stack[parse->stack_count].prelen = parse->stack[parse->stack_count-1].prelen;
+		parse->stack[parse->stack_count].buf = (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].obj_type->size * parse->stack[parse->stack_count-1].count;
+		parse->stack[parse->stack_count].max = 0;
+		parse->stack[parse->stack_count].count = 0;
+		parse->stack[parse->stack_count-1].count++;
+		return;
+	}
+
+	if(!value) {
+		protocol_break(callback);
+		return;
+	}
+
+	if(proto_convert(value, (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].prelen * parse->stack[parse->stack_count-1].count, parse->stack[parse->stack_count-1].type, parse->stack[parse->stack_count-1].prelen)!=ERR_NOERROR) {
+		protocol_break(callback);
+		return;
+	}
+	//memset(
+	//	(char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].prelen * parse->stack[parse->stack_count-1].count,
+	//	0x33, parse->stack[parse->stack_count-1].prelen);
 }
 
-void proto_new_end(void* ptr)
+void proto_new_end(PROTOCOL_CALLBACK* callback)
 {
+	PROTO_PARSE* parse = (PROTO_PARSE*)callback->user_ptr;
+	parse->stack_count--;
+
+	if(parse->stack[parse->stack_count].type&PROTOCOL_TYPE_ARRAY) {
+		*((unsigned int*)((char*)parse->stack[parse->stack_count].buf - 4)) = parse->stack[parse->stack_count].count;
+	}
+}
+
+int proto_convert(const char* value, void* buf, int type, unsigned int len)
+{
+	os_long v;
+
+	if(type==PROTOCOL_TYPE_STRING) {
+		unsigned int slen;
+		if(value[0]!='"') return ERR_UNKNOWN;
+		slen = strlen(value);
+		if(slen-1>len) return ERR_UNKNOWN;
+		memcpy(buf, value+1, slen-2);
+		*((char*)buf+slen-2) = '\0';
+		return ERR_NOERROR;
+	}
+	if(type==PROTOCOL_TYPE_FLOAT) {
+		if(sscanf(value, "%f", (os_float*)buf)!=1) return ERR_UNKNOWN;
+		return ERR_NOERROR;
+	}
+
+#ifdef _WIN32
+	v = _atoi64(value);
+#else
+	v = atoll(value);
+#endif
+
+	switch(type) {
+	case PROTOCOL_TYPE_CHAR:
+		*((os_char*)buf) = (os_char)v;
+		break;
+	case PROTOCOL_TYPE_SHORT:
+		*((os_short*)buf) = (os_short)v;
+		break;
+	case PROTOCOL_TYPE_INT:
+		*((os_int*)buf) = (os_int)v;
+		break;
+	case PROTOCOL_TYPE_LONG:
+		*((os_long*)buf) = (os_long)v;
+		break;
+	case PROTOCOL_TYPE_BYTE:
+		*((os_byte*)buf) = (os_byte)v;
+		break;
+	case PROTOCOL_TYPE_WORD:
+		*((os_word*)buf) = (os_word)v;
+		break;
+	case PROTOCOL_TYPE_DWORD:
+		*((os_dword*)buf) = (os_dword)v;
+		break;
+	case PROTOCOL_TYPE_QWORD:
+		*((os_qword*)buf) = (os_qword)v;
+		break;
+	default:
+		return ERR_UNKNOWN;
+	}
+	return ERR_NOERROR;
 }

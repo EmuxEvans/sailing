@@ -5,20 +5,25 @@
 extern "C" {
 #endif
 
-typedef struct PROTOCOL_CALLBACK {
-	void (*new_field)(void* ptr, const char* name, const char* value);
-	void (*new_array)(void* ptr, const char* name);
-	void (*new_begin)(void* ptr);
-	void (*new_item)(void* ptr, const char* value);
-	void (*new_end)(void* ptr);
+struct PROTOCOL_CALLBACK;
+typedef struct PROTOCOL_CALLBACK PROTOCOL_CALLBACK;
+
+struct PROTOCOL_CALLBACK {
+	void (*new_field)(PROTOCOL_CALLBACK* callback, const char* name, const char* value);
+	void (*new_array)(PROTOCOL_CALLBACK* callback, const char* name);
+	void (*new_begin)(PROTOCOL_CALLBACK* callback);
+	void (*new_item)(PROTOCOL_CALLBACK* callback, const char* value);
+	void (*new_end)(PROTOCOL_CALLBACK* callback);
 
 	char *type, *name, *value;
 	int type_len, name_len, value_len;
 
 	int is_break;
-} PROTOCOL_CALLBACK;
+	void* user_ptr;
+};
 
 ZION_API int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr);
+ZION_API void protocol_break(PROTOCOL_CALLBACK* callback);
 
 //
 #include "protocol_def.h"
