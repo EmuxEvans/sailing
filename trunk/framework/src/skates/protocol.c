@@ -59,6 +59,7 @@ int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr)
 
 void protocol_break(PROTOCOL_CALLBACK* callback)
 {
+	(void)get_token_keyword;
 	callback->is_break = 1;
 }
 
@@ -404,11 +405,6 @@ int protocol_binary_write(PROTOCOL_TYPE* type, const void* buf, void* data, unsi
 	return ERR_NOERROR;
 }
 
-#define READ_BUFFER(addr, size)	\
-	if(read_len+size>*data_len) return ERR_UNKNOWN;	\
-	memcpy(addr, (const char*)data+read_len, size);		\
-	read_len += size;
-
 #define WRITE_TEXT(...)	\
 	ret = (int)snprintf(data+write_len, *data_len-write_len, __VA_ARGS__);	\
 	if(ret>=(int)(*data_len-write_len)) return ERR_INVALID_DATA;	\
@@ -478,7 +474,11 @@ int text_write_object(PROTOCOL_TYPE* type, const void* buf, char* data, unsigned
 				WRITE_TEXT("%d", (int)(((const os_int*)((char*)buf+type->var_list[i].offset))[j]));
 				break;
 			case PROTOCOL_TYPE_LONG:
-				WRITE_TEXT("%I64d", (const os_long*)((char*)buf+type->var_list[i].offset)[j]);
+#ifdef _WIN32
+				WRITE_TEXT("%I64d", ((const os_long*)((char*)buf+type->var_list[i].offset))[j]);
+#else
+				WRITE_TEXT("%lld", ((const os_long*)((char*)buf+type->var_list[i].offset))[j]);
+#endif
 				break;
 			case PROTOCOL_TYPE_BYTE:
 				WRITE_TEXT("%u", (unsigned int)(((const os_byte*)((char*)buf+type->var_list[i].offset))[j]));
@@ -490,10 +490,14 @@ int text_write_object(PROTOCOL_TYPE* type, const void* buf, char* data, unsigned
 				WRITE_TEXT("%u", (unsigned int)(((const os_dword*)((char*)buf+type->var_list[i].offset))[j]));
 				break;
 			case PROTOCOL_TYPE_QWORD:
-				WRITE_TEXT("%I64u", (const os_qword*)((char*)buf+type->var_list[i].offset)[j]);
+#ifdef _WIN32
+				WRITE_TEXT("%I64u", ((const os_qword*)((char*)buf+type->var_list[i].offset))[j]);
+#else
+				WRITE_TEXT("%llu", ((const os_qword*)((char*)buf+type->var_list[i].offset))[j]);
+#endif
 				break;
 			case PROTOCOL_TYPE_FLOAT:
-				WRITE_TEXT("%f", (const os_float*)((char*)buf+type->var_list[i].offset)[j]);
+				WRITE_TEXT("%f", (double)(((const os_qword*)((char*)buf+type->var_list[i].offset))[j]));
 				break;
 			case PROTOCOL_TYPE_STRING:
 				WRITE_TEXT("\"%s\"", (char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen);

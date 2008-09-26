@@ -62,7 +62,9 @@ static struct {
 	int  var_start;
 	int  var_count;
 } data_type[100];
+static int num_inc, num_var, num_type;
 
+/*
 static struct {
 	char name[100];
 	char type[100];
@@ -77,8 +79,8 @@ static struct {
 	int function_start;
 	int function_count;
 } data_class[100];
-
 static int num_inc, num_var, num_type;
+*/
 
 int main(int argc, char* argv[])
 {
