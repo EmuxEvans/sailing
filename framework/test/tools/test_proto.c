@@ -10,11 +10,11 @@
 char buf[100000];
 b vv;
 
-static void my_new_field(void* ptr, const char* name, const char* value);
-static void my_new_array(void* ptr, const char* name);
-static void my_new_begin(void* ptr);
-static void my_new_item(void* ptr, const char* value);
-static void my_new_end(void* ptr);
+static void my_new_field(PROTOCOL_CALLBACK* callback, const char* name, const char* value);
+static void my_new_array(PROTOCOL_CALLBACK* callback, const char* name);
+static void my_new_begin(PROTOCOL_CALLBACK* callback);
+static void my_new_item(PROTOCOL_CALLBACK* callback, const char* value);
+static void my_new_end(PROTOCOL_CALLBACK* callback);
 
 static char callback_type[100];
 static char callback_name[100];
@@ -56,27 +56,27 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-void my_new_field(void* ptr, const char* name, const char* value)
+void my_new_field(PROTOCOL_CALLBACK* callback, const char* name, const char* value)
 {
 	printf("%s %s %s\n", __FUNCTION__, name, value);
 }
 
-void my_new_array(void* ptr, const char* name)
+void my_new_array(PROTOCOL_CALLBACK* callback, const char* name)
 {
 	printf("%s %s\n", __FUNCTION__, name);
 }
 
-void my_new_begin(void* ptr)
+void my_new_begin(PROTOCOL_CALLBACK* callback)
 {
 	printf("%s\n", __FUNCTION__);
 }
 
-void my_new_item(void* ptr, const char* value)
+void my_new_item(PROTOCOL_CALLBACK* callback, const char* value)
 {
 	printf("%s %s\n", __FUNCTION__, value);
 }
 
-void my_new_end(void* ptr)
+void my_new_end(PROTOCOL_CALLBACK* callback)
 {
 	printf("%s\n", __FUNCTION__);
 }
