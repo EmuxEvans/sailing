@@ -43,6 +43,10 @@ static void def_node(const char* mode, const char* name);
 static void def_const(const char* type, const char* name, const char* value);
 static void def_field(const char* mode, const char* type, const char* prefix, const char* name, const char* value);
 static void def_array(const char* mode, const char* type, const char* prefix, const char* name, const char* count);
+static void def_function(const char* name);
+static void def_parameter(const char* type, const char* name);
+static void def_class_begin(const char* name);
+static void def_class_end(const char* name);
 
 static struct {
 	char file[100];
@@ -68,7 +72,6 @@ static struct {
 } data_type[1000];
 static int num_inc = 0, num_const = 0, num_var = 0, num_type = 0;
 
-/*
 static struct {
 	char name[100];
 	char type[100];
@@ -80,11 +83,12 @@ static struct {
 	int parameter_count;
 } data_function[100];
 static struct {
+	char name[100];
 	int function_start;
 	int function_count;
 } data_class[100];
 static int num_parm = 0, num_func = 0, num_class = 0;
-*/
+static int current_class = -1;
 
 int main(int argc, char* argv[])
 {
@@ -179,7 +183,6 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 	for(type=0; type<num_const; type++) {
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define %s ((%s)(%s))\n", data_const[type].name, data_const[type].type, data_const[type].value);
 	}
-
 	for(type=0; type<num_type; type++) {
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "typedef struct %s {\n", data_type[type].name);
@@ -219,6 +222,11 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifdef __cplusplus\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "}\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifdef __cplusplus");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
 
@@ -593,7 +601,8 @@ const char* parse_parameter(const char* buf)
 	if(buf==NULL)
 		return NULL;
 
-	// call
+	def_parameter(type, name);
+
 	return buf;
 }
 
@@ -610,6 +619,8 @@ const char* parse_function(const char* buf)
 
 	buf = get_token_char(buf, '(');
 	if(buf==NULL) return NULL;
+
+	def_function(name);
 
 	tbuf = buf;
 	for(;;) {
@@ -648,7 +659,7 @@ const char* parse_class(const char* buf)
 	buf = get_token_char(buf, '{');
 	if(buf==NULL) return NULL;
 
-	// call class_begin
+	def_class_begin(name);
 
 	tbuf = buf;
 	for(;;) {
@@ -667,7 +678,7 @@ const char* parse_class(const char* buf)
 	buf = get_token_char(tbuf, ';');
 	if(buf==NULL) return NULL;
 
-	// call class_begin
+	def_class_end(name);
 
 	return buf;
 }
@@ -824,3 +835,36 @@ void def_array(const char* mode, const char* type, const char* prefix, const cha
 	return;
 }
 
+void def_function(const char* name)
+{
+	strcpy(data_function[num_func].name, name);
+	data_function[num_func].parameter_start = num_parm;
+	data_function[num_func].parameter_count = 0;
+	data_function[num_func].class_index = current_class;
+	if(current_class>=0) {
+		data_class[current_class].function_count++;
+	}
+	num_func++;
+}
+
+void def_parameter(const char* type, const char* name)
+{
+	data_function[num_func-1].parameter_count++;
+	strcpy(data_parameter[num_parm].type, type);
+	strcpy(data_parameter[num_parm].name, name);
+	num_parm++;
+}
+
+void def_class_begin(const char* name)
+{
+	current_class = num_class;
+	strcpy(data_class[num_class].name, name);
+	data_class[num_class].function_start = num_func;
+	data_class[num_class].function_count = 0;
+	num_class++;
+}
+
+void def_class_end(const char* name)
+{
+	current_class = -1;
+}
