@@ -14,7 +14,8 @@ static char mode[100], type[100], name[100], value[2000];
 static int is_break;
 
 static int parse_pfile(const char* text);
-static int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src, unsigned int src_len);
+static int generate_hfile(const char* name, char* inc, unsigned int inc_len);
+static int generate_cfile(const char* name, char* src, unsigned int src_len);
 
 static const char* get_token_char(const char* buf, char c);
 static const char* get_token_string(const char* buf, char* value, int size);
@@ -33,7 +34,8 @@ static const char* parse_function(const char* buf);
 static const char* parse_class(const char* buf);
 
 static int get_type(const char* type);
-static const char* get_type_string(const char* type);
+static const char* get_type_const(const char* type);
+static const char* get_ctype(const char* type);
 static int check_include_filename(const char* file);
 static void make_define_filename(const char* file, char* out);
 static void make_include_filename(const char* file, char* out);
@@ -43,7 +45,7 @@ static void def_node(const char* mode, const char* name);
 static void def_const(const char* type, const char* name, const char* value);
 static void def_field(const char* mode, const char* type, const char* prefix, const char* name, const char* value);
 static void def_array(const char* mode, const char* type, const char* prefix, const char* name, const char* count);
-static void def_function(const char* name);
+static void def_function(const char* return_type, const char* name);
 static void def_parameter(const char* type, const char* name);
 static void def_class_begin(const char* name);
 static void def_class_end(const char* name);
@@ -77,6 +79,7 @@ static struct {
 	char type[100];
 } data_parameter[100];
 static struct {
+	char return_type[100];
 	char name[100];
 	int class_index;
 	int parameter_start;
@@ -111,7 +114,12 @@ int main(int argc, char* argv[])
 		printf("error: parse!\n");
 		return 0;
 	}
-	ret = generate_cfile(argv[1], h_file, sizeof(h_file), c_file, sizeof(c_file));
+	ret = generate_hfile(argv[1], h_file, sizeof(h_file));
+	if(ret!=ERR_NOERROR) {
+		printf("error: parse!\n");
+		return 0;
+	}
+	ret = generate_cfile(argv[1], c_file, sizeof(c_file));
 	if(ret!=ERR_NOERROR) {
 		printf("error: parse!\n");
 		return 0;
@@ -155,14 +163,14 @@ int parse_pfile(const char* buf)
 	return ERR_NOERROR;
 }
 
-int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src, unsigned int src_len)
+int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 {
-	int type, var;
+	int i, j, k, type, var;
 	struct tm   *newTime;
     time_t      szClock;
 	char buf[100];
 
-	inc[0] = src[0] = '\0';
+	inc[0] = '\0';
     time(&szClock);
     newTime = localtime(&szClock);
 
@@ -173,15 +181,15 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_include__\n", buf);
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_include__\n", buf);
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	for(type=0; type<num_inc; type++) {
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#include \"%s.h\"\n", data_include[type].file);
+	for(i=0; i<num_inc; i++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#include \"%s.h\"\n", data_include[i].file);
 	}
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifdef __cplusplus\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "extern \"C\" {\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	for(type=0; type<num_const; type++) {
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define %s ((%s)(%s))\n", data_const[type].name, data_const[type].type, data_const[type].value);
+	for(i=0; i<num_const; i++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define %s ((%s)(%s))\n", data_const[i].name, data_const[i].type, data_const[i].value);
 	}
 	for(type=0; type<num_type; type++) {
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
@@ -225,10 +233,53 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifdef __cplusplus");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	for(i=0; i<num_class; i++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class %s {\n", data_class[i].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
+		for(j=data_class[i].function_start; j<data_class[i].function_start+data_class[i].function_count; j++) {
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual %s %s(", get_ctype(data_function[j].return_type), data_function[j].name);
+			for(k=data_function[j].parameter_start; k<data_function[j].parameter_start+data_function[j].parameter_count; k++) {
+				if(k==data_function[j].parameter_start) {
+					snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s", get_ctype(data_parameter[k].type), data_parameter[k].name);
+				} else {
+					snprintf(inc+strlen(inc), inc_len-strlen(inc), ", %s %s", get_ctype(data_parameter[k].type), data_parameter[k].name);
+				}
+			}
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), ") = NULL;\n");
+		}
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "};\n");
+	}
+	for(i=0; i<num_func; i++) {
+		if(data_function[i].class_index>=0) continue;
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s(", get_ctype(data_function[i].return_type), data_function[i].name);
+		for(j=data_function[i].parameter_start; j<data_function[i].parameter_start+data_function[i].parameter_count; j++) {
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s(", get_ctype(data_function[i].return_type), data_function[i].name);
+		}
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), ");");
+	}
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
+	return ERR_NOERROR;
+}
+
+int generate_cfile(const char* name, char* src, unsigned int src_len)
+{
+	int type, var;
+	struct tm   *newTime;
+    time_t      szClock;
+	char buf[100];
+
+	src[0] = '\0';
+    time(&szClock);
+    newTime = localtime(&szClock);
 
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "// generate by PROT_GEN.\n");
@@ -246,14 +297,14 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 			char stype[100], obj_type[100], prelen[100];
 
 			if(data_variable[var].maxlen[0]=='\0') {
-				sprintf(stype, "%s", get_type_string(data_variable[var].type));
+				sprintf(stype, "%s", get_type_const(data_variable[var].type));
 				if(get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
 					sprintf(prelen, "%s+1", data_variable[var].prefix);
 				} else {
 					sprintf(prelen, "sizeof(%s)", data_variable[var].type);
 				}
 			} else {
-				sprintf(stype, "%s|PROTOCOL_TYPE_ARRAY", get_type_string(data_variable[var].type));
+				sprintf(stype, "%s|PROTOCOL_TYPE_ARRAY", get_type_const(data_variable[var].type));
 				if(get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
 					sprintf(prelen, "%s+1", data_variable[var].prefix);
 				} else {
@@ -610,7 +661,7 @@ const char* parse_function(const char* buf)
 {
 	const char* tbuf;
 
-	buf = get_token_keyword(buf, "int", mode);
+	buf = get_token_id(buf, mode, sizeof(mode));
 	if(buf==NULL)
 		return NULL;
 
@@ -620,7 +671,7 @@ const char* parse_function(const char* buf)
 	buf = get_token_char(buf, '(');
 	if(buf==NULL) return NULL;
 
-	def_function(name);
+	def_function(mode, name);
 
 	tbuf = buf;
 	for(;;) {
@@ -710,7 +761,7 @@ int get_type(const char* type)
 	return PROTOCOL_TYPE_OBJECT;
 }
 
-const char* get_type_string(const char* type)
+const char* get_type_const(const char* type)
 {
 	int i;
 	for(i=0; i<sizeof(base_type)/sizeof(base_type[0]); i++) {
@@ -718,6 +769,19 @@ const char* get_type_string(const char* type)
 			return base_type[i].string;
 	}
 	return "PROTOCOL_TYPE_OBJECT";
+}
+
+const char* get_ctype(const char* type)
+{
+	static char ctype[100];
+	if(get_type(type)==PROTOCOL_TYPE_STRING) {
+		snprintf(ctype, sizeof(ctype), "char*");
+	} else if(get_type(type)==PROTOCOL_TYPE_OBJECT) {
+		snprintf(ctype, sizeof(ctype), "%s*", type);
+	} else {
+		snprintf(ctype, sizeof(ctype), "%s", type);
+	}
+	return ctype;
 }
 
 int check_include_filename(const char* file)
@@ -835,8 +899,9 @@ void def_array(const char* mode, const char* type, const char* prefix, const cha
 	return;
 }
 
-void def_function(const char* name)
+void def_function(const char* return_type, const char* name)
 {
+	strcpy(data_function[num_func].return_type, return_type);
 	strcpy(data_function[num_func].name, name);
 	data_function[num_func].parameter_start = num_parm;
 	data_function[num_func].parameter_count = 0;
