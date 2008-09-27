@@ -48,21 +48,25 @@ static struct {
 	char file[100];
 } data_include[100];
 static struct {
-	int  is_const;
+	char type[100];
+	char name[100];
+	char value[100];
+} data_const[1000];
+static struct {
 	char mode[100];
 	char type[100];
 	char prefix[100];
 	char name[100];
 	char maxlen[100];
 	char value[1000];
-} data_variable[500];
+} data_variable[5000];
 static struct {
 	char mode[100];
 	char name[100];
 	int  var_start;
 	int  var_count;
-} data_type[100];
-static int num_inc, num_var, num_type;
+} data_type[1000];
+static int num_inc = 0, num_const = 0, num_var = 0, num_type = 0;
 
 /*
 static struct {
@@ -79,7 +83,7 @@ static struct {
 	int function_start;
 	int function_count;
 } data_class[100];
-static int num_inc, num_var, num_type;
+static int num_parm = 0, num_func = 0, num_class = 0;
 */
 
 int main(int argc, char* argv[])
@@ -97,8 +101,6 @@ int main(int argc, char* argv[])
 		printf("can't load file(%s)\n", argv[1]);
 		return 0;
 	}
-
-	num_inc = num_var = num_type = 0;
 
 	ret = parse_pfile(txt);
 	if(ret!=ERR_NOERROR) {
@@ -130,6 +132,9 @@ int parse_pfile(const char* buf)
 
 		tbuf = parse_include(buf);
 		if(tbuf) continue;
+
+		tbuf = parse_const(buf);
+		if(tbuf!=NULL) continue;
 
 		tbuf = parse_node_def(buf);
 		if(tbuf) continue;
@@ -170,12 +175,16 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifdef __cplusplus\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "extern \"C\" {\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	for(type=0; type<num_const; type++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define %s ((%s)(%s))\n", data_const[type].name, data_const[type].type, data_const[type].value);
+	}
+
 	for(type=0; type<num_type; type++) {
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "typedef struct %s {\n", data_type[type].name);
 
 		for(var=data_type[type].var_start; var<data_type[type].var_start+data_type[type].var_count; var++) {
-			if(data_variable[var].is_const) continue;
 			if(data_variable[var].maxlen[0]=='\0') {
 				if(get_type(data_variable[var].type)==PROTOCOL_TYPE_STRING) {
 					if(data_variable[var].prefix[0]=='\0') {
@@ -227,9 +236,6 @@ int generate_cfile(const char* name, char* inc, unsigned int inc_len, char* src,
 		snprintf(src+strlen(src), src_len-strlen(src), "static PROTOCOL_VARIABLE __variable_list_%s_[] = {\n", data_type[type].name);
 		for(var=data_type[type].var_start; var<data_type[type].var_start+data_type[type].var_count; var++) {
 			char stype[100], obj_type[100], prelen[100];
-
-			if(data_variable[var].is_const)
-				continue;
 
 			if(data_variable[var].maxlen[0]=='\0') {
 				sprintf(stype, "%s", get_type_string(data_variable[var].type));
@@ -324,7 +330,7 @@ const char* get_token_keyword(const char* buf, const char* keyword, char* value)
 	buf = get_token_id(buf, id, sizeof(id));
 	if(buf==NULL) return NULL;
 	if(strcmp(id, keyword)!=0) return NULL;
-	if(keyword) strcpy(value, keyword);
+	if(value) strcpy(value, keyword);
 	return buf;
 }
 
@@ -421,9 +427,6 @@ const char* parse_node_def(const char* buf)
 		tbuf = get_token_char(buf, '}');
 		if(tbuf!=NULL) break;
 
-		tbuf = parse_const(buf);
-		if(tbuf!=NULL) continue;
-
 		tbuf = parse_field_def(buf);
 		if(tbuf!=NULL) continue;
 
@@ -451,6 +454,8 @@ const char* parse_const(const char* buf)
 	if(buf==NULL) return NULL;
 	buf = get_token_id(buf, name, sizeof(name));
 	if(buf==NULL) return NULL;
+	buf = get_token_char(buf, '=');
+	if(buf==NULL) return NULL;
 	tbuf = get_token_string(buf, value, sizeof(value));
 	if(tbuf==NULL) {
 		tbuf = get_token_id(buf, value, sizeof(value));
@@ -461,6 +466,8 @@ const char* parse_const(const char* buf)
 			}
 		}
 	}
+	tbuf = get_token_char(tbuf, ';');
+	if(tbuf==NULL) return NULL;
 
 	def_const(type, name, value);
 
@@ -765,19 +772,15 @@ void def_node(const char* mode, const char* name)
 
 void def_const(const char* type, const char* name, const char* value)
 {
-	if(num_var>=sizeof(data_variable)/sizeof(data_variable[0])) {
-		printf("so many variable(%s:%s)\n", data_type[num_type-1].name, name);
+	if(num_const>=sizeof(data_const)/sizeof(data_const[0])) {
+		printf("so many const(%s)\n", name);
 		is_break = 1;
 		return;
 	}
-	data_variable[num_var].is_const = 1;
-	strcpy(data_variable[num_var].mode, "");
-	strcpy(data_variable[num_var].type, type);
-	strcpy(data_variable[num_var].name, name);
-	strcpy(data_variable[num_var].maxlen, "");
-	strcpy(data_variable[num_var].value, value);
-	data_type[num_type-1].var_count++;
-	num_var++;
+	strcpy(data_const[num_const].type, type);
+	strcpy(data_const[num_const].name, name);
+	strcpy(data_const[num_const].value, value);
+	num_const++;
 	return;
 }
 
@@ -788,7 +791,6 @@ void def_field(const char* mode, const char* type, const char* prefix, const cha
 		is_break = 1;
 		return;
 	}
-	data_variable[num_var].is_const = 0;
 	strcpy(data_variable[num_var].mode, mode);
 	strcpy(data_variable[num_var].type, type);
 	strcpy(data_variable[num_var].prefix, prefix);
@@ -811,7 +813,6 @@ void def_array(const char* mode, const char* type, const char* prefix, const cha
 		is_break = 1;
 		return;
 	}
-	data_variable[num_var].is_const = 0;
 	strcpy(data_variable[num_var].mode, mode);
 	strcpy(data_variable[num_var].type, type);
 	strcpy(data_variable[num_var].prefix, prefix);

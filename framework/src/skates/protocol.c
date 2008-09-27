@@ -124,7 +124,7 @@ const char* get_token_keyword(const char* buf, const char* keyword, char* value)
 	buf = get_token_id(buf, id, sizeof(id));
 	if(buf==NULL) return NULL;
 	if(strcmp(id, keyword)!=0) return NULL;
-	if(keyword) strcpy(value, keyword);
+	if(value) strcpy(value, keyword);
 	return buf;
 }
 
