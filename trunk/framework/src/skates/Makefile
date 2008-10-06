@@ -10,15 +10,27 @@ SQLITE_SRC=	alter.c analyze.c attach.c auth.c bitvec.c btmutex.c btree.c build.c
 SQLITE_INC=	btree.h btreeInt.h fts3.h fts3_hash.h fts3_tokenizer.h hash.h hwtime.h keywordhash.h\
 			mutex.h opcodes.h os.h os_common.h pager.h parse.h pcache.h rtree.h sqlite3.h sqlite3ext.h\
 			sqliteInt.h sqliteLimit.h vdbe.h vdbeInt.h
-
 SQLITE_FULL_INC=$(foreach inc,$(SQLITE_INC),sqlite/$(inc))
 SQLITE_FULL_SRC=$(foreach src,$(SQLITE_SRC),sqlite/$(src))
 SQLITE_FULL_OBJ=$(subst .c,.o,$(SQLITE_FULL_SRC))
 SQLITE_FULL_LIB=sqlite/sqlite.a
 
+LUA_SRC=    lapi.c lauxlib.c lbaselib.c lcode.c ldblib.c ldebug.c ldo.c ldump.c lfunc.c lgc.c linit.c\
+            liolib.c llex.c lmathlib.c lmem.c loadlib.c lobject.c lopcodes.c loslib.c lparser.c lstate.c\
+            lstring.c lstrlib.c ltable.c ltablib.c ltm.c lundump.c lvm.c lzio.c print.c
+
+LUA_INC=    lapi.h lauxlib.h lcode.h ldebug.h ldo.h lfunc.h lgc.h llex.h llimits.h lmem.h lobject.h\
+            lopcodes.h lparser.h lstate.h lstring.h ltable.h ltm.h lua.h luaconf.h lualib.h lundump.h\
+            lvm.h lzio.h
+LUA_FULL_INC=$(foreach inc,$(LUA_INC),lua/$(inc))
+LUA_FULL_SRC=$(foreach src,$(LUA_SRC),lua/$(src))
+LUA_FULL_OBJ=$(subst .c,.o,$(LUA_FULL_SRC))
+LUA_FULL_LIB=lua/lua.a
+
+
 INCS=$(OS_INC_DIR) $(APPBOX_INC) -DDBAPI_MYSQL_$(DBAPI_MYSQL)
 LIBS=$(OS_LIB_DIR) $(APPBOX_LIB) $(OS_LIB)
-OBJS=os_unix.o misc.o mempool.o hashmap.o sock.o log.o dymempool.o stream.o protocol.o dbapi.o dbapi_sqlite.o dbapi_mysql.o threadpool.o timer.o fdwatch_$(FDWATCH_USE).o console.o network.o rqueue.o rpc_net.o rpc_fun.o appbox.o applog.o appbox_unix.o appbox_args.o $(SQLITE_FULL_LIB)
+OBJS=os_unix.o misc.o mempool.o hashmap.o sock.o log.o dymempool.o stream.o protocol.o protocol_lua.o dbapi.o dbapi_sqlite.o dbapi_mysql.o threadpool.o timer.o fdwatch_$(FDWATCH_USE).o console.o network.o rqueue.o rpc_net.o rpc_fun.o appbox.o applog.o appbox_unix.o appbox_args.o
 MAIN_OBJS=appbox_main.o
 
 .c.o:
@@ -28,7 +40,7 @@ MAIN_OBJS=appbox_main.o
 all: $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX)
 
 clean:
-	rm -rf $(OBJS) $(MAIN_OBJS) $(SQLITE_FULL_OBJ) $(SQLITE_FULL_LIB) *.S $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX)
+	rm -rf $(OBJS) $(MAIN_OBJS) $(SQLITE_FULL_OBJ) $(SQLITE_FULL_LIB) $(LUA_FULL_OBJ) $(LUA_FULL_LIB) *.S $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX)
 
 $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(MAIN_OBJS)
 	cp -f $(OUTPUT_DIR)/appbox$(DLL_PREFIX) .
@@ -36,14 +48,17 @@ $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(MAIN
 	cp -f appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/
 	rm -f appbox$(DLL_PREFIX) appbox_main$(EXE_PREFIX)
 
-$(OUTPUT_DIR)/appbox$(DLL_PREFIX): $(OBJS)
+$(OUTPUT_DIR)/appbox$(DLL_PREFIX): $(OBJS) $(SQLITE_FULL_LIB) $(LUA_FULL_LIB)
 	mkdir -p $(OUTPUT_DIR)
-	$(CC) $(CC_FLAG) $(OBJS) $(LIBS) $(DLL_CC_FLAG) $@
+	$(CC) $(CC_FLAG) $(OBJS) $(SQLITE_FULL_LIB) $(LUA_FULL_LIB) $(LIBS) $(DLL_CC_FLAG) $@
 	rm -f appbox$(DLL_PREFIX)
 
-$(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX): $(OBJS)
-	$(STA_LIB) $@ $^
+$(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX): $(OBJS) $(SQLITE_FULL_LIB) $(LUA_FULL_LIB)
+	$(STA_LIB) $@ $(OBJS) $(SQLITE_FULL_OBJ) $(LUA_FULL_OBJ)
 
 $(SQLITE_FULL_LIB): $(SQLITE_FULL_INC) $(SQLITE_FULL_SRC)
 	cd sqlite; $(MAKE) sqlite.a
+
+$(LUA_FULL_LIB): $(LUA_FULL_INC) $(LUA_FULL_SRC)
+	cd lua; $(MAKE) lua.a
 

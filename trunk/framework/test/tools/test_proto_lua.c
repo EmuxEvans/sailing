@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <skates/errcode.h>
@@ -12,7 +13,6 @@
 #include "sample_p.proto.h"
 
 static lua_State* L;
-static char buf[100000];
 static int my_lua_func(lua_State* L);
 static int my_obj_save(lua_State* L);
 static int my_obj_load(lua_State* L);
