@@ -21,7 +21,7 @@ DLL_PREFIX=.so
 DLL_LIB_PREFIX=.so
 STA_LIB_PREFIX=.a
 
-OS_LIB=-pthread -ldl
+OS_LIB=-pthread -ldl -lm
 OS_INC_DIR=
 OS_LIB_DIR=
 
