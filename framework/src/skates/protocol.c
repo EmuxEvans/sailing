@@ -540,7 +540,7 @@ int protocol_file_read(PROTOCOL_TYPE* type, const char* filename, void* buf)
 	char data[50*1024];
 
 	ret = load_textfile(filename, data, sizeof(data));
-	if(ret!=ERR_NOERROR)
+	if(ret<0)
 		return ret;
 
 	return protocol_text_read(type, data, buf);
@@ -556,7 +556,8 @@ int protocol_file_write(PROTOCOL_TYPE* type, const void* buf, const char* filena
 	if(ret!=ERR_NOERROR)
 		return ret;
 
-	return save_textfile(filename, data, sizeof(data));
+	ret = save_textfile(filename, data, sizeof(data));
+	return ret<0?ERR_UNKNOWN:ERR_NOERROR;
 }
 
 void proto_new_field(PROTOCOL_CALLBACK* callback, const char* name, const char* value)

@@ -4,16 +4,7 @@
 #include "../../inc/skates/os.h"
 #include "../../inc/skates/protocol_def.h"
 #include "../../inc/skates/protocol_lua.h"
-
-struct PROTOCOL_LUA_OBJECT;
-typedef struct PROTOCOL_LUA_OBJECT PROTOCOL_LUA_OBJECT;;
-
-struct PROTOCOL_LUA_OBJECT {
-	PROTOCOL_TYPE*			type;
-	int						n_var;
-	int						idx;
-	void*					ptr;
-};
+#include "../../inc/skates/protocol.h"
 
 static void lua_return_value(lua_State* L, PROTOCOL_TYPE* type, int n_var, int idx, void* ptr);
 static int lua_set_value(lua_State* L, PROTOCOL_TYPE* type, int n_var, int idx, const void* ptr);
@@ -144,7 +135,7 @@ int lua_set_value(lua_State* L, PROTOCOL_TYPE* type, int n_var, int idx, const v
 	return 0;
 }
 
-static int protocol_lua_get(lua_State* L)
+int protocol_lua_get(lua_State* L)
 {
 	PROTOCOL_LUA_OBJECT* obj;
 	if(lua_gettop(L)!=2) {

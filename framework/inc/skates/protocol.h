@@ -1,6 +1,8 @@
 #ifndef __PROTOCOL_INCLUDE_
 #define __PROTOCOL_INCLUDE_
 
+#include "protocol_def.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,9 +26,6 @@ struct PROTOCOL_CALLBACK {
 
 ZION_API int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr);
 ZION_API void protocol_break(PROTOCOL_CALLBACK* callback);
-
-//
-#include "protocol_def.h"
 
 ZION_API int protocol_binary_read(PROTOCOL_TYPE* type, const void* data, unsigned int* data_len, void* buf);
 ZION_API int protocol_binary_write(PROTOCOL_TYPE* type, const void* buf, void* data, unsigned int* data_len);

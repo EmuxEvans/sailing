@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="sailing"
-	ProjectGUID="{3ECD4BF2-E3DA-4C2C-B520-4C2C2600C2B8}"
-	RootNamespace="sailing"
+	Name="test_proto_lua"
+	ProjectGUID="{0E7E6E58-6C5C-4F18-B813-EEC518865403}"
+	RootNamespace="test_timer"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -21,9 +21,9 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
+			OutputDirectory="$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="0"
 			>
 			<Tool
@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(ProjectDir)..\inc"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\inc&quot;;&quot;$(ProjectDir)..\src\skates&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;SYSLOG_DISABLE;DBGLOG_DISABLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -96,9 +96,9 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
+			OutputDirectory="$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
@@ -328,6 +328,34 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath="..\src\skates\dymempool.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\misc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\os_win32.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\protocol.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\protocol_lua.c"
+				>
+			</File>
+			<File
+				RelativePath="..\test\tools\sample_p.proto.c"
+				>
+			</File>
+			<File
+				RelativePath="..\test\tools\test_proto_lua.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="include"
@@ -335,10 +363,286 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\inc\sailing\pool.inl"
+				RelativePath="..\inc\skates\dymempool.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\errcode.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\misc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\os.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\os_win32.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\protocol.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\protocol_def.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\protocol_lua.h"
+				>
+			</File>
+			<File
+				RelativePath="..\test\tools\sample_p.proto.h"
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="lua"
+			>
+			<File
+				RelativePath="..\src\skates\lua\lapi.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lapi.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lauxlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lauxlib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lbaselib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lcode.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lcode.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ldblib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ldebug.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ldebug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ldo.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ldo.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ldump.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lfunc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lfunc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lgc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lgc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\linit.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\liolib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\llex.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\llex.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\llimits.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lmathlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lmem.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lmem.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\loadlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lobject.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lobject.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lopcodes.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lopcodes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\loslib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lparser.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lparser.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lstate.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lstate.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lstring.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lstring.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lstrlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ltable.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ltable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ltablib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ltm.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\ltm.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lua.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\luaconf.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lualib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lundump.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lundump.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lvm.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lvm.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lzio.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lzio.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\print.c"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath="..\test\tools\proto.lua"
+			>
+		</File>
+		<File
+			RelativePath="..\test\tools\sample_p.proto"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Compiling Protocol Define File..."
+					CommandLine="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Compiling Protocol Define File..."
+					CommandLine="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;"
+				/>
+			</FileConfiguration>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
