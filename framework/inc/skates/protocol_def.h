@@ -10,6 +10,7 @@ extern "C" {
 
 #define PROTOCOL_STRUCT_OFFSET(type, var)			((unsigned int)&(((type*)NULL)->var))
 
+#define PROTOCOL_TYPE_FAKEVAR		0x1000
 #define PROTOCOL_TYPE_ARRAY			0x0100
 #define PROTOCOL_TYPE_CHAR			0x0001
 #define PROTOCOL_TYPE_SHORT			0x0002
@@ -44,6 +45,7 @@ struct PROTOCOL_TYPE {
 	PROTOCOL_VARIABLE*		var_list;
 	int						var_count;
 	unsigned int			size;
+	PROTOCOL_VARIABLE		fake_var;
 };
 
 #ifdef __cplusplus

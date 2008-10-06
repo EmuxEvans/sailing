@@ -4,6 +4,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "appbox", "appbox.vcproj", "{4AE40DD4-9AF4-41F7-8C4D-979841F13F2D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{DCB78FBD-FC12-474D-8726-42FB6716C88D} = {DCB78FBD-FC12-474D-8726-42FB6716C88D}
+		{C6FB1CF6-9AE7-4D93-8019-61A860855418} = {C6FB1CF6-9AE7-4D93-8019-61A860855418}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_fdwatch", "test_fdwatch.vcproj", "{572A2668-69B9-4E0A-94B9-03FCE494A0B8}"
@@ -63,6 +64,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "prot_gen", "prot_gen.vcproj", "{5187C724-8C5C-4E88-9A88-873F3C57DAEB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_proto", "test_proto.vcproj", "{71B61CCB-E602-4783-B523-FE47AE023E32}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua", "lua.vcproj", "{C6FB1CF6-9AE7-4D93-8019-61A860855418}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "appbox_lib", "appbox_lib.vcproj", "{3AEE38B9-C643-48E5-A58B-7488C259500B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -204,6 +209,18 @@ Global
 		{71B61CCB-E602-4783-B523-FE47AE023E32}.Release|Win32.ActiveCfg = Release|Win32
 		{71B61CCB-E602-4783-B523-FE47AE023E32}.Release|Win32.Build.0 = Release|Win32
 		{71B61CCB-E602-4783-B523-FE47AE023E32}.Release|x64.ActiveCfg = Release|Win32
+		{C6FB1CF6-9AE7-4D93-8019-61A860855418}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C6FB1CF6-9AE7-4D93-8019-61A860855418}.Debug|Win32.Build.0 = Debug|Win32
+		{C6FB1CF6-9AE7-4D93-8019-61A860855418}.Debug|x64.ActiveCfg = Debug|Win32
+		{C6FB1CF6-9AE7-4D93-8019-61A860855418}.Release|Win32.ActiveCfg = Release|Win32
+		{C6FB1CF6-9AE7-4D93-8019-61A860855418}.Release|Win32.Build.0 = Release|Win32
+		{C6FB1CF6-9AE7-4D93-8019-61A860855418}.Release|x64.ActiveCfg = Release|Win32
+		{3AEE38B9-C643-48E5-A58B-7488C259500B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3AEE38B9-C643-48E5-A58B-7488C259500B}.Debug|Win32.Build.0 = Debug|Win32
+		{3AEE38B9-C643-48E5-A58B-7488C259500B}.Debug|x64.ActiveCfg = Debug|Win32
+		{3AEE38B9-C643-48E5-A58B-7488C259500B}.Release|Win32.ActiveCfg = Release|Win32
+		{3AEE38B9-C643-48E5-A58B-7488C259500B}.Release|Win32.Build.0 = Release|Win32
+		{3AEE38B9-C643-48E5-A58B-7488C259500B}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
