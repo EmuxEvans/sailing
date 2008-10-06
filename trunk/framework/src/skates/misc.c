@@ -237,5 +237,5 @@ int save_textfile(const char* filename, char* buf, int buflen)
 	fputs(buf, fp);
 
 	fclose(fp);
-	return 1;
+	return 0;
 }
