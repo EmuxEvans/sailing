@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(ProjectDir)..\inc"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\inc&quot;;&quot;$(ProjectDir)..\src\skates&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;SYSLOG_DISABLE;DBGLOG_DISABLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -388,7 +388,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Compiling Protocol Define File..."
-					CommandLine="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+					CommandLine="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;"
 				/>
 			</FileConfiguration>
@@ -398,7 +398,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Compiling Protocol Define File..."
-					CommandLine="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+					CommandLine="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;"
 				/>
 			</FileConfiguration>

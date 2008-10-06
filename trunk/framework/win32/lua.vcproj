@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="appbox"
-	ProjectGUID="{4AE40DD4-9AF4-41F7-8C4D-979841F13F2D}"
-	RootNamespace="appbox"
+	Name="lua"
+	ProjectGUID="{C6FB1CF6-9AE7-4D93-8019-61A860855418}"
+	RootNamespace="sqlite"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -23,7 +23,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
-			ConfigurationType="2"
+			ConfigurationType="4"
 			CharacterSet="0"
 			>
 			<Tool
@@ -44,14 +44,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)Dep\Mysql\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=__declspec(dllexport)"
+				AdditionalIncludeDirectories=""
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SQLITE_CORE=1"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				WarnAsError="true"
+				WarnAsError="false"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
 			/>
@@ -65,23 +65,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib sqlite.lib"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
-				GenerateManifest="false"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-				EmbedManifest="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -93,9 +80,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -103,7 +87,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
-			ConfigurationType="2"
+			ConfigurationType="4"
 			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
@@ -124,12 +108,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="$(SolutionDir)Dep\Mysql\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=__declspec(dllexport)"
+				AdditionalIncludeDirectories=""
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;SQLITE_CORE=1"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				WarnAsError="true"
+				WarnAsError="false"
 				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
@@ -143,24 +127,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib sqlite.lib"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
-				GenerateManifest="true"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -170,9 +140,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -346,171 +313,123 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\skates\appbox.c"
+				RelativePath="..\src\skates\lua\lapi.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\appbox_args.c"
+				RelativePath="..\src\skates\lua\lauxlib.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\appbox_win32.c"
+				RelativePath="..\src\skates\lua\lbaselib.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\applog.c"
+				RelativePath="..\src\skates\lua\lcode.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\console.c"
+				RelativePath="..\src\skates\lua\ldblib.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\dbapi.c"
+				RelativePath="..\src\skates\lua\ldebug.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\dbapi_mysql.c"
-				>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\src\skates\dbapi_pgsql.c"
+				RelativePath="..\src\skates\lua\ldo.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\dbapi_sample.c"
+				RelativePath="..\src\skates\lua\ldump.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\dbapi_sqlite.c"
+				RelativePath="..\src\skates\lua\lfunc.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\dbapi_sqlrelay.c"
+				RelativePath="..\src\skates\lua\lgc.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\dymempool.c"
+				RelativePath="..\src\skates\lua\linit.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\fdwatch_epoll.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\src\skates\fdwatch_kqueue.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\src\skates\fdwatch_select.c"
+				RelativePath="..\src\skates\lua\liolib.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\hashmap.c"
+				RelativePath="..\src\skates\lua\llex.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\log.c"
+				RelativePath="..\src\skates\lua\lmathlib.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\mempool.c"
+				RelativePath="..\src\skates\lua\lmem.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\misc.c"
+				RelativePath="..\src\skates\lua\loadlib.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\network.c"
+				RelativePath="..\src\skates\lua\lobject.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\os_win32.c"
+				RelativePath="..\src\skates\lua\lopcodes.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\protocol.c"
+				RelativePath="..\src\skates\lua\loslib.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\protocol_lua.c"
+				RelativePath="..\src\skates\lua\lparser.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\rpc_fun.c"
+				RelativePath="..\src\skates\lua\lstate.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\rpc_net.c"
+				RelativePath="..\src\skates\lua\lstring.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\rqueue.c"
+				RelativePath="..\src\skates\lua\lstrlib.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\sock.c"
+				RelativePath="..\src\skates\lua\ltable.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\stream.c"
+				RelativePath="..\src\skates\lua\ltablib.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\threadpool.c"
+				RelativePath="..\src\skates\lua\ltm.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\timer.c"
+				RelativePath="..\src\skates\lua\lundump.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lvm.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\lzio.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\print.c"
 				>
 			</File>
 		</Filter>
@@ -520,119 +439,95 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\inc\skates\appbox.h"
+				RelativePath="..\src\skates\lua\lapi.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\appbox_args.h"
+				RelativePath="..\src\skates\lua\lauxlib.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\appbox_svc.h"
+				RelativePath="..\src\skates\lua\lcode.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\applog.h"
+				RelativePath="..\src\skates\lua\ldebug.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\console.h"
+				RelativePath="..\src\skates\lua\ldo.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\dbapi.h"
+				RelativePath="..\src\skates\lua\lfunc.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\skates\dbapi_provider.h"
+				RelativePath="..\src\skates\lua\lgc.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\dymempool.h"
+				RelativePath="..\src\skates\lua\llex.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\errcode.h"
+				RelativePath="..\src\skates\lua\llimits.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\fdwatch.h"
+				RelativePath="..\src\skates\lua\lmem.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\hashmap.h"
+				RelativePath="..\src\skates\lua\lobject.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\log.h"
+				RelativePath="..\src\skates\lua\lopcodes.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\mempool.h"
+				RelativePath="..\src\skates\lua\lparser.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\misc.h"
+				RelativePath="..\src\skates\lua\lstate.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\network.h"
+				RelativePath="..\src\skates\lua\lstring.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\os.h"
+				RelativePath="..\src\skates\lua\ltable.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\os_unix.h"
+				RelativePath="..\src\skates\lua\ltm.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\os_win32.h"
+				RelativePath="..\src\skates\lua\lua.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\protocol.h"
+				RelativePath="..\src\skates\lua\luaconf.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\protocol_lua.h"
+				RelativePath="..\src\skates\lua\lualib.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\rlist.h"
+				RelativePath="..\src\skates\lua\lundump.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\rpc_fun.h"
+				RelativePath="..\src\skates\lua\lvm.h"
 				>
 			</File>
 			<File
-				RelativePath="..\inc\skates\rpc_net.h"
-				>
-			</File>
-			<File
-				RelativePath="..\inc\skates\rqueue.h"
-				>
-			</File>
-			<File
-				RelativePath="..\inc\skates\skates.h"
-				>
-			</File>
-			<File
-				RelativePath="..\inc\skates\sock.h"
-				>
-			</File>
-			<File
-				RelativePath="..\inc\skates\stream.h"
-				>
-			</File>
-			<File
-				RelativePath="..\inc\skates\threadpool.h"
-				>
-			</File>
-			<File
-				RelativePath="..\inc\skates\timer.h"
+				RelativePath="..\src\skates\lua\lzio.h"
 				>
 			</File>
 		</Filter>

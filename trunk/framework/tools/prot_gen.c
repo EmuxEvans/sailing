@@ -189,6 +189,21 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	for(i=0; i<num_const; i++) {
+		if(get_type(data_const[i].type)==PROTOCOL_TYPE_OBJECT) {
+			printf("invalid const type [%s %s = %s]\n", data_const[i].type, data_const[i].name, data_const[i].value);
+			return ERR_UNKNOWN;
+		}
+		if(get_type(data_const[i].type)==PROTOCOL_TYPE_STRING) {
+			if(value[0]!='"') {
+				printf("invalid const type [%s %s = %s]\n", data_const[i].type, data_const[i].name, data_const[i].value);
+				return ERR_UNKNOWN;
+			}
+		} else {
+			if(value[0]=='"') {
+				printf("invalid const type [%s %s = %s]\n", data_const[i].type, data_const[i].name, data_const[i].value);
+				return ERR_UNKNOWN;
+			}
+		}
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define %s ((%s)(%s))\n", data_const[i].name, data_const[i].type, data_const[i].value);
 	}
 	for(type=0; type<num_type; type++) {
@@ -321,7 +336,7 @@ int generate_cfile(const char* name, char* src, unsigned int src_len)
 			count++;
 		}
 		snprintf(src+strlen(src), src_len-strlen(src), "};\n");
-		snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TYPE PROTOCOL_NAME(%s) = {\"%s\", &__variable_list_%s_[0], %d, sizeof(%s)};\n", data_type[type].name, data_type[type].name, data_type[type].name, count, data_type[type].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TYPE PROTOCOL_NAME(%s) = {\"%s\", &__variable_list_%s_[0], %d, sizeof(%s), {\"\", PROTOCOL_TYPE_FAKEVAR|PROTOCOL_TYPE_OBJECT, &PROTOCOL_NAME(%s), sizeof(%s), 0, 0}};\n", data_type[type].name, data_type[type].name, data_type[type].name, count, data_type[type].name, data_type[type].name, data_type[type].name);
 	}
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 

@@ -9,7 +9,7 @@
 #include "sample_p.proto.h"
 
 char buf[100000];
-b vv;
+B vv;
 
 static void my_new_field(PROTOCOL_CALLBACK* callback, const char* name, const char* value);
 static void my_new_array(PROTOCOL_CALLBACK* callback, const char* name);
@@ -44,14 +44,14 @@ int main(int argc, char* argv[])
 	len = sizeof(buf);
 	memset(&vv, 0, sizeof(vv));
 	memset(buf, 0xff, sizeof(buf));
-	protocol_binary_write(&PROTOCOL_NAME(b), &vv, buf, &len);
+	protocol_binary_write(&PROTOCOL_NAME(B), &vv, buf, &len);
 	memset(&vv, 0xff, sizeof(vv));
-	protocol_binary_read(&PROTOCOL_NAME(b), buf, &len, &vv);
+	protocol_binary_read(&PROTOCOL_NAME(B), buf, &len, &vv);
 	len = sizeof(buf);
 	memset(buf, 0xff, sizeof(buf));
-	protocol_text_write(&PROTOCOL_NAME(b), &vv, buf, &len);
+	protocol_text_write(&PROTOCOL_NAME(B), &vv, buf, &len);
 	memset(&vv, 0xff, sizeof(vv));
-	protocol_text_read(&PROTOCOL_NAME(b), buf, &vv);
+	protocol_text_read(&PROTOCOL_NAME(B), buf, &vv);
 
 	protocol_parse(buf, &callback, NULL);
 	return 0;

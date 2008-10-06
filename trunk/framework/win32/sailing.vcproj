@@ -351,11 +351,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\sailing\lua\lauxlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sailing\lua\lauxlib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sailing\lua\lbaselib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\sailing\lua\lcode.c"
 				>
 			</File>
 			<File
 				RelativePath="..\src\sailing\lua\lcode.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sailing\lua\ldblib.c"
 				>
 			</File>
 			<File
@@ -395,6 +411,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\sailing\lua\linit.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sailing\lua\liolib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\sailing\lua\llex.c"
 				>
 			</File>
@@ -407,11 +431,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\sailing\lua\lmathlib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\sailing\lua\lmem.c"
 				>
 			</File>
 			<File
 				RelativePath="..\src\sailing\lua\lmem.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sailing\lua\loadlib.c"
 				>
 			</File>
 			<File
@@ -428,6 +460,10 @@
 			</File>
 			<File
 				RelativePath="..\src\sailing\lua\lopcodes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sailing\lua\loslib.c"
 				>
 			</File>
 			<File
@@ -455,11 +491,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\sailing\lua\lstrlib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\sailing\lua\ltable.c"
 				>
 			</File>
 			<File
 				RelativePath="..\src\sailing\lua\ltable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sailing\lua\ltablib.c"
 				>
 			</File>
 			<File
@@ -476,6 +520,10 @@
 			</File>
 			<File
 				RelativePath="..\src\sailing\lua\luaconf.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sailing\lua\lualib.h"
 				>
 			</File>
 			<File
@@ -500,6 +548,10 @@
 			</File>
 			<File
 				RelativePath="..\src\sailing\lua\lzio.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\sailing\lua\print.c"
 				>
 			</File>
 		</Filter>

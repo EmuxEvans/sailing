@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="appbox"
-	ProjectGUID="{4AE40DD4-9AF4-41F7-8C4D-979841F13F2D}"
+	Name="appbox_lib"
+	ProjectGUID="{3AEE38B9-C643-48E5-A58B-7488C259500B}"
 	RootNamespace="appbox"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
@@ -23,7 +23,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
-			ConfigurationType="2"
+			ConfigurationType="4"
 			CharacterSet="0"
 			>
 			<Tool
@@ -45,7 +45,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="$(SolutionDir)Dep\Mysql\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=__declspec(dllexport)"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=extern"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -65,23 +65,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib sqlite.lib"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
-				GenerateManifest="false"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-				EmbedManifest="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -93,9 +80,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -103,7 +87,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)\$(ProjectName)"
-			ConfigurationType="2"
+			ConfigurationType="4"
 			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
@@ -125,7 +109,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="$(SolutionDir)Dep\Mysql\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=__declspec(dllexport)"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=extern"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -143,24 +127,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib sqlite.lib"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
-				GenerateManifest="true"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -170,9 +140,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
