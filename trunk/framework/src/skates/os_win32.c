@@ -1,5 +1,5 @@
 #include "../../inc/skates/errcode.h"
-#include "../../inc/skates/os.h"
+#include "../../inc/skates/os_win32.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -10,6 +10,16 @@
 #define CONDITION_TCOUNT(v)						(((v)>>8)&0xff)
 #define CONDITION_SCOUNT(v)						((v)&0xff)
 #define CONDITION_MAKE(seq, tcount, scount)		(((((DWORD)(seq))&0xffff)<<16) | ((((DWORD)(tcount))&0xff)<<8) | (((DWORD)(scount))&0xff))
+
+char* os_getcwd(char* path, int len)
+{
+	return GetCurrentDirectory((DWORD)len, path)==0?path:NULL;
+}
+
+int os_chdir(char* path)
+{
+	return SetCurrentDirectory(path)?0:-1;
+}
 
 int os_condition_wait(os_condition_t* cond, os_mutex_t* mtx)
 {
@@ -89,7 +99,7 @@ int os_fileexist(const char* file)
 	int ret;
 	struct _stat s;
 	ret = _stat(file, &s);
-	return ret==0 && (s.st_mode&S_IFDIR)==0;
+	return ret==0 && (s.st_mode&_S_IFDIR)==0;
 }
 
 int os_isdir(const char* dir)
@@ -97,7 +107,7 @@ int os_isdir(const char* dir)
 	int ret;
 	struct _stat s;
 	ret = _stat(dir, &s);
-	return ret==0 && (s.st_mode&S_IFDIR)!=0;
+	return ret==0 && (s.st_mode&_S_IFDIR)!=0;
 }
 
 int os_mkdir(const char* dir)
@@ -110,7 +120,7 @@ int os_mkdir(const char* dir)
 
 	ret = _stat(dir, &s);
 	if(ret==0) {
-		return (s.st_mode&S_IFDIR)==0?-1:0;
+		return (s.st_mode&_S_IFDIR)==0?-1:0;
 	}
 
 	cur = dir;
@@ -128,7 +138,7 @@ int os_mkdir(const char* dir)
 
 		ret = _stat(tmp, &s);
 		if(ret==0) {
-			if((s.st_mode&S_IFDIR)==0) {
+			if((s.st_mode&_S_IFDIR)==0) {
 				return -1;
 			} else {
 				continue;

@@ -16,3 +16,9 @@ extern MY_STRUCT {
 	os_int a_int = 100;
 	B b;
 };
+
+interface IA {
+	B func1(os_int a, string b, A c);
+};
+
+

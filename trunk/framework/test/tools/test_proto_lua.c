@@ -65,7 +65,8 @@ int my_lua_func(lua_State* L)
 	MY_STRUCT* ptr;
 	ptr = (MY_STRUCT*)malloc(sizeof(MY_STRUCT));
 	memset(ptr, 0, sizeof(*ptr));
-	return protocol_lua_create(L, &PROTOCOL_NAME(MY_STRUCT), ptr);
+	protocol_lua_create(L, &PROTOCOL_NAME(MY_STRUCT), ptr);
+	return 1;
 }
 
 int my_obj_save(lua_State* L)
@@ -76,14 +77,15 @@ int my_obj_save(lua_State* L)
 
 	if(lua_gettop(L)<2 || lua_type(L, 1)!=LUA_TUSERDATA || lua_type(L, 2)!=LUA_TSTRING) {
 		luaL_error(L, "invalid parameter type, array.\n");
-		return 1;
+		return 0;
 	}
 
 	obj = (PROTOCOL_LUA_OBJECT*)lua_touserdata(L, 1);
 	filename = lua_tolstring(L, 2, NULL);
 
 	ret = protocol_file_write(obj->type, obj->ptr, filename);
-	return ret==ERR_NOERROR?0:1;
+	lua_pushinteger(L, ret);
+	return 1;
 }
 
 int my_obj_load(lua_State* L)
@@ -94,12 +96,13 @@ int my_obj_load(lua_State* L)
 
 	if(lua_gettop(L)<2 || lua_type(L, 1)!=LUA_TUSERDATA || lua_type(L, 2)!=LUA_TSTRING) {
 		luaL_error(L, "invalid parameter type, array.\n");
-		return 1;
+		return 0;
 	}
 
 	obj = (PROTOCOL_LUA_OBJECT*)lua_touserdata(L, 1);
 	filename = lua_tolstring(L, 2, NULL);
 
 	ret = protocol_file_read(obj->type, filename, obj->ptr);
-	return ret==ERR_NOERROR?0:1;
+	lua_pushinteger(L, ret);
+	return 1;
 }

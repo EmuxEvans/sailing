@@ -26,10 +26,8 @@ extern "C" {
 
 struct PROTOCOL_VARIABLE;
 struct PROTOCOL_TYPE;
-struct PROTOCOL_TABLE;
 typedef struct PROTOCOL_VARIABLE	PROTOCOL_VARIABLE;
 typedef struct PROTOCOL_TYPE		PROTOCOL_TYPE;
-typedef struct PROTOCOL_TABLE		PROTOCOL_TABLE;
 
 struct PROTOCOL_VARIABLE {
 	char*					name;

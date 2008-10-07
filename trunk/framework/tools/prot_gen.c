@@ -7,7 +7,6 @@
 #include <skates/misc.h>
 #include <skates/protocol.h>
 
-static char txt[50*1024];
 static char c_file[50*1024];
 static char h_file[50*1024];
 static char mode[100], type[100], name[100], value[2000];
@@ -16,6 +15,8 @@ static int is_break;
 static int parse_pfile(const char* text);
 static int generate_hfile(const char* name, char* inc, unsigned int inc_len);
 static int generate_cfile(const char* name, char* src, unsigned int src_len);
+static int generate_hlua(const char* name, char* src, unsigned int src_len);
+static int generate_clua(const char* name, char* src, unsigned int src_len);
 
 static const char* get_token_char(const char* buf, char c);
 static const char* get_token_string(const char* buf, char* value, int size);
@@ -93,6 +94,64 @@ static struct {
 static int num_parm = 0, num_func = 0, num_class = 0;
 static int current_class = -1;
 
+static struct {
+	char	o_path[100];
+	char	path[100];
+	char	file[100];
+	char	txt[50*1024];
+} p_stack[10];
+static int p_stack_depth = 0;
+
+static int parse_file(const char* file)
+{
+	int i, ret;
+	char path[100];
+	char *a, *b;
+
+	os_getcwd(p_stack[p_stack_depth].o_path, sizeof(p_stack[p_stack_depth].o_path));
+	a = strrchr(file, '\\');
+	b = strrchr(file, '/');
+	if(a==NULL && b==NULL) {
+		strcpy(path, p_stack[p_stack_depth].o_path);
+		strcpy(p_stack[p_stack_depth].o_path, file);
+	} else {
+		if(a<b) a = b;
+		strcpy(path, file);
+		path[a-file] = '\0';
+		if(os_chdir(path)!=0) {
+			return ERR_UNKNOWN;
+		}
+		os_getcwd(path, sizeof(path));
+		strcpy(p_stack[p_stack_depth].o_path, a+1);
+	}
+	strcpy(p_stack[p_stack_depth].path, path);
+	for(i=0; i<p_stack_depth; i++) {
+		if(strcmp(p_stack[p_stack_depth].path, p_stack[i].path)!=0) continue;
+		if(strcmp(p_stack[p_stack_depth].file, p_stack[i].file)!=0) continue;
+		os_chdir(p_stack[p_stack_depth].o_path);
+		return ERR_UNKNOWN;
+	}
+	p_stack_depth++;
+
+	ret = load_textfile(p_stack[p_stack_depth-1].file, p_stack[p_stack_depth-1].txt, sizeof(p_stack[p_stack_depth-1].txt));
+	if(ret<0) {
+		printf("can't load file(%s)\n", p_stack[p_stack_depth-1].file);
+		ret = ERR_UNKNOWN;
+	} else {
+		ret = parse_pfile(p_stack[p_stack_depth-1].txt);
+		if(ret!=ERR_NOERROR) {
+			printf("error: parse!\n");
+		} else {
+			// done
+		}
+	}
+
+	os_chdir(p_stack[p_stack_depth-1].o_path);
+	p_stack_depth--;
+
+	return ERR_NOERROR;
+}
+
 int main(int argc, char* argv[])
 {
 	int ret;
@@ -103,17 +162,12 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	ret = load_textfile(argv[1], txt, sizeof(txt));
-	if(ret<0) {
-		printf("can't load file(%s)\n", argv[1]);
-		return 0;
-	}
-
-	ret = parse_pfile(txt);
+	ret = parse_file(argv[1]);
 	if(ret!=ERR_NOERROR) {
 		printf("error: parse!\n");
 		return 0;
 	}
+
 	ret = generate_hfile(argv[1], h_file, sizeof(h_file));
 	if(ret!=ERR_NOERROR) {
 		printf("error: parse!\n");
@@ -149,9 +203,6 @@ int parse_pfile(const char* buf)
 		if(tbuf!=NULL) continue;
 
 		tbuf = parse_node_def(buf);
-		if(tbuf) continue;
-
-		tbuf = parse_function(buf);
 		if(tbuf) continue;
 
 		tbuf = parse_class(buf);
@@ -272,9 +323,12 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s(", get_ctype(data_function[i].return_type), data_function[i].name);
 		for(j=data_function[i].parameter_start; j<data_function[i].parameter_start+data_function[i].parameter_count; j++) {
-			snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s(", get_ctype(data_function[i].return_type), data_function[i].name);
+			if(j!=data_function[i].parameter_start) {
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), ", ");
+			}
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s", get_ctype(data_parameter[j].type), data_parameter[j].name);
 		}
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), ");");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), ");\n");
 	}
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif");
@@ -339,6 +393,48 @@ int generate_cfile(const char* name, char* src, unsigned int src_len)
 		snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TYPE PROTOCOL_NAME(%s) = {\"%s\", &__variable_list_%s_[0], %d, sizeof(%s), {\"\", PROTOCOL_TYPE_FAKEVAR|PROTOCOL_TYPE_OBJECT, &PROTOCOL_NAME(%s), sizeof(%s), 0, 0}};\n", data_type[type].name, data_type[type].name, data_type[type].name, count, data_type[type].name, data_type[type].name, data_type[type].name);
 	}
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+
+	return ERR_NOERROR;
+}
+
+int generate_hlua(const char* name, char* src, unsigned int src_len)
+{
+	return ERR_NOERROR;
+}
+
+int generate_clua(const char* name, char* src, unsigned int src_len)
+{
+	int i, j, k;
+	struct tm   *newTime;
+    time_t      szClock;
+	char buf[200];
+
+	src[0] = '\0';
+    time(&szClock);
+    newTime = localtime(&szClock);
+
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "// generate by PROT_GEN.\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "// %s\n", asctime(newTime));
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/errcode.h>\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/os.h>\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/protocol_def.h>\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/protocol_lua.h>\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+	make_include_filename(name, buf);
+	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.lua.h\"\n", buf);
+
+	for(i=0; i<num_class; i++) {
+		snprintf(src+strlen(src), src_len-strlen(src), "\n");
+		for(j=data_class[i].function_start; j<data_class[i].function_start+data_class[i].function_count; j++) {
+			snprintf(src+strlen(src), src_len-strlen(src), "static PROTOCOL_LUA_PARAMETER __%s_%s_[]={\n");
+			for(k=data_function[j].parameter_start; k<data_function[j].parameter_start+data_function[j].parameter_count; k++) {
+				snprintf(src+strlen(src), src_len-strlen(src), "};\n");
+			}
+			snprintf(src+strlen(src), src_len-strlen(src), "};\n");
+		}
+	}
+
 
 	return ERR_NOERROR;
 }
@@ -716,7 +812,7 @@ const char* parse_class(const char* buf)
 {
 	const char* tbuf;
 
-	buf = get_token_keyword(buf, "class", mode);
+	buf = get_token_keyword(buf, "interface", mode);
 	if(buf==NULL)
 		return NULL;
 
@@ -831,17 +927,27 @@ void make_include_filename(const char* file, char* out)
 
 void def_include(const char* name)
 {
+	int ret;
+
 	if(!check_include_filename(name)) {
 		printf("invalid include filename(%s)\n", name);
 		is_break = 1;
 		return;
 	}
-	if(num_inc>=sizeof(data_include)/sizeof(data_include[0])) {
-		printf("so many include filename(%s)\n", name);
-		is_break = 1;
-		return;
+	if(p_stack_depth==1) {
+		if(num_inc>=sizeof(data_include)/sizeof(data_include[0])) {
+			printf("so many include filename(%s)\n", name);
+			is_break = 1;
+			return;
+		}
+		strcpy(data_include[num_inc++].file, name);
 	}
-	strcpy(data_include[num_inc++].file, name);
+
+	ret = parse_file(name);
+	if(ret!=ERR_NOERROR) {
+		is_break = 1;
+	}
+
 	return;
 }
 

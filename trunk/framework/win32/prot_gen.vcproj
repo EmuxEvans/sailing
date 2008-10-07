@@ -301,6 +301,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\skates\os_win32.c"
+				>
+			</File>
+			<File
 				RelativePath="..\tools\prot_gen.c"
 				>
 			</File>
