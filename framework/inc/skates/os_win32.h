@@ -41,6 +41,9 @@ typedef double				os_double;
 
 ZION_INLINE int os_last_error();
 
+ZION_API char* os_getcwd(char* path, int len);
+ZION_API int os_chdir(char* path);
+
 typedef __int64 os_time_t;
 ZION_INLINE void os_sleep(unsigned int u);
 ZION_INLINE void os_time_get(os_time_t* t);

@@ -5,9 +5,20 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "../../inc/skates/errcode.h"
 #include "../../inc/skates/os.h"
+
+char* os_getcwd(char* path, int len)
+{
+	return getcwd(path, (size_t)len);
+}
+
+int os_chdir(char* path)
+{
+	return chdir(path);
+}
 
 unsigned int atom_unix_inc(unsigned int volatile* mem)
 {
