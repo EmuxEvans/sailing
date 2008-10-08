@@ -83,7 +83,7 @@ int my_obj_save(lua_State* L)
 	obj = (PROTOCOL_LUA_OBJECT*)lua_touserdata(L, 1);
 	filename = lua_tolstring(L, 2, NULL);
 
-	ret = protocol_file_write(obj->type, obj->ptr, filename);
+	ret = protocol_file_write(obj->s.type, obj->s.ptr, filename);
 	lua_pushinteger(L, ret);
 	return 1;
 }
@@ -102,7 +102,7 @@ int my_obj_load(lua_State* L)
 	obj = (PROTOCOL_LUA_OBJECT*)lua_touserdata(L, 1);
 	filename = lua_tolstring(L, 2, NULL);
 
-	ret = protocol_file_read(obj->type, filename, obj->ptr);
+	ret = protocol_file_read(obj->s.type, filename, obj->s.ptr);
 	lua_pushinteger(L, ret);
 	return 1;
 }

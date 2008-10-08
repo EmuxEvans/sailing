@@ -340,7 +340,7 @@ int protocol_binary_read(PROTOCOL_TYPE* type, const void* data, unsigned int* da
 		}
 
 		for(j=0; j<(int)len; j++) {
-			if((type->var_list[i].type&0xff)==PROTOCOL_TYPE_OBJECT) {
+			if((type->var_list[i].type&0xff)==PROTOCOL_TYPE_STRUCT) {
 				unsigned int olen;
 				olen = *data_len - read_len;
 				ret = protocol_binary_read(type->var_list[i].obj_type, (const char*)data+read_len, &olen, (char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen);
@@ -381,7 +381,7 @@ int protocol_binary_write(PROTOCOL_TYPE* type, const void* buf, void* data, unsi
 		}
 
 		for(j=0; j<(int)len; j++) {
-			if((type->var_list[i].type&0xff)==PROTOCOL_TYPE_OBJECT) {
+			if((type->var_list[i].type&0xff)==PROTOCOL_TYPE_STRUCT) {
 				unsigned int olen;
 				olen = *data_len - write_len;
 				ret = protocol_binary_write(type->var_list[i].obj_type, (const char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen, (char*)data+write_len, &olen);
@@ -502,7 +502,7 @@ int text_write_object(PROTOCOL_TYPE* type, const void* buf, char* data, unsigned
 			case PROTOCOL_TYPE_STRING:
 				WRITE_TEXT("\"%s\"", (char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen);
 				break;
-			case PROTOCOL_TYPE_OBJECT:
+			case PROTOCOL_TYPE_STRUCT:
 				len = *data_len - write_len;
 				ret = text_write_object(type->var_list[i].obj_type, (const char*)buf+type->var_list[i].offset+j*type->var_list[i].prelen, (char*)data+write_len, &len);
 				if(ret!=ERR_NOERROR) return ret;
@@ -565,7 +565,7 @@ void proto_new_field(PROTOCOL_CALLBACK* callback, const char* name, const char* 
 	int i;
 	PROTO_PARSE* parse = (PROTO_PARSE*)callback->user_ptr;
 	if(parse->stack_count==0) {
-		parse->stack[0].type = PROTOCOL_TYPE_OBJECT;
+		parse->stack[0].type = PROTOCOL_TYPE_STRUCT;
 		parse->stack[0].obj_type = parse->root;
 		parse->stack[0].prelen = parse->root->size;
 		parse->stack[0].buf = parse->buf;
@@ -585,7 +585,7 @@ void proto_new_field(PROTOCOL_CALLBACK* callback, const char* name, const char* 
 	}
 
 	if(!value) {
-		if(parse->stack[parse->stack_count-1].obj_type->var_list[i].type!=PROTOCOL_TYPE_OBJECT) {
+		if(parse->stack[parse->stack_count-1].obj_type->var_list[i].type!=PROTOCOL_TYPE_STRUCT) {
 			protocol_break(callback);
 			return;
 		}
@@ -660,7 +660,7 @@ void proto_new_item(PROTOCOL_CALLBACK* callback, const char* value)
 {
 	PROTO_PARSE* parse = (PROTO_PARSE*)callback->user_ptr;
 
-	if(parse->stack[parse->stack_count-1].type==(PROTOCOL_TYPE_ARRAY|PROTOCOL_TYPE_OBJECT)) {
+	if(parse->stack[parse->stack_count-1].type==(PROTOCOL_TYPE_ARRAY|PROTOCOL_TYPE_STRUCT)) {
 		if(value) {
 			protocol_break(callback);
 			return;
