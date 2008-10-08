@@ -19,6 +19,9 @@ extern MY_STRUCT {
 
 interface IA {
 	B func1(os_int a, string b, A c);
+	void func2();
 };
 
-
+interface IB {
+	B func1(os_int a, string b, A c, IB d);
+};

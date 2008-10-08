@@ -346,7 +346,15 @@
 				RelativePath="..\inc\skates\protocol_def.h"
 				>
 			</File>
+			<File
+				RelativePath="..\inc\skates\protocol_lua.h"
+				>
+			</File>
 		</Filter>
+		<File
+			RelativePath="..\test\tools\sample_a.proto"
+			>
+		</File>
 		<File
 			RelativePath="..\test\tools\sample_p.proto"
 			>

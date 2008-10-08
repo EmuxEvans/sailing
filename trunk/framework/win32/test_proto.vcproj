@@ -345,6 +345,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\test\tools\sample_p.proto.lua.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\test\tools\test_proto.c"
 				>
 			</File>
@@ -376,6 +380,10 @@
 			</File>
 			<File
 				RelativePath="..\test\tools\sample_p.proto.h"
+				>
+			</File>
+			<File
+				RelativePath="..\test\tools\sample_p.proto.lua.h"
 				>
 			</File>
 		</Filter>
