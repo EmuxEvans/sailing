@@ -7,6 +7,7 @@ extern "C" {
 
 #include "lua/lua.h"
 #include "lua/lauxlib.h"
+#include "lua/lualib.h"
 
 struct PROTOCOL_LUA_PARAMETER;
 typedef struct PROTOCOL_LUA_PARAMETER PROTOCOL_LUA_PARAMETER;
@@ -28,6 +29,7 @@ struct PROTOCOL_LUA_FUNCTION {
 	const char*					name;
 	PROTOCOL_LUA_PARAMETER*		params;
 	int							params_count;
+	int (*lua_func)(lua_State* L);
 };
 
 struct PROTOCOL_LUA_CLASS {
@@ -36,8 +38,16 @@ struct PROTOCOL_LUA_CLASS {
 	int							funcs_count;
 };
 
-ZION_API void protocol_lua_create(lua_State* L, PROTOCOL_TYPE* type, void* ptr);
+ZION_API void protocol_lua_newstruct(lua_State* L, PROTOCOL_TYPE* type, void* ptr);
+ZION_API void protocol_lua_newobject(lua_State* L, PROTOCOL_LUA_CLASS* cls, void* ptr);
 ZION_API int protocol_lua_init(lua_State* L);
+ZION_API int protocol_lua_getvalue(lua_State* L, int idx, PROTOCOL_LUA_PARAMETER* p, void* v);
+ZION_API void protocol_lua_pushvalue(lua_State* L, PROTOCOL_LUA_PARAMETER* p, void* v);
+
+ZION_API int luaL_isstruct(lua_State* L, int idx, PROTOCOL_TYPE* type);
+ZION_API int luaL_isobject(lua_State* L, int idx, PROTOCOL_LUA_CLASS* cls);
+ZION_API void* luaL_tostruct(lua_State* L, int idx, PROTOCOL_TYPE* type);
+ZION_API void* luaL_toobject(lua_State* L, int idx, PROTOCOL_LUA_CLASS* cls);
 
 typedef struct PROTOCOL_LUA_OBJECT {
 	int type;
@@ -45,6 +55,7 @@ typedef struct PROTOCOL_LUA_OBJECT {
 	union {
 		struct {
 			PROTOCOL_LUA_CLASS*		t_class;
+			void*					ptr;
 		} o;
 
 		struct {
@@ -58,6 +69,7 @@ typedef struct PROTOCOL_LUA_OBJECT {
 } PROTOCOL_LUA_OBJECT;
 
 #define PROTOCOL_STRUCT_METATABLE		"protocol_struct_metatable"
+#define PROTOCOL_OBJECT_METATABLE		"protocol_object_metatable"
 
 #ifdef __cplusplus
 }
