@@ -17,6 +17,10 @@ extern MY_STRUCT {
 	B b;
 };
 
+interface ICallMe {
+	os_int callme(os_int i);
+};
+
 interface IA {
 	B func1(os_int a, string b, A c);
 	void func2();

@@ -18,14 +18,24 @@ static int struct_set(lua_State* L);
 static int struct_gc(lua_State* L);
 static int struct_tostring(lua_State* L);
 
+static int object_get(lua_State* L);
+static int object_gc(lua_State* L);
+
 int luaL_isstruct(lua_State* L, int idx, PROTOCOL_TYPE* type)
 {
 	PROTOCOL_LUA_OBJECT* obj;
 	if(lua_type(L, idx)!=LUA_TUSERDATA) return 0;
 	obj = (PROTOCOL_LUA_OBJECT*)lua_touserdata(L, idx);
 	if(obj->type!=PROTOCOL_TYPE_STRUCT) return 0;
+	if(obj->s.n_var<0) {
+		return obj->s.type==type;
+	}
 	if(obj->s.type!=type) return 0;
-	return 1;
+	if(obj->s.type->var_list[obj->s.n_var].type&PROTOCOL_TYPE_ARRAY) {
+		return obj->s.idx>=0;
+	} else {
+		return 0;
+	}
 }
 
 int luaL_isobject(lua_State* L, int idx, PROTOCOL_LUA_CLASS* cls)
@@ -38,24 +48,35 @@ int luaL_isobject(lua_State* L, int idx, PROTOCOL_LUA_CLASS* cls)
 	return 1;
 }
 
-PROTOCOL_LUA_OBJECT* luaL_tostruct(lua_State* L, int idx, PROTOCOL_TYPE* type)
+void* luaL_tostruct(lua_State* L, int idx, PROTOCOL_TYPE* type)
 {
 	PROTOCOL_LUA_OBJECT* obj;
 	if(lua_type(L, idx)!=LUA_TUSERDATA) return NULL;
 	obj = (PROTOCOL_LUA_OBJECT*)lua_touserdata(L, idx);
 	if(obj->type!=PROTOCOL_TYPE_STRUCT) return NULL;
+	if(obj->s.n_var<0) {
+		if(obj->s.type==type) {
+			return obj->s.ptr;
+		} else {
+			return NULL;
+		}
+	}
 	if(obj->s.type!=type) return NULL;
-	return obj;
+	if(obj->s.type->var_list[obj->s.n_var].type&PROTOCOL_TYPE_ARRAY) {
+		return (char*)obj->s.ptr + obj->s.type->var_list[obj->s.n_var].offset + obj->s.type->var_list[obj->s.n_var].prelen * obj->s.idx;
+	} else {
+		return (char*)obj->s.ptr + obj->s.type->var_list[obj->s.n_var].offset;
+	}
 }
 
-PROTOCOL_LUA_OBJECT* luaL_toobject(lua_State* L, int idx, PROTOCOL_LUA_CLASS* cls)
+void* luaL_toobject(lua_State* L, int idx, PROTOCOL_LUA_CLASS* cls)
 {
 	PROTOCOL_LUA_OBJECT* obj;
 	if(lua_type(L, idx)!=LUA_TUSERDATA) return NULL;
 	obj = (PROTOCOL_LUA_OBJECT*)lua_touserdata(L, idx);
 	if(obj->type!=PROTOCOL_TYPE_OBJECT) return NULL;
 	if(obj->o.t_class!=cls) return NULL;
-	return obj;
+	return obj->o.ptr;
 }
 
 void struct_return(lua_State* L, PROTOCOL_TYPE* type, int n_var, int idx, void* ptr)
@@ -253,12 +274,12 @@ int struct_set(lua_State* L)
 		luaL_error(L, "invalid parameter count.\n");
 		return 0;
 	}
-	if(lua_type(L, 1)!=LUA_TUSERDATA) {
+	if(lua_isuserdata(L, 1)) {
 		luaL_error(L, "invalid parameter type.\n");
 		return 0;
 	}
 	obj = (PROTOCOL_LUA_OBJECT*)lua_touserdata(L, 1);
-	if(lua_type(L, 2)==LUA_TNUMBER) {
+	if(lua_isnumber(L, 2)) {
 		int idx;
 
 		if(obj->s.n_var<0 || !(obj->s.type->var_list[obj->s.n_var].type&PROTOCOL_TYPE_ARRAY) || obj->s.idx>=0) {
@@ -275,7 +296,7 @@ int struct_set(lua_State* L)
 		struct_make(L, obj->s.type, obj->s.n_var, idx, (char*)obj->s.ptr);
 		return 0;
 	}
-	if(lua_type(L, 2)==LUA_TSTRING) {
+	if(lua_isstring(L, 2)) {
 		PROTOCOL_TYPE* type;
 		unsigned int offset;
 		const char* name;
@@ -348,14 +369,74 @@ int struct_tostring(lua_State* L)
 	return 1;
 }
 
-void protocol_lua_create(lua_State* L, PROTOCOL_TYPE* type, void* ptr)
+int object_call(lua_State* L)
+{
+	int i;
+	i = lua_gettop(L);
+	return 0;
+}
+
+int object_get(lua_State* L)
+{
+	PROTOCOL_LUA_OBJECT* obj;
+	const char* name;
+	int i;
+
+	if(lua_gettop(L)!=2) {
+		luaL_error(L, "invalid parameter count.\n");
+		return 0;
+	}
+	if(lua_type(L, 1)!=LUA_TUSERDATA) {
+		luaL_error(L, "invalid parameter type.\n");
+		return 0;
+	}
+	obj = (PROTOCOL_LUA_OBJECT*)lua_touserdata(L, 1);
+	if(!lua_isstring(L, 2)) {
+		luaL_error(L, "invalid parameter type.\n");
+		return 0;
+	}
+	name = lua_tolstring(L, 2, NULL);
+	for(i=0; i<obj->o.t_class->funcs_count; i++) {
+		if(strcmp(obj->o.t_class->funcs[i].name, name)==0) {
+			lua_pushcfunction(L, obj->o.t_class->funcs[i].lua_func);
+			return 1;
+		}
+	}
+
+	luaL_error(L, "invalid function.\n");
+	return 0;
+}
+
+int object_gc(lua_State* L)
+{
+	return 1;
+}
+
+void protocol_lua_newstruct(lua_State* L, PROTOCOL_TYPE* type, void* ptr)
 {
 	struct_return(L, type, -1, -1, ptr); 
+}
+
+void protocol_lua_newobject(lua_State* L, PROTOCOL_LUA_CLASS* cls, void* ptr)
+{
+	PROTOCOL_LUA_OBJECT* obj;
+	obj = (PROTOCOL_LUA_OBJECT*)lua_newuserdata(L, sizeof(PROTOCOL_LUA_OBJECT));
+	luaL_getmetatable(L, PROTOCOL_OBJECT_METATABLE);
+	lua_setmetatable(L, -2);
+	obj->type = PROTOCOL_TYPE_OBJECT;
+	obj->o.t_class = cls;
+	obj->o.ptr = ptr;
+}
+
+int object_test(lua_State* L)
+{
+	return 0;
 }
 
 int protocol_lua_init(lua_State* L)
 {
 	int ret;
+
 	ret = luaL_newmetatable(L, PROTOCOL_STRUCT_METATABLE);
 	if(ret==0) return ERR_UNKNOWN;
 	lua_pushvalue(L, -1);
@@ -374,5 +455,126 @@ int protocol_lua_init(lua_State* L)
 	lua_pushcfunction(L, struct_tostring);
 	lua_rawset(L,-3);
 	lua_pop(L,1);
+
+	ret = luaL_newmetatable(L, PROTOCOL_OBJECT_METATABLE);
+	if(ret==0) return ERR_UNKNOWN;
+	lua_pushvalue(L, -1);
+	lua_pushstring(L, PROTOCOL_OBJECT_METATABLE);
+	lua_settable(L, LUA_REGISTRYINDEX); /* reg[mt] = type_name */
+	lua_pushstring(L,"__index");
+	lua_pushcfunction(L, object_get);
+	lua_rawset(L,-3);
+	lua_pushstring(L,"__gc");
+	lua_pushcfunction(L, object_gc);
+	lua_rawset(L,-3);
+	lua_pop(L,1);
+
+	
 	return ERR_NOERROR;
+}
+
+int protocol_lua_getvalue(lua_State* L, int idx, PROTOCOL_LUA_PARAMETER* p, void* v)
+{
+	switch(p->i_type) {
+	case PROTOCOL_TYPE_CHAR:
+		if(!lua_isnumber(L, idx)) return ERR_UNKNOWN;
+		*((os_char*)v) = (os_char)lua_tointeger(L, idx);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_SHORT:
+		if(!lua_isnumber(L, idx)) return ERR_UNKNOWN;
+		*((os_short*)v) = (os_short)lua_tointeger(L, idx);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_INT:
+		if(!lua_isnumber(L, idx)) return ERR_UNKNOWN;
+		*((os_int*)v) = (os_int)lua_tointeger(L, idx);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_LONG:
+		if(!lua_isnumber(L, idx)) return ERR_UNKNOWN;
+		*((os_long*)v) = (os_long)lua_tointeger(L, idx);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_BYTE:
+		if(!lua_isnumber(L, idx)) return ERR_UNKNOWN;
+		*((os_byte*)v) = (os_byte)lua_tointeger(L, idx);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_WORD:
+		if(!lua_isnumber(L, idx)) return ERR_UNKNOWN;
+		*((os_word*)v) = (os_word)lua_tointeger(L, idx);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_DWORD:
+		if(!lua_isnumber(L, idx)) return ERR_UNKNOWN;
+		*((os_dword*)v) = (os_dword)lua_tointeger(L, idx);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_QWORD:
+		if(!lua_isnumber(L, idx)) return ERR_UNKNOWN;
+		*((os_qword*)v) = (os_qword)lua_tointeger(L, idx);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_FLOAT:
+		if(!lua_isnumber(L, idx)) return ERR_UNKNOWN;
+		*((os_float*)v) = (os_float)lua_tonumber(L, idx);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_STRING:
+		if(!lua_isstring(L, idx)) return ERR_UNKNOWN;
+		*((char**)v) = (char*)lua_tolstring(L, idx, NULL);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_STRUCT:
+		if(!luaL_isstruct(L, idx, p->p_type)) return ERR_UNKNOWN;
+		*((void**)v) = luaL_tostruct(L, idx, p->p_type);
+		return ERR_NOERROR;
+	case PROTOCOL_TYPE_OBJECT:
+		if(!luaL_isobject(L, idx, p->c_type)) return ERR_UNKNOWN;
+		*((void**)v) = luaL_toobject(L, idx, p->c_type);
+		return ERR_UNKNOWN;
+	}
+
+	return ERR_UNKNOWN;
+}
+
+void protocol_lua_pushvalue(lua_State* L, PROTOCOL_LUA_PARAMETER* p, void* v)
+{
+	switch(p->i_type) {
+	case PROTOCOL_TYPE_CHAR:
+		lua_pushinteger(L, (lua_Integer)*((os_char*)v));
+		return;
+	case PROTOCOL_TYPE_SHORT:
+		lua_pushinteger(L, (lua_Integer)*((os_short*)v));
+		return;
+	case PROTOCOL_TYPE_INT:
+		lua_pushinteger(L, (lua_Integer)*((os_int*)v));
+		return;
+	case PROTOCOL_TYPE_LONG:
+		lua_pushinteger(L, (lua_Integer)*((os_long*)v));
+		return;
+	case PROTOCOL_TYPE_BYTE:
+		lua_pushinteger(L, (lua_Integer)*((os_byte*)v));
+		return;
+	case PROTOCOL_TYPE_WORD:
+		lua_pushinteger(L, (lua_Integer)*((os_word*)v));
+		return;
+	case PROTOCOL_TYPE_DWORD:
+		lua_pushinteger(L, (lua_Integer)*((os_dword*)v));
+		return;
+	case PROTOCOL_TYPE_QWORD:
+		lua_pushinteger(L, (lua_Integer)*((os_qword*)v));
+		return;
+	case PROTOCOL_TYPE_FLOAT:
+		lua_pushnumber(L, (lua_Number)*((os_float*)v));
+		return;
+	case PROTOCOL_TYPE_STRING:
+		lua_pushstring(L, *((char**)v));
+		return;
+	case PROTOCOL_TYPE_STRUCT:
+		struct_return(L, p->p_type, -1, -1, *((void**)v));
+		return;
+	case PROTOCOL_TYPE_OBJECT:
+		{
+			PROTOCOL_LUA_OBJECT* obj;
+			obj = (PROTOCOL_LUA_OBJECT*)lua_newuserdata(L, sizeof(PROTOCOL_LUA_OBJECT));
+			luaL_getmetatable(L, PROTOCOL_STRUCT_METATABLE);
+			lua_setmetatable(L, -2);
+			obj->type = PROTOCOL_TYPE_OBJECT;
+			obj->o.t_class = p->c_type;
+			obj->o.ptr = *((void**)v);
+			return;
+		}
+	}
 }

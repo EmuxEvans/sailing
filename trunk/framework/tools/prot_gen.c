@@ -379,6 +379,7 @@ int generate_cfile(const char* name, char* src, unsigned int src_len)
 		if(!data_type[type].is_root) continue;
 
 		snprintf(src+strlen(src), src_len-strlen(src), "\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "static PROTOCOL_VARIABLE __variable_list_%s_[] = {\n", data_type[type].name);
 		for(var=data_type[type].var_start; var<data_type[type].var_start+data_type[type].var_count; var++) {
 			char stype[100], obj_type[100], prelen[100];
@@ -478,6 +479,8 @@ int generate_clua(const char* name, char* src, unsigned int src_len)
 
 	for(i=0; i<num_class; i++) {
 		snprintf(src+strlen(src), src_len-strlen(src), "\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "\n");
+
 		for(j=data_class[i].function_start; j<data_class[i].function_start+data_class[i].function_count; j++) {
 			if(data_function[j].parameter_count) {
 				snprintf(src+strlen(src), src_len-strlen(src), "static PROTOCOL_LUA_PARAMETER __%s_%s_[]={\n", data_class[i].name, data_function[j].name);
@@ -503,7 +506,7 @@ int generate_clua(const char* name, char* src, unsigned int src_len)
 			if(strcmp(data_function[j].return_type, "void")!=0) {
 				snprintf(src+strlen(src), src_len-strlen(src), "static PROTOCOL_LUA_PARAMETER __%s_%s_return_={\n\t", data_class[i].name, data_function[j].name);
 				if(get_basetype(data_function[j].return_type)!=0) {
-					snprintf(src+strlen(src), src_len-strlen(src), "%s, \"%s\", NULL, NULL, %s", get_ctype(data_function[j].return_type), "");
+					snprintf(src+strlen(src), src_len-strlen(src), "%s, \"%s\", NULL, NULL, \"%s\"", get_type_const(data_function[j].return_type), get_ctype(data_function[j].return_type), "");
 				} else if(check_vailid_dtype(data_function[j].return_type)) {
 					snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_TYPE_STRUCT, \"%s\", &PROTOCOL_NAME(%s), NULL, \"%s\"", data_function[j].return_type, data_function[j].return_type, "");
 				} else if(check_vailid_otype(data_function[j].return_type)) {
@@ -514,6 +517,55 @@ int generate_clua(const char* name, char* src, unsigned int src_len)
 				}
 				snprintf(src+strlen(src), src_len-strlen(src), "\n};\n");
 			}
+		}
+
+		for(j=data_class[i].function_start; j<data_class[i].function_start+data_class[i].function_count; j++) {
+			char arg_def[300];
+			char arg_list[300];
+
+			snprintf(src+strlen(src), src_len-strlen(src), "static int luafunc_%s_%s(lua_State* L)\n", data_class[i].name, data_function[j].name);
+			snprintf(src+strlen(src), src_len-strlen(src), "{\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "	if(!luaL_isobject(L, 1, &PROTOCOL_NAME(%s))) {\n", data_class[i].name);
+			snprintf(src+strlen(src), src_len-strlen(src), "		luaL_error(L, \"invalid parameter type.\\n\");\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		return 0;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "	}\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "	void* obj = luaL_toobject(L, 1, &PROTOCOL_NAME(%s));\n", data_class[i].name);
+			if(strcmp(data_function[j].return_type, "void")!=0) {
+				snprintf(src+strlen(src), src_len-strlen(src), "	%s return_value;\n", get_ctype(data_function[j].return_type));
+			}
+			arg_def[0] = '\0';
+			arg_list[0] = '\0';
+			for(k=data_function[j].parameter_start; k<data_function[j].parameter_start+data_function[j].parameter_count; k++) {
+				if(k>data_function[j].parameter_start) {
+					snprintf(arg_def+strlen(arg_def), sizeof(arg_def)-strlen(arg_def), ", ");
+					snprintf(arg_list+strlen(arg_list), sizeof(arg_list)-strlen(arg_list), ", ");
+				}
+				snprintf(src+strlen(src), src_len-strlen(src), "	%s %s;\n", get_ctype(data_parameter[k].type), data_parameter[k].name);
+				snprintf(arg_def+strlen(arg_def), sizeof(arg_def)-strlen(arg_def), "%s ", get_ctype(data_parameter[k].type));
+				snprintf(arg_def+strlen(arg_def), sizeof(arg_def)-strlen(arg_def), "%s ", data_parameter[k].name);
+				snprintf(arg_list+strlen(arg_list), sizeof(arg_list)-strlen(arg_list), "%s", data_parameter[k].name);
+			}
+			for(k=data_function[j].parameter_start; k<data_function[j].parameter_start+data_function[j].parameter_count; k++) {
+				snprintf(src+strlen(src), src_len-strlen(src), "	if(protocol_lua_getvalue(L, %d, &__%s_%s_[%d], &%s)!=ERR_NOERROR) {\n",
+ k-data_function[j].parameter_start+2, data_class[i].name, data_function[j].name, k-data_function[j].parameter_start,
+ data_parameter[k].name);
+				snprintf(src+strlen(src), src_len-strlen(src), "		luaL_error(L, \"invalid parameter type.\\n\");\n");
+				snprintf(src+strlen(src), src_len-strlen(src), "		return 0;\n");
+				snprintf(src+strlen(src), src_len-strlen(src), "	}\n");
+			}
+			snprintf(src+strlen(src), src_len-strlen(src), "	%s (%s::*%s)(%s);\n", get_ctype(data_function[j].return_type), data_class[i].name, data_function[j].name, arg_def);
+			snprintf(src+strlen(src), src_len-strlen(src), "	*((void**)&%s) = ((void**)(*((void**)obj)))[%d];\n", data_function[j].name, j-data_class[i].function_start);
+			if(strcmp(data_function[j].return_type, "void")==0) {
+				snprintf(src+strlen(src), src_len-strlen(src), "	(((%s*)obj)->*%s)(%s);\n", data_class[i].name, data_function[j].name, arg_list);
+				snprintf(src+strlen(src), src_len-strlen(src), "	return 0;\n");
+			} else {
+				snprintf(src+strlen(src), src_len-strlen(src), "	return_value = (((%s*)obj)->*%s)(%s);\n",
+data_class[i].name, data_function[j].name, arg_list);
+				snprintf(src+strlen(src), src_len-strlen(src), "	protocol_lua_pushvalue(L, &__%s_%s_return_, &return_value);\n",
+data_class[i].name, data_function[j].name);
+				snprintf(src+strlen(src), src_len-strlen(src), "	return 1;\n");
+			}
+			snprintf(src+strlen(src), src_len-strlen(src), "}\n");
 		}
 
 		if(data_class[i].function_count) {
@@ -527,15 +579,18 @@ int generate_clua(const char* name, char* src, unsigned int src_len)
 				}
 				snprintf(src+strlen(src), src_len-strlen(src), " \"%s\",", data_function[j].name);
 				snprintf(src+strlen(src), src_len-strlen(src), " &__%s_%s_[0],", data_class[i].name, data_function[j].name);
-				snprintf(src+strlen(src), src_len-strlen(src), " %d", data_function[j].parameter_count);
+				snprintf(src+strlen(src), src_len-strlen(src), " %d,", data_function[j].parameter_count);
+				snprintf(src+strlen(src), src_len-strlen(src), " luafunc_%s_%s", data_class[i].name, data_function[j].name);
 				snprintf(src+strlen(src), src_len-strlen(src), "},\n");
 			}
 			snprintf(src+strlen(src), src_len-strlen(src), "};\n");
 		} else {
 			snprintf(src+strlen(src), src_len-strlen(src), "static PROTOCOL_LUA_FUNCTION __%s_[1];\n", data_class[i].name);
 		}
+
 		snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_LUA_CLASS PROTOCOL_NAME(%s) = {\n", data_class[i].name);
-		snprintf(src+strlen(src), src_len-strlen(src), "\t\"%s\", &__%s_[0], %d\n", data_class[i].name, data_class[i].name, data_class[i].function_count);
+		snprintf(src+strlen(src), src_len-strlen(src), "\t\"%s\", &__%s_[0], %d\n",
+			data_class[i].name, data_class[i].name, data_class[i].function_count);
 		snprintf(src+strlen(src), src_len-strlen(src), "};\n");
 	}
 
@@ -988,7 +1043,9 @@ const char* get_type_const(const char* type)
 const char* get_ctype(const char* type)
 {
 	static char ctype[100];
-	if(get_basetype(type)==PROTOCOL_TYPE_STRING) {
+	if(strcmp(type, "void")==0) {
+		snprintf(ctype, sizeof(ctype), "void");
+	} else if(get_basetype(type)==PROTOCOL_TYPE_STRING) {
 		snprintf(ctype, sizeof(ctype), "char*");
 	} else if(get_basetype(type)==0) {
 		snprintf(ctype, sizeof(ctype), "%s*", type);
