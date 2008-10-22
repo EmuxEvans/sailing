@@ -21,7 +21,7 @@
 			IntermediateDirectory="Debug"
 			ConfigurationType="1"
 			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="1"
+			CharacterSet="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -50,7 +50,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG"
+				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG;PLAT_WIN"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -72,6 +72,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="imm32.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -105,7 +106,7 @@
 			IntermediateDirectory="Release"
 			ConfigurationType="1"
 			ATLMinimizesCRunTimeLibraryUsage="true"
-			CharacterSet="1"
+			CharacterSet="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -133,12 +134,12 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG"
+				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG;PLAT_WIN"
 				ExceptionHandling="0"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -154,7 +155,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="imm32.lib"
 				LinkIncremental="1"
+				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
 			/>
@@ -238,6 +241,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DropFileHandler.h"
+				>
+			</File>
+			<File
 				RelativePath=".\LuaEditView.h"
 				>
 			</File>
@@ -255,6 +262,10 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TreeListView.h"
 				>
 			</File>
 		</Filter>

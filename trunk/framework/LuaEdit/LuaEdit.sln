@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaEdit", "LuaEdit.vcproj", "{865ACE34-660D-43CD-9ABD-0FE02F456215}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4EC3B086-755E-4F7B-BD8C-60E88A5DD222} = {4EC3B086-755E-4F7B-BD8C-60E88A5DD222}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SciLexer", "scintilla\vcbuild\SciLexer.vcproj", "{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}"
 EndProject

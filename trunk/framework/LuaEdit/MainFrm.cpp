@@ -5,8 +5,10 @@
 #include "stdafx.h"
 #include "resource.h"
 
-#include "aboutdlg.h"
+#include "AboutDlg.h"
+#include "SciLexerEdit.h"
 #include "LuaEditView.h"
+#include "DropFileHandler.h"
 #include "MainFrm.h"
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
@@ -72,21 +74,142 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 	return 1;
 }
 
+LRESULT CMainFrame::OnFileNew(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	CLuaEditView* pView = new CLuaEditView;
+	pView->Create(m_view, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_HSCROLL | WS_VSCROLL | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_NOHIDESEL, 0);
+	pView->SetFont(AtlGetDefaultGuiFont());
+	m_view.AddPage(pView->m_hWnd, _T("Document"), -1, pView);
+	pView->Init();
+
+	// TODO: add code to initialize document
+
+	return 0;
+}
+
+LRESULT CMainFrame::OnFileOpen(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	return 0;
+}
+
+LRESULT CMainFrame::OnFileClose(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()>=0)
+		m_view.RemovePage(m_view.GetActivePage());
+	return 0;
+}
+
+LRESULT CMainFrame::OnFileSave(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	return 0;
+}
+
+LRESULT CMainFrame::OnFileSaveAs(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	return 0;
+}
+
+LRESULT CMainFrame::OnFileCloseAll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	m_view.RemoveAllPages();
+	return 0;
+}
+
 LRESULT CMainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	PostMessage(WM_CLOSE);
 	return 0;
 }
 
-LRESULT CMainFrame::OnFileNew(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT CMainFrame::OnEditUndo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	CLuaEditView* pView = new CLuaEditView;
-	pView->Create(m_view, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_HSCROLL | WS_VSCROLL | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_NOHIDESEL, 0);
-	pView->SetFont(AtlGetDefaultGuiFont());
-	m_view.AddPage(pView->m_hWnd, _T("Document"));
+	if(m_view.GetActivePage()<0)
+		return 0;
 
-	// TODO: add code to initialize document
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	pView->Undo();
+	return 0;
+}
 
+LRESULT CMainFrame::OnEditCut(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	pView->Cut();
+	return 0;
+}
+
+LRESULT CMainFrame::OnEditCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	pView->Copy();
+	return 0;
+}
+
+LRESULT CMainFrame::OnEditPaste(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	pView->Paste();
+	return 0;
+}
+
+LRESULT CMainFrame::OnBookmarkToggle(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	long lLine = pView->GetCurrentLine();
+	if(pView->HasBookmark(lLine)) {
+		pView->DeleteBookmark(lLine);
+	} else {
+		pView->AddBookmark(lLine);
+	}
+	return 0;
+}
+
+LRESULT CMainFrame::OnBookmarkNext(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	pView->FindNextBookmark();
+	return 0;
+}
+
+LRESULT CMainFrame::OnBookmarkPrev(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	pView->FindPreviousBookmark();
 	return 0;
 }
 
@@ -118,28 +241,22 @@ LRESULT CMainFrame::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 	return 0;
 }
 
-LRESULT CMainFrame::OnWindowClose(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-	int nActivePage = m_view.GetActivePage();
-	if(nActivePage != -1)
-		m_view.RemovePage(nActivePage);
-	else
-		::MessageBeep((UINT)-1);
-
-	return 0;
-}
-
-LRESULT CMainFrame::OnWindowCloseAll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-{
-	m_view.RemoveAllPages();
-
-	return 0;
-}
-
 LRESULT CMainFrame::OnWindowActivate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	int nPage = wID - ID_WINDOW_TABFIRST;
 	m_view.SetActivePage(nPage);
 
+	return 0;
+}
+
+LRESULT CMainFrame::OnWindowNext(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	m_view.SetActivePage((m_view.GetActivePage()+1+m_view.GetPageCount()) % m_view.GetPageCount());
+	return 0;
+}
+
+LRESULT CMainFrame::OnWindowPrev(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	m_view.SetActivePage((m_view.GetActivePage()-1+m_view.GetPageCount()) % m_view.GetPageCount());
 	return 0;
 }
