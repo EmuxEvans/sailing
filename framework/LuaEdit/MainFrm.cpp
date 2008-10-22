@@ -25,6 +25,20 @@ BOOL CMainFrame::OnIdle()
 	return FALSE;
 }
 
+BOOL CMainFrame::IsReadyForDrop()
+{
+	return TRUE;
+}
+
+BOOL CMainFrame::HandleDroppedFile(LPCTSTR szBuff)
+{
+	return TRUE;
+}
+
+void CMainFrame::EndDropFiles()
+{
+}
+
 LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	// create command bar window
@@ -58,6 +72,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 	CMenuHandle menuMain = m_CmdBar.GetMenu();
 	m_view.SetWindowMenu(menuMain.GetSubMenu(WINDOW_MENU_POSITION));
+
+	RegisterDropHandler();
 
 	return 0;
 }

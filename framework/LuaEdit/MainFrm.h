@@ -7,7 +7,7 @@
 #define WINDOW_MENU_POSITION	3
 
 class CMainFrame : public CFrameWindowImpl<CMainFrame>, public CUpdateUI<CMainFrame>,
-		public CMessageFilter, public CIdleHandler
+		public CMessageFilter, public CIdleHandler, public CDropFilesHandler<CMainFrame>
 {
 public:
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
@@ -17,6 +17,10 @@ public:
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();
+
+	BOOL IsReadyForDrop();
+	BOOL HandleDroppedFile(LPCTSTR szBuff);
+	void EndDropFiles();
 
 	BEGIN_UPDATE_UI_MAP(CMainFrame)
 		UPDATE_ELEMENT(ID_VIEW_TOOLBAR, UPDUI_MENUPOPUP)
@@ -52,6 +56,7 @@ public:
 		COMMAND_RANGE_HANDLER(ID_WINDOW_TABFIRST, ID_WINDOW_TABLAST, OnWindowActivate)
 		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
 		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
+		CHAIN_MSG_MAP(CDropFilesHandler<CMainFrame>)
 	END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
