@@ -61,6 +61,10 @@ BEGIN
     BUTTON      ID_EDIT_COPY
     BUTTON      ID_EDIT_PASTE
     SEPARATOR
+    BUTTON      ID_BOOKMARK_TOGGLE
+    BUTTON      ID_BOOKMARK_NEXT
+    BUTTON      ID_BOOKMARK_PREV
+    SEPARATOR
     BUTTON      ID_APP_ABOUT
 END
 
@@ -103,8 +107,8 @@ BEGIN
         POPUP "Boo&kmarks"
         BEGIN
             MENUITEM "&Toggle Bookmark\tCtrl+K",    ID_BOOKMARK_TOGGLE
-            MENUITEM "Next Bookmark\tCtrl+N",       ID_BOOKMARKS_NEXT
-            MENUITEM "Previous Bookmark\tCtrl+P",   ID_BOOKMARKS_PREV
+            MENUITEM "Next Bookmark\tCtrl+N",       ID_BOOKMARK_NEXT
+            MENUITEM "Previous Bookmark\tCtrl+P",   ID_BOOKMARK_PREV
         END
     END
     POPUP "&View"
@@ -325,6 +329,13 @@ END
 STRINGTABLE 
 BEGIN
     ATL_IDS_MRU_FILE        "Open this document"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_BOOKMARK_TOGGLE      "Toggle Bookmark\nToggle Bookmark"
+    ID_BOOKMARK_NEXT        "Next Bookmark\nNext Bookmark"
+    ID_BOOKMARK_PREV        "Previous Bookmark\nPrevious Bookmark"
 END
 
 #endif    // English (U.S.) resources
