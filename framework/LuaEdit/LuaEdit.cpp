@@ -5,8 +5,10 @@
 
 #include "resource.h"
 
+#include "SciLexerEdit.h"
 #include "LuaEditView.h"
-#include "aboutdlg.h"
+#include "AboutDlg.h"
+#include "DropFileHandler.h"
 #include "MainFrm.h"
 
 CAppModule _Module;
@@ -39,6 +41,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 // make the EXE free threaded. This means that calls come in on a random RPC thread.
 //	HRESULT hRes = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	ATLASSERT(SUCCEEDED(hRes));
+	Scintilla_RegisterClasses(hInstance);
+
 
 	// this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
 	::DefWindowProc(NULL, 0, 0, 0L);
@@ -51,6 +55,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	int nRet = Run(lpstrCmdLine, nCmdShow);
 
 	_Module.Term();
+	Scintilla_ReleaseResources();
 	::CoUninitialize();
 
 	return nRet;
