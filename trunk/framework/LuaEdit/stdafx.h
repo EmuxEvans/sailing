@@ -41,6 +41,7 @@ extern CAppModule _Module;
 #include "scintilla\include\Propset.h"
 #include "scintilla\include\keywords.h"
 
+#include <DWAutoHide.h>
 #include <ExtDockingWindow.h>
 #include <DockingFrame.h>
 #include <dwstate.h>

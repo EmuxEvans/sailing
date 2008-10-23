@@ -8,9 +8,11 @@ public:
 
 	BOOL New();
 	BOOL Open(LPCTSTR pFileName);
-	BOOL Save(LPCTSTR pFileName);
+	BOOL Save(LPCTSTR pFileName=NULL);
 	BOOL SaveAll();
 	BOOL CloseAll();
+
+	void UpdateUI();
 
 protected:
 	CTabView* m_pTabView;
