@@ -9,7 +9,16 @@
 #include "SciLexerEdit.h"
 #include "LuaEditView.h"
 #include "DropFileHandler.h"
+#include "FileManager.h"
 #include "MainFrm.h"
+
+CMainFrame::CMainFrame() : m_FileManager(&m_view)
+{
+}
+
+CMainFrame::~CMainFrame()
+{
+}
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
@@ -267,12 +276,14 @@ LRESULT CMainFrame::OnWindowActivate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 
 LRESULT CMainFrame::OnWindowNext(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	m_view.SetActivePage((m_view.GetActivePage()+1+m_view.GetPageCount()) % m_view.GetPageCount());
+	if(m_view.GetActivePage()>=0)
+		m_view.SetActivePage((m_view.GetActivePage()+1+m_view.GetPageCount()) % m_view.GetPageCount());
 	return 0;
 }
 
 LRESULT CMainFrame::OnWindowPrev(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	m_view.SetActivePage((m_view.GetActivePage()-1+m_view.GetPageCount()) % m_view.GetPageCount());
+	if(m_view.GetActivePage()>=0)
+		m_view.SetActivePage((m_view.GetActivePage()-1+m_view.GetPageCount()) % m_view.GetPageCount());
 	return 0;
 }

@@ -75,6 +75,7 @@ END
 //
 
 IDR_MAINFRAME           BITMAP                  "res\\Toolbar.bmp"
+IDB_ABOUT               BITMAP                  "res\\About.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -142,15 +143,15 @@ IDR_MAINFRAME           ICON                    "res\\LuaEdit.ico"
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 232, 158
+IDD_ABOUTBOX DIALOGEX 0, 0, 233, 174
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,175,137,50,14
-    LTEXT           "LuaEdit Application v1.0\n(c) Copyright 2008",IDC_STATIC,31,133,78,18
-    ICON            IDR_MAINFRAME,IDC_STATIC,7,131,21,20
-    GROUPBOX        "",IDC_STATIC,7,7,218,119
+    DEFPUSHBUTTON   "OK",IDOK,176,152,50,14
+    LTEXT           "LuaEdit Application v1.0\n(c) Copyright 2008",IDC_STATIC,31,148,78,18
+    ICON            IDR_MAINFRAME,IDC_STATIC,7,146,21,20
+    CONTROL         201,IDC_STATIC,"Static",SS_BITMAP | SS_REALSIZEIMAGE,7,7,219,134,WS_EX_STATICEDGE
 END
 
 
@@ -165,9 +166,9 @@ BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 225
+        RIGHTMARGIN, 226
         TOPMARGIN, 7
-        BOTTOMMARGIN, 151
+        BOTTOMMARGIN, 166
     END
 END
 #endif    // APSTUDIO_INVOKED

@@ -7,8 +7,8 @@
 
 #include "SciLexerEdit.h"
 #include "LuaEditView.h"
-#include "AboutDlg.h"
 #include "DropFileHandler.h"
+#include "FileManager.h"
 #include "MainFrm.h"
 
 CAppModule _Module;
