@@ -9,6 +9,7 @@
 #include "LuaEditView.h"
 #include "DropFileHandler.h"
 #include "FileManager.h"
+#include "OutputWindow.h"
 #include "MainFrm.h"
 
 CAppModule _Module;
@@ -60,3 +61,5 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 
 	return nRet;
 }
+
+#include "include\DockImpl.cpp"

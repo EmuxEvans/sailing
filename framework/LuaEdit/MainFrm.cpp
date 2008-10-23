@@ -10,7 +10,9 @@
 #include "LuaEditView.h"
 #include "DropFileHandler.h"
 #include "FileManager.h"
+#include "OutputWindow.h"
 #include "MainFrm.h"
+
 
 CMainFrame::CMainFrame() : m_FileManager(&m_view)
 {
@@ -22,7 +24,7 @@ CMainFrame::~CMainFrame()
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
-	if(CFrameWindowImpl<CMainFrame>::PreTranslateMessage(pMsg))
+	if(dockwins::CDockingFrameImpl<CMainFrame>::PreTranslateMessage(pMsg))
 		return TRUE;
 
 	return m_view.PreTranslateMessage(pMsg);
@@ -84,6 +86,36 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 	RegisterDropHandler();
 
+	InitializeDockingFrame();
+	DWORD dwStyle=WS_OVERLAPPEDWINDOW | WS_POPUP| WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+
+	CRect rcBar(0,0,300,100);
+	m_OutputWindow.Create(m_hWnd, rcBar, _T("Output"), dwStyle);
+	DockWindow(m_OutputWindow, dockwins::CDockingSide(dockwins::CDockingSide::sBottom),
+						0/*nBar*/,float(0.0)/*fPctPos*/,100/*nWidth*/,100/* nHeight*/);
+
+	return 0;
+}
+
+LRESULT CMainFrame::OnInitialize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+{
+	sstate::CDockWndMgr mgrDockWnds;
+	mgrDockWnds.Add(sstate::CDockingWindowStateAdapter<COutputWindow>(m_OutputWindow));
+
+	m_stateMgr.Initialize(m_hWnd);
+	m_stateMgr.Add(sstate::CRebarStateAdapter(m_hWndToolBar));
+	m_stateMgr.Add(sstate::CToggleWindowAdapter(m_hWndStatusBar));
+	m_stateMgr.Add(mgrDockWnds);
+	CRegKey key;
+	if(key.Open(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"),KEY_READ)==ERROR_SUCCESS)
+	{
+		sstate::CStgRegistry reg(key.Detach());
+		m_stateMgr.Restore(reg);
+	}
+	else
+		m_stateMgr.RestoreDefault();
+
+	UpdateLayout();
 	return 0;
 }
 

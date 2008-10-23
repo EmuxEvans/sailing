@@ -50,6 +50,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG;PLAT_WIN"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -212,6 +213,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\OutputWindow.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SciLexerEdit.cpp"
 				>
 			</File>
@@ -261,6 +266,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\OutputWindow.h"
+				>
+			</File>
+			<File
 				RelativePath=".\resource.h"
 				>
 			</File>
@@ -295,6 +304,106 @@
 			</File>
 			<File
 				RelativePath=".\res\toolbar.bmp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="ExtControls"
+			>
+			<File
+				RelativePath=".\include\dbstate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DDTracker.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DockImpl.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\include\DockingBox.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DockingFrame.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DockingWindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DockMisc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DWAutoHide.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\dwstate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\ExtDockingWindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\FlyingTabs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\PackageWindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\SimpleSplitterBar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\ssec.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\sstate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\stg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\stgreg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\stgxml.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\TabDockingBox.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\WndFrmPkg.h"
 				>
 			</File>
 		</Filter>
