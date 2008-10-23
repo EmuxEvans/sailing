@@ -8,6 +8,7 @@
 #include "DropFileHandler.h"
 #include "FileManager.h"
 #include "OutputWindow.h"
+#include "CommandWindow.h"
 #include "MainFrm.h"
 
 CAppModule _Module;
@@ -61,3 +62,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 }
 
 #include "include\DockImpl.cpp"
+#include "include\DialogItemTemplate.cpp"
+#include "include\DialogTemplate.cpp"
+#include "include\DialogLayout.cpp"
