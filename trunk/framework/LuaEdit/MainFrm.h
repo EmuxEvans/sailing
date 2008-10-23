@@ -5,9 +5,15 @@
 #pragma once
 
 #define WINDOW_MENU_POSITION	3
+#define CWM_INITIALIZE			(WMDF_LAST+1)
 
-class CMainFrame : public CFrameWindowImpl<CMainFrame>, public CUpdateUI<CMainFrame>,
-		public CMessageFilter, public CIdleHandler, public CDropFilesHandler<CMainFrame>
+class CMainFrame :
+		public dockwins::CDockingFrameImpl<CMainFrame>,
+		public CUpdateUI<CMainFrame>,
+		public CMessageFilter, 
+		public CIdleHandler,
+		public CDropFilesHandler<CMainFrame>
+
 {
 public:
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
@@ -18,6 +24,8 @@ public:
 	CTabView m_view;
 	CCommandBarCtrl m_CmdBar;
 	CFileManager m_FileManager;
+	COutputWindow m_OutputWindow;
+	sstate::CWindowStateMgr<sstate::CStgRegistry> m_stateMgr;
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();
@@ -33,6 +41,7 @@ public:
 
 	BEGIN_MSG_MAP(CMainFrame)
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
+		MESSAGE_HANDLER(CWM_INITIALIZE, OnInitialize)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 		COMMAND_ID_HANDLER(ID_FILE_NEW, OnFileNew)
 		COMMAND_ID_HANDLER(ID_FILE_OPEN, OnFileOpen)
@@ -59,7 +68,7 @@ public:
 		COMMAND_ID_HANDLER(ID_PREV_PANE, OnWindowPrev)
 		COMMAND_RANGE_HANDLER(ID_WINDOW_TABFIRST, ID_WINDOW_TABLAST, OnWindowActivate)
 		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
-		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
+		CHAIN_MSG_MAP(dockwins::CDockingFrameImpl<CMainFrame>)
 		CHAIN_MSG_MAP(CDropFilesHandler<CMainFrame>)
 	END_MSG_MAP()
 
@@ -69,6 +78,7 @@ public:
 //	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
 
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+	LRESULT OnInitialize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled);
 	LRESULT OnFileNew(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnFileOpen(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
