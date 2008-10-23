@@ -5,8 +5,6 @@
 
 #include "resource.h"
 
-#include "SciLexerEdit.h"
-#include "LuaEditView.h"
 #include "DropFileHandler.h"
 #include "FileManager.h"
 #include "OutputWindow.h"

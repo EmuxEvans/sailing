@@ -116,6 +116,7 @@ BEGIN
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "&Output Window",              ID_VIEW_OUTPUT
     END
     POPUP "&Window"
     BEGIN
@@ -337,6 +338,11 @@ BEGIN
     ID_BOOKMARK_TOGGLE      "Toggle Bookmark\nToggle Bookmark"
     ID_BOOKMARK_NEXT        "Next Bookmark\nNext Bookmark"
     ID_BOOKMARK_PREV        "Previous Bookmark\nPrevious Bookmark"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_VIEW_OUTPUT          "Show or hide the status bar\nToggle StatusBar"
 END
 
 #endif    // English (U.S.) resources

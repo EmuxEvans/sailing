@@ -6,13 +6,13 @@
 #include "resource.h"
 
 #include "AboutDlg.h"
-#include "SciLexerEdit.h"
-#include "LuaEditView.h"
 #include "DropFileHandler.h"
 #include "FileManager.h"
 #include "OutputWindow.h"
 #include "MainFrm.h"
 
+#include "SciLexerEdit.h"
+#include "LuaEditView.h"
 
 CMainFrame::CMainFrame() : m_FileManager(&m_view)
 {
@@ -33,6 +33,8 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 BOOL CMainFrame::OnIdle()
 {
 	UIUpdateToolBar();
+	UISetCheck(ID_VIEW_OUTPUT, m_OutputWindow.IsVisible());
+	m_FileManager.UpdateUI();
 	return FALSE;
 }
 
@@ -43,6 +45,7 @@ BOOL CMainFrame::IsReadyForDrop()
 
 BOOL CMainFrame::HandleDroppedFile(LPCTSTR szBuff)
 {
+	m_FileManager.Open(szBuff);
 	return TRUE;
 }
 
@@ -74,6 +77,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	UIAddToolBar(hWndToolBar);
 	UISetCheck(ID_VIEW_TOOLBAR, 1);
 	UISetCheck(ID_VIEW_STATUS_BAR, 1);
+	UISetCheck(ID_VIEW_OUTPUT, 1);
 
 	// register object for message filtering and idle updates
 	CMessageLoop* pLoop = _Module.GetMessageLoop();
@@ -107,7 +111,7 @@ LRESULT CMainFrame::OnInitialize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 	m_stateMgr.Add(sstate::CToggleWindowAdapter(m_hWndStatusBar));
 	m_stateMgr.Add(mgrDockWnds);
 	CRegKey key;
-	if(key.Open(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"),KEY_READ)==ERROR_SUCCESS)
+	if(key.Open(HKEY_CURRENT_USER, _T("SOFTWARE\\Sailing\\LuaEdit"), KEY_READ)==ERROR_SUCCESS)
 	{
 		sstate::CStgRegistry reg(key.Detach());
 		m_stateMgr.Restore(reg);
@@ -133,14 +137,7 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 
 LRESULT CMainFrame::OnFileNew(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	CLuaEditView* pView = new CLuaEditView;
-	pView->Create(m_view, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_HSCROLL | WS_VSCROLL | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_NOHIDESEL, 0);
-	pView->SetFont(AtlGetDefaultGuiFont());
-	m_view.AddPage(pView->m_hWnd, _T("Document"), -1, pView);
-	pView->Init();
-
-	// TODO: add code to initialize document
-
+	m_FileManager.New();
 	return 0;
 }
 
@@ -158,32 +155,32 @@ LRESULT CMainFrame::OnFileClose(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 
 LRESULT CMainFrame::OnFileSave(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	if(m_view.GetActivePage()<0)
-		return 0;
-
-	CLuaEditView* pView;
-	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	if(m_view.GetActivePage()>=0)
+		m_FileManager.Save();
 	return 0;
 }
 
 LRESULT CMainFrame::OnFileSaveAs(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	if(m_view.GetActivePage()<0)
-		return 0;
-
-	CLuaEditView* pView;
-	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	if(m_view.GetActivePage()>=0){
+	}
 	return 0;
 }
 
 LRESULT CMainFrame::OnFileCloseAll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	m_view.RemoveAllPages();
+	m_FileManager.CloseAll();
 	return 0;
 }
 
 LRESULT CMainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
+	CRegKey key;
+	if(key.Open(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"), KEY_WRITE)==ERROR_SUCCESS || key.Create(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"))==ERROR_SUCCESS)
+	{
+		sstate::CStgRegistry reg(key.Detach());
+		m_stateMgr.Store(reg);
+	}
 	PostMessage(WM_CLOSE);
 	return 0;
 }
