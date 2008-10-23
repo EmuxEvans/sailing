@@ -3,9 +3,14 @@
 // Used by LuaEdit.rc
 //
 #define IDD_ABOUTBOX                    100
+#define IDD_COMMAND_WINDOW              101
 #define IDR_MAINFRAME                   128
 #define IDB_BITMAP1                     201
 #define IDB_ABOUT                       201
+#define IDC_EDIT1                       1000
+#define IDC_COMMAND                     1000
+#define IDC_RUN                         1001
+#define IDC_CONSOLE                     1002
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_WINDOW_NEXTWINDOW            32775
@@ -34,7 +39,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
 #define _APS_NEXT_COMMAND_VALUE         32802
-#define _APS_NEXT_CONTROL_VALUE         1000
+#define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

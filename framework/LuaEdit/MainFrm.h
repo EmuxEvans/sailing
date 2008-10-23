@@ -22,9 +22,11 @@ public:
 	~CMainFrame();
 
 	CTabView m_view;
-	CCommandBarCtrl m_CmdBar;
+
+	CCommandBarCtrlXP m_CmdBar;
 	CFileManager m_FileManager;
 	COutputWindow m_OutputWindow;
+//	CCommandWindow m_OutputWindow;
 	sstate::CWindowStateMgr<sstate::CStgRegistry> m_stateMgr;
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

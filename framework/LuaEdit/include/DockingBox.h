@@ -25,13 +25,13 @@ class CDockingBoxMessage
 public:
 	CDockingBoxMessage(void)
 	{
-		std::basic_ostringstream<TCHAR> smessage;
-		smessage<<_T("DockingBoxMessage-")<<GetCurrentProcessId();
-		m_message=RegisterWindowMessage(smessage.str().c_str());
-		assert(m_message);
-		ATLTRACE(_T("%s = %x \n"),smessage.str().c_str(), m_message);
-//        if(m_message==0)
-//                throw exception();
+		//std::basic_ostringstream<TCHAR> smessage;
+		//smessage<<_T("DockingBoxMessage-")<<GetCurrentProcessId();
+		//m_message=RegisterWindowMessage(smessage.str().c_str());
+		//assert(m_message);
+		//ATLTRACE(_T("%s = %x \n"),smessage.str().c_str(), m_message);
+        //if(m_message==0)
+        //        throw exception();
 	}
 	operator unsigned long (void) const
 	{

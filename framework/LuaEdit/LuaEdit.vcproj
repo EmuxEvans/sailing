@@ -198,7 +198,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CommandWindow.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\FileManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LuaDebugClient.cpp"
 				>
 			</File>
 			<File
@@ -251,11 +259,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CommandWindow.h"
+				>
+			</File>
+			<File
 				RelativePath=".\DropFileHandler.h"
 				>
 			</File>
 			<File
 				RelativePath=".\FileManager.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LuaDebugClient.h"
 				>
 			</File>
 			<File
@@ -320,6 +336,54 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\DialogItemTemplate.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\include\DialogItemTemplate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DialogLayout.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\include\DialogLayout.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DialogTemplate.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\include\DialogTemplate.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\DockImpl.cpp"
 				>
 				<FileConfiguration
@@ -356,6 +420,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\Draw.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Draw.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\DWAutoHide.h"
 				>
 			</File>
@@ -369,6 +441,10 @@
 			</File>
 			<File
 				RelativePath=".\include\FlyingTabs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\MenuXP.h"
 				>
 			</File>
 			<File

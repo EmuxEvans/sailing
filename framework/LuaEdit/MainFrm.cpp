@@ -9,6 +9,7 @@
 #include "DropFileHandler.h"
 #include "FileManager.h"
 #include "OutputWindow.h"
+#include "CommandWindow.h"
 #include "MainFrm.h"
 
 #include "SciLexerEdit.h"
@@ -299,7 +300,6 @@ LRESULT CMainFrame::OnWindowActivate(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 {
 	int nPage = wID - ID_WINDOW_TABFIRST;
 	m_view.SetActivePage(nPage);
-
 	return 0;
 }
 
