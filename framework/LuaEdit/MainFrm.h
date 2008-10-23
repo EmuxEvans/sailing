@@ -12,8 +12,12 @@ class CMainFrame : public CFrameWindowImpl<CMainFrame>, public CUpdateUI<CMainFr
 public:
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 
+	CMainFrame();
+	~CMainFrame();
+
 	CTabView m_view;
 	CCommandBarCtrl m_CmdBar;
+	CFileManager m_FileManager;
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();
