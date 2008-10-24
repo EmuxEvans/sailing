@@ -1,4 +1,4 @@
-// Windows Template Library - WTL version 8.0
+// Windows Template Library - WTL version 9.0
 // Copyright (C) Microsoft Corporation. All rights reserved.
 //
 // This file is a part of the Windows Template Library.
@@ -6,7 +6,7 @@
 // Microsoft Permissive License (Ms-PL) which can be found in the file
 // Ms-PL.txt at the root of this distribution.
 
-// Setup program for the WTL App Wizard for VC++ 8.0 Express
+// Setup program for the WTL App Wizard for VC++ 9.0 (Whidbey)
 
 main();
 
@@ -66,24 +66,24 @@ function main()
 
 	try
 	{
-		var strVC8Key = "HKLM\\Software\\Microsoft\\VCExpress\\8.0\\Setup\\VC\\ProductDir";
+		var strVC8Key = "HKLM\\Software\\Microsoft\\VisualStudio\\9.0\\Setup\\VC\\ProductDir";
 		strValue = WSShell.RegRead(strVC8Key);
 	}
 	catch(e)
 	{
 		try
 		{
-			var strVC8Key_x64 = "HKLM\\Software\\Wow6432Node\\Microsoft\\VCExpress\\8.0\\Setup\\VC\\ProductDir";
+			var strVC8Key_x64 = "HKLM\\Software\\Wow6432Node\\Microsoft\\VisualStudio\\9.0\\Setup\\VC\\ProductDir";
 			strValue = WSShell.RegRead(strVC8Key_x64);
 		}
 		catch(e)
 		{
-			WScript.Echo("ERROR: Cannot find where Visual C++ 8.0 Express is installed.");
+			WScript.Echo("ERROR: Cannot find where Visual Studio 9.0 is installed.");
 			return;
 		}
 	}
 
-	var strDestFolder = FileSys.BuildPath(strValue, "Express\\vcprojects");
+	var strDestFolder = FileSys.BuildPath(strValue, "vcprojects");
 	if(bDebug)
 		WScript.Echo("Destination: " + strDestFolder);
 	if(!FileSys.FolderExists(strDestFolder))
@@ -138,15 +138,13 @@ function main()
 		{
 			var strLine = fileSrc.ReadLine();
 			if(strLine.indexOf("Wizard=VsWizard.VsWizardEngine") != -1)
-				strLine += ".8.0";
+				strLine += ".9.0";
 			else if(strLine.indexOf("WIZARD_VERSION") != -1)
-				strLine = "Param=\"WIZARD_VERSION = 8.0\"";
+				strLine = "Param=\"WIZARD_VERSION = 9.0\"";
 			else if(strLine.indexOf("ABSOLUTE_PATH") != -1)
 				strLine = "Param=\"ABSOLUTE_PATH = " + strSourceFolder + "\"";
 			fileDest.WriteLine(strLine);
 		}
-
-		fileDest.WriteLine("Param=\"VC_EXPRESS = 1\"");
 
 		fileSrc.Close();
 		fileDest.Close();
