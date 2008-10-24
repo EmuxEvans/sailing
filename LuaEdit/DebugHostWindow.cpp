@@ -3,4 +3,4 @@
 #include "resource.h"
 
 #include "DialogWindow.h"
-#include "CommandWindow.h"
+#include "DebugHostWindow.h"

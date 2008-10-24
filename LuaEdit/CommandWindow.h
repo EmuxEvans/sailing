@@ -28,37 +28,7 @@ public:
 
 };
 
-class CCommandWindow
-	: public dockwins::CTitleDockingWindowImpl<CCommandWindow, CWindow, dockwins::COutlookLikeTitleDockingWindowTraits>
+class CCommandWindow : public CDialogWindow<CCommandWindow, CCommandDlg>
 {
-	typedef CCommandWindow	thisClass;
-	typedef dockwins::CTitleDockingWindowImpl< CCommandWindow, CWindow, dockwins::COutlookLikeTitleDockingWindowTraits> baseClass;
 public:
-
-	BEGIN_MSG_MAP(thisClass)
-		CHAIN_MSG_MAP(baseClass)
-//		CHAIN_MSG_MAP(CCommandWindowDlg)
-		MESSAGE_HANDLER(WM_CREATE, OnCreate)
-		MESSAGE_HANDLER(WM_SIZE, OnSize);
-	END_MSG_MAP()
-
-	CCommandDlg m_CommandDlg;
-
-	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-	{
-		BOOL bHandle = TRUE;
-		m_CommandDlg.Create(m_hWnd, NULL);
-		m_CommandDlg.SetParent(m_hWnd);
-//		OnSize(0, 0, 0, bHandle);
-		return 0;
-	}
-	LRESULT OnSize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-	{
-		RECT rcClient;
-		GetClientRect(&rcClient);
-		m_CommandDlg.SetWindowPos(NULL, &rcClient, SWP_NOACTIVATE | SWP_NOOWNERZORDER);
-		m_CommandDlg.ShowWindow(SW_SHOWNOACTIVATE);
-		return 0;
-	}
-
 };

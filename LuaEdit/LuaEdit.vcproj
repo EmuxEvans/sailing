@@ -202,6 +202,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DebugHostWindow.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\FileManager.cpp"
 				>
 			</File>
@@ -219,10 +223,6 @@
 			</File>
 			<File
 				RelativePath=".\MainFrm.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\OutputWindow.cpp"
 				>
 			</File>
 			<File
@@ -263,6 +263,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DebugHostWindow.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DialogWindow.h"
+				>
+			</File>
+			<File
 				RelativePath=".\DropFileHandler.h"
 				>
 			</File>
@@ -280,10 +288,6 @@
 			</File>
 			<File
 				RelativePath=".\MainFrm.h"
-				>
-			</File>
-			<File
-				RelativePath=".\OutputWindow.h"
 				>
 			</File>
 			<File
