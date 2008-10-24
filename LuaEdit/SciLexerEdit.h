@@ -72,7 +72,7 @@ public:
 
 		BOOL bReturn = TRUE;
 		// ty to open file in sharing mode
-		::ifstream file;
+		std::ifstream file;
 		long len = 0L;
 		long nTotal;
 		TCHAR *szBuffer = NULL;
@@ -140,6 +140,14 @@ public:
 		file << ends;
 		file.close();
 		return TRUE;
+	}
+	void SetSavePoint()
+	{
+		SendMessage(SCI_SETSAVEPOINT, 0 , 0);
+	}
+	BOOL GetModify()
+	{
+		return SendMessage(SCI_GETMODIFY, 0, 0);
 	}
 	/////////////////////////////////////
 	// @mfunc Try to find format for lexer by looking at the file extension.<nl>

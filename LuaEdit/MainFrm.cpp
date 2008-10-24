@@ -46,6 +46,9 @@ BOOL CMainFrame::IsReadyForDrop()
 
 BOOL CMainFrame::HandleDroppedFile(LPCTSTR szBuff)
 {
+	LPCTSTR pDot;
+	pDot = _tcsrchr(szBuff, _T('.'));
+	if(pDot==NULL || _tcsicmp(pDot+1, _T("lua"))!=0) return TRUE;
 	m_FileManager.Open(szBuff);
 	return TRUE;
 }
@@ -102,6 +105,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	DockWindow(m_CommandWindow, dockwins::CDockingSide(dockwins::CDockingSide::sBottom),
 		0/*nBar*/,float(0.5)/*fPctPos*/, 100 /*nWidth*/,200/* nHeight*/);
 
+	SendMessage(CWM_INITIALIZE, 0, 0);
+
 	return 0;
 }
 
@@ -128,6 +133,18 @@ LRESULT CMainFrame::OnInitialize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 	return 0;
 }
 
+LRESULT CMainFrame::OnNCDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
+{
+	//CRegKey key;
+	//if(key.Open(HKEY_CURRENT_USER, _T("SOFTWARE\\Sailing\\LuaEdit"), KEY_WRITE)==ERROR_SUCCESS || key.Create(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"))==ERROR_SUCCESS)
+	//{
+	//	sstate::CStgRegistry reg(key.Detach());
+	//	m_stateMgr.Store(reg);
+	//}
+	bHandled = FALSE;
+	return 0;
+}
+
 LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 {
 	// unregister message filtering and idle updates
@@ -148,6 +165,9 @@ LRESULT CMainFrame::OnFileNew(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl
 
 LRESULT CMainFrame::OnFileOpen(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
+	CFileDialog a(TRUE, _T("*.lua"), NULL, OFN_FILEMUSTEXIST, _T("Lua Source File (*.lua)\0*.lua\0"));
+	if(a.DoModal()!=IDOK) return 0;
+	HandleDroppedFile(a.m_szFileName);
 	return 0;
 }
 
@@ -160,32 +180,52 @@ LRESULT CMainFrame::OnFileClose(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 
 LRESULT CMainFrame::OnFileSave(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	if(m_view.GetActivePage()>=0)
-		m_FileManager.Save();
+	int nIndex = m_view.GetActivePage();
+	if(nIndex>=0) {
+		if(m_FileManager.IsNewFile(nIndex)) {
+			BOOL bHandled = TRUE;
+			return OnFileSaveAs(0, 0, NULL, bHandled);
+		}
+		m_FileManager.Save(nIndex);
+	}
 	return 0;
 }
 
 LRESULT CMainFrame::OnFileSaveAs(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	if(m_view.GetActivePage()>=0){
+	int nIndex = m_view.GetActivePage();
+	if(nIndex>=0) {
+		CFileDialog a(FALSE, _T("*.lua"), m_FileManager.GetFileName(nIndex), 0, _T("Lua Source File (*.lua)\0*.lua\0"));
+		if(a.DoModal()!=IDOK) return 0;
+		m_FileManager.Save(nIndex, a.m_szFileName);
+		return 0;
 	}
 	return 0;
 }
 
 LRESULT CMainFrame::OnFileCloseAll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	m_FileManager.CloseAll();
+	for(int i=m_view.GetPageCount()-1; i>=0; i--) {
+		m_FileManager.Close(i);
+	}
+	return 0;
+}
+
+LRESULT CMainFrame::OnFileSaveAll(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	for(int nIndex=m_view.GetPageCount()-1; nIndex>=0; nIndex--) {
+		if(m_FileManager.IsNewFile(nIndex)) {
+			CFileDialog a(FALSE, _T("*.lua"), m_FileManager.GetFileName(nIndex), 0, _T("Lua Source File (*.lua)\0*.lua\0"));
+			if(a.DoModal()!=IDOK) break;
+			m_FileManager.Save(nIndex, a.m_szFileName);
+		}
+		m_FileManager.Save(nIndex);
+	}
 	return 0;
 }
 
 LRESULT CMainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	CRegKey key;
-	if(key.Open(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"), KEY_WRITE)==ERROR_SUCCESS || key.Create(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"))==ERROR_SUCCESS)
-	{
-		sstate::CStgRegistry reg(key.Detach());
-		m_stateMgr.Store(reg);
-	}
 	PostMessage(WM_CLOSE);
 	return 0;
 }
