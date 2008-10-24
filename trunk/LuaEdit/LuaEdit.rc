@@ -119,7 +119,8 @@ BEGIN
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-        MENUITEM "&Output Window",              ID_VIEW_OUTPUT
+        MENUITEM "&Debug Host Window",          ID_VIEW_DEBUGHOST
+        MENUITEM "&Command Window",             ID_VIEW_COMMAND
     END
     POPUP "&Debug"
     BEGIN
@@ -174,6 +175,16 @@ BEGIN
     EDITTEXT        IDC_CONSOLE,0,0,233,72,ES_MULTILINE | ES_AUTOHSCROLL | ES_READONLY | NOT WS_TABSTOP
 END
 
+IDD_DEBUGHOST_WINDOW DIALOGEX 0, 0, 234, 89
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    PUSHBUTTON      "Continue",ID_DEBUG_CONTINUE,191,0,42,14
+    COMBOBOX        IDC_HOSTLIST,1,1,187,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Call Stack",IDC_STATIC,4,16,32,8
+    EDITTEXT        IDC_CALLSTACK,1,25,232,63,ES_MULTILINE | ES_AUTOHSCROLL
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -192,6 +203,12 @@ BEGIN
     END
 
     IDD_COMMAND_WINDOW, DIALOG
+    BEGIN
+        RIGHTMARGIN, 233
+        BOTTOMMARGIN, 88
+    END
+
+    IDD_DEBUGHOST_WINDOW, DIALOG
     BEGIN
         RIGHTMARGIN, 233
         BOTTOMMARGIN, 88

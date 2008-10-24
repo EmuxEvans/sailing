@@ -8,7 +8,8 @@
 #include "AboutDlg.h"
 #include "DropFileHandler.h"
 #include "FileManager.h"
-#include "OutputWindow.h"
+#include "DialogWindow.h"
+#include "DebugHostWindow.h"
 #include "CommandWindow.h"
 #include "MainFrm.h"
 
@@ -34,7 +35,8 @@ BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 BOOL CMainFrame::OnIdle()
 {
 	UIUpdateToolBar();
-	UISetCheck(ID_VIEW_OUTPUT, m_OutputWindow.IsVisible());
+	UISetCheck(ID_VIEW_DEBUGHOST, m_DebugHostWindow.IsVisible());
+	UISetCheck(ID_VIEW_COMMAND, m_CommandWindow.IsVisible());
 	m_FileManager.UpdateUI();
 	return FALSE;
 }
@@ -98,8 +100,8 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	DWORD dwStyle=WS_OVERLAPPEDWINDOW | WS_POPUP| WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
 	CRect rcBar(0, 0, 100, 200);
-	m_OutputWindow.Create(m_hWnd, rcBar, _T("Output"), dwStyle);
-	DockWindow(m_OutputWindow, dockwins::CDockingSide(dockwins::CDockingSide::sBottom),
+	m_DebugHostWindow.Create(m_hWnd, rcBar, _T("Debug Host"), dwStyle);
+	DockWindow(m_DebugHostWindow, dockwins::CDockingSide(dockwins::CDockingSide::sBottom),
 		0/*nBar*/,float(0.5)/*fPctPos*/, 100 /*nWidth*/,200/* nHeight*/);
 	m_CommandWindow.Create(m_hWnd, rcBar, _T("Command"), dwStyle);
 	DockWindow(m_CommandWindow, dockwins::CDockingSide(dockwins::CDockingSide::sBottom),
@@ -113,7 +115,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 LRESULT CMainFrame::OnInitialize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	sstate::CDockWndMgr mgrDockWnds;
-	mgrDockWnds.Add(sstate::CDockingWindowStateAdapter<COutputWindow>(m_OutputWindow));
+	mgrDockWnds.Add(sstate::CDockingWindowStateAdapter<CDebugHostWindow>(m_DebugHostWindow));
 	mgrDockWnds.Add(sstate::CDockingWindowStateAdapter<CCommandWindow>(m_CommandWindow));
 
 	m_stateMgr.Initialize(m_hWnd);

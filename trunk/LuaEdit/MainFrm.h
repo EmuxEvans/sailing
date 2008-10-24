@@ -25,7 +25,7 @@ public:
 
 	CCommandBarCtrlXP m_CmdBar;
 	CFileManager m_FileManager;
-	COutputWindow m_OutputWindow;
+	CDebugHostWindow m_DebugHostWindow;
 	CCommandWindow m_CommandWindow;
 	sstate::CWindowStateMgr<sstate::CStgRegistry> m_stateMgr;
 
@@ -68,7 +68,8 @@ public:
 
 		COMMAND_ID_HANDLER(ID_VIEW_TOOLBAR, OnViewToolBar)
 		COMMAND_ID_HANDLER(ID_VIEW_STATUS_BAR, OnViewStatusBar)
-		COMMAND_TOGGLE_MEMBER_HANDLER(ID_VIEW_OUTPUT, m_OutputWindow)
+		COMMAND_TOGGLE_MEMBER_HANDLER(ID_VIEW_OUTPUT, m_DebugHostWindow)
+		COMMAND_TOGGLE_MEMBER_HANDLER(ID_VIEW_OUTPUT, m_CommandWindow)
 
 		COMMAND_ID_HANDLER(ID_APP_ABOUT, OnAppAbout)
 		COMMAND_ID_HANDLER(ID_NEXT_PANE, OnWindowNext)

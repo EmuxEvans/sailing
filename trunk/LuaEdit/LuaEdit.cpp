@@ -7,7 +7,8 @@
 
 #include "DropFileHandler.h"
 #include "FileManager.h"
-#include "OutputWindow.h"
+#include "DialogWindow.h"
+#include "DebugHostWindow.h"
 #include "CommandWindow.h"
 #include "MainFrm.h"
 
