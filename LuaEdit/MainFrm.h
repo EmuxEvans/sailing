@@ -26,7 +26,7 @@ public:
 	CCommandBarCtrlXP m_CmdBar;
 	CFileManager m_FileManager;
 	COutputWindow m_OutputWindow;
-//	CCommandWindow m_OutputWindow;
+	CCommandWindow m_CommandWindow;
 	sstate::CWindowStateMgr<sstate::CStgRegistry> m_stateMgr;
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
