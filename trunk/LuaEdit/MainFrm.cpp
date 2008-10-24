@@ -94,10 +94,13 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	InitializeDockingFrame();
 	DWORD dwStyle=WS_OVERLAPPEDWINDOW | WS_POPUP| WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
-	CRect rcBar(0,0,300,100);
+	CRect rcBar(0, 0, 100, 200);
 	m_OutputWindow.Create(m_hWnd, rcBar, _T("Output"), dwStyle);
 	DockWindow(m_OutputWindow, dockwins::CDockingSide(dockwins::CDockingSide::sBottom),
-						0/*nBar*/,float(0.0)/*fPctPos*/,100/*nWidth*/,100/* nHeight*/);
+		0/*nBar*/,float(0.5)/*fPctPos*/, 100 /*nWidth*/,200/* nHeight*/);
+	m_CommandWindow.Create(m_hWnd, rcBar, _T("Command"), dwStyle);
+	DockWindow(m_CommandWindow, dockwins::CDockingSide(dockwins::CDockingSide::sBottom),
+		0/*nBar*/,float(0.5)/*fPctPos*/, 100 /*nWidth*/,200/* nHeight*/);
 
 	return 0;
 }
@@ -106,6 +109,7 @@ LRESULT CMainFrame::OnInitialize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 {
 	sstate::CDockWndMgr mgrDockWnds;
 	mgrDockWnds.Add(sstate::CDockingWindowStateAdapter<COutputWindow>(m_OutputWindow));
+	mgrDockWnds.Add(sstate::CDockingWindowStateAdapter<CCommandWindow>(m_CommandWindow));
 
 	m_stateMgr.Initialize(m_hWnd);
 	m_stateMgr.Add(sstate::CRebarStateAdapter(m_hWndToolBar));
