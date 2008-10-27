@@ -1,0 +1,9 @@
+
+LuaDebugClientRpc_Attach();
+LuaDebugClientRpc_Detach();
+
+LuaDebugClientRpc_BreakPoint();
+LuaDebugClientRpc_DebugMsg(
+	[IN] int Type,
+	[IN] char Msg["strlen(Msg)+1"]
+);

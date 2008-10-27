@@ -1,0 +1,7 @@
+
+LuaDebugHostRpc_Attach();
+LuaDebugHostRpc_Detach();
+
+LuaDebugHostRpc_RunCmd(
+	[IN] char Cmd["strlen(Cmd)+1"]
+);
