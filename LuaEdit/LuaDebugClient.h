@@ -20,9 +20,9 @@ public:
 	virtual BOOL Connect(LPCSTR pHostEP, ILuaDebugHooker* pHooker) = NULL;
 	virtual BOOL Disconnect() = NULL;
 
-	virtual BOOL RunCmd(LPCSTR pCmd) = NULL;
+	virtual BOOL RunCmd(LPCSTR pCmd, int &nRetCode) = NULL;
 
-	virtual BOOL IsRuning() = NULL;
+	virtual BOOL IsStop() = NULL;
 	virtual BOOL Continue() = NULL;
 
 	virtual void Release() = NULL;

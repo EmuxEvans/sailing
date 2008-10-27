@@ -369,13 +369,6 @@ int struct_tostring(lua_State* L)
 	return 1;
 }
 
-int object_call(lua_State* L)
-{
-	int i;
-	i = lua_gettop(L);
-	return 0;
-}
-
 int object_get(lua_State* L)
 {
 	PROTOCOL_LUA_OBJECT* obj;
@@ -426,11 +419,6 @@ void protocol_lua_newobject(lua_State* L, PROTOCOL_LUA_CLASS* cls, void* ptr)
 	obj->type = PROTOCOL_TYPE_OBJECT;
 	obj->o.t_class = cls;
 	obj->o.ptr = ptr;
-}
-
-int object_test(lua_State* L)
-{
-	return 0;
 }
 
 int protocol_lua_init(lua_State* L)

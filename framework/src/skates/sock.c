@@ -317,8 +317,7 @@ int sock_peername(SOCK_HANDLE fd, SOCK_ADDR* addr)
 		return ERR_UNKNOWN;
 	}
 
-	addr->ip	= sa.sin_addr.s_addr;
-	addr->port	= sa.sin_port;
+	sock_addr(addr, sa.sin_addr.s_addr, sa.sin_port);
 	return ERR_NOERROR;
 }
 
@@ -332,8 +331,7 @@ int sock_sockname(SOCK_HANDLE fd, SOCK_ADDR* addr)
 		return ERR_UNKNOWN;
 	}
 
-	addr->ip	= sa.sin_addr.s_addr;
-	addr->port	= sa.sin_port;
+	sock_addr(addr, sa.sin_addr.s_addr, sa.sin_port);
 	return ERR_NOERROR;
 }
 

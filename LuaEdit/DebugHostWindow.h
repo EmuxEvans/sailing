@@ -1,3 +1,5 @@
+#pragma once
+
 class CDebugHostDlg :
 	public CDialogImpl<CDebugHostDlg>,
 	public CDialogLayout<CDebugHostDlg>

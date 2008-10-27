@@ -347,17 +347,68 @@ LRESULT CMainFrame::OnViewStatusBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*h
 	return 0;
 }
 
-static ILuaDebugClient* m_pClient = NULL;
+class CLuaDebugHooker : public ILuaDebugHooker
+{
+public:
+	virtual void OnConnect(ILuaDebugClient* pClient)
+	{
+	}
+	virtual void OnDisconnect(ILuaDebugClient* pClient)
+	{
+	}
+	virtual void OnBreakPoint(ILuaDebugClient* pClient)
+	{
+	}
+	virtual void OnDebugMessage(ILuaDebugClient* pClient, int nType, const char* pMsg)
+	{
+		m_pCommandWindow->m_Dlg.Print(pMsg);
+		m_pCommandWindow->m_Dlg.Print("\n");
+	}
+
+	CDebugHostWindow*	m_pDebugHostWindow;
+	CCommandWindow*		m_pCommandWindow;
+
+};
+
+ILuaDebugClient* m_pClient = NULL;
+CLuaDebugHooker m_LuaDebugHooker;
 
 LRESULT CMainFrame::OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
+	if(m_pClient) {
+		MessageBox("Already Attached");
+		return 0;
+	}
+	m_LuaDebugHooker.m_pDebugHostWindow = &m_DebugHostWindow;
+	m_LuaDebugHooker.m_pCommandWindow = &m_CommandWindow;
 	m_pClient = CreateLuaDebugClient();
-	m_pClient->Connect("127.0.0.1:1982", NULL);
+	m_pClient->Connect("127.0.0.1:1982", &m_LuaDebugHooker);
 	return 0;
 }
 
 LRESULT CMainFrame::OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
+	if(!m_pClient) {
+		MessageBox("Not Attach");
+		return 0;
+	}
+	m_pClient->Disconnect();
+	m_pClient->Release();
+	m_pClient = NULL;
+	return 0;
+}
+
+LRESULT CMainFrame::OnDebugContinue(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(!m_pClient) {
+		MessageBox("Not Attach");
+		return 0;
+	}
+	if(!m_pClient->IsStop()) {
+		MessageBox("Not Stop");
+		return 0;
+	}
+	m_pClient->Continue();
 	return 0;
 }
 

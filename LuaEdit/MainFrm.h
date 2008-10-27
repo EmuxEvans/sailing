@@ -74,6 +74,7 @@ public:
 
 		COMMAND_ID_HANDLER(ID_DEBUG_ATTACHHOST, OnDebugAttachHost)
 		COMMAND_ID_HANDLER(ID_DEBUG_DETACHHOST, OnDebugDetachHost)
+		COMMAND_ID_HANDLER(ID_DEBUG_CONTINUE, OnDebugContinue)
 
 		COMMAND_ID_HANDLER(ID_APP_ABOUT, OnAppAbout)
 		COMMAND_ID_HANDLER(ID_NEXT_PANE, OnWindowNext)
@@ -117,6 +118,7 @@ public:
 
 	LRESULT OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnDebugContinue(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 	LRESULT OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnWindowActivate(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
