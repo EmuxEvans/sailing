@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <skates\errcode.h>
 #include <skates\os.h>
@@ -11,16 +13,95 @@
 #include <skates\stream.h>
 #include <skates\rpc_net.h>
 #include <skates\rpc_fun.h>
+#include <skates\misc.h>
 
 #include "LuaDebugClientRpc.h"
 #include "LuaDebugHostRpc.h"
 
+extern "C" {
 #include <skates\lua\lua.h>
 #include <skates\lua\lauxlib.h>
+#include <skates\lua\lualib.h>
+}
 
-static int run_flag = 1;
 static RPCNET_GROUP* client_grp = NULL;
-static void do_proc(void*);
+static lua_State* L = NULL;
+
+static int want_return(lua_State* L)
+{
+	getchar();
+	return 0;
+}
+static int debug_break(lua_State* L)
+{
+	if(!client_grp)
+		return 0;
+
+	threadpool_s();
+	LuaDebugClientRpc_BreakPoint(client_grp);
+	threadpool_e();
+	return 0;
+}
+static int debug_msg(lua_State* L)
+{
+	int type;
+	const char* msg;
+
+	if(lua_gettop(L)!=2 || !lua_isnumber(L, 1) || !lua_isstring(L, 2)) {
+		luaL_error(L, "invalid parameter type.\n");
+		return 0;
+	}
+
+	type = lua_tointeger(L, 1);
+	msg = lua_tolstring(L, 2, NULL);
+
+	if(!client_grp)
+		return 0;
+
+	threadpool_s();
+	LuaDebugClientRpc_DebugMsg(client_grp, type, msg);
+	threadpool_e();
+	return 0;
+}
+static void lua_do()
+{
+	L = luaL_newstate();
+	luaL_openlibs(L);
+
+	lua_pushstring(L,"want_return");
+	lua_pushcfunction(L, want_return);
+	lua_rawset(L,LUA_GLOBALSINDEX);
+	lua_pushstring(L,"debug_break");
+	lua_pushcfunction(L, debug_break);
+	lua_rawset(L,LUA_GLOBALSINDEX);
+	lua_pushstring(L,"debug_msg");
+	lua_pushcfunction(L, debug_msg);
+	lua_rawset(L,LUA_GLOBALSINDEX);
+
+	for(;;) {
+		char line[300];
+		int ret;
+
+		printf(">");
+		gets(line);
+		strtrim(line);
+		strltrim(line);
+
+		if(line[0]=='@') {
+			ret = luaL_dofile(L, line+1);
+		} else {
+			if(line[0]!='\0') {
+				ret = luaL_dostring(L, line);
+			} else {
+				ret = 0;
+			}
+		}
+		if(ret) {
+			fprintf(stderr, "LUA_ERROR: %s\n", lua_tostring(L, -1));
+			lua_pop(L, 1);
+		}
+	}
+}
 
 int main(int argc, char* argv[])
 {
@@ -42,14 +123,11 @@ int main(int argc, char* argv[])
 	ret = rpcnet_bind(&sa);
 	if(ret==ERR_NOERROR) {
 		rpcfun_register(__LuaDebugHostRpc_desc, 0);
-		printf("press enter to continue\n");
-		getchar();
-		threadpool_queueitem(do_proc, NULL);
-		printf("begin\n");
-		while(run_flag) {
-			os_sleep(100);
-		}
-		printf("end\n");
+
+		threadpool_s();
+		lua_do();
+		threadpool_e();
+
 		rpcfun_register(__LuaDebugHostRpc_desc, 0);
 		rpcnet_unbind();
 	} else {
@@ -65,15 +143,10 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-void do_proc(void*)
-{
-	run_flag = 0;
-}
-
 int LuaDebugHostRpc_Attach_impl(RPCNET_GROUP* group)
 {
 	int ret;
-	if(client_grp!=NULL) {
+	if(client_grp!=NULL && client_grp!=group) {
 		ret = LuaDebugClientRpc_Detach(client_grp);
 		if(ret!=ERR_NOERROR) {
 			printf("@@LuaDebugClientRpc_Detach return %d\n", ret);
@@ -103,8 +176,20 @@ int LuaDebugHostRpc_Detach_impl(RPCNET_GROUP* group)
 	return ret;
 }
 
+
 int LuaDebugHostRpc_RunCmd_impl(RPCNET_GROUP* group, const char* Cmd)
 {
+	char line[20*1024];
+
 	printf("@@LuaDebugHostRpc_RunCmd_impl : [[[%s\n]]]", Cmd);
+
+	strcpy(line, Cmd);
+	strtrim(line);
+	strltrim(line);
+
+	if(line[0]=='\0')
+		return ERR_NOERROR;
+
+	luaL_dostring(L, line);
 	return ERR_NOERROR;
 }

@@ -19,9 +19,9 @@ public:
 	virtual BOOL Connect(LPCSTR pHostEP, ILuaDebugHooker* pHooker);
 	virtual BOOL Disconnect();
 
-	virtual BOOL RunCmd(LPCSTR pCmd);
+	virtual BOOL RunCmd(LPCSTR pCmd, int &nRetCode);
 
-	virtual BOOL IsRuning();
+	virtual BOOL IsStop();
 	virtual BOOL Continue();
 
 	virtual void Release() {
@@ -34,6 +34,7 @@ public:
 	void OnDetched(RPCNET_GROUP* grp);
 
 protected:
+	BOOL m_bIsStop;
 	RPCNET_GROUP* m_pHost;
 	ILuaDebugHooker* m_pHooker;
 	HANDLE m_hBPEvent;
@@ -91,11 +92,15 @@ ILuaDebugClient* CreateLuaDebugClient()
 
 CLuaDebugClient::CLuaDebugClient()
 {
+	m_bIsStop = FALSE;
 	m_pHost = NULL;
+	m_pHooker = NULL;
+	m_hBPEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
 
 CLuaDebugClient::~CLuaDebugClient()
 {
+	DeleteObject(m_hBPEvent);
 }
 
 BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, ILuaDebugHooker* pHooker)
@@ -110,15 +115,16 @@ BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, ILuaDebugHooker* pHooker)
 	if(pHost==NULL)
 		return FALSE;
 
+	os_mutex_lock(&client_mtx);
+	client_map[pHost] = this;
+	os_mutex_unlock(&client_mtx);
+
+	m_pHooker = pHooker;
 	threadpool_s();
 	ret = LuaDebugHostRpc_Attach(pHost);
 	threadpool_e();
-	if(ret!=ERR_NOERROR)
-		return FALSE;
 
-	m_pHost = pHost;
-	m_pHooker = pHooker;
-	return TRUE;
+	return ret!=ERR_NOERROR?FALSE:TRUE;
 }
 
 BOOL CLuaDebugClient::Disconnect()
@@ -130,25 +136,35 @@ BOOL CLuaDebugClient::Disconnect()
 	return TRUE;
 }
 
-BOOL CLuaDebugClient::RunCmd(LPCSTR pCmd)
+BOOL CLuaDebugClient::RunCmd(LPCSTR pCmd, int &nRetCode)
 {
-	return TRUE;
+	if(!m_pHost) return FALSE;
+	threadpool_s();
+	nRetCode = LuaDebugHostRpc_RunCmd(m_pHost, pCmd);
+	threadpool_e();
+	return nRetCode==ERR_NOERROR?TRUE:FALSE;
 }
 
-BOOL CLuaDebugClient::IsRuning()
+BOOL CLuaDebugClient::IsStop()
 {
-	return TRUE;
+	return m_bIsStop;
 }
 
 BOOL CLuaDebugClient::Continue()
 {
+	if(!m_bIsStop)
+		return FALSE;
+
+	SetEvent(m_hBPEvent);
 	return TRUE;
 }
 
 void CLuaDebugClient::OnRPCBreakPoint()
 {
+	m_bIsStop = TRUE;
 	m_pHooker->OnBreakPoint(this);
 	WaitForSingleObject(m_hBPEvent, INFINITE);
+	m_bIsStop = FALSE;
 }
 
 void CLuaDebugClient::OnRPCDebugMessage(int nType, LPCSTR pMsg)
@@ -184,7 +200,7 @@ int LuaDebugClientRpc_Attach_impl(RPCNET_GROUP* group)
 	}
 	os_mutex_unlock(&client_mtx);
 
-	if(pClient!=NULL) return ERR_UNKNOWN;
+	if(pClient==NULL) return ERR_UNKNOWN;
 	pClient->OnAttched(group);
 	return ERR_NOERROR;
 }
