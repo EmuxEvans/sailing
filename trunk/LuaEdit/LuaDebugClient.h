@@ -28,6 +28,6 @@ public:
 	virtual void Release() = NULL;
 };
 
-BOOL InitializeLuaDebugClient();
+BOOL InitializeLuaDebugClient(const char* addr);
 BOOL FinalizeLuaDebugClient();
 ILuaDebugClient* CreateLuaDebugClient();

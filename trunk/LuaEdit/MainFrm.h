@@ -58,6 +58,7 @@ public:
 		COMMAND_ID_HANDLER(ID_APP_EXIT, OnFileExit)
 
 		COMMAND_ID_HANDLER(ID_EDIT_UNDO, OnEditUndo)
+		COMMAND_ID_HANDLER(ID_EDIT_REDO, OnEditRedo)
 		COMMAND_ID_HANDLER(ID_EDIT_CUT, OnEditCut)
 		COMMAND_ID_HANDLER(ID_EDIT_COPY, OnEditCopy)
 		COMMAND_ID_HANDLER(ID_EDIT_PASTE, OnEditPaste)
@@ -70,6 +71,9 @@ public:
 		COMMAND_ID_HANDLER(ID_VIEW_STATUS_BAR, OnViewStatusBar)
 		COMMAND_TOGGLE_MEMBER_HANDLER(ID_VIEW_OUTPUT, m_DebugHostWindow)
 		COMMAND_TOGGLE_MEMBER_HANDLER(ID_VIEW_OUTPUT, m_CommandWindow)
+
+		COMMAND_ID_HANDLER(ID_DEBUG_ATTACHHOST, OnDebugAttachHost)
+		COMMAND_ID_HANDLER(ID_DEBUG_DETACHHOST, OnDebugDetachHost)
 
 		COMMAND_ID_HANDLER(ID_APP_ABOUT, OnAppAbout)
 		COMMAND_ID_HANDLER(ID_NEXT_PANE, OnWindowNext)
@@ -99,6 +103,7 @@ public:
 	LRESULT OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 	LRESULT OnEditUndo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnEditRedo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnEditCut(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnEditCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnEditPaste(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
@@ -109,6 +114,9 @@ public:
 
 	LRESULT OnViewToolBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnViewStatusBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+
+	LRESULT OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 	LRESULT OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnWindowActivate(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

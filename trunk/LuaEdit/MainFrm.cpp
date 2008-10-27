@@ -15,6 +15,7 @@
 
 #include "SciLexerEdit.h"
 #include "LuaEditView.h"
+#include "LuaDebugClient.h"
 
 CMainFrame::CMainFrame() : m_FileManager(&m_view)
 {
@@ -243,6 +244,17 @@ LRESULT CMainFrame::OnEditUndo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 	return 0;
 }
 
+LRESULT CMainFrame::OnEditRedo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+	pView->Redo();
+	return 0;
+}
+
 LRESULT CMainFrame::OnEditCut(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	if(m_view.GetActivePage()<0)
@@ -332,6 +344,20 @@ LRESULT CMainFrame::OnViewStatusBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*h
 	::ShowWindow(m_hWndStatusBar, bVisible ? SW_SHOWNOACTIVATE : SW_HIDE);
 	UISetCheck(ID_VIEW_STATUS_BAR, bVisible);
 	UpdateLayout();
+	return 0;
+}
+
+static ILuaDebugClient* m_pClient = NULL;
+
+LRESULT CMainFrame::OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	m_pClient = CreateLuaDebugClient();
+	m_pClient->Connect("127.0.0.1:1982", NULL);
+	return 0;
+}
+
+LRESULT CMainFrame::OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
 	return 0;
 }
 

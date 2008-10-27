@@ -60,6 +60,10 @@ int gen_h(const char* filename)
 	fprintf(fp_h,  "#ifndef _%s_H_\n", filename);
 	fprintf(fp_h,  "#define _%s_H_\n", filename);
 	fprintf(fp_h,  "\n");
+	fprintf(fp_h,  "#ifdef __cplusplus\n");
+	fprintf(fp_h,  "extern \"C\" {\n");
+	fprintf(fp_h,  "#endif\n");
+	fprintf(fp_h,  "\n");
 	fprintf(fp_h,  "// C_DEF\n");
 	for(i=0; i<i_count; i++) {
 		fprintf(fp_h,  "%s\n", &i_list[i][0]);
@@ -78,6 +82,10 @@ int gen_h(const char* filename)
 	}
 	fprintf(fp_h,  "\n");
 	fprintf(fp_h,  "extern RPCFUN_FUNCTION_DESC __%s_desc[%d];\n", filename, f_count+1);
+	fprintf(fp_h,  "\n");
+	fprintf(fp_h,  "#ifdef __cplusplus\n");
+	fprintf(fp_h,  "}\n");
+	fprintf(fp_h,  "#endif\n");
 	fprintf(fp_h,  "\n");
 	fprintf(fp_h,  "#endif\n");
 	fprintf(fp_h,  "\n");
@@ -204,7 +212,7 @@ if(strcmp(func->mode, "async")==0) {
 	fprintf(fp_clt,"		}\n");
 } else {
 #ifdef OUTPUT_DEBUG
-	fprintf(fp_clt,"		DBGLOG(LOG_INFO, MODULE_NAME, \"%%s (%%s:%%d) start proxy local\", __FUNCTION__, __FILE__, __LINE__);\n");
+	fprintf(fp_clt,"		DBGLOG(LOG_INFO, \"IDLGEN\", \"%%s (%%s:%%d) start proxy local\", __FUNCTION__, __FILE__, __LINE__);\n");
 #endif
 	fprintf(fp_clt,"\n");
 	fprintf(fp_clt,"		_reserved.func_desc = rpcfun_get_function(\"%s\");\n", func->name);
@@ -212,7 +220,7 @@ if(strcmp(func->mode, "async")==0) {
 	fprintf(fp_clt,"		_reserved.retcode = ((int (*)(RPCNET_GROUP* group%s))_reserved.func_desc->impl)(group%s);\n", str, str_1);
 	fprintf(fp_clt,"		rpcfun_release_function(_reserved.func_desc);\n");
 #ifdef OUTPUT_DEBUG
-	fprintf(fp_clt,"		DBGLOG(LOG_INFO, MODULE_NAME, \"%%s (%%s:%%d) end proxy local\", __FUNCTION__, __FILE__, __LINE__);\n");
+	fprintf(fp_clt,"		DBGLOG(LOG_INFO, \"IDLGEN\", \"%%s (%%s:%%d) end proxy local\", __FUNCTION__, __FILE__, __LINE__);\n");
 #endif
 	fprintf(fp_clt,"\n");
 	fprintf(fp_clt,"		return(_reserved.retcode);\n");
@@ -233,7 +241,7 @@ if(strcmp(func->mode, "async")==0) {
 	fprintf(fp_clt,"\n");
 
 #ifdef OUTPUT_DEBUG
-	fprintf(fp_clt,"	DBGLOG(LOG_INFO, MODULE_NAME, \"%%s (%%s:%%d) start proxy\", __FUNCTION__, __FILE__, __LINE__);\n");
+	fprintf(fp_clt,"	DBGLOG(LOG_INFO, \"IDLGEN\", \"%%s (%%s:%%d) start proxy\", __FUNCTION__, __FILE__, __LINE__);\n");
 #endif
 	fprintf(fp_clt,"\n");
 	// step  1: full parameter list\n");
@@ -287,7 +295,7 @@ if(strcmp(func->mode, "async")==0) {
 	fprintf(fp_clt,"		_reserved.retcode = rpcfun_serialize_write(_reserved.stream, _reserved.list, %d, NULL);\n", func->p_count);
 	fprintf(fp_clt,"		if(_reserved.retcode!=ERR_NOERROR) {\n");
 //#ifdef OUTPUT_DEBUG
-	fprintf(fp_clt,"			DBGLOG(LOG_INFO, MODULE_NAME, \"rpc serialize write error in %%s, ret=%%d\", __FUNCTION__, _reserved.retcode);\n");
+	fprintf(fp_clt,"			DBGLOG(LOG_INFO, \"IDLGEN\", \"rpc serialize write error in %%s, ret=%%d\", __FUNCTION__, _reserved.retcode);\n");
 //#endif
 	fprintf(fp_clt,"			rpcfun_release_function(_reserved.func_desc);\n");
 	fprintf(fp_clt,"			return(_reserved.retcode);\n");
@@ -365,7 +373,7 @@ if(strcmp(func->mode, "async")==0) {
 }
 	fprintf(fp_clt,"	if(_reserved.retcode!=ERR_NOERROR) {\n");
 #ifdef OUTPUT_DEBUG
-	fprintf(fp_clt,"		DBGLOG(LOG_INFO, MODULE_NAME, \"rpc write head error in %%s, ret=%%d\", __FUNCTION__, _reserved.retcode);\n");
+	fprintf(fp_clt,"		DBGLOG(LOG_INFO, \"IDLGEN\", \"rpc write head error in %%s, ret=%%d\", __FUNCTION__, _reserved.retcode);\n");
 #endif
 	fprintf(fp_clt,"		rpcnet_context_free(_reserved.ctx);\n");
 	fprintf(fp_clt,"		return _reserved.retcode;\n");
@@ -376,7 +384,7 @@ if(strcmp(func->mode, "async")==0) {
 	fprintf(fp_clt,"	_reserved.retcode = rpcfun_serialize_write(_reserved.stream, _reserved.list, %d, NULL);\n", func->p_count);
 	fprintf(fp_clt,"	if(_reserved.retcode!=ERR_NOERROR) {\n");
 //#ifdef OUTPUT_DEBUG
-	fprintf(fp_clt,"		DBGLOG(LOG_INFO, MODULE_NAME, \"rpc serialize write error in %%s, ret=%%d\", __FUNCTION__, _reserved.retcode);\n");
+	fprintf(fp_clt,"		DBGLOG(LOG_INFO, \"IDLGEN\", \"rpc serialize write error in %%s, ret=%%d\", __FUNCTION__, _reserved.retcode);\n");
 //#endif
 	fprintf(fp_clt,"		rpcnet_context_free(_reserved.ctx);\n");
 	fprintf(fp_clt,"		return _reserved.retcode;\n");
@@ -421,7 +429,7 @@ if(strcmp(func->mode, "async")==0) {
 	fprintf(fp_clt,"		_reserved.retcode = rpcfun_read_result(_reserved.stream, NULL, &_reserved.result);\n");
 	fprintf(fp_clt,"		if(_reserved.retcode!=ERR_NOERROR) {\n");
 #ifdef OUTPUT_DEBUG
-	fprintf(fp_clt,"			DBGLOG(LOG_INFO, MODULE_NAME, \"rpc read result error in %%s, ret=%%d\", __FUNCTION__, _reserved.retcode);\n");
+	fprintf(fp_clt,"			DBGLOG(LOG_INFO, \"IDLGEN\", \"rpc read result error in %%s, ret=%%d\", __FUNCTION__, _reserved.retcode);\n");
 #endif
 	fprintf(fp_clt,"			rpcnet_context_free(_reserved.ctx);\n");
 	fprintf(fp_clt,"			return _reserved.retcode;\n");
@@ -436,7 +444,7 @@ if(strcmp(func->mode, "async")==0) {
 	fprintf(fp_clt,"		_reserved.retcode = rpcfun_serialize_read(_reserved.stream, _reserved.list, %d, NULL);\n", func->p_count);
 	fprintf(fp_clt,"		if(_reserved.retcode!=ERR_NOERROR) {\n");
 //#ifdef OUTPUT_DEBUG
-	fprintf(fp_clt,"			DBGLOG(LOG_INFO, MODULE_NAME, \"rpc serialize read error in %%s, ret=%%d\", __FUNCTION__, _reserved.retcode);\n");
+	fprintf(fp_clt,"			DBGLOG(LOG_INFO, \"IDLGEN\", \"rpc serialize read error in %%s, ret=%%d\", __FUNCTION__, _reserved.retcode);\n");
 //#endif
 	fprintf(fp_clt,"			rpcnet_context_free(_reserved.ctx);\n");
 	fprintf(fp_clt,"			return _reserved.retcode;\n");
@@ -454,7 +462,7 @@ if(strcmp(func->mode, "async")==0) {
 	fprintf(fp_clt,"	\n");
 
 #ifdef OUTPUT_DEBUG
-	fprintf(fp_clt,"	DBGLOG(LOG_INFO, MODULE_NAME, \"%%s (%%s:%%d) end proxy\", __FUNCTION__, __FILE__, __LINE__);\n");
+	fprintf(fp_clt,"	DBGLOG(LOG_INFO, \"IDLGEN\", \"%%s (%%s:%%d) end proxy\", __FUNCTION__, __FILE__, __LINE__);\n");
 #endif
 	fprintf(fp_clt,"\n");
 	fprintf(fp_clt,"	// step 13: return RETCODE\n");
@@ -478,11 +486,15 @@ void gen_stub(FUNCTION* func)
 	fprintf(fp_svr,"	// reserve\n");
 	fprintf(fp_svr,"	int _reserve_ret;\n");
 	fprintf(fp_svr,"	STREAM* _reserve_stream = NULL;\n");
-	fprintf(fp_svr,"	RPCFUN_PARAMETER_ITEM	_reserve_list[%d];\n", func->p_count);
+	if(func->p_count>0) {
+		fprintf(fp_svr,"	RPCFUN_PARAMETER_ITEM	_reserve_list[%d];\n", func->p_count);
+	} else {
+		fprintf(fp_svr,"	RPCFUN_PARAMETER_ITEM	_reserve_list[%d];\n", 1);
+	}
 	fprintf(fp_svr,"\n");
 
 #ifdef OUTPUT_DEBUG
-	fprintf(fp_svr,"	DBGLOG(LOG_INFO, MODULE_NAME, \"%%s (%%s:%%d) start stub\", __FUNCTION__, __FILE__, __LINE__);\n");
+	fprintf(fp_svr,"	DBGLOG(LOG_INFO, \"IDLGEN\", \"%%s (%%s:%%d) start stub\", __FUNCTION__, __FILE__, __LINE__);\n");
 #endif
 	fprintf(fp_svr,"\n");
 	fprintf(fp_svr,"	// step  1: fill parameter list\n");
@@ -512,7 +524,7 @@ if(strcmp(func->mode, "async")==0 && func->p_list[p].flag_out!=IDL_FLAG_NONE) {
 	fprintf(fp_svr,"	_reserve_ret = rpcfun_serialize_read(_reserve_in, _reserve_list, %d, ctx);\n", func->p_count);
 	fprintf(fp_svr,"	if(_reserve_ret!=ERR_NOERROR) {\n");
 //#ifdef OUTPUT_DEBUG
-	fprintf(fp_svr,"		DBGLOG(LOG_INFO, MODULE_NAME, \"rpc serialize read error in %%s, ret=%%d\", __FUNCTION__, _reserve_ret);\n");
+	fprintf(fp_svr,"		DBGLOG(LOG_INFO, \"IDLGEN\", \"rpc serialize read error in %%s, ret=%%d\", __FUNCTION__, _reserve_ret);\n");
 //#endif
 	fprintf(fp_svr,"		if(_reserve_conn==NULL && _reserve_seq==NULL) {\n");
 	fprintf(fp_svr,"			return(_reserve_ret);\n");
@@ -552,7 +564,7 @@ if(strcmp(func->mode, "async")==0 && func->p_list[p].flag_out!=IDL_FLAG_NONE) {
 	fprintf(fp_svr,"	_reserve_ret = rpcfun_write_result(_reserve_stream, _reserve_seq, _reserve_ret);\n");
 	fprintf(fp_svr,"	if(_reserve_ret!=ERR_NOERROR) {\n");
 #ifdef OUTPUT_DEBUG
-	fprintf(fp_svr,"		DBGLOG(LOG_INFO, MODULE_NAME, \"rpc write result error in %s, ret=%d\", __FUNCTION__, _reserve_ret);\n");
+	fprintf(fp_svr,"		DBGLOG(LOG_INFO, \"IDLGEN\", \"rpc write result error in %s, ret=%d\", __FUNCTION__, _reserve_ret);\n");
 #endif
 	fprintf(fp_svr,"		goto SEND_ERROR;\n");
 	fprintf(fp_svr,"	}\n");
@@ -562,7 +574,7 @@ if(strcmp(func->mode, "async")==0 && func->p_list[p].flag_out!=IDL_FLAG_NONE) {
 	fprintf(fp_svr,"	_reserve_ret = rpcfun_serialize_write(_reserve_stream, _reserve_list, %d, ctx);\n", func->p_count);
 	fprintf(fp_svr,"	if(_reserve_ret!=ERR_NOERROR) {\n");
 //#ifdef OUTPUT_DEBUG
-	fprintf(fp_svr,"		DBGLOG(LOG_INFO, MODULE_NAME, \"rpc serialize write error in %%s, ret=%%d\", __FUNCTION__, _reserve_ret);\n");
+	fprintf(fp_svr,"		DBGLOG(LOG_INFO, \"IDLGEN\", \"rpc serialize write error in %%s, ret=%%d\", __FUNCTION__, _reserve_ret);\n");
 //#endif
 	fprintf(fp_svr,"		goto SEND_ERROR;\n");
 	fprintf(fp_svr,"	}\n");
@@ -583,7 +595,7 @@ if(strcmp(func->mode, "async")==0 && func->p_list[p].flag_out!=IDL_FLAG_NONE) {
 	fprintf(fp_svr,"\n");
 
 #ifdef OUTPUT_DEBUG
-	fprintf(fp_svr,"	DBGLOG(LOG_INFO, MODULE_NAME, \"%%s (%%s:%%d) end stub\", __FUNCTION__, __FILE__, __LINE__);\n");
+	fprintf(fp_svr,"	DBGLOG(LOG_INFO, \"IDLGEN\", \"%%s (%%s:%%d) end stub\", __FUNCTION__, __FILE__, __LINE__);\n");
 #endif
 	fprintf(fp_svr,"\n");
 	fprintf(fp_svr,"	// done.\n");
@@ -604,7 +616,7 @@ if(strcmp(func->mode, "async")==0 && func->p_list[p].flag_out!=IDL_FLAG_NONE) {
 	fprintf(fp_svr,"	_reserve_ret = rpcfun_write_result(_reserve_stream, _reserve_seq, _reserve_ret);\n");
 	fprintf(fp_svr,"	if(_reserve_ret!=ERR_NOERROR) {\n");
 #ifdef OUTPUT_DEBUG
-	fprintf(fp_svr,"		DBGLOG(LOG_INFO, MODULE_NAME, \"rpc write result error in %%s, ret=%%d\", __FUNCTION__, _reserve_ret);\n");
+	fprintf(fp_svr,"		DBGLOG(LOG_INFO, \"IDLGEN\", \"rpc write result error in %%s, ret=%%d\", __FUNCTION__, _reserve_ret);\n");
 #endif
 	fprintf(fp_svr,"		return(_reserve_ret);\n");
 	fprintf(fp_svr,"	}\n");

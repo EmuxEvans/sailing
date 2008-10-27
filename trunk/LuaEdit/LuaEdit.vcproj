@@ -50,11 +50,11 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="include;..\framework_dep\wtl\include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG;PLAT_WIN"
+				AdditionalIncludeDirectories="include;..\framework_dep\wtl\include;..\framework\inc"
+				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG;PLAT_WIN;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -73,8 +73,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="imm32.lib"
+				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\framework\$(ConfigurationName)-$(PlatformName)"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -135,10 +136,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="include;..\framework_dep\wtl\include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG;PLAT_WIN"
+				AdditionalIncludeDirectories="include;..\framework_dep\wtl\include;..\framework\inc"
+				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG;PLAT_WIN;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS"
 				ExceptionHandling="0"
-				RuntimeLibrary="0"
+				RuntimeLibrary="2"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -157,8 +158,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="imm32.lib"
+				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\framework\$(ConfigurationName)-$(PlatformName)"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -525,6 +527,42 @@
 			</File>
 			<File
 				RelativePath=".\include\WndFrmPkg.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Rpc Files"
+			>
+			<File
+				RelativePath=".\LuaHost\LuaDebugClientRpc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LuaHost\LuaDebugClientRpc.svr.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\LuaHost\LuaDebugHostRpc.clt.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\LuaHost\LuaDebugHostRpc.h"
 				>
 			</File>
 		</Filter>

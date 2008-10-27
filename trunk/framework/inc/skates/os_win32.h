@@ -69,6 +69,7 @@ ZION_INLINE int os_sem_post(os_sem_t* sem);
 
 typedef HANDLE os_thread_t;
 ZION_INLINE int os_thread_begin(os_thread_t* handle, unsigned int (ZION_CALLBACK *proc)(void*), void* arg);
+ZION_INLINE int os_thread_get(os_thread_t* handle);
 ZION_INLINE int os_thread_close(os_thread_t handle);
 ZION_INLINE void os_thread_exit(unsigned int code);
 ZION_INLINE int os_thread_wait(os_thread_t handle, unsigned int* retcode);
@@ -188,6 +189,12 @@ ZION_INLINE int os_thread_begin(os_thread_t* handle, unsigned int (ZION_CALLBACK
 	th = (HANDLE)_beginthreadex(NULL, 0, proc, arg, 0, NULL);
 	if(th==NULL) return (int)GetLastError();
 	*handle = th;
+	return 0;
+}
+
+ZION_INLINE int os_thread_get(os_thread_t* handle)
+{
+	*handle = GetCurrentThread();
 	return 0;
 }
 

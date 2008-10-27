@@ -18,6 +18,8 @@ ZION_API int threadpool_getindex();
 ZION_API int threadpool_getcount();
 
 ZION_API int threadpool_begin(os_thread_t* handle, unsigned int (ZION_CALLBACK *proc)(void*), void* arg);
+ZION_API int threadpool_s();
+ZION_API int threadpool_e();
 
 typedef struct {
 	const char* name;
