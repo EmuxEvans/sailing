@@ -326,16 +326,13 @@ const SOCK_ADDR* rpcnet_get_bindep()
 	return local_group?&local_group->endpoint:NULL;
 }
 
-#include <stdio.h>
 void accept_callback(FDWATCH_ITEM* item, int events)
 {
-	printf("post listener_threadevent\n");
 	threadpool_queueitem(listener_threadevent, item);
 }
 
 void client_callback(FDWATCH_ITEM* item, int events)
 {
-	printf("post connection_threadevent\n");
 	threadpool_queueitem(connection_threadevent, item);
 }
 
@@ -670,7 +667,6 @@ int rpcnet_context_freeconn(RPCNET_THREAD_CONTEXT* ctx, RPCNET_CONNECTION* conn)
 			os_mutex_unlock(&group_mutex);
 
 			if(conn!=NULL) {
-				printf("rpcnet_context_freeconn rearm %d\n", conn->fd);
 				// rearm incoming connection
 				if(fdwatch_rearm(epoll_fd, &conn->item_fdw)!=ERR_NOERROR) {
 					SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_context_freeconn(): epoll_ctl() rearm incoming connection failed at %d.\n", errno);
@@ -749,17 +745,13 @@ ON_START:
 
 	// read head
 	ret = sock_readbuf(conn->fd, &ctx->pkg, sizeof(ctx->pkg.len)+sizeof(ctx->pkg.subsys));
-	if(ret==ERR_NOERROR) goto ON_ERROR;
-
-//	printf("1@ len=%d subsys=%d\n", ctx->pkg.len, ctx->pkg.subsys);
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
 
 	// read body
 	ret = sock_readbuf(conn->fd, &ctx->pkg.body, ctx->pkg.len);
 	if(ret!=0) goto ON_ERROR;
 	// done
 	ctx->stream.cur	= 0;
-
-//	printf("2# len=%d subsys=%d\n", ctx->pkg.len, ctx->pkg.subsys);
 
 	if(subsys!=RPCNET_SUBSYS_NONE && ctx->pkg.subsys!=subsys) {
 		assert(ctx->pkg.subsys<sizeof(subsys_events)/sizeof(subsys_events[0]));

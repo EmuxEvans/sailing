@@ -103,6 +103,7 @@ BEGIN
     POPUP "&Edit"
     BEGIN
         MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM "&Redo\tCtrl+Y",               ID_EDIT_REDO
         MENUITEM SEPARATOR
         MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
         MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
@@ -119,6 +120,7 @@ BEGIN
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
         MENUITEM "&Debug Host Window",          ID_VIEW_DEBUGHOST
         MENUITEM "&Command Window",             ID_VIEW_COMMAND
     END
@@ -157,12 +159,12 @@ IDR_MAINFRAME           ICON                    "res\\LuaEdit.ico"
 
 IDD_ABOUTBOX DIALOGEX 0, 0, 233, 177
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About"
+CAPTION "About LuaEdit"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,176,155,50,14
     LTEXT           "LuaEdit Application v1.0\n(c) Copyright 2008\ngamemake@gmail.com",IDC_STATIC,31,145,78,24
-    ICON            IDR_MAINFRAME,IDC_STATIC,7,149,21,20
+    ICON            IDR_MAINFRAME,IDC_STATIC,7,149,20,20
     CONTROL         201,IDC_STATIC,"Static",SS_BITMAP | SS_REALSIZEIMAGE,7,7,219,134,WS_EX_STATICEDGE
 END
 
@@ -227,6 +229,7 @@ BEGIN
     "N",            ID_BOOKMARK_NEXT,       VIRTKEY, CONTROL, NOINVERT
     "P",            ID_BOOKMARK_PREV,       VIRTKEY, CONTROL, NOINVERT
     "K",            ID_BOOKMARK_TOGGLE,     VIRTKEY, CONTROL, NOINVERT
+    VK_F5,          ID_DEBUG_CONTINUE,      VIRTKEY, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
@@ -240,7 +243,7 @@ BEGIN
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
-    VK_F5,          ID_DEBUG_CONTINUE,      VIRTKEY, NOINVERT
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
 END
 
 

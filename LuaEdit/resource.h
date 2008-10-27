@@ -42,13 +42,14 @@
 #define ID_VIEW_DEBUGHOST               32809
 #define ID_VIEW_COMMANDWINDOW           32810
 #define ID_VIEW_COMMAND                 32811
+#define ID_EDIT_REDO32812               32812
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
-#define _APS_NEXT_COMMAND_VALUE         32812
+#define _APS_NEXT_COMMAND_VALUE         32815
 #define _APS_NEXT_CONTROL_VALUE         1005
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

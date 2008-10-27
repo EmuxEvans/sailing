@@ -40,6 +40,7 @@ static unsigned int				thread_count;
 static unsigned int				thread_busy = 0;
 static os_thread_key_t			thread_key;
 static THREAD_CTX				threads[THREADPOOL_MAX_WORKERTHREAD];
+static os_mutex_t				threads_mtx;
 
 // define external function
 int threadpool_init(unsigned int thread_num)
@@ -53,6 +54,7 @@ int threadpool_init(unsigned int thread_num)
 	thread_count = 0;
 	os_thread_key_init(&thread_key);
 	memset(&threads, 0xff, sizeof(threads));
+	os_mutex_init(&threads_mtx);
 
 	for(i=0; i<thread_num; i++) {
 		threads[i].index = i;
@@ -99,6 +101,7 @@ int threadpool_final()
 	}
 
 	//
+	os_mutex_destroy(&threads_mtx);
 	os_sem_destroy(&msgq_sem);
 	os_thread_key_destroy(&thread_key);
 	os_mutex_destroy(&msgq_mtx);
@@ -200,14 +203,18 @@ int threadpool_begin(os_thread_t* handle, unsigned int (ZION_CALLBACK *proc)(voi
 	int ret;
 	int index;
 
+	os_mutex_lock(&threads_mtx);
 	for(index=thread_count; index<sizeof(threads)/sizeof(threads[0]); index++) {
 		if(threads[index].index==-1) break;
 	}
-	if(index==sizeof(threads)/sizeof(threads[0])) return ERR_FULL;
-
+	if(index==sizeof(threads)/sizeof(threads[0])) {
+		os_mutex_unlock(&threads_mtx);
+		return ERR_FULL;
+	}
 	threads[index].index = index;
 	threads[index].proc = proc;
 	threads[index].arg = arg;
+	os_mutex_unlock(&threads_mtx);
 
 	ret = os_thread_begin(&threads[index].tid, workthread_proc, &threads[index]);
 	if(ret!=0) {
@@ -216,6 +223,49 @@ int threadpool_begin(os_thread_t* handle, unsigned int (ZION_CALLBACK *proc)(voi
 	}
 
 	memcpy(handle, &threads[index].tid, sizeof(*handle));
+	return ERR_NOERROR;
+}
+
+int threadpool_s()
+{
+	int index;
+
+	os_mutex_lock(&threads_mtx);
+	for(index=thread_count; index<sizeof(threads)/sizeof(threads[0]); index++) {
+		if(threads[index].index==-1) break;
+	}
+	if(index==sizeof(threads)/sizeof(threads[0])) {
+		os_mutex_unlock(&threads_mtx);
+		return ERR_FULL;
+	}
+	threads[index].index = index;
+	threads[index].proc = NULL;
+	threads[index].arg = NULL;
+	os_thread_get(&threads[index].tid);
+	os_mutex_unlock(&threads_mtx);
+
+	if(os_thread_key_set(&thread_key, (void*)&threads[index])!=0)
+		assert(0);
+	if(os_thread_key_get(&thread_key)!=(void*)&threads[index])
+		assert(0);
+
+	return ERR_NOERROR;
+}
+
+int threadpool_e()
+{
+	int index;
+
+	index = threadpool_getindex();
+	if(index<0) return ERR_NOT_WORKER;
+
+	threads[index].index = -1;
+
+	if(os_thread_key_set(&thread_key, NULL)!=0)
+		assert(0);
+	if(os_thread_key_get(&thread_key)!=NULL)
+		assert(0);
+
 	return ERR_NOERROR;
 }
 

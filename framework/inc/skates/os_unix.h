@@ -69,6 +69,7 @@ ZION_INLINE int os_sem_post(os_sem_t* sem);
 
 typedef pthread_t os_thread_t;
 ZION_INLINE int os_thread_begin(os_thread_t* handle, unsigned int (ZION_CALLBACK *proc)(void*), void* arg);
+ZION_INLINE int os_thread_get(os_thread_t* handle);
 ZION_INLINE int os_thread_close(os_thread_t handle);
 ZION_INLINE void os_thread_exit(unsigned int code);
 ZION_INLINE int os_thread_wait(os_thread_t handle, unsigned int* retcode);
@@ -197,6 +198,11 @@ ZION_INLINE int os_sem_post(os_sem_t* sem)
 ZION_INLINE int os_thread_begin(os_thread_t* handle, unsigned int (ZION_CALLBACK *proc)(void*), void* arg)
 {
 	return pthread_create(handle, NULL, (void *(*)(void*))proc, arg);
+}
+
+ZION_INLINE int os_thread_get(os_thread_t* handle)
+{
+	return 1;
 }
 
 ZION_INLINE int os_thread_close(os_thread_t handle)

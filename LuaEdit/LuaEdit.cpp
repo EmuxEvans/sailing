@@ -11,6 +11,7 @@
 #include "DebugHostWindow.h"
 #include "CommandWindow.h"
 #include "MainFrm.h"
+#include "LuaDebugClient.h"
 
 CAppModule _Module;
 
@@ -35,8 +36,14 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 	return nRet;
 }
 
+//ILuaDebugClient* CreateLuaDebugClient();
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow)
 {
+	if(!InitializeLuaDebugClient("127.0.0.1:1980")) {
+		::MessageBox(NULL, _T("InitializeLuaDebugClient"), _T("ERROR"), MB_OK);
+		return 0;
+	}
+
 	HRESULT hRes = ::CoInitialize(NULL);
 // If you are running on NT 4.0 or higher you can use the following call instead to 
 // make the EXE free threaded. This means that calls come in on a random RPC thread.
@@ -58,6 +65,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	_Module.Term();
 	Scintilla_ReleaseResources();
 	::CoUninitialize();
+	FinalizeLuaDebugClient();
 
 	return nRet;
 }
