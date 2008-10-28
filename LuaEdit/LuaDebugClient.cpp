@@ -1,7 +1,10 @@
 #include "StdAfx.h"
+
+#include "LuaHost\LuaDebugInfo.h"
 #include "LuaDebugClient.h"
 
 #include <skates\skates.h>
+
 #include "LuaHost\LuaDebugClientRpc.h"
 #include "LuaHost\LuaDebugHostRpc.h"
 
@@ -20,6 +23,7 @@ public:
 	virtual BOOL Disconnect();
 
 	virtual BOOL RunCmd(LPCSTR pCmd, int &nRetCode);
+	virtual BOOL GetCallStack(LUADEBUG_CALLSTACK* pStacks, int nSize, int &nDepth);
 
 	virtual BOOL IsStop();
 	virtual BOOL Continue();
@@ -143,6 +147,20 @@ BOOL CLuaDebugClient::RunCmd(LPCSTR pCmd, int &nRetCode)
 	nRetCode = LuaDebugHostRpc_RunCmd(m_pHost, pCmd);
 	threadpool_e();
 	return nRetCode==ERR_NOERROR?TRUE:FALSE;
+}
+
+BOOL CLuaDebugClient::GetCallStack(LUADEBUG_CALLSTACK* pStacks, int nSize, int &nDepth)
+{
+	int ret;
+
+	if(!m_pHost) return FALSE;
+	if(!m_bIsStop) return FALSE;
+
+	nDepth = nSize;
+	ret = LuaDebugHostRpc_GetCallStack(m_pHost, pStacks, &nDepth);
+	if(ret!=ERR_NOERROR) return FALSE;
+
+	return TRUE;
 }
 
 BOOL CLuaDebugClient::IsStop()

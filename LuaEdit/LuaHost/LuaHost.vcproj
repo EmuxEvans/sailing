@@ -245,6 +245,10 @@
 				RelativePath=".\LuaDebugHostRpc.h"
 				>
 			</File>
+			<File
+				RelativePath=".\LuaDebugInfo.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

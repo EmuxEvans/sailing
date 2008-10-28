@@ -11,6 +11,8 @@
 #include "DebugHostWindow.h"
 #include "CommandWindow.h"
 #include "MainFrm.h"
+
+#include "LuaHost\LuaDebugInfo.h"
 #include "LuaDebugClient.h"
 
 CAppModule _Module;
