@@ -651,6 +651,15 @@ RPCNET_CONNECTION* rpcnet_context_getconn_force(RPCNET_THREAD_CONTEXT* ctx, RPCN
 	return conn;
 }
 
+int rpcnet_context_chkconn(RPCNET_THREAD_CONTEXT* ctx, RPCNET_CONNECTION* conn)
+{
+	RLIST_ITEM* item;
+	for(item=rlist_front(&ctx->hold_conns); !rlist_is_head(&ctx->hold_conns, item); item=rlist_next(item)) {
+		if(conn==(RPCNET_CONNECTION*)rlist_get_userdata(item)) return 1;
+	}
+	return 0;
+}
+
 int rpcnet_context_freeconn(RPCNET_THREAD_CONTEXT* ctx, RPCNET_CONNECTION* conn)
 {
 	if(conn->type==RPCCONN_TYPE_OUTGOING) {

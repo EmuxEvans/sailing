@@ -43,6 +43,7 @@ void CLuaDebugHooker::OnDisconnect(ILuaDebugClient* pClient)
 {
 	if(m_bQuit) return;
 	m_pDebugHostWindow->m_Dlg.m_HostList.DeleteString(0);
+	m_pDebugHostWindow->m_Dlg.m_HostList.SetCurSel(-1);
 }
 
 void CLuaDebugHooker::OnBreakPoint(ILuaDebugClient* pClient)
