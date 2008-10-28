@@ -9,7 +9,7 @@
 #include "LuaDebugClient.h"
 #include "LuaDebugHooker.h"
 
-LRESULT CCommandDlg::OnCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
+LRESULT CCommandDlg::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
 {
 	TCHAR szCmd[1000];
 	int nRetCode;
@@ -26,5 +26,11 @@ LRESULT CCommandDlg::OnCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /
 	}
 
 	::SetWindowText(GetDlgItem(IDC_COMMAND), _T(""));
+	return 0;
+}
+
+LRESULT CCommandDlg::OnClearLog(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
+{
+	::SetWindowText(GetDlgItem(IDC_CONSOLE), _T(""));
 	return 0;
 }
