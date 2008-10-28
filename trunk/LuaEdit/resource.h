@@ -15,6 +15,7 @@
 #define IDC_HOSTLIST                    1003
 #define IDC_CUSTOM1                     1004
 #define IDC_CALLSTACK                   1004
+#define IDC_LIST1                       1005
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_WINDOW_NEXTWINDOW            32775
@@ -50,7 +51,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
 #define _APS_NEXT_COMMAND_VALUE         32815
-#define _APS_NEXT_CONTROL_VALUE         1005
+#define _APS_NEXT_CONTROL_VALUE         1006
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

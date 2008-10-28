@@ -15,6 +15,8 @@
 
 #include "SciLexerEdit.h"
 #include "LuaEditView.h"
+
+#include "LuaHost\LuaDebugInfo.h"
 #include "LuaDebugClient.h"
 
 CMainFrame::CMainFrame() : m_FileManager(&m_view)

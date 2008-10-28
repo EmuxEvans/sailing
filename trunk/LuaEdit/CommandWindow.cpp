@@ -5,7 +5,9 @@
 #include "DialogWindow.h"
 #include "CommandWindow.h"
 
+#include "LuaHost\LuaDebugInfo.h"
 #include "LuaDebugClient.h"
+
 extern ILuaDebugClient* m_pClient;
 
 LRESULT CCommandDlg::OnCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <skates\errcode.h>
 #include <skates\os.h>
@@ -26,6 +27,18 @@ extern "C" {
 
 static RPCNET_GROUP* client_grp = NULL;
 static lua_State* L = NULL;
+  int event;
+  const char *name;	/* (n) */
+  const char *namewhat;	/* (n) `global', `local', `field', `method' */
+  const char *what;	/* (S) `Lua', `C', `main', `tail' */
+  const char *source;	/* (S) */
+  int currentline;	/* (l) */
+  int nups;		/* (u) number of upvalues */
+  int linedefined;	/* (S) */
+  int lastlinedefined;	/* (S) */
+  char short_src[LUA_IDSIZE]; /* (S) */
+  /* private part */
+  int i_ci;  /* active function */
 
 static int want_return(lua_State* L)
 {
@@ -191,5 +204,33 @@ int LuaDebugHostRpc_RunCmd_impl(RPCNET_GROUP* group, const char* Cmd)
 		return ERR_NOERROR;
 
 	luaL_dostring(L, line);
+	return ERR_NOERROR;
+}
+
+int LuaDebugHostRpc_GetCallStack_impl(RPCNET_GROUP* group, LUADEBUG_CALLSTACK* stacks, int* depth)
+{
+	int i;
+	lua_Debug ar;
+
+	for(i=1; i<*depth; i++) {
+		memset(&ar, 0, sizeof(ar));
+		if(!lua_getstack(L, i, &ar)) break;
+		if(!lua_getinfo(L, "flnSu", &ar)) {
+			assert(0);
+			break;
+		}
+
+		if(ar.name) strcpy(stacks[i-1].name, ar.name);				else strcpy(stacks[i-1].name, "");
+		if(ar.namewhat) strcpy(stacks[i-1].namewhat, ar.namewhat);	else strcpy(stacks[i-1].namewhat, "");
+		if(ar.what) strcpy(stacks[i-1].what, ar.what);				else strcpy(stacks[i-1].what, "");
+		if(ar.source) strcpy(stacks[i-1].source, ar.source);		else strcpy(stacks[i-1].source, "");
+		stacks[i-1].currentline = ar.currentline;
+		stacks[i-1].nups = ar.nups;
+		stacks[i-1].linedefined = ar.linedefined;
+		stacks[i-1].lastlinedefined = ar.lastlinedefined;
+		strcpy(stacks[i-1].short_src, ar.short_src);
+	}
+
+	*depth = i - 1;
 	return ERR_NOERROR;
 }
