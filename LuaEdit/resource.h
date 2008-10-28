@@ -13,6 +13,7 @@
 #define IDC_EDIT1                       1000
 #define IDC_COMMAND                     1000
 #define IDC_LINE_NUMBER                 1000
+#define IDC_HOST_ADDRESS                1000
 #define IDC_RUN                         1001
 #define IDC_CONSOLE                     1002
 #define IDC_HOSTLIST                    1003
@@ -22,8 +23,6 @@
 #define IDC_BUTTON1                     1006
 #define ID_CANCEL                       1006
 #define IDC_GOTOLINE_STATIC             1007
-#define IDC_NETADDRESS1                 1008
-#define IDC_HOST_ADDRESS                1008
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_WINDOW_NEXTWINDOW            32775

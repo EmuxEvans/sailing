@@ -20,6 +20,8 @@
 #include "LuaEditView.h"
 #include "LuaDebugHooker.h"
 
+#include <skates\skates.h>
+
 CMainFrame::CMainFrame() : m_FileManager(&m_view)
 {
 }
@@ -298,6 +300,34 @@ LRESULT CMainFrame::OnEditPaste(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 	pView->Paste();
 	return 0;
 }
+
+class CAttachHostDlg : public CDialogImpl<CAttachHostDlg>
+{
+public:
+	enum { IDD = IDD_ATTACH_HOST };
+
+	BEGIN_MSG_MAP(CAttachHostDlg)
+		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
+		COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
+		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
+	END_MSG_MAP()
+
+	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
+		return 0;
+	}
+	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+		if(wID==IDOK) {
+			::GetWindowText(GetDlgItem(IDC_HOST_ADDRESS), m_szAddress, sizeof(m_szAddress));
+			SOCK_ADDR sa;
+			if(!sock_str2addr(m_szAddress, &sa)) return 0;
+		}
+		EndDialog(wID);
+		return 0;
+	}
+
+	TCHAR m_szAddress[100];
+};
+
 
 class CGoToLineDlg : public CDialogImpl<CGoToLineDlg>
 {
