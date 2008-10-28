@@ -60,8 +60,9 @@ ZION_API void rpcnet_group_set_subsysdata(RPCNET_GROUP* group, unsigned char id,
 
 ZION_API RPCNET_THREAD_CONTEXT* rpcnet_context_get();
 ZION_API void rpcnet_context_free(RPCNET_THREAD_CONTEXT* context);
-ZION_API RPCNET_CONNECTION* rpcnet_context_getconn(RPCNET_THREAD_CONTEXT* ctx, RPCNET_GROUP *group);
-ZION_API RPCNET_CONNECTION* rpcnet_context_getconn_force(RPCNET_THREAD_CONTEXT* ctx, RPCNET_GROUP *group);
+ZION_API RPCNET_CONNECTION* rpcnet_context_getconn(RPCNET_THREAD_CONTEXT* ctx, RPCNET_GROUP* group);
+ZION_API RPCNET_CONNECTION* rpcnet_context_getconn_force(RPCNET_THREAD_CONTEXT* ctx, RPCNET_GROUP* group);
+ZION_API int rpcnet_context_chkconn(RPCNET_THREAD_CONTEXT* ctx, RPCNET_CONNECTION* conn);
 ZION_API int rpcnet_context_freeconn(RPCNET_THREAD_CONTEXT* ctx, RPCNET_CONNECTION* conn);
 ZION_API void rpcnet_context_closeconn(RPCNET_THREAD_CONTEXT* ctx, RPCNET_CONNECTION* conn);
 ZION_API STREAM* rpcnet_context_getstream(RPCNET_THREAD_CONTEXT* context);

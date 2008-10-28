@@ -544,8 +544,15 @@ if(strcmp(func->mode, "async")==0 && func->p_list[p].flag_out!=IDL_FLAG_NONE) {
 	fprintf(fp_svr,"	_reserve_ret = %s_impl(group", func->name);
 	for(p=0; p<func->p_count; p++) fprintf(fp_svr,", %s", func->p_list[p].name);
 	fprintf(fp_svr,");\n");
-	fprintf(fp_svr,"	if(_reserve_conn==NULL && _reserve_seq==NULL) return(_reserve_ret);\n");
-	fprintf(fp_svr,"	if(_reserve_ret!=ERR_NOERROR) goto SEND_ERROR;\n");
+	fprintf(fp_svr,"	if(_reserve_conn==NULL && _reserve_seq==NULL) {\n");
+	fprintf(fp_svr,"		return(_reserve_ret);\n");
+	fprintf(fp_svr,"	}\n");
+	fprintf(fp_svr,"	if(_reserve_conn!=NULL && !rpcnet_context_chkconn(ctx, _reserve_conn)) {\n");
+	fprintf(fp_svr,"		return ERR_UNKNOWN;\n");
+	fprintf(fp_svr,"	}\n");
+	fprintf(fp_svr,"	if(_reserve_ret!=ERR_NOERROR) {\n");
+	fprintf(fp_svr,"		goto SEND_ERROR;\n");
+	fprintf(fp_svr,"	}\n");
 	fprintf(fp_svr,"\n");
 
 	fprintf(fp_svr,"	// step  5: fill parameter\n");

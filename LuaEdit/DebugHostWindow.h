@@ -11,8 +11,8 @@ public:
 		MSG_WM_INITDIALOG(OnInitDialog)
 		NOTIFY_HANDLER(IDC_CALLSTACK, NM_DBLCLK, OnCallStack_DlbClk)
 		COMMAND_ID_HANDLER(ID_DEBUG_CONTINUE, OnDebugContinue)
-		COMMAND_ID_HANDLER(ID_DEBUG_DETACHHOST, OnDebugDetachHost)
 		COMMAND_ID_HANDLER(ID_DEBUG_ATTACHHOST, OnDebugAttachHost)
+		COMMAND_ID_HANDLER(ID_DEBUG_DETACHHOST, OnDebugDetachHost)
 		CHAIN_MSG_MAP(CDialogLayout<CDebugHostDlg>)
 	END_MSG_MAP()
 
@@ -20,7 +20,6 @@ public:
 	CComboBox		m_HostList;
 
 	BEGIN_LAYOUT_MAP()
-		LAYOUT_CONTROL(ID_DEBUG_ATTACHHOST, LAYOUT_ANCHOR_RIGHT | LAYOUT_ANCHOR_TOP)
 		LAYOUT_CONTROL(ID_DEBUG_DETACHHOST, LAYOUT_ANCHOR_RIGHT | LAYOUT_ANCHOR_TOP)
 		LAYOUT_CONTROL(ID_DEBUG_CONTINUE, LAYOUT_ANCHOR_RIGHT | LAYOUT_ANCHOR_TOP)
 		LAYOUT_CONTROL(IDC_HOSTLIST, LAYOUT_ANCHOR_HORIZONTAL | LAYOUT_ANCHOR_TOP)
@@ -29,8 +28,8 @@ public:
 
 	BOOL OnInitDialog(HWND, LPARAM);
 	LRESULT OnDebugContinue(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
-	LRESULT OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnCallStack_DlbClk(int wID, LPNMHDR pNM, BOOL &bHandled);
 
 	void Update(LUADEBUG_CALLSTACK* pStack, int nCount);

@@ -313,6 +313,7 @@ public:
 	END_MSG_MAP()
 
 	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
+		::SetWindowText(GetDlgItem(IDC_HOST_ADDRESS), _T("127.0.0.1:1982"));
 		return 0;
 	}
 	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
@@ -460,12 +461,15 @@ LRESULT CMainFrame::OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /
 		return 0;
 	}
 
+	CAttachHostDlg Dlg;
+	if(Dlg.DoModal(m_hWnd)!=IDOK) return 0;
+
 	if(!CLuaDebugManager::GetDefault()->NewHooker(this)) {
 		MessageBox("Already Attached");
 		return 0;
 	}
 
-	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->Connect("127.0.0.1:1982")) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->Connect(Dlg.m_szAddress)) {
 		MessageBox("Connect Error");
 		CLuaDebugManager::GetDefault()->DeleteHooker();
 		return 0;
