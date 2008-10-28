@@ -252,6 +252,10 @@ public:
 	{
 		return SendMessage(SCI_CANPASTE, 0, 0) != 0;
 	}
+	long GetLineCount()
+	{
+		return SendMessage(SCI_GETLINECOUNT, 0, 0);
+	}
 	long GetCurrentLine()
 	{
 		long lPos = SendMessage(SCI_GETCURRENTPOS, 0, 0);

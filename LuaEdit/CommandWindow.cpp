@@ -7,8 +7,7 @@
 
 #include "LuaHost\LuaDebugInfo.h"
 #include "LuaDebugClient.h"
-
-extern ILuaDebugClient* m_pClient;
+#include "LuaDebugHooker.h"
 
 LRESULT CCommandDlg::OnCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
 {
@@ -16,14 +15,16 @@ LRESULT CCommandDlg::OnCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /
 	int nRetCode;
 	::GetWindowText(GetDlgItem(IDC_COMMAND), szCmd, sizeof(szCmd));
 
-	if(!m_pClient) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()) {
 		MessageBox(_T("Not Attach"), _T("ERROR"), MB_OK);
 		return 0;
 	}
 
-	if(!m_pClient->RunCmd(szCmd, nRetCode)) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->RunCmd(szCmd, nRetCode)) {
+		MessageBox(_T("RunCmd Error"), _T("ERROR"), MB_OK);
+		return 0;
 	}
-	::SetWindowText(GetDlgItem(IDC_COMMAND), _T(""));
 
+	::SetWindowText(GetDlgItem(IDC_COMMAND), _T(""));
 	return 0;
 }

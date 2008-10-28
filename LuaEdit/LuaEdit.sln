@@ -14,6 +14,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "appbox_lib", "..\framework\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua", "..\framework\win32\lua.vcproj", "{C6FB1CF6-9AE7-4D93-8019-61A860855418}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "idl_cc", "..\framework\win32\idl_cc.vcproj", "{A48BE179-E123-4E33-976C-DF71E3498C6A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -40,6 +42,10 @@ Global
 		{C6FB1CF6-9AE7-4D93-8019-61A860855418}.Debug|Win32.Build.0 = Debug|Win32
 		{C6FB1CF6-9AE7-4D93-8019-61A860855418}.Release|Win32.ActiveCfg = Release|Win32
 		{C6FB1CF6-9AE7-4D93-8019-61A860855418}.Release|Win32.Build.0 = Release|Win32
+		{A48BE179-E123-4E33-976C-DF71E3498C6A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A48BE179-E123-4E33-976C-DF71E3498C6A}.Debug|Win32.Build.0 = Debug|Win32
+		{A48BE179-E123-4E33-976C-DF71E3498C6A}.Release|Win32.ActiveCfg = Release|Win32
+		{A48BE179-E123-4E33-976C-DF71E3498C6A}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

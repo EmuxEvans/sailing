@@ -108,6 +108,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="$(SolutionDir)Dep\Mysql\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=extern"
 				RuntimeLibrary="2"

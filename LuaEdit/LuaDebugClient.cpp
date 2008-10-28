@@ -25,6 +25,7 @@ public:
 	virtual BOOL RunCmd(LPCSTR pCmd, int &nRetCode);
 	virtual BOOL GetCallStack(LUADEBUG_CALLSTACK* pStacks, int nSize, int &nDepth);
 
+	virtual BOOL IsConnected();
 	virtual BOOL IsStop();
 	virtual BOOL Continue();
 
@@ -161,6 +162,11 @@ BOOL CLuaDebugClient::GetCallStack(LUADEBUG_CALLSTACK* pStacks, int nSize, int &
 	if(ret!=ERR_NOERROR) return FALSE;
 
 	return TRUE;
+}
+
+BOOL CLuaDebugClient::IsConnected()
+{
+	return m_pHooker?TRUE:FALSE;
 }
 
 BOOL CLuaDebugClient::IsStop()

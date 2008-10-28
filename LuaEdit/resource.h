@@ -5,17 +5,22 @@
 #define IDD_ABOUTBOX                    100
 #define IDD_COMMAND_WINDOW              101
 #define IDD_DEBUGHOST_WINDOW            102
+#define IDD_GOTO_LINE                   103
 #define IDR_MAINFRAME                   128
 #define IDB_BITMAP1                     201
 #define IDB_ABOUT                       201
 #define IDC_EDIT1                       1000
 #define IDC_COMMAND                     1000
+#define IDC_LINE_NUMBER                 1000
 #define IDC_RUN                         1001
 #define IDC_CONSOLE                     1002
 #define IDC_HOSTLIST                    1003
 #define IDC_CUSTOM1                     1004
 #define IDC_CALLSTACK                   1004
 #define IDC_LIST1                       1005
+#define IDC_BUTTON1                     1006
+#define ID_CANCEL                       1006
+#define IDC_GOTOLINE_STATIC             1007
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_WINDOW_NEXTWINDOW            32775
@@ -44,14 +49,15 @@
 #define ID_VIEW_COMMANDWINDOW           32810
 #define ID_VIEW_COMMAND                 32811
 #define ID_EDIT_REDO32812               32812
+#define ID_EDIT_GOTO                    32815
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
-#define _APS_NEXT_COMMAND_VALUE         32815
-#define _APS_NEXT_CONTROL_VALUE         1006
+#define _APS_NEXT_COMMAND_VALUE         32818
+#define _APS_NEXT_CONTROL_VALUE         1008
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

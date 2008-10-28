@@ -23,6 +23,7 @@ public:
 	virtual BOOL RunCmd(LPCSTR pCmd, int &nRetCode) = NULL;
 	virtual BOOL GetCallStack(LUADEBUG_CALLSTACK* pStacks, int nSize, int &nDepth) = NULL;
 
+	virtual BOOL IsConnected() = NULL;
 	virtual BOOL IsStop() = NULL;
 	virtual BOOL Continue() = NULL;
 
