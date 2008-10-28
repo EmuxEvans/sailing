@@ -15,6 +15,7 @@
 #define IDC_LINE_NUMBER                 1000
 #define IDC_HOST_ADDRESS                1000
 #define IDC_RUN                         1001
+#define IDC_RUNCMD                      1001
 #define IDC_CONSOLE                     1002
 #define IDC_HOSTLIST                    1003
 #define IDC_CUSTOM1                     1004
@@ -22,6 +23,8 @@
 #define IDC_LIST1                       1005
 #define IDC_BUTTON1                     1006
 #define ID_CANCEL                       1006
+#define IDC_CLEAR_LOG                   1006
+#define IDC_CLRLOG                      1006
 #define IDC_GOTOLINE_STATIC             1007
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
@@ -52,7 +55,6 @@
 #define ID_VIEW_COMMAND                 32811
 #define ID_EDIT_REDO32812               32812
 #define ID_EDIT_GOTO                    32815
-#define ID_BUTTON32818                  32818
 
 // Next default values for new objects
 // 
