@@ -136,6 +136,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="include;..\framework_dep\wtl\include;..\framework\inc"
 				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG;PLAT_WIN;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS"
 				ExceptionHandling="0"
@@ -216,6 +217,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LuaDebugHooker.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LuaEdit.cpp"
 				>
 			</File>
@@ -282,6 +287,10 @@
 			</File>
 			<File
 				RelativePath=".\LuaDebugClient.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LuaDebugHooker.h"
 				>
 			</File>
 			<File
@@ -548,6 +557,14 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\LuaHost\LuaDebugHostRpc.clt.c"
@@ -560,9 +577,21 @@
 						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\LuaHost\LuaDebugHostRpc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LuaHost\LuaDebugInfo.h"
 				>
 			</File>
 		</Filter>

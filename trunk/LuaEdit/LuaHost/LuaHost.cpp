@@ -27,18 +27,6 @@ extern "C" {
 
 static RPCNET_GROUP* client_grp = NULL;
 static lua_State* L = NULL;
-  int event;
-  const char *name;	/* (n) */
-  const char *namewhat;	/* (n) `global', `local', `field', `method' */
-  const char *what;	/* (S) `Lua', `C', `main', `tail' */
-  const char *source;	/* (S) */
-  int currentline;	/* (l) */
-  int nups;		/* (u) number of upvalues */
-  int linedefined;	/* (S) */
-  int lastlinedefined;	/* (S) */
-  char short_src[LUA_IDSIZE]; /* (S) */
-  /* private part */
-  int i_ci;  /* active function */
 
 static int want_return(lua_State* L)
 {
@@ -181,7 +169,7 @@ int LuaDebugHostRpc_Detach_impl(RPCNET_GROUP* group)
 		printf("@@LuaDebugHostRpc_Detach_impl(): client_grp==NULL\n");
 		return ERR_NOERROR;
 	}
-	ret = LuaDebugClientRpc_Attach(client_grp);
+	ret = LuaDebugClientRpc_Detach(client_grp);
 	if(ret!=ERR_NOERROR) {
 		printf("@@LuaDebugClientRpc_Attach return %d\n", ret);
 	}

@@ -18,6 +18,8 @@ public:
 	BOOL IsNewFile(int nIndex);
 	LPCTSTR GetFileName(int nIndex);
 
+	void GotoLine(int nLine, int nIndex=-1);
+
 protected:
 	CTabView* m_pTabView;
 };

@@ -62,6 +62,7 @@ public:
 		COMMAND_ID_HANDLER(ID_EDIT_CUT, OnEditCut)
 		COMMAND_ID_HANDLER(ID_EDIT_COPY, OnEditCopy)
 		COMMAND_ID_HANDLER(ID_EDIT_PASTE, OnEditPaste)
+		COMMAND_ID_HANDLER(ID_EDIT_GOTO, OnEditGoTo)
 
 		COMMAND_ID_HANDLER(ID_BOOKMARK_TOGGLE, OnBookmarkToggle)
 		COMMAND_ID_HANDLER(ID_BOOKMARK_NEXT, OnBookmarkNext)
@@ -108,6 +109,7 @@ public:
 	LRESULT OnEditCut(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnEditCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnEditPaste(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnEditGoTo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 	LRESULT OnBookmarkToggle(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnBookmarkNext(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

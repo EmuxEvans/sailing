@@ -5,6 +5,9 @@
 #include "stdafx.h"
 #include "resource.h"
 
+#include "LuaHost\LuaDebugInfo.h"
+#include "LuaDebugClient.h"
+
 #include "AboutDlg.h"
 #include "DropFileHandler.h"
 #include "FileManager.h"
@@ -15,9 +18,7 @@
 
 #include "SciLexerEdit.h"
 #include "LuaEditView.h"
-
-#include "LuaHost\LuaDebugInfo.h"
-#include "LuaDebugClient.h"
+#include "LuaDebugHooker.h"
 
 CMainFrame::CMainFrame() : m_FileManager(&m_view)
 {
@@ -146,6 +147,14 @@ LRESULT CMainFrame::OnNCDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPara
 	//	sstate::CStgRegistry reg(key.Detach());
 	//	m_stateMgr.Store(reg);
 	//}
+
+	if(CLuaDebugManager::GetDefault()->GetDebugHooker()) {
+		if(CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->IsStop()) {
+			CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->Continue();
+		}
+		CLuaDebugManager::GetDefault()->DeleteHooker();
+	}
+
 	bHandled = FALSE;
 	return 0;
 }
@@ -290,6 +299,71 @@ LRESULT CMainFrame::OnEditPaste(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 	return 0;
 }
 
+class CGoToLineDlg : public CDialogImpl<CGoToLineDlg>
+{
+public:
+	enum { IDD = IDD_GOTO_LINE };
+
+	BEGIN_MSG_MAP(CGoToLineDlg)
+		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
+		COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
+		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
+	END_MSG_MAP()
+
+	CGoToLineDlg(int nLineMax, int nLineNumber) {
+		m_nLineMax = nLineMax;
+		m_nLineNumber = nLineNumber;
+	}
+
+// Handler prototypes (uncomment arguments if needed):
+//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+//	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+//	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
+
+	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
+		char szTmp[100];
+		sprintf(szTmp, "&Line number (1-%d):", m_nLineMax);
+		::SetWindowTextA(GetDlgItem(IDC_GOTOLINE_STATIC), szTmp);
+		sprintf(szTmp, "%d", m_nLineNumber);
+		::SetWindowTextA(GetDlgItem(IDC_LINE_NUMBER), szTmp);
+		return 0;
+	}
+	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+		if(wID==IDOK) {
+			char szTmp[100];
+			::GetWindowTextA(GetDlgItem(IDC_LINE_NUMBER), szTmp, sizeof(szTmp));
+			m_nLineNumber = atoi(szTmp);
+			if(m_nLineNumber<1 || m_nLineNumber>m_nLineMax) {
+				MessageBox(_T("Invalid line number"), _T("Error"), MB_OK);
+				return 0;
+			}
+		}
+		EndDialog(wID);
+		return 0;
+	}
+
+	int m_nLineMax;
+	int m_nLineNumber;
+};
+
+LRESULT CMainFrame::OnEditGoTo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	int nLineNumber, nLineMax;
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_view.GetPageData(m_view.GetActivePage());
+
+	nLineMax = (int)pView->GetLineCount();
+	nLineNumber = (int)pView->GetCurrentLine();
+
+	CGoToLineDlg Dlg(nLineMax, nLineNumber);
+	if(Dlg.DoModal(m_hWnd)!=IDOK) return 0;
+	pView->GotoLine(Dlg.m_nLineNumber);
+	return 0;
+}
+
 LRESULT CMainFrame::OnBookmarkToggle(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
 	if(m_view.GetActivePage()<0)
@@ -349,68 +423,50 @@ LRESULT CMainFrame::OnViewStatusBar(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*h
 	return 0;
 }
 
-class CLuaDebugHooker : public ILuaDebugHooker
-{
-public:
-	virtual void OnConnect(ILuaDebugClient* pClient)
-	{
-	}
-	virtual void OnDisconnect(ILuaDebugClient* pClient)
-	{
-	}
-	virtual void OnBreakPoint(ILuaDebugClient* pClient)
-	{
-	}
-	virtual void OnDebugMessage(ILuaDebugClient* pClient, int nType, const char* pMsg)
-	{
-		m_pCommandWindow->m_Dlg.Print(pMsg);
-		m_pCommandWindow->m_Dlg.Print("\n");
-	}
-
-	CDebugHostWindow*	m_pDebugHostWindow;
-	CCommandWindow*		m_pCommandWindow;
-
-};
-
-ILuaDebugClient* m_pClient = NULL;
-CLuaDebugHooker m_LuaDebugHooker;
-
 LRESULT CMainFrame::OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	if(m_pClient) {
+	if(CLuaDebugManager::GetDefault()->GetDebugHooker()) {
 		MessageBox("Already Attached");
 		return 0;
 	}
-	m_LuaDebugHooker.m_pDebugHostWindow = &m_DebugHostWindow;
-	m_LuaDebugHooker.m_pCommandWindow = &m_CommandWindow;
-	m_pClient = CreateLuaDebugClient();
-	m_pClient->Connect("127.0.0.1:1982", &m_LuaDebugHooker);
+
+	if(!CLuaDebugManager::GetDefault()->NewHooker(this)) {
+		MessageBox("Already Attached");
+		return 0;
+	}
+
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->Connect("127.0.0.1:1982", CLuaDebugManager::GetDefault()->GetDebugHooker())) {
+		MessageBox("Connect Error");
+		CLuaDebugManager::GetDefault()->DeleteHooker();
+		return 0;
+	}
+
 	return 0;
 }
 
 LRESULT CMainFrame::OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	if(!m_pClient) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()) {
 		MessageBox("Not Attach");
 		return 0;
 	}
-	m_pClient->Disconnect();
-	m_pClient->Release();
-	m_pClient = NULL;
+	CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->Disconnect();
+	CLuaDebugManager::GetDefault()->DeleteHooker();
 	return 0;
 }
 
 LRESULT CMainFrame::OnDebugContinue(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	if(!m_pClient) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()) {
 		MessageBox("Not Attach");
 		return 0;
 	}
-	if(!m_pClient->IsStop()) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->IsStop()) {
 		MessageBox("Not Stop");
 		return 0;
 	}
-	m_pClient->Continue();
+	CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->Continue();
+	m_DebugHostWindow.m_Dlg.Update(NULL, 0);
 	return 0;
 }
 

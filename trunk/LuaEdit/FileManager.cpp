@@ -214,3 +214,11 @@ LPCTSTR CFileManager::GetFileName(int nIndex)
 	pView = (CLuaEditView*)m_pTabView->GetPageData(nIndex);
 	return pView->GetFileName();
 }
+
+void CFileManager::GotoLine(int nLine, int nIndex)
+{
+	if(nIndex<0) nIndex = m_pTabView->GetActivePage();
+	CLuaEditView* pView;
+	pView = (CLuaEditView*)m_pTabView->GetPageData(nIndex);
+	return pView->GotoLine(nLine);
+}
