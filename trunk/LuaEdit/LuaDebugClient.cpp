@@ -116,6 +116,10 @@ BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, ILuaDebugHooker* pHooker)
 
 	if(sock_str2addr(pHostEP, &sa)==NULL)
 		return FALSE;
+
+	if(m_pHost)
+		return FALSE;
+
 	pHost = rpcnet_getgroup(&sa);
 	if(pHost==NULL)
 		return FALSE;
@@ -134,6 +138,9 @@ BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, ILuaDebugHooker* pHooker)
 
 BOOL CLuaDebugClient::Disconnect()
 {
+	if(!m_pHost)
+		return FALSE;
+
 	threadpool_s();
 	LuaDebugHostRpc_Detach(m_pHost);
 	threadpool_e();

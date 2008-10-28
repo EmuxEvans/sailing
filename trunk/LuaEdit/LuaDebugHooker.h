@@ -30,6 +30,8 @@ public:
 		return m_nDepth;
 	}
 
+	BOOL Connect(const char* pEP);
+	BOOL Disconnect();
 	BOOL Continue();
 	BOOL GoStack(int nIndex);
 
@@ -38,6 +40,7 @@ private:
 	ILuaDebugClient*	m_pClient;
 	LUADEBUG_CALLSTACK	m_Stack[30];
 	int					m_nDepth;
+	int					m_bQuit;
 };
 
 class CLuaDebugManager

@@ -435,7 +435,7 @@ LRESULT CMainFrame::OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /
 		return 0;
 	}
 
-	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->Connect("127.0.0.1:1982", CLuaDebugManager::GetDefault()->GetDebugHooker())) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->Connect("127.0.0.1:1982")) {
 		MessageBox("Connect Error");
 		CLuaDebugManager::GetDefault()->DeleteHooker();
 		return 0;
@@ -450,7 +450,7 @@ LRESULT CMainFrame::OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /
 		MessageBox("Not Attach");
 		return 0;
 	}
-	CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->Disconnect();
+	CLuaDebugManager::GetDefault()->GetDebugHooker()->Disconnect();
 	CLuaDebugManager::GetDefault()->DeleteHooker();
 	return 0;
 }
