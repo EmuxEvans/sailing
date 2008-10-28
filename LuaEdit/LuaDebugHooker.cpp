@@ -17,25 +17,32 @@ static CLuaDebugHooker*		pDefaultHooker = NULL;
 static CDebugHostWindow*	m_pDebugHostWindow = NULL;
 static CCommandWindow*		m_pCommandWindow = NULL;
 static CFileManager*		m_pFileManager = NULL;
+static char					m_szHostEP[100] = "";
 
 CLuaDebugHooker::CLuaDebugHooker(CLuaDebugManager* pManager)
 {
 	m_pManager = pManager;
 	m_pClient = CreateLuaDebugClient();
+	m_bQuit = FALSE;
 }
 
 CLuaDebugHooker::~CLuaDebugHooker()
 {
+	m_bQuit = TRUE;
 	if(m_pClient->IsConnected()) m_pClient->Disconnect();
 	m_pClient->Release();
 }
 
 void CLuaDebugHooker::OnConnect(ILuaDebugClient* pClient)
 {
+	m_pDebugHostWindow->m_Dlg.m_HostList.AddString(m_szHostEP);
+	m_pDebugHostWindow->m_Dlg.m_HostList.SetCurSel(0);
 }
 
 void CLuaDebugHooker::OnDisconnect(ILuaDebugClient* pClient)
 {
+	if(m_bQuit) return;
+	m_pDebugHostWindow->m_Dlg.m_HostList.DeleteString(0);
 }
 
 void CLuaDebugHooker::OnBreakPoint(ILuaDebugClient* pClient)
@@ -49,6 +56,20 @@ void CLuaDebugHooker::OnDebugMessage(ILuaDebugClient* pClient, int nType, const 
 {
 	m_pCommandWindow->m_Dlg.Print(pMsg);
 	m_pCommandWindow->m_Dlg.Print("\n");
+}
+
+BOOL CLuaDebugHooker::Connect(const char* pEP)
+{
+	BOOL bRet;
+	strcpy(m_szHostEP, pEP);
+	bRet = m_pClient->Connect(pEP, this);
+	return bRet;
+}
+
+BOOL CLuaDebugHooker::Disconnect()
+{
+	if(m_pClient->IsStop()) m_pClient->Continue();
+	return m_pClient->Disconnect();
 }
 
 BOOL CLuaDebugHooker::Continue()

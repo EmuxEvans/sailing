@@ -12,8 +12,9 @@
 
 BOOL CDebugHostDlg::OnInitDialog(HWND, LPARAM)
 {
-	// ...
 	m_CallStack.m_hWnd = GetDlgItem(IDC_CALLSTACK);
+	m_HostList.m_hWnd = GetDlgItem(IDC_HOSTLIST);
+
 	m_CallStack.AddColumn(_T(""), 0);
 	m_CallStack.AddColumn(_T("Name"), 1);
 	m_CallStack.AddColumn(_T("Source"), 2);
@@ -40,6 +41,22 @@ LRESULT CDebugHostDlg::OnDebugContinue(WORD /*wNotifyCode*/, WORD /*wID*/, HWND 
 		return 0;
 	}
 	CLuaDebugManager::GetDefault()->GetDebugHooker()->Continue();
+	return 0;
+}
+
+LRESULT CDebugHostDlg::OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()) {
+		MessageBox("Not Attach");
+		return 0;
+	}
+	CLuaDebugManager::GetDefault()->GetDebugHooker()->Disconnect();
+	CLuaDebugManager::GetDefault()->DeleteHooker();
+	return 0;
+}
+
+LRESULT CDebugHostDlg::OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
 	return 0;
 }
 

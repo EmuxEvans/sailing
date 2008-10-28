@@ -6,6 +6,7 @@
 #define IDD_COMMAND_WINDOW              101
 #define IDD_DEBUGHOST_WINDOW            102
 #define IDD_GOTO_LINE                   103
+#define IDD_ATTACH_HOST                 104
 #define IDR_MAINFRAME                   128
 #define IDB_BITMAP1                     201
 #define IDB_ABOUT                       201
@@ -21,6 +22,8 @@
 #define IDC_BUTTON1                     1006
 #define ID_CANCEL                       1006
 #define IDC_GOTOLINE_STATIC             1007
+#define IDC_NETADDRESS1                 1008
+#define IDC_HOST_ADDRESS                1008
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_WINDOW_NEXTWINDOW            32775
@@ -57,7 +60,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
 #define _APS_NEXT_COMMAND_VALUE         32818
-#define _APS_NEXT_CONTROL_VALUE         1008
+#define _APS_NEXT_CONTROL_VALUE         1009
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

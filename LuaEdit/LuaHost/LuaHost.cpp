@@ -171,7 +171,7 @@ int LuaDebugHostRpc_Detach_impl(RPCNET_GROUP* group)
 	}
 	ret = LuaDebugClientRpc_Detach(client_grp);
 	if(ret!=ERR_NOERROR) {
-		printf("@@LuaDebugClientRpc_Attach return %d\n", ret);
+		printf("@@LuaDebugClientRpc_Detach return %d\n", ret);
 	}
 	client_grp = NULL;
 	return ret;
@@ -182,7 +182,7 @@ int LuaDebugHostRpc_RunCmd_impl(RPCNET_GROUP* group, const char* Cmd)
 {
 	char line[20*1024];
 
-	printf("@@LuaDebugHostRpc_RunCmd_impl : [[[%s\n]]]", Cmd);
+	printf("@@LuaDebugHostRpc_RunCmd_impl : [[[%s]]]\n", Cmd);
 
 	strcpy(line, Cmd);
 	strtrim(line);
