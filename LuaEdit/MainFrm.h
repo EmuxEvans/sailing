@@ -62,6 +62,11 @@ public:
 		COMMAND_ID_HANDLER(ID_EDIT_CUT, OnEditCut)
 		COMMAND_ID_HANDLER(ID_EDIT_COPY, OnEditCopy)
 		COMMAND_ID_HANDLER(ID_EDIT_PASTE, OnEditPaste)
+
+		COMMAND_ID_HANDLER(ID_EDIT_FIND, OnEditFind)
+		COMMAND_ID_HANDLER(ID_EDIT_FINDNEXT, OnEditFindNext)
+		COMMAND_ID_HANDLER(ID_EDIT_REPLACE, OnEditReplace)
+
 		COMMAND_ID_HANDLER(ID_EDIT_GOTO, OnEditGoTo)
 
 		COMMAND_ID_HANDLER(ID_BOOKMARK_TOGGLE, OnBookmarkToggle)
@@ -75,6 +80,8 @@ public:
 
 		COMMAND_ID_HANDLER(ID_DEBUG_ATTACHHOST, OnDebugAttachHost)
 		COMMAND_ID_HANDLER(ID_DEBUG_DETACHHOST, OnDebugDetachHost)
+		COMMAND_ID_HANDLER(ID_DEBUG_BEGINHOST, OnDebugBeginHost)
+		COMMAND_ID_HANDLER(ID_DEBUG_HOSTSETTING, OnDebugHostSetting)
 		COMMAND_ID_HANDLER(ID_DEBUG_CONTINUE, OnDebugContinue)
 
 		COMMAND_ID_HANDLER(ID_APP_ABOUT, OnAppAbout)
@@ -109,6 +116,11 @@ public:
 	LRESULT OnEditCut(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnEditCopy(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnEditPaste(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+
+	LRESULT OnEditFind(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnEditFindNext(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnEditReplace(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+
 	LRESULT OnEditGoTo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 	LRESULT OnBookmarkToggle(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
@@ -120,6 +132,8 @@ public:
 
 	LRESULT OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnDebugBeginHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnDebugHostSetting(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnDebugContinue(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
 	LRESULT OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
