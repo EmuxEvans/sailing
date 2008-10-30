@@ -301,81 +301,33 @@ LRESULT CMainFrame::OnEditPaste(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 	return 0;
 }
 
-class CAttachHostDlg : public CDialogImpl<CAttachHostDlg>
+LRESULT CMainFrame::OnEditFind(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-public:
-	enum { IDD = IDD_ATTACH_HOST };
-
-	BEGIN_MSG_MAP(CAttachHostDlg)
-		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
-		COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
-		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
-	END_MSG_MAP()
-
-	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
-		::SetWindowText(GetDlgItem(IDC_HOST_ADDRESS), _T("127.0.0.1:1982"));
+	if(m_view.GetActivePage()<0)
 		return 0;
-	}
-	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
-		if(wID==IDOK) {
-			::GetWindowText(GetDlgItem(IDC_HOST_ADDRESS), m_szAddress, sizeof(m_szAddress));
-			SOCK_ADDR sa;
-			if(!sock_str2addr(m_szAddress, &sa)) return 0;
-		}
-		EndDialog(wID);
-		return 0;
-	}
 
-	TCHAR m_szAddress[100];
-};
+	CFindDlg Dlg;
+	Dlg.DoModal(m_hWnd);
+	return 0;
+}
 
-
-class CGoToLineDlg : public CDialogImpl<CGoToLineDlg>
+LRESULT CMainFrame::OnEditFindNext(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-public:
-	enum { IDD = IDD_GOTO_LINE };
-
-	BEGIN_MSG_MAP(CGoToLineDlg)
-		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
-		COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
-		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
-	END_MSG_MAP()
-
-	CGoToLineDlg(int nLineMax, int nLineNumber) {
-		m_nLineMax = nLineMax;
-		m_nLineNumber = nLineNumber;
-	}
-
-// Handler prototypes (uncomment arguments if needed):
-//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
-//	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
-//	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
-
-	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
-		char szTmp[100];
-		sprintf(szTmp, "&Line number (1-%d):", m_nLineMax);
-		::SetWindowTextA(GetDlgItem(IDC_GOTOLINE_STATIC), szTmp);
-		sprintf(szTmp, "%d", m_nLineNumber);
-		::SetWindowTextA(GetDlgItem(IDC_LINE_NUMBER), szTmp);
+	if(m_view.GetActivePage()<0)
 		return 0;
-	}
-	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
-		if(wID==IDOK) {
-			char szTmp[100];
-			::GetWindowTextA(GetDlgItem(IDC_LINE_NUMBER), szTmp, sizeof(szTmp));
-			m_nLineNumber = atoi(szTmp);
-			if(m_nLineNumber<1 || m_nLineNumber>m_nLineMax) {
-				MessageBox(_T("Invalid line number"), _T("Error"), MB_OK);
-				return 0;
-			}
-		}
-		EndDialog(wID);
-		return 0;
-	}
 
-	int m_nLineMax;
-	int m_nLineNumber;
-};
+	return 0;
+}
+
+LRESULT CMainFrame::OnEditReplace(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	if(m_view.GetActivePage()<0)
+		return 0;
+
+	CRelaceDlg Dlg;
+	Dlg.DoModal(m_hWnd);
+	return 0;
+}
 
 LRESULT CMainFrame::OnEditGoTo(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
@@ -486,6 +438,18 @@ LRESULT CMainFrame::OnDebugDetachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /
 	}
 	CLuaDebugManager::GetDefault()->GetDebugHooker()->Disconnect();
 	CLuaDebugManager::GetDefault()->DeleteHooker();
+	return 0;
+}
+
+LRESULT CMainFrame::OnDebugBeginHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	return 0;
+}
+
+LRESULT CMainFrame::OnDebugHostSetting(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	CHostSettingDlg Dlg;
+	Dlg.DoModal(m_hWnd);
 	return 0;
 }
 
