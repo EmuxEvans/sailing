@@ -22,7 +22,7 @@ CMD_CLT login_callback(
 );
 CMD_SVR create_player(
     string["$$<=CUBE_NICK_LEN+1"] nick[],
-    string["$$<=CUBE_ROLE_PROPERTY_LEN+1"] role[]
+    string["$$<=CUBE_ROLEINFO_LEN+1"] role[]
 );
 CMD_CLT create_player_callback(
     int     ret
@@ -41,14 +41,31 @@ CMD_SVR chat(
 CMD_CLT chat_callback(
 );
 
+CMD_SVR roleinfo_set(
+    string["$$<=CUBE_WAREHOUSE_LEN+1"] value[]
+);
+CMD_SVR roleinfo_get(
+);
+CMD_CLT roleinfo_callback(
+    string value[]
+);
+
+CMD_SVR warehouse_set(
+    string["$$<=CUBE_WAREHOUSE_LEN+1"] value[]
+);
 CMD_SVR warehouse_get(
 );
 CMD_CLT warehouse_callback(
+    string value[]
 );
 
+CMD_SVR equipment_set(
+    string["$$<=CUBE_EQUIPMENT_LEN+1"] value[]
+);
 CMD_SVR equipment_get(
 );
 CMD_CLT equipment_callback(
+    string value[]
 );
 
 // ROOM : room
@@ -63,8 +80,11 @@ CMD_CLT leave_callback(
 );
 
 CMD_SVR chat(
+    string["$$<=300+1"] what[]
 );
 CMD_CLT chat_callback(
+	string nick[],
+	string what[]
 );
 
 CMD_SVR walk(

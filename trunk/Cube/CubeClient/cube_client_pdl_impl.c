@@ -17,11 +17,15 @@ void lobby_chat_callback(CLT_USER_CTX* user_ctx)
 {
 }
 
-void lobby_warehouse_callback(CLT_USER_CTX* user_ctx)
+void lobby_roleinfo_callback(CLT_USER_CTX* user_ctx, const char* value)
 {
 }
 
-void lobby_equipment_callback(CLT_USER_CTX* user_ctx)
+void lobby_warehouse_callback(CLT_USER_CTX* user_ctx, const char* value)
+{
+}
+
+void lobby_equipment_callback(CLT_USER_CTX* user_ctx, const char* value)
 {
 }
 
@@ -37,7 +41,7 @@ void room_leave_callback(CLT_USER_CTX* user_ctx)
 {
 }
 
-void room_chat_callback(CLT_USER_CTX* user_ctx)
+void room_chat_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* what)
 {
 }
 

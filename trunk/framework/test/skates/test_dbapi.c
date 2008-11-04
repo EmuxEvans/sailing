@@ -6,6 +6,7 @@
 #include <skates/os.h>
 #include <skates/dbapi.h>
 #include <skates/mempool.h>
+#include <skates/misc.h>
 
 static void do_test(const char* connstr);
 
@@ -41,6 +42,9 @@ void do_test(const char* connstr)
 
 		printf(">");
 		gets(line);
+		strtrim(line);
+		strltrim(line);
+
 		if(strcmp(line, "quit")==0) break;
 		if(sscanf(line, "%s", cmd)!=1) continue;
 

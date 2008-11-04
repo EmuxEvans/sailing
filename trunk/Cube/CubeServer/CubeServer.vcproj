@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;CUBESERVER_EXPORTS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;CUBESERVER_EXPORTS;MODULE_NAME=\&quot;cube\&quot;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -206,6 +206,10 @@
 				RelativePath=".\cube_pdl.CubeServer.h"
 				>
 			</File>
+			<File
+				RelativePath=".\cube_server.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -218,6 +222,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\cube_db.sql"
+			>
+		</File>
+		<File
 			RelativePath="..\cube_pdl.pdl"
 			>
 			<FileConfiguration
@@ -225,7 +233,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="del /Q $(ProjectDir)$(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(ProjectDir)$(InputName).$(ProjectName).c&#x0D;&#x0A;cd &quot;$(InputDir)&quot;&#x0D;&#x0A;copy $(InputName).pdl $(InputName).$(ProjectName).pdl&#x0D;&#x0A;..\framework\$(ConfigurationName)-$(PlatformName)\pdl_cc CMD_SVR SVR $(InputName).$(ProjectName).pdl&#x0D;&#x0A;copy $(InputName).$(ProjectName).h $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).c $(ProjectDir)&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).pdl&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).c"
+					CommandLine="del /Q $(ProjectDir)$(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(ProjectDir)$(InputName).$(ProjectName).c&#x0D;&#x0A;cd &quot;$(InputDir)&quot;&#x0D;&#x0A;copy $(InputName).pdl $(InputName).$(ProjectName).pdl&#x0D;&#x0A;..\framework\$(ConfigurationName)-$(PlatformName)\pdl_cc CMD_SVR SVR $(InputName).$(ProjectName).pdl&#x0D;&#x0A;copy $(InputName).$(ProjectName).h $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).c $(ProjectDir)&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).pdl&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).c&#x0D;&#x0A;"
 					Outputs="$(InputName).$(ProjectName).h;$(InputName).$(ProjectName).c"
 				/>
 			</FileConfiguration>
@@ -234,7 +242,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="del /Q $(ProjectDir)$(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(ProjectDir)$(InputName).$(ProjectName).c&#x0D;&#x0A;cd &quot;$(InputDir)&quot;&#x0D;&#x0A;copy $(InputName).pdl $(InputName).$(ProjectName).pdl&#x0D;&#x0A;..\framework\$(ConfigurationName)-$(PlatformName)\pdl_cc CMD_SVR CLT $(InputName).$(ProjectName).pdl&#x0D;&#x0A;copy $(InputName).$(ProjectName).h $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).c $(ProjectDir)&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).pdl&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).c"
+					CommandLine="del /Q $(ProjectDir)$(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(ProjectDir)$(InputName).$(ProjectName).c&#x0D;&#x0A;cd &quot;$(InputDir)&quot;&#x0D;&#x0A;copy $(InputName).pdl $(InputName).$(ProjectName).pdl&#x0D;&#x0A;..\framework\$(ConfigurationName)-$(PlatformName)\pdl_cc CMD_SVR CLT $(InputName).$(ProjectName).pdl&#x0D;&#x0A;copy $(InputName).$(ProjectName).h $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).c $(ProjectDir)&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).pdl&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).c&#x0D;&#x0A;"
 					Outputs="$(InputName).$(ProjectName).h;$(InputName).$(ProjectName).c"
 				/>
 			</FileConfiguration>

@@ -227,5 +227,5 @@ int _set_errcode(DBAPI_SQLITE* conn, int errcode)
 {
 	conn->errcode = errcode;
 	conn->errmsg[0] = '\0';
-	return 0;
+	return errcode;
 }
