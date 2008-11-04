@@ -16,6 +16,7 @@ int room_leave_callback_stub(CLT_USER_CTX* ctx, STREAM* stream);
 int room_chat_callback_stub(CLT_USER_CTX* ctx, STREAM* stream);
 int room_walk_callback_stub(CLT_USER_CTX* ctx, STREAM* stream);
 int room_status_callback_stub(CLT_USER_CTX* ctx, STREAM* stream);
+int room_terminate_stub(CLT_USER_CTX* ctx, STREAM* stream);
 // Define command : END
 
 // extern dispatcher function : BEGIN
@@ -39,6 +40,7 @@ int CLT_Dispatcher(CLT_USER_CTX* ctx, STREAM* stream)
 	case 0x00050000|ROOM_FILTER_ID:	return room_chat_callback_stub(ctx, stream);
 	case 0x00070000|ROOM_FILTER_ID:	return room_walk_callback_stub(ctx, stream);
 	case 0x000b0000|ROOM_FILTER_ID:	return room_status_callback_stub(ctx, stream);
+	case 0x000c0000|ROOM_FILTER_ID:	return room_terminate_stub(ctx, stream);
 	default: return ERR_UNKNOWN;
 	}
 }
@@ -298,7 +300,7 @@ int lobby_roomlist_callback_stub(CLT_USER_CTX* user_ctx, STREAM* stream)
 	return ERR_NOERROR;
 }
 
-int lobby_chat(CLT_USER_CTX* user_ctx)
+int lobby_chat(CLT_USER_CTX* user_ctx, const char* what)
 {
 	// define
 	struct {
@@ -327,6 +329,24 @@ int lobby_chat(CLT_USER_CTX* user_ctx)
 	}
 
 	// fill
+    // len [what]
+	__reserve.len = strlen(what)+1;
+    // check rule [what]
+    if(!(__reserve.len<=300+1)) {
+        return(ERR_INVALID_DATA);
+    }
+    // write len [what]
+	__reserve.ret = stream_put(__reserve.stream, &__reserve.len, sizeof(short));
+	if(__reserve.ret!=ERR_NOERROR) {
+		stream_destroy(__reserve.stream);
+		return __reserve.ret;
+	}
+    // write data [what]
+	__reserve.ret = stream_put(__reserve.stream, what, sizeof(char)*(__reserve.len));
+	if(__reserve.ret!=ERR_NOERROR) {
+		stream_destroy(__reserve.stream);
+		return __reserve.ret;
+	}
 
 	// send
 	__reserve.ret = CLT_Send(user_ctx, __reserve.stream);
@@ -342,20 +362,55 @@ int lobby_chat(CLT_USER_CTX* user_ctx)
 int lobby_chat_callback_stub(CLT_USER_CTX* user_ctx, STREAM* stream)
 {
 	// define
+	struct {
+		char* nick;
+		char* what;
+	} __reserve;
 	int len, ret;
 
 	// init
+	memset(&__reserve, 0, sizeof(__reserve));
 	len = 0;
 	ret = 0;
 
 	// read from stream
+	// get [nick] len
+	len = 0;
+	ret = stream_get(stream, &len, sizeof(short));
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	// alloc memory [nick]
+	ret = CLT_Alloc(user_ctx, stream, (void**)&__reserve.nick, sizeof(char)*(len+1));
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	// get data [nick]
+	ret = stream_get(stream, __reserve.nick, sizeof(char)*len);
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	__reserve.nick[len-1] = '\0';
+	// get [what] len
+	len = 0;
+	ret = stream_get(stream, &len, sizeof(short));
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	// alloc memory [what]
+	ret = CLT_Alloc(user_ctx, stream, (void**)&__reserve.what, sizeof(char)*(len+1));
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	// get data [what]
+	ret = stream_get(stream, __reserve.what, sizeof(char)*len);
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	__reserve.what[len-1] = '\0';
 
 	// call
-	lobby_chat_callback(user_ctx);
+	lobby_chat_callback(user_ctx, __reserve.nick, __reserve.what);
 
 	// free memory
+	CLT_Free(user_ctx, __reserve.what);
+	CLT_Free(user_ctx, __reserve.nick);
 	// end
 	return ERR_NOERROR;
+
+ON_ERROR:
+	if(__reserve.what!=NULL) CLT_Free(user_ctx, __reserve.what);
+	if(__reserve.nick!=NULL) CLT_Free(user_ctx, __reserve.nick);
+
+	return ret;
 }
 
 int lobby_roleinfo_set(CLT_USER_CTX* user_ctx, const char* value)
@@ -948,7 +1003,7 @@ ON_ERROR:
 	return ret;
 }
 
-int room_walk(CLT_USER_CTX* user_ctx)
+int room_walk(CLT_USER_CTX* user_ctx, const char* pos)
 {
 	// define
 	struct {
@@ -977,6 +1032,24 @@ int room_walk(CLT_USER_CTX* user_ctx)
 	}
 
 	// fill
+    // len [pos]
+	__reserve.len = strlen(pos)+1;
+    // check rule [pos]
+    if(!(__reserve.len<=CUBE_ROOM_POSITION_LEN+1)) {
+        return(ERR_INVALID_DATA);
+    }
+    // write len [pos]
+	__reserve.ret = stream_put(__reserve.stream, &__reserve.len, sizeof(short));
+	if(__reserve.ret!=ERR_NOERROR) {
+		stream_destroy(__reserve.stream);
+		return __reserve.ret;
+	}
+    // write data [pos]
+	__reserve.ret = stream_put(__reserve.stream, pos, sizeof(char)*(__reserve.len));
+	if(__reserve.ret!=ERR_NOERROR) {
+		stream_destroy(__reserve.stream);
+		return __reserve.ret;
+	}
 
 	// send
 	__reserve.ret = CLT_Send(user_ctx, __reserve.stream);
@@ -992,20 +1065,55 @@ int room_walk(CLT_USER_CTX* user_ctx)
 int room_walk_callback_stub(CLT_USER_CTX* user_ctx, STREAM* stream)
 {
 	// define
+	struct {
+		char* nick;
+		char* pos;
+	} __reserve;
 	int len, ret;
 
 	// init
+	memset(&__reserve, 0, sizeof(__reserve));
 	len = 0;
 	ret = 0;
 
 	// read from stream
+	// get [nick] len
+	len = 0;
+	ret = stream_get(stream, &len, sizeof(short));
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	// alloc memory [nick]
+	ret = CLT_Alloc(user_ctx, stream, (void**)&__reserve.nick, sizeof(char)*(len+1));
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	// get data [nick]
+	ret = stream_get(stream, __reserve.nick, sizeof(char)*len);
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	__reserve.nick[len-1] = '\0';
+	// get [pos] len
+	len = 0;
+	ret = stream_get(stream, &len, sizeof(short));
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	// alloc memory [pos]
+	ret = CLT_Alloc(user_ctx, stream, (void**)&__reserve.pos, sizeof(char)*(len+1));
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	// get data [pos]
+	ret = stream_get(stream, __reserve.pos, sizeof(char)*len);
+	if(ret!=ERR_NOERROR) goto ON_ERROR;
+	__reserve.pos[len-1] = '\0';
 
 	// call
-	room_walk_callback(user_ctx);
+	room_walk_callback(user_ctx, __reserve.nick, __reserve.pos);
 
 	// free memory
+	CLT_Free(user_ctx, __reserve.pos);
+	CLT_Free(user_ctx, __reserve.nick);
 	// end
 	return ERR_NOERROR;
+
+ON_ERROR:
+	if(__reserve.pos!=NULL) CLT_Free(user_ctx, __reserve.pos);
+	if(__reserve.nick!=NULL) CLT_Free(user_ctx, __reserve.nick);
+
+	return ret;
 }
 
 int room_set_singer(CLT_USER_CTX* user_ctx)
@@ -1144,6 +1252,25 @@ int room_status_callback_stub(CLT_USER_CTX* user_ctx, STREAM* stream)
 
 	// call
 	room_status_callback(user_ctx);
+
+	// free memory
+	// end
+	return ERR_NOERROR;
+}
+
+int room_terminate_stub(CLT_USER_CTX* user_ctx, STREAM* stream)
+{
+	// define
+	int len, ret;
+
+	// init
+	len = 0;
+	ret = 0;
+
+	// read from stream
+
+	// call
+	room_terminate(user_ctx);
 
 	// free memory
 	// end

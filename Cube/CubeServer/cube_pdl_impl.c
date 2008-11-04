@@ -1,4 +1,6 @@
 
+#include <stdlib.h>
+
 #include "cube_pdl.CubeServer.h"
 
 #include "cube_server.h"
@@ -177,24 +179,58 @@ void lobby_equipment_get(SVR_USER_CTX* user_ctx)
 	lobby_equipment_callback(user_ctx, user_ctx->conn->equ);
 }
 
-void room_chat(SVR_USER_CTX* user_ctx)
+void room_chat(SVR_USER_CTX* user_ctx, const char* what)
 {
+	int idx;
+	CUBE_ROOM* room;
+	SVR_USER_CTX ctx;
+
+	if(user_ctx->conn->room==NULL) return;
+	room = user_ctx->conn->room;
+
+	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		if(room->conns[idx]==NULL) continue;
+		room_chat_callback(&ctx, user_ctx->conn->nick, what);
+	}
 }
 
-void room_walk(SVR_USER_CTX* user_ctx)
+void room_walk(SVR_USER_CTX* user_ctx, const char* pos)
 {
+	int idx;
+	CUBE_ROOM* room;
+	SVR_USER_CTX ctx;
+
+	if(user_ctx->conn->room==NULL) return;
+	room = user_ctx->conn->room;
+
+	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		if(room->conns[idx]==NULL) continue;
+		room_walk_callback(&ctx, user_ctx->conn->nick, pos);
+	}
 }
 
 void room_set_singer(SVR_USER_CTX* user_ctx)
 {
+	CUBE_ROOM* room;
+	room = user_ctx->conn->room;
+	if(room==NULL) return;
+	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
 }
 
 void room_load_complete(SVR_USER_CTX* user_ctx)
 {
+	CUBE_ROOM* room;
+	room = user_ctx->conn->room;
+	if(room==NULL) return;
+	if(room->state!=CUBE_ROOM_STATE_LOADING) return;
 }
 
 void room_set_ready(SVR_USER_CTX* user_ctx)
 {
+	CUBE_ROOM* room;
+	room = user_ctx->conn->room;
+	if(room==NULL) return;
+	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
 }
 
 int SVR_Newstream(SVR_USER_CTX* ctx, STREAM** ptr)
