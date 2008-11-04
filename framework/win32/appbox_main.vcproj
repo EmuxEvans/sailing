@@ -68,7 +68,7 @@
 				AdditionalDependencies="appbox.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
-				GenerateManifest="false"
+				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
@@ -81,7 +81,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				EmbedManifest="false"
+				EmbedManifest="true"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"

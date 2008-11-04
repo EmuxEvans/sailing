@@ -66,7 +66,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib sqlite.lib"
+				AdditionalDependencies="ws2_32.lib sqlite.lib lua.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
 				GenerateManifest="false"

@@ -369,6 +369,7 @@ int appbox_final()
 	ret = rpcnet_shutdown();
 	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_shutdown() fail, ret=%d", ret);
 	ret = rpcnet_final();
+	network_final();
 	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "rpcnet_final() fail, ret=%d", ret);
 	ret = timer_final();
 	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "timer_final() fail, ret=%d", ret);
@@ -379,7 +380,6 @@ int appbox_final()
 	ret = dymempool_final();
 	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "dymempool_final() fail, ret=%d", ret);
 
-	network_final();
 
 	ret = os_thread_wait(cs_thread_id, NULL);
 	if(ret!=ERR_NOERROR) {

@@ -97,7 +97,7 @@ static int event_opt_read(NETWORK_CONNECTION* conn);
 static int event_opt_write(NETWORK_CONNECTION* conn);
 static void event_opt_close(NETWORK_CONNECTION* conn);
 
-void network_init(unsigned int size)
+int network_init(unsigned int size)
 {
 	int l;
 
@@ -122,16 +122,19 @@ void network_init(unsigned int size)
 	os_thread_begin(&event_thread, event_proc, NULL);
 
 	notify_thread_quit = 0;
-	os_thread_begin(&notify_thread, notify_proc, NULL);	
+	os_thread_begin(&notify_thread, notify_proc, NULL);
+
+	return ERR_NOERROR;
 }
 
-void network_final()
+int network_final()
 {
 	event_post(QUEUE_ITEM_QUIT, NULL);
 	os_thread_wait(event_thread, NULL);
 
 	notify_thread_quit = 1;
-	os_thread_wait(event_thread, NULL);
+	os_thread_wait(notify_thread, NULL);
+
 	os_condition_destroy(&event_queue_cond);
 	os_mutex_destroy(&event_queue_mutex);
 
@@ -140,9 +143,10 @@ void network_final()
 	fdwatch_destroy(network_fdw);
 
 	mempool_destroy(conn_pool);
-//	os_mutex_destroy(&recvbuf_mutex);
 	os_mutex_destroy(&downbuf_mutex);
 	mempool_destroy(downbuf_pool);
+
+	return ERR_NOERROR;
 }
 
 int network_tcp_register(SOCK_ADDR* sa, NETWORK_ONACCEPT OnAccept, void* userptr)
