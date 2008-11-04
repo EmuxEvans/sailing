@@ -2,15 +2,12 @@
 #include <skates\skates.h>
 
 #include "cube_pdl.CubeServer.h"
+#include "cube_server.h"
 
-typedef struct CUBE_CONNECTION {
-	char uid[CUBE_UID_LEN+1];
-	char nick[CUBE_UID_LEN+1];
+SOCK_ADDR cube_sa;
+char cube_dbstr[100] = "provider=sqlite;dbname=..\\cube.db";
+CUBE_CONNECTION* conn_list[1000];
 
-	char recv_buf[10*1024];
-} CUBE_CONNECTION;
-
-static SOCK_ADDR cube_sa;
 static MEMPOOL_HANDLE conn_pool;
 
 static void onconnect(NETWORK_HANDLE handle, void* userptr)
@@ -62,9 +59,18 @@ static void ondisconnect(NETWORK_HANDLE handle, void* userptr)
 
 static void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 {
+	int idx;
 	CUBE_CONNECTION* conn;
 	NETWORK_HANDLE handle;
 	NETWORK_EVENT event;
+
+	for(idx=0; idx<sizeof(conn_list)/sizeof(conn_list[0]); idx++) {
+		if(conn_list[idx]==NULL) break;
+	}
+	if(idx==sizeof(conn_list)/sizeof(conn_list[0])) {
+		sock_close(sock);
+		return;
+	}
 
 	conn = (CUBE_CONNECTION*)mempool_alloc(conn_pool);
 	if(conn==NULL) {
@@ -95,6 +101,7 @@ static int cube_loadconfig()
 
 static int cube_init()
 {
+	memset(conn_list, 0, sizeof(conn_list));
 	conn_pool = mempool_create("CUBE_CONN_POOL", sizeof(CUBE_CONNECTION), 0);
 	return network_tcp_register(&cube_sa, onaccept, NULL);
 }
@@ -105,6 +112,17 @@ static int cube_final()
 
 	ret = network_tcp_unregister(&cube_sa);
 	if(ret!=ERR_NOERROR) return ret;
+
+	while(1) {
+		os_sleep(10);
+
+		for(ret=0; ret<sizeof(conn_list)/sizeof(conn_list[0]); ret++) {
+			if(conn_list[ret]!=NULL) break;
+		}
+		if(ret==sizeof(conn_list)/sizeof(conn_list[0])) {
+			break;
+		}
+	}
 
 	mempool_destroy(conn_pool);
 	return ERR_NOERROR;
