@@ -29,8 +29,8 @@ typedef struct NETWORK_DOWNBUF {
 	char			buf[0];
 } NETWORK_DOWNBUF;
 
-ZION_API void network_init(unsigned int downbuf_size);
-ZION_API void network_final();
+ZION_API int network_init(unsigned int downbuf_size);
+ZION_API int network_final();
 
 ZION_API int network_tcp_register(SOCK_ADDR* sa, NETWORK_ONACCEPT OnAccept, void* userptr);
 ZION_API int network_tcp_unregister(const SOCK_ADDR* sa);

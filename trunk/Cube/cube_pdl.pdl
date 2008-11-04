@@ -1,0 +1,82 @@
+!
+!struct CLT_USER_CTX;
+!typedef struct CLT_USER_CTX CLT_USER_CTX;
+!struct SVR_USER_CTX;
+!typedef struct SVR_USER_CTX SVR_USER_CTX;
+!
+!#define	LOGIN_FILTER_ID		0x1
+!#define	LOBBY_FILTER_ID		0x2
+!#define	ROOM_FILTER_ID		0x3
+!
+!#include "../cube_data.h"
+!
+
+// LOGIN : login
+FILTER LOGIN_FILTER_ID login;
+
+CMD_SVR login(
+    string["$$<=CUBE_LOGIN_TOKEN_LEN+1"] token[]
+);
+CMD_CLT login_callback(
+    int     ret
+);
+CMD_SVR create_player(
+    string["$$<=CUBE_NICK_LEN+1"] nick[],
+    string["$$<=CUBE_ROLE_PROPERTY_LEN+1"] role[]
+);
+CMD_CLT create_player_callback(
+    int     ret
+);
+
+// LOBBY : lobby
+FILTER LOBBY_FILTER_ID lobby;
+
+CMD_SVR roomlist_get(
+);
+CMD_CLT roomlist_callback(
+);
+
+CMD_SVR chat(
+);
+CMD_CLT chat_callback(
+);
+
+CMD_SVR warehouse_get(
+);
+CMD_CLT warehouse_callback(
+);
+
+CMD_SVR equipment_get(
+);
+CMD_CLT equipment_callback(
+);
+
+// ROOM : room
+FILTER ROOM_FILTER_ID room;
+
+CMD_CLT join_callback(
+);
+
+CMD_CLT leave(
+);
+CMD_CLT leave_callback(
+);
+
+CMD_SVR chat(
+);
+CMD_CLT chat_callback(
+);
+
+CMD_SVR walk(
+);
+CMD_CLT walk_callback(
+);
+
+CMD_SVR set_singer(
+);
+CMD_SVR load_complete(
+);
+CMD_SVR set_ready(
+);
+CMD_CLT status_callback(
+);

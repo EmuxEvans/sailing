@@ -61,7 +61,7 @@ static void gen_include(FILE* fp, const char* name)
 	fprintf(fp, "#define _%s_INCLUDE\n", name);
 	fprintf(fp, "\n");
 
-	fprintf(fp, "#include <skates.h>\n");
+	fprintf(fp, "#include <skates/skates.h>\n");
 	fprintf(fp, "\n");
 	fprintf(fp, "#ifdef __cplusplus\n");
 	fprintf(fp, "extern \"C\" {\n");

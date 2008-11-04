@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CubeServer", "CubeServer\CubeServer.vcproj", "{E582196F-F2C3-4C0E-9523-19609A33BB31}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CubeClient", "CubeClient\CubeClient.vcproj", "{FEB78C82-EFE9-4490-94D4-628057DB3FF7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "appbox", "..\framework\win32\appbox.vcproj", "{4AE40DD4-9AF4-41F7-8C4D-979841F13F2D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E582196F-F2C3-4C0E-9523-19609A33BB31}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E582196F-F2C3-4C0E-9523-19609A33BB31}.Debug|Win32.Build.0 = Debug|Win32
+		{E582196F-F2C3-4C0E-9523-19609A33BB31}.Release|Win32.ActiveCfg = Release|Win32
+		{E582196F-F2C3-4C0E-9523-19609A33BB31}.Release|Win32.Build.0 = Release|Win32
+		{FEB78C82-EFE9-4490-94D4-628057DB3FF7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FEB78C82-EFE9-4490-94D4-628057DB3FF7}.Debug|Win32.Build.0 = Debug|Win32
+		{FEB78C82-EFE9-4490-94D4-628057DB3FF7}.Release|Win32.ActiveCfg = Release|Win32
+		{FEB78C82-EFE9-4490-94D4-628057DB3FF7}.Release|Win32.Build.0 = Release|Win32
+		{4AE40DD4-9AF4-41F7-8C4D-979841F13F2D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4AE40DD4-9AF4-41F7-8C4D-979841F13F2D}.Debug|Win32.Build.0 = Debug|Win32
+		{4AE40DD4-9AF4-41F7-8C4D-979841F13F2D}.Release|Win32.ActiveCfg = Release|Win32
+		{4AE40DD4-9AF4-41F7-8C4D-979841F13F2D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,5 @@
+
+#define CUBE_LOGIN_TOKEN_LEN		100
+#define CUBE_NICK_LEN				32
+#define CUBE_ROLE_PROPERTY_LEN		100
+#define CUBE_UID_LEN				10
