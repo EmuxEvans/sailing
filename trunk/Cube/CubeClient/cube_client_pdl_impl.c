@@ -13,7 +13,7 @@ void lobby_roomlist_callback(CLT_USER_CTX* user_ctx)
 {
 }
 
-void lobby_chat_callback(CLT_USER_CTX* user_ctx)
+void lobby_chat_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* what)
 {
 }
 
@@ -45,11 +45,15 @@ void room_chat_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* wh
 {
 }
 
-void room_walk_callback(CLT_USER_CTX* user_ctx)
+void room_walk_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* pos)
 {
 }
 
 void room_status_callback(CLT_USER_CTX* user_ctx)
+{
+}
+
+void room_terminate(CLT_USER_CTX* user_ctx)
 {
 }
 

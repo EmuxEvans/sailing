@@ -37,8 +37,11 @@ CMD_CLT roomlist_callback(
 );
 
 CMD_SVR chat(
+    string["$$<=300+1"] what[]
 );
 CMD_CLT chat_callback(
+	string nick[],
+	string what[]
 );
 
 CMD_SVR roleinfo_set(
@@ -88,8 +91,11 @@ CMD_CLT chat_callback(
 );
 
 CMD_SVR walk(
+    string["$$<=CUBE_ROOM_POSITION_LEN+1"] pos[]
 );
 CMD_CLT walk_callback(
+	string nick[],
+	string pos[]
 );
 
 CMD_SVR set_singer(
@@ -99,4 +105,7 @@ CMD_SVR load_complete(
 CMD_SVR set_ready(
 );
 CMD_CLT status_callback(
+);
+
+CMD_CLT terminate(
 );

@@ -29,8 +29,8 @@ int login_create_player(CLT_USER_CTX* user_ctx, const char* nick, const char* ro
 void login_create_player_callback(CLT_USER_CTX* user_ctx, int ret);
 int lobby_roomlist_get(CLT_USER_CTX* user_ctx);
 void lobby_roomlist_callback(CLT_USER_CTX* user_ctx);
-int lobby_chat(CLT_USER_CTX* user_ctx);
-void lobby_chat_callback(CLT_USER_CTX* user_ctx);
+int lobby_chat(CLT_USER_CTX* user_ctx, const char* what);
+void lobby_chat_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* what);
 int lobby_roleinfo_set(CLT_USER_CTX* user_ctx, const char* value);
 int lobby_roleinfo_get(CLT_USER_CTX* user_ctx);
 void lobby_roleinfo_callback(CLT_USER_CTX* user_ctx, const char* value);
@@ -45,12 +45,13 @@ void room_leave(CLT_USER_CTX* user_ctx);
 void room_leave_callback(CLT_USER_CTX* user_ctx);
 int room_chat(CLT_USER_CTX* user_ctx, const char* what);
 void room_chat_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* what);
-int room_walk(CLT_USER_CTX* user_ctx);
-void room_walk_callback(CLT_USER_CTX* user_ctx);
+int room_walk(CLT_USER_CTX* user_ctx, const char* pos);
+void room_walk_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* pos);
 int room_set_singer(CLT_USER_CTX* user_ctx);
 int room_load_complete(CLT_USER_CTX* user_ctx);
 int room_set_ready(CLT_USER_CTX* user_ctx);
 void room_status_callback(CLT_USER_CTX* user_ctx);
+void room_terminate(CLT_USER_CTX* user_ctx);
 // implement&stub functions : END
 
 // extern dispatcher function
