@@ -29,6 +29,9 @@ int login_create_player(CLT_USER_CTX* user_ctx, const char* nick, const char* ro
 void login_create_player_callback(CLT_USER_CTX* user_ctx, int ret);
 int lobby_roomlist_get(CLT_USER_CTX* user_ctx);
 void lobby_roomlist_callback(CLT_USER_CTX* user_ctx);
+int lobby_room_create(CLT_USER_CTX* user_ctx, const char* name, const char* map);
+int lobby_room_join(CLT_USER_CTX* user_ctx, int idx);
+void lobby_room_callback(CLT_USER_CTX* user_ctx, int ret, const char* name);
 int lobby_chat(CLT_USER_CTX* user_ctx, const char* what);
 void lobby_chat_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* what);
 int lobby_roleinfo_set(CLT_USER_CTX* user_ctx, const char* value);
@@ -40,18 +43,24 @@ void lobby_warehouse_callback(CLT_USER_CTX* user_ctx, const char* value);
 int lobby_equipment_set(CLT_USER_CTX* user_ctx, const char* value);
 int lobby_equipment_get(CLT_USER_CTX* user_ctx);
 void lobby_equipment_callback(CLT_USER_CTX* user_ctx, const char* value);
-void room_join_callback(CLT_USER_CTX* user_ctx);
-void room_leave(CLT_USER_CTX* user_ctx);
-void room_leave_callback(CLT_USER_CTX* user_ctx);
+int room_info_set(CLT_USER_CTX* user_ctx, const char* singer, const char* map);
+void room_info_callback(CLT_USER_CTX* user_ctx, const char* name, const char* singer, const char* map);
+void room_notify_join(CLT_USER_CTX* user_ctx, const char* nick, const char* equ);
+int room_leave(CLT_USER_CTX* user_ctx);
+void room_notify_leave(CLT_USER_CTX* user_ctx, const char* nick);
+void room_notify_load(CLT_USER_CTX* user_ctx);
+void room_notify_start(CLT_USER_CTX* user_ctx);
+void room_notify_terminate(CLT_USER_CTX* user_ctx);
+void room_notify_ready(CLT_USER_CTX* user_ctx, const char* nick, int flag);
 int room_chat(CLT_USER_CTX* user_ctx, const char* what);
 void room_chat_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* what);
 int room_walk(CLT_USER_CTX* user_ctx, const char* pos);
 void room_walk_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* pos);
 int room_set_singer(CLT_USER_CTX* user_ctx);
 int room_load_complete(CLT_USER_CTX* user_ctx);
-int room_set_ready(CLT_USER_CTX* user_ctx);
+int room_set_ready(CLT_USER_CTX* user_ctx, int flag);
 void room_status_callback(CLT_USER_CTX* user_ctx);
-void room_terminate(CLT_USER_CTX* user_ctx);
+int room_terminate(CLT_USER_CTX* user_ctx);
 // implement&stub functions : END
 
 // extern dispatcher function

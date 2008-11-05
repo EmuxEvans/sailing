@@ -13,6 +13,10 @@ void lobby_roomlist_callback(CLT_USER_CTX* user_ctx)
 {
 }
 
+void lobby_room_callback(CLT_USER_CTX* user_ctx, int ret, const char* name)
+{
+}
+
 void lobby_chat_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* what)
 {
 }
@@ -29,15 +33,31 @@ void lobby_equipment_callback(CLT_USER_CTX* user_ctx, const char* value)
 {
 }
 
-void room_join_callback(CLT_USER_CTX* user_ctx)
+void room_info_callback(CLT_USER_CTX* user_ctx, const char* name, const char* singer, const char* map)
 {
 }
 
-void room_leave(CLT_USER_CTX* user_ctx)
+void room_notify_join(CLT_USER_CTX* user_ctx, const char* nick, const char* equ)
 {
 }
 
-void room_leave_callback(CLT_USER_CTX* user_ctx)
+void room_notify_leave(CLT_USER_CTX* user_ctx, const char* nick)
+{
+}
+
+void room_notify_load(CLT_USER_CTX* user_ctx)
+{
+}
+
+void room_notify_start(CLT_USER_CTX* user_ctx)
+{
+}
+
+void room_notify_terminate(CLT_USER_CTX* user_ctx)
+{
+}
+
+void room_notify_ready(CLT_USER_CTX* user_ctx, const char* nick, int flag)
 {
 }
 
@@ -50,10 +70,6 @@ void room_walk_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* po
 }
 
 void room_status_callback(CLT_USER_CTX* user_ctx)
-{
-}
-
-void room_terminate(CLT_USER_CTX* user_ctx)
 {
 }
 

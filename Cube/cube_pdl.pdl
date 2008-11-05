@@ -36,6 +36,18 @@ CMD_SVR roomlist_get(
 CMD_CLT roomlist_callback(
 );
 
+CMD_SVR room_create(
+    string["$$<=CUBE_ROOM_NAME_LEN+1"] name[],
+    string["$$<=CUBE_ROOM_MAP_LEN+1"] map[]
+);
+CMD_SVR room_join(
+	int idx
+);
+CMD_CLT room_callback(
+	int ret,
+	string name[]
+);
+
 CMD_SVR chat(
     string["$$<=300+1"] what[]
 );
@@ -74,12 +86,36 @@ CMD_CLT equipment_callback(
 // ROOM : room
 FILTER ROOM_FILTER_ID room;
 
-CMD_CLT join_callback(
+CMD_SVR info_set(
+    string["$$<=CUBE_NICK_LEN+1"] singer[],
+    string["$$<=CUBE_ROOM_MAP_LEN+1"] map[]
+);
+CMD_CLT info_callback(
+    string name[],
+    string singer[],
+    string map[]
 );
 
-CMD_CLT leave(
+CMD_CLT notify_join(
+	string nick[],
+	string equ[]
 );
-CMD_CLT leave_callback(
+
+CMD_SVR leave(
+);
+CMD_CLT notify_leave(
+	string nick[]
+);
+
+CMD_CLT notify_load(
+);
+CMD_CLT notify_start(
+);
+CMD_CLT notify_terminate(
+);
+CMD_CLT notify_ready(
+	string nick[],
+	int flag
 );
 
 CMD_SVR chat(
@@ -103,9 +139,9 @@ CMD_SVR set_singer(
 CMD_SVR load_complete(
 );
 CMD_SVR set_ready(
+	int flag
 );
 CMD_CLT status_callback(
 );
-
-CMD_CLT terminate(
+CMD_SVR terminate(
 );
