@@ -1,3 +1,5 @@
+#include <string.h>
+#include <assert.h>
 
 #include <skates\skates.h>
 
@@ -7,14 +9,15 @@
 SOCK_ADDR cube_sa;
 char cube_dbstr[100] = "provider=sqlite;dbname=..\\cube.db";
 CUBE_CONNECTION* conn_list[1000];
+CUBE_ROOM* room_list[1000];
 
 static MEMPOOL_HANDLE conn_pool;
+static MEMPOOL_HANDLE room_pool;
 
 static void onconnect(NETWORK_HANDLE handle, void* userptr)
 {
 	CUBE_CONNECTION* conn;
 	conn = (CUBE_CONNECTION*)userptr;
-	memset(conn, 0, sizeof(*conn));
 }
 
 static void ondata(NETWORK_HANDLE handle, void* userptr)
@@ -53,6 +56,13 @@ static void ondisconnect(NETWORK_HANDLE handle, void* userptr)
 {
 	CUBE_CONNECTION* conn;
 	conn = (CUBE_CONNECTION*)userptr;
+
+	if(conn->room!=NULL) {
+		cube_room_leave(conn->room, conn);
+		cube_room_check(conn->room);
+		conn->room = NULL;
+	}
+
 	network_del(handle);
 	mempool_free(conn_pool, conn);
 }
@@ -84,6 +94,8 @@ static void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 	event.recvbuf_buf = conn->recv_buf;
 	event.recvbuf_max = sizeof(conn->recv_buf);
 	event.recvbuf_pool = NULL;
+	memset(conn, 0, sizeof(*conn));
+	conn->index = idx;
 
 	handle = network_add(sock, &event, conn);
 	if(handle==NULL) {
@@ -146,4 +158,92 @@ ZION_EXPORT int module_entry(int reason)
 	}
 
 	return ERR_NOERROR;
+}
+
+CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char* map)
+{
+	CUBE_ROOM* room;
+	room = (CUBE_ROOM*)mempool_alloc(room_pool);
+	if(room==NULL) return NULL;
+
+	memset(room, 0, sizeof(*room));
+	strcpy(room->name, name);
+	strcpy(room->map, map);
+	room->singer = 0;
+	room->conns[0] = conn;
+	conn->room = room;
+	conn->room_idx = 0;
+
+	return room;
+}
+
+void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn)
+{
+	int idx;
+	SVR_USER_CTX ctx;
+
+	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		if(room->conns[idx]==conn) break;
+	}
+	assert(idx<sizeof(room->conns)/sizeof(room->conns[0]));
+
+	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		if(room->conns[idx]==NULL) continue;
+		ctx.conn = room->conns[idx];
+		room_notify_leave(&ctx, conn->nick);
+	}
+
+	room->conns[idx] = NULL;
+	room->readys[idx] = 0;
+	conn->room = NULL;
+}
+
+void cube_room_check(CUBE_ROOM* room)
+{
+	int idx, count, ready, loaded;
+
+	count = ready = loaded = 0;
+	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		if(room->conns[idx]==NULL) continue;
+		if(room->readys[idx]) ready++;
+		if(room->loaded[idx]) loaded++;
+		count++;
+	}
+	if(count==0) {
+		mempool_free(room_pool, room);
+		return;
+	}
+	if(room->singer>=0 && room->conns[room->singer]==NULL) {
+		room->singer = -1;
+	}
+	if(room->singer==-1 && room->state!=CUBE_ROOM_STATE_ACTIVE) {
+		for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+			SVR_USER_CTX ctx;
+			if(room->conns[idx]==NULL) continue;
+			ctx.conn = room->conns[idx];
+			room_notify_terminate(&ctx);
+		}
+		memset(room->readys, 0, sizeof(room->readys));
+		return;
+	}
+	if(count==ready && room->singer>=0 && room->state==CUBE_ROOM_STATE_ACTIVE) {
+		room->state = CUBE_ROOM_STATE_LOADING;
+		for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+			SVR_USER_CTX ctx;
+			if(room->conns[idx]==NULL) continue;
+			ctx.conn = room->conns[idx];
+			room_notify_load(&ctx);
+		}
+		return;
+	}
+	if(count==loaded && room->state==CUBE_ROOM_STATE_LOADING) {
+		room->state = CUBE_ROOM_STATE_GAMING;
+		for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+			SVR_USER_CTX ctx;
+			if(room->conns[idx]==NULL) continue;
+			ctx.conn = room->conns[idx];
+			room_notify_start(&ctx);
+		}
+		return;
+	}
 }

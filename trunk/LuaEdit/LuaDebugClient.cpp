@@ -57,7 +57,7 @@ BOOL InitializeLuaDebugClient(const char* addr)
 	mempool_init();
 	sock_init();
 	fdwatch_init();
-	threadpool_init(10);
+	threadpool_init(1);
 	rpcnet_init();
 	rpcfun_init();
 
