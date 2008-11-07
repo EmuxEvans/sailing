@@ -247,3 +247,58 @@ void cube_room_check(CUBE_ROOM* room)
 		return;
 	}
 }
+
+void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
+{
+	int idx;
+	SVR_USER_CTX ctx;
+
+	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		if(room->conns[idx]==NULL) continue;
+
+		ctx.conn = room->conns[idx];
+		room_notify_join(&ctx, conn->nick, conn->equ);
+
+		if(room->conns[idx]!=conn) continue;
+
+		ctx.conn = conn;
+		room_notify_join(&ctx, room->conns[idx]->nick, room->conns[idx]->equ);
+	}
+
+	ctx.conn = conn;
+	if(room->singer>=0) {
+		room_info_callback(&ctx, room->name, room->conns[room->singer]->nick, room->map);
+	} else {
+		room_info_callback(&ctx, room->name, "", room->map);
+	}
+}
+
+void cube_room_terminate(CUBE_ROOM* room)
+{
+	int i, j;
+	SVR_USER_CTX ctx;
+
+	for(i=0; i<sizeof(room->conns)/sizeof(room->conns[0]); i++) {
+		if(room->conns[i]==NULL) continue;
+		ctx.conn = room->conns[i];
+
+		room_notify_terminate(&ctx);
+		for(j=0; j<sizeof(room->conns)/sizeof(room->conns[0]); j++) {
+			if(room->conns[j]==NULL) continue;
+			room_notify_join(&ctx, room->conns[j]->nick, room->conns[j]->equ);
+		}
+		if(room->singer>=0) {
+			room_info_callback(&ctx, room->name, room->conns[room->singer]->nick, room->map);
+		} else {
+			room_info_callback(&ctx, room->name, "", room->map);
+		}
+	}
+}
+
+int cube_can_change_equipment(CUBE_CONNECTION* conn)
+{
+	if(conn->room==NULL) return 1;
+	if(conn->room->state!=CUBE_ROOM_STATE_ACTIVE) return 0;
+	if(conn->room->readys[conn->room_idx]) return 0;
+	return 1;
+}

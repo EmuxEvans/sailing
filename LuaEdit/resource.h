@@ -36,6 +36,7 @@
 #define IDC_FINDNEXT                    1014
 #define IDC_REPLACE                     1015
 #define IDC_RELACEALL                   1016
+#define IDC_REPLACEALL                  1016
 #define IDC_MATCH_CASE                  1017
 #define IDC_MATCH_WHOLEWORD             1018
 #define IDC_SEARCH_UP                   1019

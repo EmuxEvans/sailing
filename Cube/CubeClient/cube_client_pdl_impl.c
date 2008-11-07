@@ -9,7 +9,11 @@ void login_create_player_callback(CLT_USER_CTX* user_ctx, int ret)
 {
 }
 
-void lobby_roomlist_callback(CLT_USER_CTX* user_ctx)
+void lobby_roomlist_callback(CLT_USER_CTX* user_ctx, int index, const char* name, const char* map, const char* singer, int state)
+{
+}
+
+void lobby_roomlist_end(CLT_USER_CTX* user_ctx)
 {
 }
 
@@ -62,6 +66,10 @@ void room_notify_ready(CLT_USER_CTX* user_ctx, const char* nick, int flag)
 }
 
 void room_chat_callback(CLT_USER_CTX* user_ctx, const char* nick, const char* what)
+{
+}
+
+void room_xuxu_callback(CLT_USER_CTX* user_ctx, int loud, const char* from, const char* who, const char* what)
 {
 }
 

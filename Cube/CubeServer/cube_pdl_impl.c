@@ -84,31 +84,15 @@ void login_create_player(SVR_USER_CTX* user_ctx, const char* nick, const char* r
 
 void lobby_roomlist_get(SVR_USER_CTX* user_ctx)
 {
-}
-
-static void lobby_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
-{
 	int idx;
-	SVR_USER_CTX ctx;
-
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) continue;
-
-		ctx.conn = room->conns[idx];
-		room_notify_join(&ctx, conn->nick, conn->equ);
-
-		if(room->conns[idx]!=conn) continue;
-
-		ctx.conn = conn;
-		room_notify_join(&ctx, room->conns[idx]->nick, room->conns[idx]->equ);
+	for(idx=0; idx<sizeof(room_list)/sizeof(room_list[0]); idx++) {
+		if(room_list[idx]->singer>=0) {
+			lobby_roomlist_callback(user_ctx, idx, room_list[idx]->name, room_list[idx]->conns[room_list[idx]->singer]->nick, room_list[idx]->map, room_list[idx]->state);
+		} else {
+			lobby_roomlist_callback(user_ctx, idx, room_list[idx]->name, "", room_list[idx]->map, room_list[idx]->state);
+		}
 	}
-
-	ctx.conn = conn;
-	if(room->singer>=0) {
-		room_info_callback(&ctx, room->name, room->conns[room->singer]->nick, room->map);
-	} else {
-		room_info_callback(&ctx, room->name, "", room->map);
-	}
+	lobby_roomlist_end(user_ctx);
 }
 
 void lobby_room_create(SVR_USER_CTX* user_ctx, const char* name, const char* map)
@@ -122,7 +106,7 @@ void lobby_room_create(SVR_USER_CTX* user_ctx, const char* name, const char* map
 		return;
 	}
 
-	lobby_room_onjoin(room, user_ctx->conn);
+	cube_room_onjoin(room, user_ctx->conn);
 }
 
 void lobby_room_join(SVR_USER_CTX* user_ctx, int index)
@@ -145,7 +129,7 @@ void lobby_room_join(SVR_USER_CTX* user_ctx, int index)
 
 	room->conns[idx] = user_ctx->conn;
 
-	lobby_room_onjoin(room, user_ctx->conn);
+	cube_room_onjoin(room, user_ctx->conn);
 }
 
 void lobby_chat(SVR_USER_CTX* user_ctx, const char* what)
@@ -220,6 +204,8 @@ void lobby_equipment_set(SVR_USER_CTX* user_ctx, const char* value)
 	DBAPI_HANDLE handle;
 	char sql[100*1024];
 
+	if(!cube_can_change_equipment(user_ctx->conn)) return;
+
 	handle = dbapi_connect(cube_dbstr);
 	if(handle==NULL) {
 		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to dbapi_connect(\"%s\")", cube_dbstr);
@@ -250,12 +236,8 @@ void room_info_set(SVR_USER_CTX* user_ctx, const char* singer, const char* map)
 	if(user_ctx->conn->room==NULL) return;
 	room = user_ctx->conn->room;
 
-	if(room->singer>=0 && room->conns[room->singer]!=user_ctx->conn) {
-		return;
-	}
-	if(room->state!=CUBE_ROOM_STATE_ACTIVE) {
-		return;
-	}
+	if(room->singer>=0 && room->conns[room->singer]!=user_ctx->conn) return;
+	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
 
 	sidx = -1;
 	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
@@ -264,9 +246,7 @@ void room_info_set(SVR_USER_CTX* user_ctx, const char* singer, const char* map)
 		sidx = idx;
 	}
 	room->singer = sidx;
-	if(map[0]!='\0') {
-		strcpy(room->map, map);
-	}
+	if(map[0]!='\0') strcpy(room->map, map);
 
 	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
 		if(room->conns[idx]==NULL) continue;
@@ -300,6 +280,33 @@ void room_chat(SVR_USER_CTX* user_ctx, const char* what)
 	}
 }
 
+void room_xuxu(SVR_USER_CTX* user_ctx, int loud, const char* who, const char* what)
+{
+	CUBE_ROOM* room;
+	int idx;
+	SVR_USER_CTX ctx;
+
+	if(user_ctx->conn->room==NULL) return;
+	room = user_ctx->conn->room;
+
+	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		if(room->conns[idx]==NULL) continue;
+		if(strcmp(room->conns[idx]->nick, who)==0) break;
+	}
+	if(idx==sizeof(room->conns)/sizeof(room->conns[0])) return;
+
+	if(loud) {
+		for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+			if(room->conns[idx]==NULL) continue;
+			ctx.conn = room->conns[idx];
+			room_xuxu_callback(&ctx, loud, user_ctx->conn->nick, who, what);
+		}
+	} else {
+		ctx.conn = room->conns[idx];
+		room_xuxu_callback(&ctx, loud, user_ctx->conn->nick, who, what);
+	}
+}
+
 void room_walk(SVR_USER_CTX* user_ctx, const char* pos)
 {
 	int idx;
@@ -315,14 +322,6 @@ void room_walk(SVR_USER_CTX* user_ctx, const char* pos)
 	}
 }
 
-void room_set_singer(SVR_USER_CTX* user_ctx)
-{
-	CUBE_ROOM* room;
-	room = user_ctx->conn->room;
-	if(room==NULL) return;
-	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
-}
-
 void room_load_complete(SVR_USER_CTX* user_ctx)
 {
 	CUBE_ROOM* room;
@@ -334,16 +333,22 @@ void room_load_complete(SVR_USER_CTX* user_ctx)
 
 void room_set_ready(SVR_USER_CTX* user_ctx, int flag)
 {
+	int idx;
 	CUBE_ROOM* room;
+	SVR_USER_CTX ctx;
 	room = user_ctx->conn->room;
 	if(room==NULL) return;
 	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
 	room->readys[user_ctx->conn->room_idx] = flag;
+	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		if(room->conns[idx]==NULL) continue;
+		ctx.conn = room->conns[idx];
+		room_notify_ready(&ctx, user_ctx->conn->nick, flag);
+	}
 }
 
 void room_terminate(SVR_USER_CTX* user_ctx)
 {
-	int idx;
 	CUBE_ROOM* room;
 	room = user_ctx->conn->room;
 	if(room==NULL) return;
@@ -351,33 +356,38 @@ void room_terminate(SVR_USER_CTX* user_ctx)
 	if(room->conns[room->singer]!=user_ctx->conn) return;
 	room->state = CUBE_ROOM_STATE_ACTIVE;
 	memset(room->readys, 0, sizeof(room->readys));
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		SVR_USER_CTX ctx;
-		if(room->conns[idx]==NULL) continue;
-		ctx.conn = room->conns[idx];
-		room_notify_terminate(&ctx);
-		if(room->singer>=0) {
-			room_info_callback(&ctx, room->name, room->conns[room->singer]->nick, room->map);
-		} else {
-			room_info_callback(&ctx, room->name, "", room->map);
-		}
-	}
+	cube_room_terminate(room);
 }
 
 int SVR_Newstream(SVR_USER_CTX* ctx, STREAM** ptr)
 {
-	memstream_init(&ctx->stream, ctx->buf, sizeof(ctx->buf), 0);
+	memstream_init(&ctx->stream, ctx->buf+2, sizeof(ctx->buf)-2, 0);
 	*ptr = (STREAM*)&ctx->stream;
 	return ERR_NOERROR;
 }
 
 int SVR_Send(SVR_USER_CTX* ctx, STREAM* stream)
 {
-	return 0;
+	NETWORK_DOWNBUF* downbufs[100];
+	unsigned int count;
+	int ret;
+
+	*((unsigned short*)ctx->buf) = (unsigned short)ctx->stream.len;
+	count = network_downbufs_alloc(downbufs, sizeof(downbufs)/sizeof(downbufs[0]), ctx->stream.len+2);
+	network_downbufs_fill(downbufs, count, 0, ctx->buf, ctx->stream.len+2);
+
+	ret = network_send(ctx->conn->handle, downbufs, count);
+	if(ret!=ERR_NOERROR) {
+		network_downbufs_free(downbufs, count);
+		return ret;
+	}
+
+	return ERR_NOERROR;
 }
 
 int SVR_Alloc(SVR_USER_CTX* ctx, STREAM* stream, void** ptr, int size)
 {
+	*ptr = memstream_get_position((MEM_STREAM*)stream);
 	return 0;
 }
 
