@@ -8,6 +8,7 @@
 #include "LuaHost\LuaDebugInfo.h"
 #include "LuaDebugClient.h"
 
+#include "AboutDlg.h"
 #include "DropFileHandler.h"
 #include "FileManager.h"
 #include "DialogWindow.h"
@@ -39,7 +40,6 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 }
 
 TCHAR g_szLuaHostPath[MAX_PATH] = _T(".\\");
-TCHAR g_szLuaHostArgs[200] = "127.0.0.1:1980";
 TCHAR g_szLuaHostArgs[200] = "127.0.0.1:1980";
 
 //ILuaDebugClient* CreateLuaDebugClient();

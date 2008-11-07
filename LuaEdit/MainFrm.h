@@ -29,6 +29,10 @@ public:
 	CCommandWindow m_CommandWindow;
 	sstate::CWindowStateMgr<sstate::CStgRegistry> m_stateMgr;
 
+	CAttachHostDlg	m_AttachHostDlg;
+	CFindDlg		m_FindDlg;
+	CReplaceDlg		m_ReplaceDlg;
+
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();
 
@@ -45,7 +49,7 @@ public:
 	BEGIN_MSG_MAP(CMainFrame)
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
 		MESSAGE_HANDLER(CWM_INITIALIZE, OnInitialize)
-		MESSAGE_HANDLER(WM_NCDESTROY, OnNCDestroy)
+		MESSAGE_HANDLER(WM_CLOSE, OnClose)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 		COMMAND_ID_HANDLER(ID_FILE_NEW, OnFileNew)
 		COMMAND_ID_HANDLER(ID_FILE_OPEN, OnFileOpen)
@@ -54,7 +58,6 @@ public:
 		COMMAND_ID_HANDLER(ID_FILE_SAVE_AS, OnFileSaveAs)
 		COMMAND_ID_HANDLER(ID_FILE_CLOSE_ALL, OnFileCloseAll)
 		COMMAND_ID_HANDLER(ID_FILE_SAVE_ALL, OnFileSaveAll)
-		COMMAND_ID_HANDLER(WM_CLOSE, OnFileExit)
 		COMMAND_ID_HANDLER(ID_APP_EXIT, OnFileExit)
 
 		COMMAND_ID_HANDLER(ID_EDIT_UNDO, OnEditUndo)
@@ -100,7 +103,7 @@ public:
 
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnInitialize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-	LRESULT OnNCDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled);
+	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled);
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled);
 	LRESULT OnFileNew(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnFileOpen(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
