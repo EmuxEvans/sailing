@@ -35,6 +35,8 @@ public:
 		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
 	END_MSG_MAP()
 
+	CAttachHostDlg();
+
 	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
@@ -55,12 +57,12 @@ public:
 	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };
 
-class CRelaceDlg : public CDialogImpl<CRelaceDlg>
+class CReplaceDlg : public CDialogImpl<CReplaceDlg>
 {
 public:
 	enum { IDD = IDD_EDIT_REPLACE };
 
-	BEGIN_MSG_MAP(CRelaceDlg)
+	BEGIN_MSG_MAP(CReplaceDlg)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
 	END_MSG_MAP()

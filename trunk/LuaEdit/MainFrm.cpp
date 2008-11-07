@@ -115,6 +115,10 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 	SendMessage(CWM_INITIALIZE, 0, 0);
 
+
+	m_FindDlg.Create(m_hWnd);
+	m_ReplaceDlg.Create(m_hWnd);
+
 	return 0;
 }
 
@@ -141,14 +145,13 @@ LRESULT CMainFrame::OnInitialize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 	return 0;
 }
 
-LRESULT CMainFrame::OnNCDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
+LRESULT CMainFrame::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 {
-	//CRegKey key;
-	//if(key.Open(HKEY_CURRENT_USER, _T("SOFTWARE\\Sailing\\LuaEdit"), KEY_WRITE)==ERROR_SUCCESS || key.Create(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"))==ERROR_SUCCESS)
-	//{
-	//	sstate::CStgRegistry reg(key.Detach());
-	//	m_stateMgr.Store(reg);
-	//}
+	CRegKey key;
+	if(key.Open(HKEY_CURRENT_USER, _T("SOFTWARE\\Sailing\\LuaEdit"), KEY_WRITE)==ERROR_SUCCESS || key.Create(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"))==ERROR_SUCCESS) {
+		sstate::CStgRegistry reg(key.Detach());
+		m_stateMgr.Store(reg);
+	}
 
 	if(CLuaDebugManager::GetDefault()->GetDebugHooker()) {
 		if(CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->IsStop()) {
@@ -306,8 +309,7 @@ LRESULT CMainFrame::OnEditFind(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 	if(m_view.GetActivePage()<0)
 		return 0;
 
-	CFindDlg Dlg;
-	Dlg.DoModal(m_hWnd);
+	m_FindDlg.ShowWindow(SW_SHOW);
 	return 0;
 }
 
@@ -324,8 +326,7 @@ LRESULT CMainFrame::OnEditReplace(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWn
 	if(m_view.GetActivePage()<0)
 		return 0;
 
-	CRelaceDlg Dlg;
-	Dlg.DoModal(m_hWnd);
+	m_ReplaceDlg.ShowWindow(SW_SHOW);
 	return 0;
 }
 
@@ -413,15 +414,14 @@ LRESULT CMainFrame::OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /
 		return 0;
 	}
 
-	CAttachHostDlg Dlg;
-	if(Dlg.DoModal(m_hWnd)!=IDOK) return 0;
+	if(m_AttachHostDlg.DoModal(m_hWnd)!=IDOK) return 0;
 
 	if(!CLuaDebugManager::GetDefault()->NewHooker(this)) {
 		MessageBox("Already Attached");
 		return 0;
 	}
 
-	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->Connect(Dlg.m_szAddress)) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->Connect(m_AttachHostDlg.m_szAddress)) {
 		MessageBox("Connect Error");
 		CLuaDebugManager::GetDefault()->DeleteHooker();
 		return 0;

@@ -20,9 +20,14 @@ LRESULT CAboutDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, 
 	return 0;
 }
 
+CAttachHostDlg::CAttachHostDlg()
+{
+	_tcscpy(m_szAddress, "127.0.0.1:2000");
+}
+
 LRESULT CAttachHostDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-	::SetWindowText(GetDlgItem(IDC_HOST_ADDRESS), _T("127.0.0.1:1982"));
+	::SetWindowText(GetDlgItem(IDC_HOST_ADDRESS), m_szAddress);
 	return 0;
 }
 
@@ -44,18 +49,18 @@ LRESULT CFindDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
 LRESULT CFindDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	EndDialog(wID);
+	ShowWindow(SW_HIDE);
 	return 0;
 }
 
-LRESULT CRelaceDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
+LRESULT CReplaceDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	return 0;
 }
 
-LRESULT CRelaceDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+LRESULT CReplaceDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	EndDialog(wID);
+	ShowWindow(SW_HIDE);
 	return 0;
 }
 

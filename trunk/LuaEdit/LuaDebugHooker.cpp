@@ -6,6 +6,7 @@
 #include "DropFileHandler.h"
 
 #include "resource.h"
+#include "AboutDlg.h"
 #include "DialogWindow.h"
 #include "CommandWindow.h"
 #include "DebugHostWindow.h"
