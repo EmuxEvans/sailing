@@ -222,3 +222,19 @@ void CFileManager::GotoLine(int nLine, int nIndex)
 	pView = (CLuaEditView*)m_pTabView->GetPageData(nIndex);
 	return pView->GotoLine(nLine);
 }
+
+void CFileManager::Find(const char* pWhat)
+{
+	if(m_pTabView->GetActivePage()<0) return;
+
+	CLuaEditView* pView = (CLuaEditView*)m_pTabView->GetPageData(m_pTabView->GetActivePage());
+	pView->FindNextBookmark();
+}
+
+void CFileManager::Replace(const char* pWhat, const char* pWith)
+{
+}
+
+void CFileManager::ReplaceAll(const char* pWhat, const char* pWith)
+{
+}

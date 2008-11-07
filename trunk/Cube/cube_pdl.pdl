@@ -34,6 +34,13 @@ FILTER LOBBY_FILTER_ID lobby;
 CMD_SVR roomlist_get(
 );
 CMD_CLT roomlist_callback(
+	int index,
+	string name[],
+	string map[],
+	string singer[],
+	int state
+);
+CMD_CLT roomlist_end(
 );
 
 CMD_SVR room_create(
@@ -126,6 +133,18 @@ CMD_CLT chat_callback(
 	string what[]
 );
 
+CMD_SVR xuxu(
+	int loud,
+    string["$$<=CUBE_NICK_LEN+1"] who[],
+    string["$$<=300+1"] what[]
+);
+CMD_CLT xuxu_callback(
+	int loud,
+	string from[],
+	string who[],
+	string what[]
+);
+
 CMD_SVR walk(
     string["$$<=CUBE_ROOM_POSITION_LEN+1"] pos[]
 );
@@ -134,8 +153,6 @@ CMD_CLT walk_callback(
 	string pos[]
 );
 
-CMD_SVR set_singer(
-);
 CMD_SVR load_complete(
 );
 CMD_SVR set_ready(

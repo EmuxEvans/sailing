@@ -27,7 +27,6 @@ struct CUBE_CONNECTION {
 	char recv_buf[10*1024];
 };
 
-
 struct CUBE_ROOM {
 	char name[CUBE_ROOM_NAME_LEN+1];
 	int state;
@@ -52,6 +51,11 @@ extern CUBE_ROOM* room_list[1000];
 CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char* map);
 void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 void cube_room_check(CUBE_ROOM* room);
+
+void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn);
+void cube_room_terminate(CUBE_ROOM* room);
+
+int cube_can_change_equipment(CUBE_CONNECTION* conn);
 
 #ifdef __cplusplus
 }
