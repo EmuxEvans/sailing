@@ -86,6 +86,8 @@ void lobby_roomlist_get(SVR_USER_CTX* user_ctx)
 {
 	int idx;
 	for(idx=0; idx<sizeof(room_list)/sizeof(room_list[0]); idx++) {
+		if(room_list[idx]==NULL) continue;
+		if(room_list[idx]->owner[0]=='\0') continue;
 		if(room_list[idx]->singer>=0) {
 			lobby_roomlist_callback(user_ctx, idx, room_list[idx]->name, room_list[idx]->conns[room_list[idx]->singer]->nick, room_list[idx]->map, room_list[idx]->state);
 		} else {
@@ -100,9 +102,9 @@ void lobby_room_create(SVR_USER_CTX* user_ctx, const char* name, const char* map
 	CUBE_ROOM* room;
 	if(user_ctx->conn->room!=NULL) return;
 
-	room = cube_room_create(user_ctx->conn, name, map);
+	room = cube_room_create(user_ctx->conn, name, map, "");
 	if(room==NULL) {
-		lobby_room_callback(user_ctx, ERR_UNKNOWN, "");
+		lobby_room_callback(user_ctx, ERR_UNKNOWN, "", "");
 		return;
 	}
 
@@ -115,7 +117,7 @@ void lobby_room_join(SVR_USER_CTX* user_ctx, int index)
 	CUBE_ROOM* room;
 
 	if(index<0 || index>=sizeof(room_list)/sizeof(room_list[0]) || room_list[index]==NULL) {
-		lobby_room_callback(user_ctx, ERR_UNKNOWN, "");
+		lobby_room_callback(user_ctx, ERR_UNKNOWN, "", "");
 		return;
 	}
 	room = room_list[index];
@@ -128,6 +130,39 @@ void lobby_room_join(SVR_USER_CTX* user_ctx, int index)
 	}
 
 	room->conns[idx] = user_ctx->conn;
+
+	cube_room_onjoin(room, user_ctx->conn);
+}
+
+void lobby_room_join_owner(SVR_USER_CTX* user_ctx, const char* nick)
+{
+	CUBE_ROOM* room;
+	int idx;
+
+	if(user_ctx->conn->room!=NULL) return;
+
+	for(idx=0; idx<sizeof(room_list)/sizeof(room_list[0]); idx++) {
+		if(room_list[idx]==NULL) continue;
+		if(strcmp(room_list[idx]->owner, nick)==0) break;
+	}
+	if(idx==sizeof(room_list)/sizeof(room_list[0])) {
+		room = room_list[idx];
+		for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+			if(room->conns[idx]==NULL) break;
+		}
+		if(idx<sizeof(room->conns)/sizeof(room->conns[0])) {
+			lobby_room_callback(user_ctx, ERR_UNKNOWN, "", "");
+			return;
+		}
+		room->conns[idx] = user_ctx->conn;
+	} else {
+		room = cube_room_create(user_ctx->conn, "", "", nick);
+	}
+
+	if(room==NULL) {
+		lobby_room_callback(user_ctx, ERR_UNKNOWN, "", "");
+		return;
+	}
 
 	cube_room_onjoin(room, user_ctx->conn);
 }

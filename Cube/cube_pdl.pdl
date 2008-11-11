@@ -50,8 +50,12 @@ CMD_SVR room_create(
 CMD_SVR room_join(
 	int idx
 );
+CMD_SVR room_join_owner(
+    string["$$<=CUBE_NICK_LEN+1"] nick[]
+);
 CMD_CLT room_callback(
 	int ret,
+	string owner[],
 	string name[]
 );
 
