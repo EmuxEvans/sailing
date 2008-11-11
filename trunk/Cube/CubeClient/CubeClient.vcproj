@@ -18,7 +18,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -61,6 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="ws2_32.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -90,7 +91,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)"
 			ConfigurationType="1"
 			CharacterSet="1"
@@ -177,13 +178,27 @@
 				>
 			</File>
 			<File
-				RelativePath=".\cube_client_pdl_impl.c"
-				>
-			</File>
-			<File
 				RelativePath=".\cube_pdl.CubeClient.c"
 				>
 			</File>
+			<File
+				RelativePath=".\cube_pdl.CubeClient.hook.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\OOKTCPConnection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TCPConnection.cpp"
+				>
+			</File>
+			<Filter
+				Name="Resource Files"
+				Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+				UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+				>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -198,12 +213,18 @@
 				RelativePath=".\cube_pdl.CubeClient.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
+			<File
+				RelativePath=".\cube_pdl.CubeClient.hook.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\OOKTCPConnection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TCPConnection.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="..\cube_pdl.pdl"
@@ -213,8 +234,8 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="del /Q $(ProjectDir)$(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(ProjectDir)$(InputName).$(ProjectName).c&#x0D;&#x0A;cd &quot;$(InputDir)&quot;&#x0D;&#x0A;copy $(InputName).pdl $(InputName).$(ProjectName).pdl&#x0D;&#x0A;..\framework\$(ConfigurationName)-$(PlatformName)\pdl_cc CMD_CLT CLT $(InputName).$(ProjectName).pdl&#x0D;&#x0A;copy $(InputName).$(ProjectName).h $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).c $(ProjectDir)&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).pdl&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).c"
-					Outputs="$(InputName).$(ProjectName).h;$(InputName).$(ProjectName).c"
+					CommandLine="del /Q $(ProjectDir)$(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(ProjectDir)$(InputName).$(ProjectName).c&#x0D;&#x0A;cd &quot;$(InputDir)&quot;&#x0D;&#x0A;copy $(InputName).pdl $(InputName).$(ProjectName).pdl&#x0D;&#x0A;..\framework\$(ConfigurationName)-$(PlatformName)\pdl_cc CMD_CLT CLT $(InputName).$(ProjectName).pdl&#x0D;&#x0A;$(OutDir)\CubeHookGen.exe CMD_CLT CubeHook $(InputName).$(ProjectName).pdl&#x0D;&#x0A;copy $(InputName).$(ProjectName).h $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).c $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).hook.hpp $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).hook.cpp $(ProjectDir)&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).pdl&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).hook.h&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).hook.c&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).hpp&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).cpp&#x0D;&#x0A;"
+					Outputs="$(InputName).$(ProjectName).h;$(InputName).$(ProjectName).c;$(InputName).$(ProjectName).hpp;$(InputName).$(ProjectName).cpp"
 				/>
 			</FileConfiguration>
 			<FileConfiguration
@@ -222,8 +243,8 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="del /Q $(ProjectDir)$(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(ProjectDir)$(InputName).$(ProjectName).c&#x0D;&#x0A;cd &quot;$(InputDir)&quot;&#x0D;&#x0A;copy $(InputName).pdl $(InputName).$(ProjectName).pdl&#x0D;&#x0A;..\framework\$(ConfigurationName)-$(PlatformName)\pdl_cc CMD_CLT CLT $(InputName).$(ProjectName).pdl&#x0D;&#x0A;copy $(InputName).$(ProjectName).h $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).c $(ProjectDir)&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).pdl&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).c"
-					Outputs="$(InputName).$(ProjectName).h;$(InputName).$(ProjectName).c"
+					CommandLine="del /Q $(ProjectDir)$(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(ProjectDir)$(InputName).$(ProjectName).c&#x0D;&#x0A;cd &quot;$(InputDir)&quot;&#x0D;&#x0A;copy $(InputName).pdl $(InputName).$(ProjectName).pdl&#x0D;&#x0A;..\framework\$(ConfigurationName)-$(PlatformName)\pdl_cc CMD_CLT CLT $(InputName).$(ProjectName).pdl&#x0D;&#x0A;$(OutDir)\CubeHookGen.exe CMD_CLT CubeHook $(InputName).$(ProjectName).pdl&#x0D;&#x0A;copy $(InputName).$(ProjectName).h $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).c $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).hpp $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).cpp $(ProjectDir)&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).pdl&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).c&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).hpp&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).cpp&#x0D;&#x0A;"
+					Outputs="$(InputName).$(ProjectName).h;$(InputName).$(ProjectName).c;$(InputName).$(ProjectName).hpp;$(InputName).$(ProjectName).cpp"
 				/>
 			</FileConfiguration>
 		</File>

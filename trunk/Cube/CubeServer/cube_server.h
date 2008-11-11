@@ -28,6 +28,7 @@ struct CUBE_CONNECTION {
 };
 
 struct CUBE_ROOM {
+	char owner[CUBE_NICK_LEN+1];
 	char name[CUBE_ROOM_NAME_LEN+1];
 	int state;
 	CUBE_CONNECTION* conns[CUBE_ROOM_MEMBER_MAX];
@@ -48,7 +49,7 @@ extern char cube_dbstr[100];
 extern CUBE_CONNECTION* conn_list[1000];
 extern CUBE_ROOM* room_list[1000];
 
-CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char* map);
+CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char* map, const char* owner);
 void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 void cube_room_check(CUBE_ROOM* room);
 
