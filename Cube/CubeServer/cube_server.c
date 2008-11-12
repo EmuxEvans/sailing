@@ -160,7 +160,7 @@ ZION_EXPORT int module_entry(int reason)
 	return ERR_NOERROR;
 }
 
-CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char* map)
+CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char* map, const char* owner)
 {
 	CUBE_ROOM* room;
 	room = (CUBE_ROOM*)mempool_alloc(room_pool);
@@ -169,8 +169,9 @@ CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char*
 	memset(room, 0, sizeof(*room));
 	strcpy(room->name, name);
 	strcpy(room->map, map);
+	strcpy(room->owner, owner);
 	room->singer = 0;
-	room->conns[0] = conn;
+	room->members[0].conn = conn;
 	conn->room = room;
 	conn->room_idx = 0;
 
@@ -182,19 +183,20 @@ void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 	int idx;
 	SVR_USER_CTX ctx;
 
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==conn) break;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==conn) break;
 	}
-	assert(idx<sizeof(room->conns)/sizeof(room->conns[0]));
+	assert(idx<sizeof(room->members)/sizeof(room->members[0]));
 
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) continue;
-		ctx.conn = room->conns[idx];
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
+		ctx.conn = room->members[idx].conn;
 		room_notify_leave(&ctx, conn->nick);
 	}
 
-	room->conns[idx] = NULL;
-	room->readys[idx] = 0;
+	room->members[idx].conn = NULL;
+	room->members[idx].ready = 0;
+	room->members[idx].loaded = 0;
 	conn->room = NULL;
 }
 
@@ -203,45 +205,46 @@ void cube_room_check(CUBE_ROOM* room)
 	int idx, count, ready, loaded;
 
 	count = ready = loaded = 0;
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) continue;
-		if(room->readys[idx]) ready++;
-		if(room->loaded[idx]) loaded++;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
+		if(room->members[idx].ready) ready++;
+		if(room->members[idx].loaded) loaded++;
 		count++;
 	}
 	if(count==0) {
 		mempool_free(room_pool, room);
 		return;
 	}
-	if(room->singer>=0 && room->conns[room->singer]==NULL) {
+	if(room->singer>=0 && room->members[room->singer].conn==NULL) {
 		room->singer = -1;
 	}
 	if(room->singer==-1 && room->state!=CUBE_ROOM_STATE_ACTIVE) {
-		for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			SVR_USER_CTX ctx;
-			if(room->conns[idx]==NULL) continue;
-			ctx.conn = room->conns[idx];
+			if(room->members[idx].conn==NULL) continue;
+			ctx.conn = room->members[idx].conn;
 			room_notify_terminate(&ctx);
+			room->members[idx].ready = 0;
+			room->members[idx].loaded = 0;
 		}
-		memset(room->readys, 0, sizeof(room->readys));
 		return;
 	}
 	if(count==ready && room->singer>=0 && room->state==CUBE_ROOM_STATE_ACTIVE) {
 		room->state = CUBE_ROOM_STATE_LOADING;
-		for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			SVR_USER_CTX ctx;
-			if(room->conns[idx]==NULL) continue;
-			ctx.conn = room->conns[idx];
+			if(room->members[idx].conn==NULL) continue;
+			ctx.conn = room->members[idx].conn;
 			room_notify_load(&ctx);
 		}
 		return;
 	}
 	if(count==loaded && room->state==CUBE_ROOM_STATE_LOADING) {
 		room->state = CUBE_ROOM_STATE_GAMING;
-		for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
+		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			SVR_USER_CTX ctx;
-			if(room->conns[idx]==NULL) continue;
-			ctx.conn = room->conns[idx];
+			if(room->members[idx].conn==NULL) continue;
+			ctx.conn = room->members[idx].conn;
 			room_notify_start(&ctx);
 		}
 		return;
@@ -253,21 +256,21 @@ void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 	int idx;
 	SVR_USER_CTX ctx;
 
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) continue;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
 
-		ctx.conn = room->conns[idx];
+		ctx.conn = room->members[idx].conn;
 		room_notify_join(&ctx, conn->nick, conn->equ);
 
-		if(room->conns[idx]!=conn) continue;
+		if(room->members[idx].conn!=conn) continue;
 
 		ctx.conn = conn;
-		room_notify_join(&ctx, room->conns[idx]->nick, room->conns[idx]->equ);
+		room_notify_join(&ctx, room->members[idx].conn->nick, room->members[idx].conn->equ);
 	}
 
 	ctx.conn = conn;
 	if(room->singer>=0) {
-		room_info_callback(&ctx, room->name, room->conns[room->singer]->nick, room->map);
+		room_info_callback(&ctx, room->name, room->members[room->singer].conn->nick, room->map);
 	} else {
 		room_info_callback(&ctx, room->name, "", room->map);
 	}
@@ -278,17 +281,17 @@ void cube_room_terminate(CUBE_ROOM* room)
 	int i, j;
 	SVR_USER_CTX ctx;
 
-	for(i=0; i<sizeof(room->conns)/sizeof(room->conns[0]); i++) {
-		if(room->conns[i]==NULL) continue;
-		ctx.conn = room->conns[i];
+	for(i=0; i<sizeof(room->members)/sizeof(room->members[0]); i++) {
+		if(room->members[i].conn==NULL) continue;
+		ctx.conn = room->members[i].conn;
 
 		room_notify_terminate(&ctx);
-		for(j=0; j<sizeof(room->conns)/sizeof(room->conns[0]); j++) {
-			if(room->conns[j]==NULL) continue;
-			room_notify_join(&ctx, room->conns[j]->nick, room->conns[j]->equ);
+		for(j=0; j<sizeof(room->members)/sizeof(room->members[0]); j++) {
+			if(room->members[j].conn==NULL) continue;
+			room_notify_join(&ctx, room->members[j].conn->nick, room->members[j].conn->equ);
 		}
 		if(room->singer>=0) {
-			room_info_callback(&ctx, room->name, room->conns[room->singer]->nick, room->map);
+			room_info_callback(&ctx, room->name, room->members[room->singer].conn->nick, room->map);
 		} else {
 			room_info_callback(&ctx, room->name, "", room->map);
 		}
@@ -299,6 +302,6 @@ int cube_can_change_equipment(CUBE_CONNECTION* conn)
 {
 	if(conn->room==NULL) return 1;
 	if(conn->room->state!=CUBE_ROOM_STATE_ACTIVE) return 0;
-	if(conn->room->readys[conn->room_idx]) return 0;
+	if(conn->room->members[conn->room_idx].ready) return 0;
 	return 1;
 }
