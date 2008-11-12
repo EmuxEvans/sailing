@@ -31,9 +31,11 @@ struct CUBE_ROOM {
 	char owner[CUBE_NICK_LEN+1];
 	char name[CUBE_ROOM_NAME_LEN+1];
 	int state;
-	CUBE_CONNECTION* conns[CUBE_ROOM_MEMBER_MAX];
-	int readys[CUBE_ROOM_MEMBER_MAX];
-	int loaded[CUBE_ROOM_MEMBER_MAX];
+	struct {
+		CUBE_CONNECTION* conn;
+		int ready;
+		int loaded;
+	} members[CUBE_ROOM_MEMBER_MAX];
 	int singer;
 	char map[CUBE_ROOM_MAP_LEN+1];
 };

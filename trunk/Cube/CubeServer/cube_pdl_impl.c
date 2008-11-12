@@ -89,7 +89,7 @@ void lobby_roomlist_get(SVR_USER_CTX* user_ctx)
 		if(room_list[idx]==NULL) continue;
 		if(room_list[idx]->owner[0]=='\0') continue;
 		if(room_list[idx]->singer>=0) {
-			lobby_roomlist_callback(user_ctx, idx, room_list[idx]->name, room_list[idx]->conns[room_list[idx]->singer]->nick, room_list[idx]->map, room_list[idx]->state);
+			lobby_roomlist_callback(user_ctx, idx, room_list[idx]->name, room_list[idx]->members[room_list[idx]->singer].conn->nick, room_list[idx]->map, room_list[idx]->state);
 		} else {
 			lobby_roomlist_callback(user_ctx, idx, room_list[idx]->name, "", room_list[idx]->map, room_list[idx]->state);
 		}
@@ -123,13 +123,13 @@ void lobby_room_join(SVR_USER_CTX* user_ctx, int index)
 	room = room_list[index];
 	if(room->state!=CUBE_ROOM_STATE_ACTIVE) {
 	}
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) break;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) break;
 	}
-	if(idx==sizeof(room->conns)/sizeof(room->conns[0])) {
+	if(idx==sizeof(room->members)/sizeof(room->members[0])) {
 	}
 
-	room->conns[idx] = user_ctx->conn;
+	room->members[idx].conn = user_ctx->conn;
 
 	cube_room_onjoin(room, user_ctx->conn);
 }
@@ -147,14 +147,14 @@ void lobby_room_join_owner(SVR_USER_CTX* user_ctx, const char* nick)
 	}
 	if(idx==sizeof(room_list)/sizeof(room_list[0])) {
 		room = room_list[idx];
-		for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-			if(room->conns[idx]==NULL) break;
+		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+			if(room->members[idx].conn==NULL) break;
 		}
-		if(idx<sizeof(room->conns)/sizeof(room->conns[0])) {
+		if(idx<sizeof(room->members)/sizeof(room->members[0])) {
 			lobby_room_callback(user_ctx, ERR_UNKNOWN, "", "");
 			return;
 		}
-		room->conns[idx] = user_ctx->conn;
+		room->members[idx].conn = user_ctx->conn;
 	} else {
 		room = cube_room_create(user_ctx->conn, "", "", nick);
 	}
@@ -271,23 +271,23 @@ void room_info_set(SVR_USER_CTX* user_ctx, const char* singer, const char* map)
 	if(user_ctx->conn->room==NULL) return;
 	room = user_ctx->conn->room;
 
-	if(room->singer>=0 && room->conns[room->singer]!=user_ctx->conn) return;
+	if(room->singer>=0 && room->members[room->singer].conn!=user_ctx->conn) return;
 	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
 
 	sidx = -1;
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) continue;
-		if(strcmp(room->conns[idx]->nick, singer)!=0) continue;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
+		if(strcmp(room->members[idx].conn->nick, singer)!=0) continue;
 		sidx = idx;
 	}
 	room->singer = sidx;
 	if(map[0]!='\0') strcpy(room->map, map);
 
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) continue;
-		ctx.conn = room->conns[idx];
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
+		ctx.conn = room->members[idx].conn;
 		if(room->singer>=0) {
-			room_info_callback(&ctx, room->name, room->conns[room->singer]->nick, room->map);
+			room_info_callback(&ctx, room->name, room->members[room->singer].conn->nick, room->map);
 		} else {
 			room_info_callback(&ctx, room->name, "", room->map);
 		}
@@ -309,8 +309,8 @@ void room_chat(SVR_USER_CTX* user_ctx, const char* what)
 	if(user_ctx->conn->room==NULL) return;
 	room = user_ctx->conn->room;
 
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) continue;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
 		room_chat_callback(&ctx, user_ctx->conn->nick, what);
 	}
 }
@@ -324,20 +324,20 @@ void room_xuxu(SVR_USER_CTX* user_ctx, int loud, const char* who, const char* wh
 	if(user_ctx->conn->room==NULL) return;
 	room = user_ctx->conn->room;
 
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) continue;
-		if(strcmp(room->conns[idx]->nick, who)==0) break;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
+		if(strcmp(room->members[idx].conn->nick, who)==0) break;
 	}
-	if(idx==sizeof(room->conns)/sizeof(room->conns[0])) return;
+	if(idx==sizeof(room->members)/sizeof(room->members[0])) return;
 
 	if(loud) {
-		for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-			if(room->conns[idx]==NULL) continue;
-			ctx.conn = room->conns[idx];
+		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+			if(room->members[idx].conn==NULL) continue;
+			ctx.conn = room->members[idx].conn;
 			room_xuxu_callback(&ctx, loud, user_ctx->conn->nick, who, what);
 		}
 	} else {
-		ctx.conn = room->conns[idx];
+		ctx.conn = room->members[idx].conn;
 		room_xuxu_callback(&ctx, loud, user_ctx->conn->nick, who, what);
 	}
 }
@@ -351,8 +351,8 @@ void room_walk(SVR_USER_CTX* user_ctx, const char* pos)
 	if(user_ctx->conn->room==NULL) return;
 	room = user_ctx->conn->room;
 
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) continue;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
 		room_walk_callback(&ctx, user_ctx->conn->nick, pos);
 	}
 }
@@ -363,7 +363,7 @@ void room_load_complete(SVR_USER_CTX* user_ctx)
 	room = user_ctx->conn->room;
 	if(room==NULL) return;
 	if(room->state!=CUBE_ROOM_STATE_LOADING) return;
-	room->loaded[user_ctx->conn->room_idx] = 1;
+	room->members[user_ctx->conn->room_idx].loaded = 1;
 }
 
 void room_set_ready(SVR_USER_CTX* user_ctx, int flag)
@@ -374,10 +374,10 @@ void room_set_ready(SVR_USER_CTX* user_ctx, int flag)
 	room = user_ctx->conn->room;
 	if(room==NULL) return;
 	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
-	room->readys[user_ctx->conn->room_idx] = flag;
-	for(idx=0; idx<sizeof(room->conns)/sizeof(room->conns[0]); idx++) {
-		if(room->conns[idx]==NULL) continue;
-		ctx.conn = room->conns[idx];
+	room->members[user_ctx->conn->room_idx].ready = flag;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
+		ctx.conn = room->members[idx].conn;
 		room_notify_ready(&ctx, user_ctx->conn->nick, flag);
 	}
 }
@@ -385,12 +385,16 @@ void room_set_ready(SVR_USER_CTX* user_ctx, int flag)
 void room_terminate(SVR_USER_CTX* user_ctx)
 {
 	CUBE_ROOM* room;
+	int idx;
 	room = user_ctx->conn->room;
 	if(room==NULL) return;
 	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
-	if(room->conns[room->singer]!=user_ctx->conn) return;
+	if(room->members[room->singer].conn!=user_ctx->conn) return;
 	room->state = CUBE_ROOM_STATE_ACTIVE;
-	memset(room->readys, 0, sizeof(room->readys));
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		room->members[idx].loaded = 0;
+		room->members[idx].ready = 0;
+	}
 	cube_room_terminate(room);
 }
 
