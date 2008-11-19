@@ -14,7 +14,7 @@ typedef struct CUBE_ROOM CUBE_ROOM;
 struct CUBE_CONNECTION {
 	int index;
 	NETWORK_HANDLE handle;
-	int uid;
+	int uuid;
 	char nick[CUBE_NICK_LEN+1];
 
 	char ri[CUBE_ROLEINFO_LEN+1];

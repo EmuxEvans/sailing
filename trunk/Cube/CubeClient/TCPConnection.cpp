@@ -52,7 +52,10 @@ BOOL CTCPConnection::Connect(LPCTSTR pszEndpoint)
 	SOCKADDR_IN sa;
 	INT sa_len = sizeof(sa);
 	_tcscpy(szBuf, pszEndpoint);
-	if(WSAStringToAddress(szBuf, AF_INET, NULL, (LPSOCKADDR)&sa, &sa_len)==SOCKET_ERROR) return FALSE;
+	if(WSAStringToAddressA(szBuf, AF_INET, NULL, (LPSOCKADDR)&sa, &sa_len)==SOCKET_ERROR) {
+		WSAGetLastError();
+		return FALSE;
+	}
 
 	m_hSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(m_hSock==INVALID_SOCKET) return FALSE;

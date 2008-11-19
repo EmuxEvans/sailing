@@ -318,7 +318,7 @@ int appbox_init()
 		SYSLOG(LOG_ERROR, MODULE_NAME, "dymempool_init() fail, ret=%d", ret);
 		return appbox_quit(ERR_UNKNOWN);
 	}
-	ret = dbapi_init(NULL, 0);
+	ret = dbapi_init(NULL, 10*1024);
 	if(ret!=ERR_NOERROR) {
 		SYSLOG(LOG_ERROR, MODULE_NAME, "dbapi_init() fail, ret=%d", ret);
 		return appbox_quit(ERR_UNKNOWN);
