@@ -35,6 +35,7 @@ struct CUBE_ROOM {
 		CUBE_CONNECTION* conn;
 		int ready;
 		int loaded;
+		char pos[200];
 	} members[CUBE_ROOM_MEMBER_MAX];
 	int singer;
 	char map[CUBE_ROOM_MAP_LEN+1];
