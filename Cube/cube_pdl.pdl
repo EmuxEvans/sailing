@@ -18,7 +18,8 @@ CMD_SVR login(
     string["$$<=CUBE_LOGIN_TOKEN_LEN+1"] token[]
 );
 CMD_CLT login_callback(
-    int     ret
+    int     ret,
+    string	nick[]
 );
 CMD_SVR create_player(
     string["$$<=CUBE_NICK_LEN+1"] nick[],

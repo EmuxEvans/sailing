@@ -350,7 +350,7 @@
 					Name="VCCustomBuildTool"
 					Description="Generating PDL lexical parser"
 					CommandLine="&quot;$(ProjectDir)..\..\framework_dep\GnuWin32\bin\flex.exe&quot; -o&quot;$(InputDir)$(InputName).lex.c&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-					AdditionalDependencies="pdl.l"
+					AdditionalDependencies=""
 					Outputs="$(ProjectDir)..\tools\pdl.lex.c"
 				/>
 			</FileConfiguration>
@@ -394,8 +394,8 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="cd &quot;$(ProjectDir)..\..\framework_dep\GnuWin32\bin&quot;&#x0D;&#x0A;bison.exe -d -o&quot;$(InputDir)$(InputName).tab.c&quot; &quot;$(InputPath)&quot;"
-					AdditionalDependencies="pdl.y"
+					CommandLine="cd &quot;$(ProjectDir)..\..\framework_dep\GnuWin32\bin&quot;&#x0D;&#x0A;bison.exe -d -o&quot;$(InputDir)$(InputName).tab.c&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+					AdditionalDependencies=""
 					Outputs="$(ProjectDir)..\tools\pdl.tab.h;$(ProjectDir)..\tools\pdl.tab.c"
 				/>
 			</FileConfiguration>

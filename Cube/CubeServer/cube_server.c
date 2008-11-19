@@ -18,12 +18,16 @@ static void onconnect(NETWORK_HANDLE handle, void* userptr)
 {
 	CUBE_CONNECTION* conn;
 	conn = (CUBE_CONNECTION*)userptr;
+	conn->handle = handle;
+	assert(handle);
 }
 
 static void ondata(NETWORK_HANDLE handle, void* userptr)
 {
 	CUBE_CONNECTION* conn;
+	SVR_USER_CTX ctx;
 	conn = (CUBE_CONNECTION*)userptr;
+	ctx.conn = conn;
 
 	while(1) {
 		int ret;
@@ -33,8 +37,8 @@ static void ondata(NETWORK_HANDLE handle, void* userptr)
 
 		if(network_recvbuf_len(handle)<2) break;
 		network_recvbuf_get(handle, &len, 0, sizeof(len));
-		if(network_recvbuf_len(handle)<sizeof(len)+len) break;
-		network_recvbuf_get(handle, pkg_buf, sizeof(len), len);
+		if(network_recvbuf_len(handle)<len) break;
+		network_recvbuf_get(handle, pkg_buf, sizeof(len), len-sizeof(len));
 
 		if(conn->nick[0]=='\0' && *((unsigned short*)pkg_buf)!=LOGIN_FILTER_ID) {
 			network_disconnect(handle);
@@ -42,13 +46,13 @@ static void ondata(NETWORK_HANDLE handle, void* userptr)
 		}
 
 		memstream_init(&stream, pkg_buf, len, len);
-		ret = SVR_Dispatcher(NULL, (STREAM*)&stream);
+		ret = SVR_Dispatcher(&ctx, (STREAM*)&stream);
 		if(ret!=ERR_NOERROR) {
 			network_disconnect(handle);
 			break;
 		}
 
-		network_recvbuf_commit(handle, sizeof(len)+len);
+		network_recvbuf_commit(handle, len);
 	}
 }
 
@@ -69,9 +73,8 @@ static void ondisconnect(NETWORK_HANDLE handle, void* userptr)
 
 static void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 {
-	int idx;
+	int idx, ret;
 	CUBE_CONNECTION* conn;
-	NETWORK_HANDLE handle;
 	NETWORK_EVENT event;
 
 	for(idx=0; idx<sizeof(conn_list)/sizeof(conn_list[0]); idx++) {
@@ -97,8 +100,8 @@ static void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 	memset(conn, 0, sizeof(*conn));
 	conn->index = idx;
 
-	handle = network_add(sock, &event, conn);
-	if(handle==NULL) {
+	ret = network_add(sock, &event, conn, &conn->handle);
+	if(ret!=ERR_NOERROR) {
 		mempool_free(conn_pool, conn);
 		sock_close(sock);
 		return;

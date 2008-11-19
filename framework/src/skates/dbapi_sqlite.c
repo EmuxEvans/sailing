@@ -52,7 +52,7 @@ DBAPI_PROVIDER dbapi_sqlite_provider =
 static DBAPI_SQLITE sqlite_list[100];
 static os_mutex_t sqlite_mutex;
 
-static int _set_errcode(DBAPI_SQLITE* conn, int errcode);
+static int _set_errcode(DBAPI_SQLITE* conn, int errcode, char* errmsg);
 
 static DBAPI_SQLITE* sqlite_alloc()
 {
@@ -122,32 +122,36 @@ int dbapi_sqlite_begin(DBAPI_HANDLE handle)
 {
 	int ret;
 	DBAPI_SQLITE* conn = (DBAPI_SQLITE*)handle;
-	ret = sqlite3_exec(conn->db, "begin transaction", NULL, NULL, NULL);
-	return _set_errcode(conn, ret);
+	char* errmsg;
+	ret = sqlite3_exec(conn->db, "begin transaction", NULL, NULL, &errmsg);
+	return _set_errcode(conn, ret, errmsg);
 }
 
 int dbapi_sqlite_commit(DBAPI_HANDLE handle)
 {
 	int ret;
 	DBAPI_SQLITE* conn = (DBAPI_SQLITE*)handle;
-	ret = sqlite3_exec(conn->db, "commit transaction", NULL, NULL, NULL);
-	return _set_errcode(conn, ret);
+	char* errmsg;
+	ret = sqlite3_exec(conn->db, "commit transaction", NULL, NULL, &errmsg);
+	return _set_errcode(conn, ret, errmsg);
 }
 
 int dbapi_sqlite_rollback(DBAPI_HANDLE handle)
 {
 	int ret;
 	DBAPI_SQLITE* conn = (DBAPI_SQLITE*)handle;
-	ret = sqlite3_exec(conn->db, "rollback transaction", NULL, NULL, NULL);
-	return _set_errcode(conn, ret);
+	char* errmsg;
+	ret = sqlite3_exec(conn->db, "rollback transaction", NULL, NULL, &errmsg);
+	return _set_errcode(conn, ret, errmsg);
 }
 
 int dbapi_sqlite_execute(DBAPI_HANDLE handle,const char *sql)
 {
 	int ret;
 	DBAPI_SQLITE* conn = (DBAPI_SQLITE*)handle;
-	ret = sqlite3_exec(conn->db, sql, NULL, NULL, NULL);
-	return _set_errcode(conn, ret);
+	char* errmsg;
+	ret = sqlite3_exec(conn->db, sql, NULL, NULL, &errmsg);
+	return _set_errcode(conn, ret, errmsg);
 }
 
 int dbapi_sqlite_query(DBAPI_HANDLE handle, const char *sql, DBAPI_RECORDSET *rs, int row_max)
@@ -160,7 +164,7 @@ int dbapi_sqlite_query(DBAPI_HANDLE handle, const char *sql, DBAPI_RECORDSET *rs
 	int row_idx, col_count, col_idx;
 
     ret = sqlite3_prepare(conn->db, sql, -1, &stmt, &next);
-    if(ret!=SQLITE_OK) return _set_errcode(conn, ret);
+    if(ret!=SQLITE_OK) return _set_errcode(conn, ret, NULL);
 
 	col_count = sqlite3_column_count(stmt);
 	ret = dbapi_recordset_set(rs, row_max, col_count);
@@ -180,7 +184,7 @@ int dbapi_sqlite_query(DBAPI_HANDLE handle, const char *sql, DBAPI_RECORDSET *rs
 		if(ret!=SQLITE_ROW) {
             if(ret!=SQLITE_DONE) {
                 sqlite3_finalize(stmt);
-				return _set_errcode(conn, ret);
+				return _set_errcode(conn, ret, NULL);
             }
             break;
         }
@@ -223,9 +227,14 @@ const char* dbapi_sqlite_get_errmsg(DBAPI_HANDLE handle)
 	return conn->errmsg;
 }
 
-int _set_errcode(DBAPI_SQLITE* conn, int errcode)
+int _set_errcode(DBAPI_SQLITE* conn, int errcode, char* errmsg)
 {
 	conn->errcode = errcode;
-	conn->errmsg[0] = '\0';
+	if(errmsg) {
+		strncpy(conn->errmsg, errmsg, sizeof(conn->errmsg)-1);
+		sqlite3_free(errmsg);
+	} else {
+		conn->errmsg[0] = '\0';
+	}
 	return errcode;
 }

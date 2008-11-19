@@ -13,29 +13,30 @@ void login_login(SVR_USER_CTX* user_ctx, const char* token)
 	char password[100];
 	char sql[100];
 	DBAPI_RECORDSET* rs;
+	int idx;
 
-	if(user_ctx->conn->uid>=0) return;
+	if(user_ctx->conn->uuid>0) return;
 
 	if(sscanf(token, "%s %s", username, password)!=2) {
-		login_login_callback(user_ctx, ERR_UNKNOWN);
+		login_login_callback(user_ctx, ERR_UNKNOWN, "");
 		return;
 	}
 
 	handle = dbapi_connect(cube_dbstr);
 	if(handle==NULL) {
-		login_login_callback(user_ctx, ERR_UNKNOWN);
+		login_login_callback(user_ctx, ERR_UNKNOWN, "");
 		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to dbapi_connect(\"%s\")", cube_dbstr);
 		return;
 	}
 
-	sprintf(sql, "select uid, nick, ri, wh, equ from account where username='%s' and password='%s'", username, password);
+	sprintf(sql, "select uuid, nick, ri, wh, equ from account where username='%s' and password='%s'", username, password);
 	ret = dbapi_query(handle, sql, &rs, 1);
 	if(ret!=ERR_NOERROR) {
-		login_login_callback(user_ctx, ERR_UNKNOWN);
+		login_login_callback(user_ctx, ERR_UNKNOWN, "");
 		dbapi_release(handle);
 		return;
 	}
-	user_ctx->conn->uid = atoi(dbapi_recordset_get(rs, 0, 0));
+	user_ctx->conn->uuid = atoi(dbapi_recordset_get(rs, 0, 0));
 	strcpy(user_ctx->conn->nick, dbapi_recordset_get(rs, 0, 1));
 	strcpy(user_ctx->conn->ri, dbapi_recordset_get(rs, 0, 2));
 	strcpy(user_ctx->conn->wh, dbapi_recordset_get(rs, 0, 3));
@@ -44,10 +45,24 @@ void login_login(SVR_USER_CTX* user_ctx, const char* token)
 
 	dbapi_release(handle);
 
+	for(idx=0; idx<sizeof(conn_list)/sizeof(conn_list[0]); idx++) {
+		if(conn_list[idx]==NULL || conn_list[idx]==user_ctx->conn) continue;
+		if(conn_list[idx]->uuid==user_ctx->conn->uuid) {
+			network_disconnect(conn_list[idx]->handle);
+			login_login_callback(user_ctx, ERR_EXISTED, "");
+			memset(user_ctx->conn->nick, 0, sizeof(user_ctx->conn->nick));
+			memset(user_ctx->conn->ri, 0, sizeof(user_ctx->conn->ri));
+			memset(user_ctx->conn->wh, 0, sizeof(user_ctx->conn->wh));
+			memset(user_ctx->conn->equ, 0, sizeof(user_ctx->conn->equ));
+			user_ctx->conn->uuid = 0;
+			return;
+		}
+	}
+
 	if(user_ctx->conn->nick[0]=='\0') {
-		login_login_callback(user_ctx, ERR_NOT_FOUND);
+		login_login_callback(user_ctx, ERR_NOT_FOUND, "");
 	} else {
-		login_login_callback(user_ctx, ERR_NOERROR);
+		login_login_callback(user_ctx, ERR_NOERROR, user_ctx->conn->nick);
 	}
 }
 
@@ -57,18 +72,18 @@ void login_create_player(SVR_USER_CTX* user_ctx, const char* nick, const char* r
 	DBAPI_HANDLE handle;
 	char sql[100];
 
-	if(user_ctx->conn->uid==0) return;
+	if(user_ctx->conn->uuid==0) return;
 	if(user_ctx->conn->nick[0]!='\0') return;
 	if(nick[0]=='\0') return;
 
 	handle = dbapi_connect(cube_dbstr);
 	if(handle==NULL) {
-		login_login_callback(user_ctx, ERR_UNKNOWN);
+		login_create_player_callback(user_ctx, ERR_UNKNOWN);
 		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to dbapi_connect(\"%s\")", cube_dbstr);
 		return;
 	}
 
-	sprintf(sql, "update account set nick='%s', ri='%s' where uid=%d", nick, role, user_ctx->conn->uid);
+	sprintf(sql, "update account set nick='%s', ri='%s' where uuid=%d", nick, role, user_ctx->conn->uuid);
 	ret = dbapi_execute(handle, sql);
 	if(ret!=ERR_NOERROR) {
 		login_create_player_callback(user_ctx, ERR_UNKNOWN);
@@ -190,7 +205,7 @@ void lobby_roleinfo_set(SVR_USER_CTX* user_ctx, const char* value)
 		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to dbapi_connect(\"%s\")", cube_dbstr);
 		return;
 	}
-	sprintf(sql, "update account set ri='%s' where uid=%d", value, user_ctx->conn->uid);
+	sprintf(sql, "update account set ri='%s' where uuid=%d", value, user_ctx->conn->uuid);
 	ret = dbapi_execute(handle, sql);
 	if(ret!=ERR_NOERROR) {
 		dbapi_release(handle);
@@ -217,7 +232,7 @@ void lobby_warehouse_set(SVR_USER_CTX* user_ctx, const char* value)
 		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to dbapi_connect(\"%s\")", cube_dbstr);
 		return;
 	}
-	sprintf(sql, "update account set wh='%s' where uid=%d", value, user_ctx->conn->uid);
+	sprintf(sql, "update account set wh='%s' where uuid=%d", value, user_ctx->conn->uuid);
 	ret = dbapi_execute(handle, sql);
 	if(ret!=ERR_NOERROR) {
 		dbapi_release(handle);
@@ -246,7 +261,7 @@ void lobby_equipment_set(SVR_USER_CTX* user_ctx, const char* value)
 		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to dbapi_connect(\"%s\")", cube_dbstr);
 		return;
 	}
-	sprintf(sql, "update account set equ='%s' where uid=%d", value, user_ctx->conn->uid);
+	sprintf(sql, "update account set equ='%s' where uuid=%d", value, user_ctx->conn->uuid);
 	ret = dbapi_execute(handle, sql);
 	if(ret!=ERR_NOERROR) {
 		dbapi_release(handle);
@@ -411,9 +426,9 @@ int SVR_Send(SVR_USER_CTX* ctx, STREAM* stream)
 	unsigned int count;
 	int ret;
 
-	*((unsigned short*)ctx->buf) = (unsigned short)ctx->stream.len;
-	count = network_downbufs_alloc(downbufs, sizeof(downbufs)/sizeof(downbufs[0]), ctx->stream.len+2);
-	network_downbufs_fill(downbufs, count, 0, ctx->buf, ctx->stream.len+2);
+	*((unsigned short*)ctx->buf) = sizeof(unsigned short) + (unsigned short)ctx->stream.len;
+	count = network_downbufs_alloc(downbufs, sizeof(downbufs)/sizeof(downbufs[0]), sizeof(unsigned short) + ctx->stream.len);
+	network_downbufs_fill(downbufs, count, 0, ctx->buf, sizeof(unsigned short) + ctx->stream.len);
 
 	ret = network_send(ctx->conn->handle, downbufs, count);
 	if(ret!=ERR_NOERROR) {

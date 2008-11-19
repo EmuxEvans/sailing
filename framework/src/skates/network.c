@@ -214,20 +214,21 @@ int network_tcp_unregister(const SOCK_ADDR* sa)
 	return ERR_NOERROR;
 }
 
-NETWORK_HANDLE network_add(SOCK_HANDLE handle, NETWORK_EVENT* event, void* userptr)
+int network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr, NETWORK_HANDLE* handle)
 {
 	NETWORK_CONNECTION* conn;
+	*handle = NULL;
 
 	if(event->recvbuf_pool==NULL && event->recvbuf_buf==NULL) {
-		return NULL;
+		return ERR_INVALID_PARAMETER;
 	}
 
 	conn = mempool_alloc(conn_pool);
-	if(conn==NULL) return NULL;
+	if(conn==NULL) return ERR_NO_ENOUGH_MEMORY;
 
-	fdwatch_set(&conn->fdwitem, handle, FDWATCH_READ|FDWATCH_WRITE, connection_event, conn);
-	conn->sock			= handle;
-	sock_peername(handle, &conn->peername);
+	fdwatch_set(&conn->fdwitem, sock, FDWATCH_READ|FDWATCH_WRITE, connection_event, conn);
+	conn->sock			= sock;
+	sock_peername(sock, &conn->peername);
 	conn->userptr		= userptr;
 	conn->OnConnect		= event->OnConnect;
 	conn->OnData		= event->OnData;
@@ -241,7 +242,7 @@ NETWORK_HANDLE network_add(SOCK_HANDLE handle, NETWORK_EVENT* event, void* userp
 		conn->recvbuf_buf = (char*)mempool_alloc(event->recvbuf_pool);
 		if(conn->recvbuf_buf==NULL) {
 			mempool_free(conn_pool, conn);
-			return NULL;
+			return ERR_NO_ENOUGH_MEMORY;
 		}
 	}
 	conn->recvbuf_cur = 0;
@@ -251,13 +252,15 @@ NETWORK_HANDLE network_add(SOCK_HANDLE handle, NETWORK_EVENT* event, void* userp
 	rlist_init(&conn->downbufs);
 	conn->downbuf_cur = 0;
 
+	*handle = conn;
 	if(fdwatch_add(network_fdw, &conn->fdwitem)!=ERR_NOERROR) {
 		if(conn->recvbuf_pool) mempool_free(conn->recvbuf_pool, conn->recvbuf_buf);
 		mempool_free(conn_pool, conn);
-		return NULL;
+		*handle = NULL;
+		return ERR_UNKNOWN;
 	}
 
-	return conn;
+	return ERR_NOERROR;
 }
 
 int network_del(NETWORK_HANDLE handle)
@@ -354,7 +357,7 @@ int network_recvbuf_get(NETWORK_HANDLE handle, void* buf, unsigned int start, un
 
 	start = (handle->recvbuf_cur + start) % handle->recvbuf_max;
 	t = handle->recvbuf_max - start;
-	if(t<=len) {
+	if(t>len) {
 		memcpy(buf, &handle->recvbuf_buf[start], len);
 	} else {
 		memcpy(buf, &handle->recvbuf_buf[start], t);
@@ -582,7 +585,7 @@ int event_opt_write(NETWORK_CONNECTION* conn)
 	NETWORK_DOWNBUF* downbuf;
 
 	downbuf = (NETWORK_DOWNBUF*)rlist_front(&conn->downbufs);
-	while(downbuf) {
+	while(!rlist_is_head(&conn->downbufs, &downbuf->item)) {
 		int ret;
 		ret = sock_write(conn->sock, &downbuf->buf[conn->downbuf_cur], downbuf->len-conn->downbuf_cur);
 		if(ret<=0) break;
@@ -592,6 +595,7 @@ int event_opt_write(NETWORK_CONNECTION* conn)
 
 		os_mutex_lock(&downbuf_mutex);
 		rlist_pop_front(&conn->downbufs);
+		conn->downbuf_cur = 0;
 		os_mutex_unlock(&downbuf_mutex);
 		network_downbuf_free(downbuf);
 
