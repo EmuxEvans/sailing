@@ -59,12 +59,12 @@ static void ondata(NETWORK_HANDLE handle, void* userptr)
 static void ondisconnect(NETWORK_HANDLE handle, void* userptr)
 {
 	CUBE_CONNECTION* conn;
+	CUBE_ROOM* room;
 	conn = (CUBE_CONNECTION*)userptr;
 
 	if(conn->room!=NULL) {
-		cube_room_leave(conn->room, conn);
-		cube_room_check(conn->room);
-		conn->room = NULL;
+		room = conn->room;
+		cube_room_leave(room, conn);
 	}
 
 	network_del(handle);
@@ -118,6 +118,7 @@ static int cube_init()
 {
 	memset(conn_list, 0, sizeof(conn_list));
 	conn_pool = mempool_create("CUBE_CONN_POOL", sizeof(CUBE_CONNECTION), 0);
+	room_pool = mempool_create("CUBE_ROOM_POOL", sizeof(CUBE_ROOM), 0);
 	return network_tcp_register(&cube_sa, onaccept, NULL);
 }
 
@@ -139,6 +140,7 @@ static int cube_final()
 		}
 	}
 
+	mempool_destroy(room_pool);
 	mempool_destroy(conn_pool);
 	return ERR_NOERROR;
 }
@@ -165,9 +167,17 @@ ZION_EXPORT int module_entry(int reason)
 
 CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char* map, const char* owner)
 {
+	int idx;
 	CUBE_ROOM* room;
+
+	for(idx=0; idx<sizeof(room_list)/sizeof(room_list[0]); idx++) {
+		if(room_list[idx]==NULL) break;
+	}
+	if(idx==sizeof(room_list)/sizeof(room_list[0])) return NULL;
+
 	room = (CUBE_ROOM*)mempool_alloc(room_pool);
 	if(room==NULL) return NULL;
+	room_list[idx] = room;
 
 	memset(room, 0, sizeof(*room));
 	strcpy(room->name, name);
@@ -190,6 +200,7 @@ void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 		if(room->members[idx].conn==conn) break;
 	}
 	assert(idx<sizeof(room->members)/sizeof(room->members[0]));
+	assert(idx==conn->room_idx);
 
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
@@ -197,10 +208,12 @@ void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 		room_notify_leave(&ctx, conn->nick);
 	}
 
-	room->members[idx].conn = NULL;
-	room->members[idx].ready = 0;
-	room->members[idx].loaded = 0;
 	conn->room = NULL;
+	room->members[conn->room_idx].conn = NULL;
+	room->members[conn->room_idx].ready = 0;
+	room->members[conn->room_idx].loaded = 0;
+
+	cube_room_check(room);
 }
 
 void cube_room_check(CUBE_ROOM* room)
@@ -215,6 +228,11 @@ void cube_room_check(CUBE_ROOM* room)
 		count++;
 	}
 	if(count==0) {
+		for(idx=0; idx<sizeof(room_list)/sizeof(room_list[0]); idx++) {
+			if(room_list[idx]==room) break;
+		}
+		assert(idx<sizeof(room_list)/sizeof(room_list[0]));
+		room_list[idx] = NULL;
 		mempool_free(room_pool, room);
 		return;
 	}
@@ -259,16 +277,20 @@ void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 	int idx;
 	SVR_USER_CTX ctx;
 
+	strcpy(room->members[conn->room_idx].pos, "default");
+
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
 
-		ctx.conn = room->members[idx].conn;
-		room_notify_join(&ctx, conn->nick, conn->equ);
-
-		if(room->members[idx].conn!=conn) continue;
-
 		ctx.conn = conn;
 		room_notify_join(&ctx, room->members[idx].conn->nick, room->members[idx].conn->equ);
+		room_walk_callback(&ctx, room->members[idx].conn->nick, room->members[idx].pos);
+
+		if(room->members[idx].conn==conn) continue;
+
+		ctx.conn = room->members[idx].conn;
+		room_notify_join(&ctx, conn->nick, room->members[conn->room_idx].conn->equ);
+		room_walk_callback(&ctx, conn->nick, room->members[conn->room_idx].pos);
 	}
 
 	ctx.conn = conn;

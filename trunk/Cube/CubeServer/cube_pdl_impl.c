@@ -160,7 +160,7 @@ void lobby_room_join_owner(SVR_USER_CTX* user_ctx, const char* nick)
 		if(room_list[idx]==NULL) continue;
 		if(strcmp(room_list[idx]->owner, nick)==0) break;
 	}
-	if(idx==sizeof(room_list)/sizeof(room_list[0])) {
+	if(idx<sizeof(room_list)/sizeof(room_list[0])) {
 		room = room_list[idx];
 		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			if(room->members[idx].conn==NULL) break;
@@ -368,8 +368,11 @@ void room_walk(SVR_USER_CTX* user_ctx, const char* pos)
 
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
+		ctx.conn = room->members[idx].conn;
 		room_walk_callback(&ctx, user_ctx->conn->nick, pos);
 	}
+
+	strcpy(room->members[user_ctx->conn->room_idx].pos, pos);
 }
 
 void room_load_complete(SVR_USER_CTX* user_ctx)

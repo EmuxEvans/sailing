@@ -17,6 +17,9 @@ int main(int argc, char* argv[])
 	login_login(OOKTCP_GET_DEFAULT_CTX(), "a a");
 	login_create_player(OOKTCP_GET_DEFAULT_CTX(), "a", "");
 
+	lobby_room_join_owner(OOKTCP_GET_DEFAULT_CTX(), "a");
+	room_walk(OOKTCP_GET_DEFAULT_CTX(), "aaaaaaa");
+
 	for(;;) {
 		COOKTCPConnection::GetDefault()->Dispatch();
 	}
