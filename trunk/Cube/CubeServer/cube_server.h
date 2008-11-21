@@ -31,14 +31,18 @@ struct CUBE_ROOM {
 	char owner[CUBE_NICK_LEN+1];
 	char name[CUBE_ROOM_NAME_LEN+1];
 	int state;
+
 	struct {
 		CUBE_CONNECTION* conn;
 		int ready;
 		int loaded;
 		char pos[200];
 	} members[CUBE_ROOM_MEMBER_MAX];
-	int singer;
-	char map[CUBE_ROOM_MAP_LEN+1];
+
+	struct {
+		char nick[CUBE_NICK_LEN+1];
+		char song[CUBE_ROOM_SONG_LEN+1];
+	} microphone[CUBE_ROOM_MEMBER_MAX];
 };
 
 struct SVR_USER_CTX {
@@ -52,12 +56,17 @@ extern char cube_dbstr[100];
 extern CUBE_CONNECTION* conn_list[1000];
 extern CUBE_ROOM* room_list[1000];
 
-CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char* map, const char* owner);
+CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char* owner);
 void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 void cube_room_check(CUBE_ROOM* room);
+int cube_room_member_count(CUBE_ROOM* room);
 
 void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 void cube_room_terminate(CUBE_ROOM* room);
+
+void cube_room_sync(CUBE_ROOM* room, CUBE_CONNECTION* conn);
+void cube_room_acquire(CUBE_ROOM* room, const char* nick, const char* song);
+void cube_room_giveup(CUBE_ROOM* room, const char* nick);
 
 int cube_can_change_equipment(CUBE_CONNECTION* conn);
 

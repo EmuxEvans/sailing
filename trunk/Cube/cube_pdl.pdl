@@ -37,8 +37,7 @@ CMD_SVR roomlist_get(
 CMD_CLT roomlist_callback(
 	int index,
 	string name[],
-	string map[],
-	string singer[],
+	int mcount,
 	int state
 );
 CMD_CLT roomlist_end(
@@ -98,14 +97,8 @@ CMD_CLT equipment_callback(
 // ROOM : room
 FILTER ROOM_FILTER_ID room;
 
-CMD_SVR info_set(
-    string["$$<=CUBE_NICK_LEN+1"] singer[],
-    string["$$<=CUBE_ROOM_MAP_LEN+1"] map[]
-);
 CMD_CLT info_callback(
-    string name[],
-    string singer[],
-    string map[]
+    string name[]
 );
 
 CMD_CLT notify_join(
@@ -166,4 +159,16 @@ CMD_SVR set_ready(
 CMD_CLT status_callback(
 );
 CMD_SVR terminate(
+);
+
+CMD_CLT microphone_callback(
+    string nick[],
+    string song[]
+);
+CMD_CLT microphone_end(
+);
+CMD_SVR microphone_acquire(
+    string["$$<=CUBE_ROOM_SONG_LEN+1"] song[]
+);
+CMD_SVR microphone_giveup(
 );
