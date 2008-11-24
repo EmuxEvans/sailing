@@ -97,7 +97,8 @@ CMD_CLT equipment_callback(
 FILTER ROOM_FILTER_ID room;
 
 CMD_CLT info_callback(
-    string name[]
+    string name[],
+    string owner[]
 );
 
 CMD_CLT notify_join(
