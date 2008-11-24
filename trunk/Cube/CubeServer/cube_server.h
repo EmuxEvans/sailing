@@ -60,9 +60,12 @@ CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char*
 void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 void cube_room_check(CUBE_ROOM* room);
 int cube_room_member_count(CUBE_ROOM* room);
+int cube_room_member_index(CUBE_ROOM* room, const char* nick);
 
 void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 void cube_room_terminate(CUBE_ROOM* room);
+
+void cube_room_tick(CUBE_ROOM* room, unsigned int );
 
 void cube_room_sync(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 void cube_room_acquire(CUBE_ROOM* room, const char* nick, const char* song);

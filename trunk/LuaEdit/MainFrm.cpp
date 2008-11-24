@@ -448,8 +448,7 @@ LRESULT CMainFrame::OnDebugBeginHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*
 
 LRESULT CMainFrame::OnDebugHostSetting(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	CHostSettingDlg Dlg;
-	Dlg.DoModal(m_hWnd);
+	m_HostSettingDlg.DoModal(m_hWnd);
 	return 0;
 }
 

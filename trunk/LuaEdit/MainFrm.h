@@ -29,9 +29,10 @@ public:
 	CCommandWindow m_CommandWindow;
 	sstate::CWindowStateMgr<sstate::CStgRegistry> m_stateMgr;
 
-	CAttachHostDlg	m_AttachHostDlg;
-	CFindDlg		m_FindDlg;
-	CReplaceDlg		m_ReplaceDlg;
+	CAttachHostDlg		m_AttachHostDlg;
+	CFindDlg			m_FindDlg;
+	CReplaceDlg			m_ReplaceDlg;
+	CHostSettingDlg		m_HostSettingDlg;
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual BOOL OnIdle();

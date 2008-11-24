@@ -40,6 +40,8 @@
 #define IDC_MATCH_CASE                  1017
 #define IDC_MATCH_WHOLEWORD             1018
 #define IDC_SEARCH_UP                   1019
+#define IDC_SEARCH_UP2                  1020
+#define IDC_USER_REGEXP                 1020
 #define ID_WINDOW_CLOSE                 32772
 #define ID_WINDOW_CLOSE_ALL             32773
 #define ID_WINDOW_NEXTWINDOW            32775
