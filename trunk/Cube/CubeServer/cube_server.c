@@ -389,14 +389,14 @@ void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 		if(room->members[idx].conn==NULL) continue;
 
 		ctx.conn = conn;
-		room_notify_join(&ctx, room->members[idx].conn->index, room->members[idx].conn->nick, room->members[idx].conn->equ);
+		room_notify_join(&ctx, room->members[idx].conn->index, room->members[idx].conn->nick, room->members[idx].conn->ri, room->members[idx].conn->equ);
 		room_walk_callback(&ctx, room->members[idx].conn->nick, room->members[idx].pos);
 		if(room->members[idx].ready) room_notify_ready(&ctx, room->members[idx].conn->nick, room->members[idx].ready);
 
 		if(room->members[idx].conn==conn) continue;
 
 		ctx.conn = room->members[idx].conn;
-		room_notify_join(&ctx, conn->index, conn->nick, room->members[conn->room_idx].conn->equ);
+		room_notify_join(&ctx, conn->index, conn->nick, room->members[conn->room_idx].conn->ri, room->members[conn->room_idx].conn->equ);
 		room_walk_callback(&ctx, conn->nick, room->members[conn->room_idx].pos);
 	}
 
@@ -423,7 +423,7 @@ void cube_room_terminate(CUBE_ROOM* room)
 
 		for(j=0; j<sizeof(room->members)/sizeof(room->members[0]); j++) {
 			if(room->members[j].conn==NULL) continue;
-			room_notify_join(&ctx, room->members[j].conn->index, room->members[j].conn->nick, room->members[j].conn->equ);
+			room_notify_join(&ctx, room->members[j].conn->index, room->members[j].conn->nick, room->members[j].conn->ri, room->members[j].conn->equ);
 			room_walk_callback(&ctx, room->members[j].conn->nick, room->members[j].pos);
 		}
 
