@@ -24,7 +24,6 @@ static void room_timer_proc(TIMER handle, void* key)
 	for(idx=0; idx<sizeof(room_list)/sizeof(room_list[0]); idx++) {
 		if(room_list[idx]==NULL) continue;
 		cube_room_tick(room_list[idx]);
-		cube_room_check(room_list[idx]);
 	}
 	os_mutex_unlock(&room_mtx);
 }
@@ -222,9 +221,6 @@ CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char*
 	memset(room, 0, sizeof(*room));
 	strcpy(room->name, name);
 	strcpy(room->owner, owner);
-	room->members[0].conn = conn;
-	conn->room = room;
-	conn->room_idx = 0;
 
 	return room;
 }
@@ -267,7 +263,7 @@ void cube_room_check(CUBE_ROOM* room)
 		if(room->members[idx].conn==NULL) continue;
 		if(room->members[idx].ready) ready++;
 		if(room->members[idx].loaded) loaded++;
-		if(room->members[idx].p2p_status==(p2pmask|(1<<idx))) p2p++;
+		if((room->members[idx].p2p_status|(1<<idx))==p2pmask) p2p++;
 		if(strcmp(room->members[idx].conn->nick, room->microphone[0].nick)==0) singer = idx;
 		count++;
 	}
@@ -282,19 +278,13 @@ void cube_room_check(CUBE_ROOM* room)
 	}
 
 	if(singer==-1 && room->state!=CUBE_ROOM_STATE_ACTIVE) {
-		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
-			SVR_USER_CTX ctx;
-			if(room->members[idx].conn==NULL) continue;
-			ctx.conn = room->members[idx].conn;
-			room_notify_terminate(&ctx);
-			room->members[idx].ready = 0;
-			room->members[idx].loaded = 0;
-		}
+		cube_room_terminate(room);
 		return;
 	}
 	if(count==ready && singer>=0 && room->state==CUBE_ROOM_STATE_ACTIVE) {
 		room->state = CUBE_ROOM_STATE_LOADING;
 		room->start_time = cube_room_curtime(room) + CUBE_ROOM_TIMEOUT/CUBE_ROOM_TIMER;
+		strcpy(room->singer, room->members[singer].conn->nick);
 		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			SVR_USER_CTX ctx;
 			if(room->members[idx].conn==NULL) continue;
@@ -353,6 +343,11 @@ void cube_room_tick(CUBE_ROOM* room)
 
 	singer = cube_room_get_singer(room);
 	if(singer<0) return;
+
+	if(!room->members[singer].loaded) {
+		cube_room_leave(room, room->members[singer].conn);
+		return;
+	}
 
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
@@ -415,11 +410,13 @@ void cube_room_terminate(CUBE_ROOM* room)
 	int i, j;
 	SVR_USER_CTX ctx;
 
-	cube_room_giveup(room, room->microphone[0].nick);
+	cube_room_giveup(room, room->singer);
+	strcpy(room->singer, "");
 
 	for(i=0; i<sizeof(room->members)/sizeof(room->members[0]); i++) {
 		if(room->members[i].conn==NULL) continue;
 		ctx.conn = room->members[i].conn;
+		room->members[i].ready = 0;
 
 		room_notify_terminate(&ctx);
 
@@ -432,6 +429,8 @@ void cube_room_terminate(CUBE_ROOM* room)
 		cube_room_sync(room, room->members[i].conn);
 		room_info_callback(&ctx, room->name);
 	}
+
+	room->state = CUBE_ROOM_STATE_ACTIVE;
 }
 
 void cube_room_sync(CUBE_ROOM* room, CUBE_CONNECTION* conn)
@@ -457,17 +456,17 @@ void cube_room_acquire(CUBE_ROOM* room, const char* nick, const char* song)
 	int idx;
 
 	for(idx=0; idx<sizeof(room->microphone)/sizeof(room->microphone[0]); idx++) {
-		if(strcmp(nick, room->microphone[idx].nick)) return;
+		if(strcmp(nick, room->microphone[idx].nick)==0) return;
 	}
 
 	for(idx=0; idx<sizeof(room->microphone)/sizeof(room->microphone[0]); idx++) {
-		if(strcmp(nick, "")) break;
+		if(strcmp(room->microphone[idx].nick, "")==0) break;
 	}
 	assert(idx<sizeof(room->microphone)/sizeof(room->microphone[0]));
 	if(idx==sizeof(room->microphone)/sizeof(room->microphone[0])) return;
 
-	strcmp(room->microphone[idx].nick, nick);
-	strcmp(room->microphone[idx].song, song);
+	strcpy(room->microphone[idx].nick, nick);
+	strcpy(room->microphone[idx].song, song);
 
 	cube_room_sync(room, NULL);
 }
@@ -476,8 +475,10 @@ void cube_room_giveup(CUBE_ROOM* room, const char* nick)
 {
 	int idx, max;
 
+	if(strcmp(nick, "")==0) return;
+
 	for(idx=0; idx<sizeof(room->microphone)/sizeof(room->microphone[0]); idx++) {
-		if(strcmp(nick, room->microphone[idx].nick)) break;
+		if(strcmp(nick, room->microphone[idx].nick)==0) break;
 	}
 	if(idx==sizeof(room->microphone)/sizeof(room->microphone[0])) return;
 
