@@ -10,16 +10,34 @@ SOCK_ADDR cube_sa;
 char cube_dbstr[100] = "provider=sqlite;dbname=..\\cube.db";
 CUBE_CONNECTION* conn_list[1000];
 CUBE_ROOM* room_list[1000];
-
+static TIMER room_timer;
+static unsigned int cur_time;
 static MEMPOOL_HANDLE conn_pool;
 static MEMPOOL_HANDLE room_pool;
+static os_mutex_t room_mtx;
+
+static void room_timer_proc(TIMER handle, void* key)
+{
+	int idx;
+	os_mutex_lock(&room_mtx);
+	cur_time ++;
+	for(idx=0; idx<sizeof(room_list)/sizeof(room_list[0]); idx++) {
+		if(room_list[idx]==NULL) continue;
+		cube_room_tick(room_list[idx]);
+		cube_room_check(room_list[idx]);
+	}
+	os_mutex_unlock(&room_mtx);
+}
 
 static void onconnect(NETWORK_HANDLE handle, void* userptr)
 {
 	CUBE_CONNECTION* conn;
+
+	os_mutex_lock(&room_mtx);
 	conn = (CUBE_CONNECTION*)userptr;
 	conn->handle = handle;
 	assert(handle);
+	os_mutex_unlock(&room_mtx);
 }
 
 static void ondata(NETWORK_HANDLE handle, void* userptr)
@@ -28,6 +46,8 @@ static void ondata(NETWORK_HANDLE handle, void* userptr)
 	SVR_USER_CTX ctx;
 	conn = (CUBE_CONNECTION*)userptr;
 	ctx.conn = conn;
+
+	os_mutex_lock(&room_mtx);
 
 	while(1) {
 		int ret;
@@ -54,6 +74,8 @@ static void ondata(NETWORK_HANDLE handle, void* userptr)
 
 		network_recvbuf_commit(handle, len);
 	}
+
+	os_mutex_unlock(&room_mtx);
 }
 
 static void ondisconnect(NETWORK_HANDLE handle, void* userptr)
@@ -62,10 +84,12 @@ static void ondisconnect(NETWORK_HANDLE handle, void* userptr)
 	CUBE_ROOM* room;
 	conn = (CUBE_CONNECTION*)userptr;
 
+	os_mutex_lock(&room_mtx);
 	if(conn->room!=NULL) {
 		room = conn->room;
 		cube_room_leave(room, conn);
 	}
+	os_mutex_unlock(&room_mtx);
 
 	network_del(handle);
 	mempool_free(conn_pool, conn);
@@ -77,17 +101,21 @@ static void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 	CUBE_CONNECTION* conn;
 	NETWORK_EVENT event;
 
+	os_mutex_lock(&room_mtx);
+
 	for(idx=0; idx<sizeof(conn_list)/sizeof(conn_list[0]); idx++) {
 		if(conn_list[idx]==NULL) break;
 	}
 	if(idx==sizeof(conn_list)/sizeof(conn_list[0])) {
 		sock_close(sock);
+		os_mutex_unlock(&room_mtx);
 		return;
 	}
 
 	conn = (CUBE_CONNECTION*)mempool_alloc(conn_pool);
 	if(conn==NULL) {
 		sock_close(sock);
+		os_mutex_unlock(&room_mtx);
 		return;
 	}
 
@@ -99,13 +127,17 @@ static void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 	event.recvbuf_pool = NULL;
 	memset(conn, 0, sizeof(*conn));
 	conn->index = idx;
+	conn_list[idx] = conn;
 
 	ret = network_add(sock, &event, conn, &conn->handle);
 	if(ret!=ERR_NOERROR) {
 		mempool_free(conn_pool, conn);
 		sock_close(sock);
+		os_mutex_unlock(&room_mtx);
 		return;
 	}
+
+	os_mutex_unlock(&room_mtx);
 }
 
 static int cube_loadconfig()
@@ -116,9 +148,15 @@ static int cube_loadconfig()
 
 static int cube_init()
 {
+	os_mutex_init(&room_mtx);
+
 	memset(conn_list, 0, sizeof(conn_list));
 	conn_pool = mempool_create("CUBE_CONN_POOL", sizeof(CUBE_CONNECTION), 0);
 	room_pool = mempool_create("CUBE_ROOM_POOL", sizeof(CUBE_ROOM), 0);
+
+	cur_time = 0;
+	room_timer = timer_add(CUBE_ROOM_TIMER, CUBE_ROOM_TIMER, room_timer_proc, NULL);
+
 	return network_tcp_register(&cube_sa, onaccept, NULL);
 }
 
@@ -140,8 +178,10 @@ static int cube_final()
 		}
 	}
 
+	timer_force_remove(room_timer);
 	mempool_destroy(room_pool);
 	mempool_destroy(conn_pool);
+	os_mutex_destroy(&room_mtx);
 	return ERR_NOERROR;
 }
 
@@ -217,14 +257,17 @@ void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 
 void cube_room_check(CUBE_ROOM* room)
 {
-	int idx, count, ready, loaded, singer;
+	int idx, count, ready, loaded, singer, p2p;
+	unsigned int p2pmask;
 
 	singer = -1;
-	count = ready = loaded = 0;
+	count = ready = loaded = p2p = 0;
+	p2pmask = cube_room_p2pmask(room, -1);
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
 		if(room->members[idx].ready) ready++;
 		if(room->members[idx].loaded) loaded++;
+		if(room->members[idx].p2p_status==(p2pmask|(1<<idx))) p2p++;
 		if(strcmp(room->members[idx].conn->nick, room->microphone[0].nick)==0) singer = idx;
 		count++;
 	}
@@ -251,6 +294,7 @@ void cube_room_check(CUBE_ROOM* room)
 	}
 	if(count==ready && singer>=0 && room->state==CUBE_ROOM_STATE_ACTIVE) {
 		room->state = CUBE_ROOM_STATE_LOADING;
+		room->start_time = cube_room_curtime(room) + CUBE_ROOM_TIMEOUT/CUBE_ROOM_TIMER;
 		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			SVR_USER_CTX ctx;
 			if(room->members[idx].conn==NULL) continue;
@@ -259,7 +303,7 @@ void cube_room_check(CUBE_ROOM* room)
 		}
 		return;
 	}
-	if(count==loaded && room->state==CUBE_ROOM_STATE_LOADING) {
+	if(count==loaded && count==p2p && room->state==CUBE_ROOM_STATE_LOADING) {
 		room->state = CUBE_ROOM_STATE_GAMING;
 		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			SVR_USER_CTX ctx;
@@ -290,6 +334,52 @@ int cube_room_member_index(CUBE_ROOM* room, const char* nick)
 	return -1;
 }
 
+int cube_room_get_singer(CUBE_ROOM* room)
+{
+	int idx;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
+		if(strcmp(room->members[idx].conn->nick, room->microphone[0].nick)==0) return idx;
+	}
+	return -1;
+}
+
+void cube_room_tick(CUBE_ROOM* room)
+{
+	int singer, idx;
+
+	if(room->state!=CUBE_ROOM_STATE_LOADING) return;
+	if(room->start_time<cube_room_curtime(room)) return;
+
+	singer = cube_room_get_singer(room);
+	if(singer<0) return;
+
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
+		if(singer==idx) continue;
+		if(room->members[idx].p2p_status&(1<<singer)) continue;
+		cube_room_leave(room, room->members[idx].conn);
+	}
+}
+
+unsigned int cube_room_curtime(CUBE_ROOM* room)
+{
+	return cur_time;
+}
+
+unsigned int cube_room_p2pmask(CUBE_ROOM* room, int midx)
+{
+	int idx;
+	unsigned int ret;
+	if(midx>=0) return (1<<(midx));
+	ret = 0;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
+		ret |= (1<<idx);
+	}
+	return ret;
+}
+
 void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 {
 	int idx;
@@ -304,13 +394,13 @@ void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 		if(room->members[idx].conn==NULL) continue;
 
 		ctx.conn = conn;
-		room_notify_join(&ctx, room->members[idx].conn->nick, room->members[idx].conn->equ);
+		room_notify_join(&ctx, room->members[idx].conn->index, room->members[idx].conn->nick, room->members[idx].conn->equ);
 		room_walk_callback(&ctx, room->members[idx].conn->nick, room->members[idx].pos);
 
 		if(room->members[idx].conn==conn) continue;
 
 		ctx.conn = room->members[idx].conn;
-		room_notify_join(&ctx, conn->nick, room->members[conn->room_idx].conn->equ);
+		room_notify_join(&ctx, conn->index, conn->nick, room->members[conn->room_idx].conn->equ);
 		room_walk_callback(&ctx, conn->nick, room->members[conn->room_idx].pos);
 	}
 
@@ -335,7 +425,7 @@ void cube_room_terminate(CUBE_ROOM* room)
 
 		for(j=0; j<sizeof(room->members)/sizeof(room->members[0]); j++) {
 			if(room->members[j].conn==NULL) continue;
-			room_notify_join(&ctx, room->members[j].conn->nick, room->members[j].conn->equ);
+			room_notify_join(&ctx, room->members[j].conn->index, room->members[j].conn->nick, room->members[j].conn->equ);
 			room_walk_callback(&ctx, room->members[j].conn->nick, room->members[j].pos);
 		}
 
