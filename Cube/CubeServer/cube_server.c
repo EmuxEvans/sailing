@@ -280,6 +280,16 @@ int cube_room_member_count(CUBE_ROOM* room)
 	return count;
 }
 
+int cube_room_member_index(CUBE_ROOM* room, const char* nick)
+{
+	int idx;
+	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) continue;
+		if(strcmp(nick, room->members[idx].conn->nick)==0) return idx;
+	}
+	return -1;
+}
+
 void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 {
 	int idx;

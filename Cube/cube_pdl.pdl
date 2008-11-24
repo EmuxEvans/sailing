@@ -44,8 +44,7 @@ CMD_CLT roomlist_end(
 );
 
 CMD_SVR room_create(
-    string["$$<=CUBE_ROOM_NAME_LEN+1"] name[],
-    string["$$<=CUBE_ROOM_MAP_LEN+1"] map[]
+    string["$$<=CUBE_ROOM_NAME_LEN+1"] name[]
 );
 CMD_SVR room_join(
 	int idx
@@ -116,7 +115,22 @@ CMD_CLT notify_load(
 );
 CMD_CLT notify_start(
 );
+
+CMD_SVR loaded(
+);
+CMD_SVR p2p_reged(
+);
+CMD_SVR p2p_connected(
+    string["$$<=CUBE_NICK_LEN+1"] nick[]
+);
+
+CMD_SVR terminate(
+);
 CMD_CLT notify_terminate(
+);
+
+CMD_SVR set_ready(
+	int flag
 );
 CMD_CLT notify_ready(
 	string nick[],
@@ -151,24 +165,14 @@ CMD_CLT walk_callback(
 	string pos[]
 );
 
-CMD_SVR load_complete(
+CMD_SVR microphone_acquire(
+    string["$$<=CUBE_ROOM_SONG_LEN+1"] song[]
 );
-CMD_SVR set_ready(
-	int flag
+CMD_SVR microphone_giveup(
 );
-CMD_CLT status_callback(
-);
-CMD_SVR terminate(
-);
-
 CMD_CLT microphone_callback(
     string nick[],
     string song[]
 );
 CMD_CLT microphone_end(
-);
-CMD_SVR microphone_acquire(
-    string["$$<=CUBE_ROOM_SONG_LEN+1"] song[]
-);
-CMD_SVR microphone_giveup(
 );
