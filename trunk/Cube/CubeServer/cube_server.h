@@ -36,6 +36,7 @@ struct CUBE_ROOM {
 
 	int state;
 	unsigned int start_time;
+	char singer[CUBE_NICK_LEN+1];
 
 	struct {
 		CUBE_CONNECTION* conn;
