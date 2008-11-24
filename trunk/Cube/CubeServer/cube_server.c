@@ -403,7 +403,7 @@ void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 	cube_room_sync(room, conn);
 
 	ctx.conn = conn;
-	room_info_callback(&ctx, room->name);
+	room_info_callback(&ctx, room->name, room->owner);
 }
 
 void cube_room_terminate(CUBE_ROOM* room)
@@ -428,7 +428,7 @@ void cube_room_terminate(CUBE_ROOM* room)
 		}
 
 		cube_room_sync(room, room->members[i].conn);
-		room_info_callback(&ctx, room->name);
+		room_info_callback(&ctx, room->name, room->owner);
 	}
 
 	room->state = CUBE_ROOM_STATE_ACTIVE;
