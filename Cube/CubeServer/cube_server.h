@@ -6,6 +6,9 @@
 extern "C" {
 #endif
 
+#define CUBE_ROOM_TIMER		100		// ms
+#define CUBE_ROOM_TIMEOUT	20000	// ms
+
 struct CUBE_CONNECTION;
 typedef struct CUBE_CONNECTION CUBE_CONNECTION;
 struct CUBE_ROOM;
@@ -30,12 +33,15 @@ struct CUBE_CONNECTION {
 struct CUBE_ROOM {
 	char owner[CUBE_NICK_LEN+1];
 	char name[CUBE_ROOM_NAME_LEN+1];
+
 	int state;
+	unsigned int start_time;
 
 	struct {
 		CUBE_CONNECTION* conn;
 		int ready;
 		int loaded;
+		unsigned int p2p_status;
 		char pos[200];
 	} members[CUBE_ROOM_MEMBER_MAX];
 
@@ -61,11 +67,14 @@ void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 void cube_room_check(CUBE_ROOM* room);
 int cube_room_member_count(CUBE_ROOM* room);
 int cube_room_member_index(CUBE_ROOM* room, const char* nick);
+int cube_room_get_singer(CUBE_ROOM* room);
+
+void cube_room_tick(CUBE_ROOM* room);
+unsigned int cube_room_curtime(CUBE_ROOM* room);
+unsigned int cube_room_p2pmask(CUBE_ROOM* room, int midx);
 
 void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 void cube_room_terminate(CUBE_ROOM* room);
-
-void cube_room_tick(CUBE_ROOM* room, unsigned int );
 
 void cube_room_sync(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 void cube_room_acquire(CUBE_ROOM* room, const char* nick, const char* song);

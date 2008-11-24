@@ -1,8 +1,8 @@
 
 #include <stdlib.h>
+#include <assert.h>
 
 #include "cube_pdl.CubeServer.h"
-
 #include "cube_server.h"
 
 void login_login(SVR_USER_CTX* user_ctx, const char* token)
@@ -297,6 +297,12 @@ void room_set_ready(SVR_USER_CTX* user_ctx, int flag)
 
 void room_loaded(SVR_USER_CTX* user_ctx)
 {
+	CUBE_ROOM* room;
+	room = user_ctx->conn->room;
+	if(room==NULL) return;
+	room->members[user_ctx->conn->room_idx].loaded = 1;
+
+	cube_room_check(room);
 }
 
 void room_p2p_reged(SVR_USER_CTX* user_ctx)
@@ -305,6 +311,16 @@ void room_p2p_reged(SVR_USER_CTX* user_ctx)
 
 void room_p2p_connected(SVR_USER_CTX* user_ctx, const char* nick)
 {
+	CUBE_ROOM* room;
+	int midx;
+	room = user_ctx->conn->room;
+	if(room==NULL) return;
+	midx = cube_room_member_index(room, nick);
+	assert(midx>=0);
+	if(midx<0) return;
+	room->members[user_ctx->conn->room_idx].p2p_status |= (1<<midx);
+
+	cube_room_check(room);
 }
 
 void room_terminate(SVR_USER_CTX* user_ctx)

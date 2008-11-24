@@ -101,6 +101,7 @@ CMD_CLT info_callback(
 );
 
 CMD_CLT notify_join(
+	int peerid,
 	string nick[],
 	string equ[]
 );
