@@ -391,6 +391,7 @@ void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 		ctx.conn = conn;
 		room_notify_join(&ctx, room->members[idx].conn->index, room->members[idx].conn->nick, room->members[idx].conn->equ);
 		room_walk_callback(&ctx, room->members[idx].conn->nick, room->members[idx].pos);
+		if(room->members[idx].ready) room_notify_ready(&ctx, room->members[idx].conn->nick, room->members[idx].ready);
 
 		if(room->members[idx].conn==conn) continue;
 
