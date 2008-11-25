@@ -65,7 +65,7 @@ int my_lua_func(lua_State* L)
 	MY_STRUCT* ptr;
 	ptr = (MY_STRUCT*)malloc(sizeof(MY_STRUCT));
 	memset(ptr, 0, sizeof(*ptr));
-	protocol_lua_create(L, &PROTOCOL_NAME(MY_STRUCT), ptr);
+	protocol_lua_newstruct(L, &PROTOCOL_NAME(MY_STRUCT), ptr);
 	return 1;
 }
 

@@ -1,5 +1,9 @@
+BASE_DIR=.
+
+include $(BASE_DIR)/Makefile.def
 
 all:
+	cd $(BASE_DIR); mkdir $(OUTPUT_DIR); mkdir $(OUTPUT_DIR)/modules; cd ..
 	cd src/skates; $(MAKE) $@
 	cd tools; $(MAKE) $@
 	cd test/skates; $(MAKE) $@

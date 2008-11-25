@@ -66,7 +66,7 @@ void onaccept_proc(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 	event.recvbuf_buf = NULL;
 	event.recvbuf_max = recvbuf_size;
 
-	if(network_add(sock, &event, NULL)==NULL) {
+	if(network_add(sock, &event, NULL, NULL)!=ERR_NOERROR) {
 		sock_disconnect(sock);
 		sock_close(sock);
 	}
