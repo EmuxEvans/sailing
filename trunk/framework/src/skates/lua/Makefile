@@ -2,7 +2,7 @@ BASE_DIR=../../..
 
 include $(BASE_DIR)/Makefile.def
 
-LUA_CC_FLAG=$(subst -Werror,,$(subst -Wall,,$(OBJ_CC_FLAG)))
+LUA_CC_FLAG=-DLUA_USE_MKSTEMP $(subst -Werror,,$(subst -Wall,,$(OBJ_CC_FLAG)))
 
 LUA_SRC=	lapi.c lauxlib.c lbaselib.c lcode.c ldblib.c ldebug.c ldo.c ldump.c lfunc.c lgc.c linit.c\
 			liolib.c llex.c lmathlib.c lmem.c loadlib.c lobject.c lopcodes.c loslib.c lparser.c lstate.c\
