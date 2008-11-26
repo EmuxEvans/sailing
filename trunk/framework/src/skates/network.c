@@ -503,11 +503,7 @@ unsigned int ZION_CALLBACK event_proc(void* arg)
 				break;
 			}
 		}
-
-		os_mutex_lock(&event_queue_mutex);
 	}
-
-	os_mutex_unlock(&event_queue_mutex);
 
 	return 0;
 }
