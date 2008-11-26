@@ -1,0 +1,20 @@
+
+extern CubeRoomInfo {
+	os_dword		id;
+	string<100>		name;
+};
+
+extern CubeMemberInfo {
+	string<100>		nick;
+};
+
+interface ICubeUser {
+	void Disconnect();
+};
+
+interface ICubeRoom {
+	os_int GetMemberCount();
+};
+
+interface ICubeMember {
+};

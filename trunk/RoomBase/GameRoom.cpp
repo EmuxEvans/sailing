@@ -1,160 +1,16 @@
 #include <string.h>
+#include <assert.h>
 
 #include "GameRoom.h"
+#include "GameRoom.inl"
 
-template<class TGameUser>
-CGameUser<TGameUser>::CGameUser()
-{
-	memset(m_pRoomList, 0, sizeof(m_pRoomList));
-}
+static unsigned int g_nGameSeq = 0x1980;
 
-template<class TGameUser>
-CGameUser<TGameUser>::~CGameUser()
+unsigned int GenGameSeq()
 {
-}
-
-template<class TGameUser>
-IGameUserCallback<TGameUser>* CGameUser<TGameUser>::GetCallback()
-{
-	return m_pCallback;
-}
-
-template<class TGameUser>
-void CGameUser<TGameUser>::SetCallback(IGameUserCallback<TGameUser>* pCallback)
-{
-	m_pCallback = pCallback;
-}
-
-template<class TGameUser>
-void CGameUser<TGameUser>::Connect()
-{
-	m_pCallback->OnConnect(this);
-}
-
-template<class TGameUser>
-void CGameUser<TGameUser>::Disconnect()
-{
-	for(int idx=0; idx<sizeof(m_pRoomList)/sizeof(m_pRoomList[0]); idx++) {
-		if(!m_pRoomList[idx]) continue;
-		m_pRoomList[idx].pRoom->Disconnect(m_pRoomList[idx].nUIdx);
-	}
-	m_pCallback->OnDisconnect(this);
-}
-
-template<class TGameUser>
-void CGameUser<TGameUser>::OnData(const void* pData, int nSize)
-{
-}
-
-template<class TGameUser>
-void CGameUser<TGameUser>::SendData(const void* pData, int nSize)
-{
-}
-
-template<class TGameUser>
-bool CGameUser<TGameUser>::BindRoom(IGameRoom* pRoom, int nUIdx)
-{
-	for(int idx=0; idx<sizeof(m_pRoomList)/sizeof(m_pRoomList[0]); idx++) {
-		if(m_pRoomList[idx].pRoom!=NULL) continue;
-		m_pRoomList[idx].pRoom = pRoom;
-		m_pRoomList[idx].nUIdx = nUIdx;
-		return true;
-	}
-	return false;
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::CGameRoom()
-{
-	memset(m_pMemberList, 0, sizeof(m_pMemberList));
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::~CGameRoom()
-{
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-int CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetMemberCount()
-{
-	return 0;
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetMember(int nIndex)
-{
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetMember(const char* pNick)
-{
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetNextMember(TGameMember* pMember)
-{
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetPrevMember(TGameMember* pMember)
-{
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetNextMember(TGameMember* pMember, unsigned int nMask, unsigned int nValue)
-{
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetPrevMember(TGameMember* pMember, unsigned int nMask, unsigned int nValue)
-{
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Send(TGameMember* pMember, unsigned int nMask, unsigned int nValue, unsigned int nFlags, const void* pData, int nSize)
-{
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember>
-CGameMember<TGameUser, TGameRoom, TGameMember>::CGameMember(TGameUser* pUser, TGameRoom* pRoom, unsigned int nUIdx)
-{
-	m_pUser = pUser;
-	m_pRoom = pRoom;
-	m_nUIdx = nUIdx;
-	m_nMask = nMask;
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember>
-CGameMember<TGameUser, TGameRoom, TGameMember>::~CGameMember()
-{
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember>
-TGameUser* CGameMember<TGameUser, TGameRoom, TGameMember>::GetGameUser()
-{
-	return m_pUser;
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember>
-TGameRoom* CGameMember<TGameUser, TGameRoom, TGameMember>::GetGameRoom()
-{
-	return m_pRoom;
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember>
-unsigned int CGameMember<TGameUser, TGameRoom, TGameMember>::GetUidx()
-{
-	return m_nUIdx;
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember>
-void CGameMember<TGameUser, TGameRoom, TGameMember>::SetMask(unsigned int nMask)
-{
-	m_nMask = nMask;
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember>
-unsigned int CGameMember<TGameUser, TGameRoom, TGameMember>::GetMask() const
-{
-	return m_nMask;
+	unsigned int nRet;
+	do {
+		nRet = g_nGameSeq++;
+	} while((nRet&0xffff)==0);
+	return nRet;
 }
