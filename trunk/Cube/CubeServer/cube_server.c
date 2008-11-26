@@ -32,11 +32,8 @@ static void onconnect(NETWORK_HANDLE handle, void* userptr)
 {
 	CUBE_CONNECTION* conn;
 
-	os_mutex_lock(&room_mtx);
 	conn = (CUBE_CONNECTION*)userptr;
-	conn->handle = handle;
 	assert(handle);
-	os_mutex_unlock(&room_mtx);
 }
 
 static void ondata(NETWORK_HANDLE handle, void* userptr)
@@ -141,8 +138,10 @@ static void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 
 static int cube_loadconfig()
 {
-	sock_str2addr("0.0.0.0:2008", &cube_sa);
-	return ERR_NOERROR;
+	APPBOX_SETTING_BEGIN(_setting)
+		APPBOX_SETTING_ENDPOINT("tcp_ep", cube_sa)
+	APPBOX_SETTING_END(_setting)
+	return appbox_config_get(MODULE_NAME, _setting);
 }
 
 static int cube_init()
@@ -332,6 +331,32 @@ int cube_room_get_singer(CUBE_ROOM* room)
 		if(strcmp(room->members[idx].conn->nick, room->microphone[0].nick)==0) return idx;
 	}
 	return -1;
+}
+
+int cube_room_joinable(CUBE_ROOM* room, CUBE_CONNECTION* conn)
+{
+	int idx;
+
+	if(conn->room && conn->room->state!=CUBE_ROOM_STATE_ACTIVE) {
+		return ERR_UNKNOWN;
+	}
+	if(room==NULL) return ERR_NOERROR;
+
+	if(room->state!=CUBE_ROOM_STATE_ACTIVE) {
+		return ERR_UNKNOWN;
+	}
+
+	if(strcmp(room->owner, conn->nick)==0) {
+		assert(room->members[0].conn==conn || room->members[0].conn==NULL);
+		return room->members[0].conn?ERR_EXISTED:ERR_NOERROR;
+	}
+
+	idx = (strcmp(room->owner, "")==0?1:0);
+	for(; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+		if(room->members[idx].conn==NULL) return ERR_NOERROR;
+	}
+
+	return ERR_FULL;
 }
 
 void cube_room_tick(CUBE_ROOM* room)

@@ -69,6 +69,7 @@ void cube_room_check(CUBE_ROOM* room);
 int cube_room_member_count(CUBE_ROOM* room);
 int cube_room_member_index(CUBE_ROOM* room, const char* nick);
 int cube_room_get_singer(CUBE_ROOM* room);
+int cube_room_joinable(CUBE_ROOM* room, CUBE_CONNECTION* conn);
 
 void cube_room_tick(CUBE_ROOM* room);
 unsigned int cube_room_curtime(CUBE_ROOM* room);
