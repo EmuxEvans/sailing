@@ -95,8 +95,8 @@ int fdwatch_add(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 
 int fdwatch_remove(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 {
-	if(epoll_ctl(handle->epollfd, EPOLL_CTL_MOD, fdwatch_getfd(item), NULL)==-1) {
-		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_remove(epoll) : epoll_ctl() fail, errno()=%s", errno);
+	if(epoll_ctl(handle->epollfd, EPOLL_CTL_DEL, fdwatch_getfd(item), NULL)==-1) {
+		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_remove(epoll) : epoll_ctl() fail, errno()=%d", errno);
 		return ERR_UNKNOWN;
 	}
 
