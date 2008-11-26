@@ -458,10 +458,13 @@ unsigned int ZION_CALLBACK event_proc(void* arg)
 	int quit_flag;
 
 	quit_flag = 0;
-	os_mutex_lock(&event_queue_mutex);
 
 	while(!quit_flag) {
-		os_condition_wait(&event_queue_cond, &event_queue_mutex);
+		os_mutex_lock(&event_queue_mutex);
+
+		if(event_queue_len==0) {
+			os_condition_wait(&event_queue_cond, &event_queue_mutex);
+		}
 
 		if(event_queue_cur+event_queue_len>sizeof(event_queue)/sizeof(event_queue[0])) {
 			unsigned int t;
