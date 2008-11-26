@@ -140,6 +140,7 @@ static int cube_loadconfig()
 {
 	APPBOX_SETTING_BEGIN(_setting)
 		APPBOX_SETTING_ENDPOINT("tcp_ep", cube_sa)
+		APPBOX_SETTING_STRING("dbstr", cube_dbstr, sizeof(cube_dbstr))
 	APPBOX_SETTING_END(_setting)
 	return appbox_config_get(MODULE_NAME, _setting);
 }
