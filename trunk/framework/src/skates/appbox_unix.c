@@ -23,7 +23,7 @@ int appbox_service(APPBOX_SERVICE* svc, int argc, char* argv[])
 {
 	int ret;
 
-	ret = appbox_args_parse(argc, argv);
+	ret = appbox_args_parse(argc-1, argv+1);
 	if(ret!=ERR_NOERROR) {
 		svc->svc_usage();
 		return ret;

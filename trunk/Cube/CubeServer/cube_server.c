@@ -1,7 +1,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include <skates\skates.h>
+#include <skates/skates.h>
 
 #include "cube_pdl.CubeServer.h"
 #include "cube_server.h"
