@@ -1,7 +1,7 @@
 #pragma once
 
 template<class TGameUser>
-class IGameUserCallback
+class IGameUserController
 {
 public:
 	virtual void OnConnect(TGameUser* pUser) = NULL;
@@ -10,7 +10,7 @@ public:
 };
 
 template<class TGameUser, class TGameRoom, class TGameMember>
-class IGameRoomCallback
+class IGameRoomController
 {
 public:
 	virtual void OnCreate(TGameRoom* pRoom) = NULL;
@@ -48,11 +48,11 @@ template<class TGameUser>
 class CGameUser : public IGameUser
 {
 public:
-	CGameUser(IGameUserCallback<TGameUser>* pCallback);
+	CGameUser(IGameUserController<TGameUser>* pController);
 	virtual ~CGameUser();
 
-	IGameUserCallback<TGameUser>* GetCallback();
-	void SetCallback(IGameUserCallback<TGameUser>* pCallback);
+	IGameUserController<TGameUser>* GetController();
+	void SetController(IGameUserController<TGameUser>* pController);
 
 	virtual void Connect();
 	virtual void Disconnect();
@@ -66,7 +66,7 @@ private:
 		IGameRoom*		pRoom;
 		unsigned int	nUIdx;
 	}								m_pRoomList[20];
-	IGameUserCallback<TGameUser>*	m_pCallback;
+	IGameUserController<TGameUser>*	m_pController;
 };
 
 #define GAMEROOM_MATCH				(1<<0)	// Æ¥Åä
@@ -78,7 +78,7 @@ template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
 class CGameRoom : public IGameRoom
 {
 public:
-	CGameRoom(IGameRoomCallback<TGameUser, TGameRoom, TGameMember>* pCallback);
+	CGameRoom(IGameRoomController<TGameUser, TGameRoom, TGameMember>* pController);
 	virtual ~CGameRoom();
 
 	virtual bool Join(IGameUser* pUser);
@@ -100,7 +100,7 @@ public:
 
 private:
 	TGameMember* m_pMemberList[nMemberMax];
-	IGameRoomCallback<TGameUser, TGameRoom, TGameMember>*	m_pCallback;
+	IGameRoomController<TGameUser, TGameRoom, TGameMember>*	m_pController;
 };
 
 template<class TGameUser, class TGameRoom, class TGameMember>
