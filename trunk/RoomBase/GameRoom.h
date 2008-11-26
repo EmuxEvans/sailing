@@ -67,6 +67,11 @@ private:
 	IGameUserCallback<TGameUser>*	m_pCallback;
 };
 
+#define GAMEROOM_MATCH				(1<<0)	// 匹配
+#define GAMEROOM_NOTMATCH			(1<<1)	// 不匹配
+#define GAMEROOM_SELF				(1<<2)	// 包含自己
+#define GAMEROOM_EXCEPT				(1<<3)	// 除了自己
+
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
 class CGameRoom : public IGameRoom
 {
@@ -79,6 +84,10 @@ public:
 	TGameMember* GetMember(const char* pNick);
 	TGameMember* GetNextMember(TGameMember* pMember);
 	TGameMember* GetPrevMember(TGameMember* pMember);
+	TGameMember* GetNextMember(TGameMember* pMember, unsigned int nMask, unsigned int nValue);
+	TGameMember* GetPrevMember(TGameMember* pMember, unsigned int nMask, unsigned int nValue);
+
+	void Send(TGameMember* pMember, unsigned int nMask, unsigned int nValue, unsigned int nFlags, const void* pData, int nSize);
 
 private:
 	TGameMember* m_pMemberList[nMemberMax];
