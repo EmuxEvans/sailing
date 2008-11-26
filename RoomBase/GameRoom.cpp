@@ -100,9 +100,28 @@ TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetPrevMe
 {
 }
 
+template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
+TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetNextMember(TGameMember* pMember, unsigned int nMask, unsigned int nValue)
+{
+}
+
+template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
+TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetPrevMember(TGameMember* pMember, unsigned int nMask, unsigned int nValue)
+{
+}
+
+template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
+void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Send(TGameMember* pMember, unsigned int nMask, unsigned int nValue, unsigned int nFlags, const void* pData, int nSize)
+{
+}
+
 template<class TGameUser, class TGameRoom, class TGameMember>
 CGameMember<TGameUser, TGameRoom, TGameMember>::CGameMember(TGameUser* pUser, TGameRoom* pRoom, unsigned int nUIdx)
 {
+	m_pUser = pUser;
+	m_pRoom = pRoom;
+	m_nUIdx = nUIdx;
+	m_nMask = nMask;
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>
@@ -113,26 +132,29 @@ CGameMember<TGameUser, TGameRoom, TGameMember>::~CGameMember()
 template<class TGameUser, class TGameRoom, class TGameMember>
 TGameUser* CGameMember<TGameUser, TGameRoom, TGameMember>::GetGameUser()
 {
+	return m_pUser;
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>
 TGameRoom* CGameMember<TGameUser, TGameRoom, TGameMember>::GetGameRoom()
 {
+	return m_pRoom;
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>
 unsigned int CGameMember<TGameUser, TGameRoom, TGameMember>::GetUidx()
 {
-	return 0;
+	return m_nUIdx;
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>
 void CGameMember<TGameUser, TGameRoom, TGameMember>::SetMask(unsigned int nMask)
 {
+	m_nMask = nMask;
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>
 unsigned int CGameMember<TGameUser, TGameRoom, TGameMember>::GetMask() const
 {
-	return 0;
+	return m_nMask;
 }
