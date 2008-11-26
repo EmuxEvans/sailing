@@ -17,4 +17,5 @@ interface ICubeRoom {
 };
 
 interface ICubeMember {
+	string GetNick();
 };

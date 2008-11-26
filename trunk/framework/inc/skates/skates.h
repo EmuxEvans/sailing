@@ -26,6 +26,9 @@ extern "C" {
 #include "applog.h"
 #include "appbox.h"
 
+#include "protocol_def.h"
+#include "protocol_lua.h"
+
 #ifdef __cplusplus
 }
 #endif

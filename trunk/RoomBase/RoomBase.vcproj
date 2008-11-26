@@ -231,7 +231,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					CommandLine="&quot;..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
-					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;"
+					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
 				/>
 			</FileConfiguration>
 		</File>
