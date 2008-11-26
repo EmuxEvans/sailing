@@ -19,7 +19,8 @@
 #define QUEUE_ITEM_QUIT				0
 #define QUEUE_ITEM_TCP_ACCEPT		1
 #define QUEUE_ITEM_TCP_WRITE		3
-#define QUEUE_ITEM_TCP_DISCONNECT	4
+#define QUEUE_ITEM_TCP_ONDATA		4
+#define QUEUE_ITEM_TCP_DISCONNECT	5
 
 typedef struct TCP_ENDPOINT {
 	FDWATCH_ITEM fdwitem;
@@ -65,7 +66,7 @@ typedef struct QUEUE_ITEM{
 static unsigned int downbuf_size;
 static MEMPOOL_HANDLE downbuf_pool;
 static os_mutex_t downbuf_mutex;
-//static os_mutex_t recvbuf_mutex;
+static os_mutex_t recvbuf_mutex;
 static MEMPOOL_HANDLE conn_pool;
 
 static TCP_ENDPOINT tcp_eps[100];
@@ -104,6 +105,7 @@ int network_init(unsigned int size)
 	downbuf_size = size;
 	downbuf_pool = mempool_create("NETWORK_DOWNBUF", sizeof(NETWORK_DOWNBUF)+size, 0);
 	os_mutex_init(&downbuf_mutex);
+	os_mutex_init(&recvbuf_mutex);
 	conn_pool = mempool_create("NETWORK_CONNECTION", sizeof(NETWORK_CONNECTION), 0);
 
 	memset(&tcp_eps, 0, sizeof(tcp_eps));
@@ -144,6 +146,7 @@ int network_final()
 
 	mempool_destroy(conn_pool);
 	os_mutex_destroy(&downbuf_mutex);
+	os_mutex_destroy(&recvbuf_mutex);
 	mempool_destroy(downbuf_pool);
 
 	return ERR_NOERROR;
@@ -346,39 +349,51 @@ void network_downbufs_free(NETWORK_DOWNBUF* downbufs[], unsigned int count)
 
 unsigned int network_recvbuf_len(NETWORK_HANDLE handle)
 {
-	return handle->recvbuf_len;
+	unsigned int ret;
+	os_mutex_lock(&recvbuf_mutex);
+	ret = handle->recvbuf_len;
+	os_mutex_unlock(&recvbuf_mutex);
+	return ret;
 }
 
 int network_recvbuf_get(NETWORK_HANDLE handle, void* buf, unsigned int start, unsigned int len)
 {
 	unsigned int t;
+	int ret = ERR_NOERROR;
 
-	if(start+len>handle->recvbuf_len) return ERR_UNKNOWN;
+	os_mutex_lock(&recvbuf_mutex);
+	if(start+len<=handle->recvbuf_len) {
+		start = (handle->recvbuf_cur + start) % handle->recvbuf_max;
+		t = handle->recvbuf_max - start;
+		if(t>len) {
+			memcpy(buf, &handle->recvbuf_buf[start], len);
+		} else {
+			memcpy(buf, &handle->recvbuf_buf[start], t);
+			memcpy((char*)buf+t, &handle->recvbuf_buf[0], len-t);
+		}
+	} else ret = ERR_UNKNOWN;
+	os_mutex_unlock(&recvbuf_mutex);
 
-	start = (handle->recvbuf_cur + start) % handle->recvbuf_max;
-	t = handle->recvbuf_max - start;
-	if(t>len) {
-		memcpy(buf, &handle->recvbuf_buf[start], len);
-	} else {
-		memcpy(buf, &handle->recvbuf_buf[start], t);
-		memcpy((char*)buf+t, &handle->recvbuf_buf[0], len-t);
-	}
-
-	return ERR_NOERROR;
+	return ret;
 }
 
 int network_recvbuf_commit(NETWORK_HANDLE handle, unsigned int len)
 {
-	if(len>handle->recvbuf_len) return ERR_UNKNOWN;
-	if(handle->recvbuf_len==len) {
-		handle->recvbuf_cur = 0;
-		handle->recvbuf_len = 0;
-	} else {
-		handle->recvbuf_cur += len;
-		handle->recvbuf_len -= len;
-	}
+	int ret = ERR_NOERROR;
 
-	return ERR_NOERROR;
+	os_mutex_lock(&recvbuf_mutex);
+	if(len<=handle->recvbuf_len) {
+		if(handle->recvbuf_len==len) {
+			handle->recvbuf_cur = 0;
+			handle->recvbuf_len = 0;
+		} else {
+			handle->recvbuf_cur += len;
+			handle->recvbuf_len -= len;
+		}
+	} else ret = ERR_UNKNOWN;
+	os_mutex_unlock(&recvbuf_mutex);
+
+	return ret;
 }
 
 int network_send(NETWORK_HANDLE handle, NETWORK_DOWNBUF* downbufs[], unsigned int count)
@@ -477,6 +492,9 @@ unsigned int ZION_CALLBACK event_proc(void* arg)
 				}
 				event_opt_write(temp[l].tcp_conn);
 				break;
+			case QUEUE_ITEM_TCP_ONDATA:
+				temp[l].tcp_conn->OnData(temp[l].tcp_conn, temp[l].tcp_conn->userptr);
+				break;
 			case QUEUE_ITEM_TCP_DISCONNECT:
 				event_opt_close(temp[l].tcp_conn);
 				break;
@@ -555,21 +573,26 @@ int event_opt_read(NETWORK_CONNECTION* conn)
 		unsigned int start, len;
 		int ret;
 
+		os_mutex_lock(&recvbuf_mutex);
 		start = (conn->recvbuf_cur+conn->recvbuf_len)%conn->recvbuf_max;
 		if(start<conn->recvbuf_cur) {
 			len = conn->recvbuf_cur - start;
 		} else {
 			len = conn->recvbuf_max - start;
 		}
+		os_mutex_unlock(&recvbuf_mutex);
 
 		ret = sock_read(conn->sock, &conn->recvbuf_buf[start], len);
 		if(ret<0) {
 			return ret;
 		}
 		if(ret==0) break;
-		conn->recvbuf_len += ret;
 
-		conn->OnData(conn, conn->userptr);
+		os_mutex_lock(&recvbuf_mutex);
+		conn->recvbuf_len += ret;
+		os_mutex_unlock(&recvbuf_mutex);
+
+		event_post(QUEUE_ITEM_TCP_ONDATA, conn);
 
 		if(conn->recvbuf_len==conn->recvbuf_max) {
 			sock_disconnect(conn->sock);

@@ -41,6 +41,7 @@ CMD_CLT roomlist_callback(
 	int state
 );
 CMD_CLT roomlist_end(
+	int count
 );
 
 CMD_SVR room_create(
