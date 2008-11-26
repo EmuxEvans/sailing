@@ -7,7 +7,7 @@ class CCubeMember;
 typedef IGameUserCallback<CCubeUser> ICubeUserCallback;
 typedef IGameRoomCallback<CCubeUser, CCubeRoom, CCubeMember> ICubeRoomCallback;
 
-class CCubeUser : public CGameUser<CCubeUser>
+class CCubeUser : public CGameUser<CCubeUser>, public ICubeUser
 {
 public:
 	CCubeUser(ICubeUserCallback* pCallback) : CGameUser<CCubeUser>(pCallback) {
@@ -15,9 +15,12 @@ public:
 	virtual ~CCubeUser() {
 	}
 
+	//
+	virtual void Disconnect() {
+	}
 };
 
-class CCubeRoom : public CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>
+class CCubeRoom : public CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>, public ICubeRoom
 {
 public:
 	CCubeRoom(ICubeRoomCallback* pCallback) : CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>(pCallback) {
@@ -25,6 +28,10 @@ public:
 	virtual ~CCubeRoom() {
 	}
 
+	//
+	virtual os_int GetMemberCount() {
+		return 0;
+	}
 };
 
 class CCubeMember : public CGameMember<CCubeUser, CCubeRoom, CCubeMember>
@@ -39,5 +46,10 @@ public:
 		return NULL;
 	}
 	static void Delete(CCubeMember* pMember) {
+	}
+
+	//
+	virtual char* GetNick() {
+		return NULL;
 	}
 };
