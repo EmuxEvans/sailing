@@ -4,13 +4,13 @@ class CCubeUser;
 class CCubeRoom;
 class CCubeMember;
 
-typedef IGameUserCallback<CCubeUser> ICubeUserCallback;
-typedef IGameRoomCallback<CCubeUser, CCubeRoom, CCubeMember> ICubeRoomCallback;
+typedef IGameUserController<CCubeUser> ICubeUserController;
+typedef IGameRoomController<CCubeUser, CCubeRoom, CCubeMember> ICubeRoomController;
 
 class CCubeUser : public CGameUser<CCubeUser>, public ICubeUser
 {
 public:
-	CCubeUser(ICubeUserCallback* pCallback) : CGameUser<CCubeUser>(pCallback) {
+	CCubeUser(ICubeUserController* pController) : CGameUser<CCubeUser>(pController) {
 	}
 	virtual ~CCubeUser() {
 	}
@@ -23,7 +23,7 @@ public:
 class CCubeRoom : public CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>, public ICubeRoom
 {
 public:
-	CCubeRoom(ICubeRoomCallback* pCallback) : CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>(pCallback) {
+	CCubeRoom(ICubeRoomController* pController) : CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>(pController) {
 	}
 	virtual ~CCubeRoom() {
 	}

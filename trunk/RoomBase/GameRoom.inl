@@ -1,10 +1,10 @@
 #pragma once
 
 template<class TGameUser>
-CGameUser<TGameUser>::CGameUser(IGameUserCallback<TGameUser>* pCallback)
+CGameUser<TGameUser>::CGameUser(IGameUserController<TGameUser>* pController)
 {
 	memset(m_pRoomList, 0, sizeof(m_pRoomList));
-	m_pCallback = pCallback;
+	m_pController = pController;
 }
 
 template<class TGameUser>
@@ -13,21 +13,21 @@ CGameUser<TGameUser>::~CGameUser()
 }
 
 template<class TGameUser>
-IGameUserCallback<TGameUser>* CGameUser<TGameUser>::GetCallback()
+IGameUserController<TGameUser>* CGameUser<TGameUser>::GetController()
 {
-	return m_pCallback;
+	return m_pController;
 }
 
 template<class TGameUser>
-void CGameUser<TGameUser>::SetCallback(IGameUserCallback<TGameUser>* pCallback)
+void CGameUser<TGameUser>::SetController(IGameUserController<TGameUser>* pController)
 {
-	m_pCallback = pCallback;
+	m_pController = pController;
 }
 
 template<class TGameUser>
 void CGameUser<TGameUser>::Connect()
 {
-	m_pCallback->OnConnect((TGameUser*)this);
+	m_pController->OnConnect((TGameUser*)this);
 }
 
 template<class TGameUser>
@@ -37,7 +37,7 @@ void CGameUser<TGameUser>::Disconnect()
 		if(!m_pRoomList[idx].pRoom) continue;
 		m_pRoomList[idx].pRoom->Disconnect(m_pRoomList[idx].nUIdx);
 	}
-	m_pCallback->OnDisconnect((TGameUser*)this);
+	m_pController->OnDisconnect((TGameUser*)this);
 }
 
 template<class TGameUser>
@@ -75,10 +75,10 @@ bool CGameUser<TGameUser>::UnbindRoom(IGameRoom* pRoom, int nUIdx)
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::CGameRoom(IGameRoomCallback<TGameUser, TGameRoom, TGameMember>* pCallback)
+CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::CGameRoom(IGameRoomController<TGameUser, TGameRoom, TGameMember>* pController)
 {
 	memset(m_pMemberList, 0, sizeof(m_pMemberList));
-	m_pCallback = pCallback;
+	m_pController = pController;
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
@@ -97,7 +97,7 @@ bool CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Join(IGameUser* p
 	}
 	if(nIndex==sizeof(m_pMemberList)/sizeof(m_pMemberList[0])) return false;
 
-	if(!m_pCallback->MemberPrepareJoin((TGameRoom*)this, (TGameUser*)pUser)) {
+	if(!m_pController->MemberPrepareJoin((TGameRoom*)this, (TGameUser*)pUser)) {
 		return false;
 	}
 
@@ -118,7 +118,7 @@ void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::OnData(unsigned i
 	TGameMember* pMember = GetMember(nUIdx);
 	if(!pMember) return;
 
-	m_pCallback->MemberOndata((TGameRoom*)this, pMember, pData, nSize);
+	m_pController->MemberOndata((TGameRoom*)this, pMember, pData, nSize);
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
@@ -134,7 +134,7 @@ void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::MemberAttach(TGam
 	assert(m_pMemberList[nIndex]==NULL);
 
 	m_pMemberList[nIndex] = pMember;
-	m_pCallback->MemberJoin((TGameRoom*)this, pMember);
+	m_pController->MemberJoin((TGameRoom*)this, pMember);
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
@@ -144,7 +144,7 @@ void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::MemberDetach(TGam
 	assert(nIndex<sizeof(m_pMemberList)/sizeof(m_pMemberList[0]));
 	assert(m_pMemberList[nIndex]==pMember);
 
-	m_pCallback->MemberLeave((TGameRoom*)this, pMember);
+	m_pController->MemberLeave((TGameRoom*)this, pMember);
 	m_pMemberList[nIndex] = NULL;
 }
 
