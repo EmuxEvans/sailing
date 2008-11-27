@@ -32,8 +32,8 @@ public:
 	virtual void Disconnect() = NULL;
 	virtual void OnData(const void* pData, int nSize) = NULL;
 	virtual void SendData(const void* pData, int nSize) = NULL;
-	virtual bool BindRoom(IGameRoom* pRoom, int nUIdx) = NULL;
-	virtual bool UnbindRoom(IGameRoom* pRoom, int nUIdx) = NULL;
+	virtual bool BindRoom(unsigned int& nIndex, IGameRoom* pRoom, int nUIdx) = NULL;
+	virtual bool UnbindRoom(unsigned int nIndex, IGameRoom* pRoom, int nUIdx) = NULL;
 };
 
 class IGameRoom
@@ -51,21 +51,22 @@ public:
 	CGameUser(IGameUserController<TGameUser>* pController);
 	virtual ~CGameUser();
 
-	IGameUserController<TGameUser>* GetController();
-	void SetController(IGameUserController<TGameUser>* pController);
-
 	virtual void Connect();
 	virtual void Disconnect();
 	virtual void OnData(const void* pData, int nSize);
 	virtual void SendData(const void* pData, int nSize);
-	virtual bool BindRoom(IGameRoom* pRoom, int nUIdx);
-	virtual bool UnbindRoom(IGameRoom* pRoom, int nUIdx);
+	virtual bool BindRoom(unsigned int& nIndex, IGameRoom* pRoom, int nUIdx);
+	virtual bool UnbindRoom(unsigned int nIndex, IGameRoom* pRoom, int nUIdx);
 
 private:
 	struct {
 		IGameRoom*		pRoom;
 		unsigned int	nUIdx;
-	}								m_pRoomList[20];
+	}								m_pDynChannel[20];
+	struct {
+		IGameRoom*		pRoom;
+		unsigned int	nUIdx;
+	}								m_pStaChannel[20];
 	IGameUserController<TGameUser>*	m_pController;
 };
 

@@ -13,18 +13,6 @@ CGameUser<TGameUser>::~CGameUser()
 }
 
 template<class TGameUser>
-IGameUserController<TGameUser>* CGameUser<TGameUser>::GetController()
-{
-	return m_pController;
-}
-
-template<class TGameUser>
-void CGameUser<TGameUser>::SetController(IGameUserController<TGameUser>* pController)
-{
-	m_pController = pController;
-}
-
-template<class TGameUser>
 void CGameUser<TGameUser>::Connect()
 {
 	m_pController->OnConnect((TGameUser*)this);
@@ -51,7 +39,7 @@ void CGameUser<TGameUser>::SendData(const void* pData, int nSize)
 }
 
 template<class TGameUser>
-bool CGameUser<TGameUser>::BindRoom(IGameRoom* pRoom, int nUIdx)
+bool CGameUser<TGameUser>::BindRoom(unsigned int& nIndex, IGameRoom* pRoom, int nUIdx)
 {
 	for(int idx=0; idx<sizeof(m_pRoomList)/sizeof(m_pRoomList[0]); idx++) {
 		if(m_pRoomList[idx].pRoom!=NULL) continue;
@@ -63,7 +51,7 @@ bool CGameUser<TGameUser>::BindRoom(IGameRoom* pRoom, int nUIdx)
 }
 
 template<class TGameUser>
-bool CGameUser<TGameUser>::UnbindRoom(IGameRoom* pRoom, int nUIdx)
+bool CGameUser<TGameUser>::UnbindRoom(unsigned int nIndex, IGameRoom* pRoom, int nUIdx)
 {
 	for(int idx=0; idx<sizeof(m_pRoomList)/sizeof(m_pRoomList[0]); idx++) {
 		if(m_pRoomList[idx].pRoom!=NULL || m_pRoomList[idx].nUIdx!=NULL) continue;
