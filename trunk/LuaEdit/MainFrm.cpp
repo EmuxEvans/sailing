@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "resource.h"
 
-#include "LuaHost\LuaDebugInfo.h"
+#include <skates\skates.h>
 #include "LuaDebugClient.h"
 
 #include "AboutDlg.h"
@@ -19,8 +19,6 @@
 #include "SciLexerEdit.h"
 #include "LuaEditView.h"
 #include "LuaDebugHooker.h"
-
-#include <skates\skates.h>
 
 CMainFrame::CMainFrame() : m_FileManager(&m_view)
 {
@@ -421,7 +419,7 @@ LRESULT CMainFrame::OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /
 		return 0;
 	}
 
-	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->Connect(m_AttachHostDlg.m_szAddress)) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->Connect(m_AttachHostDlg.m_szAddress, 0)) {
 		MessageBox("Connect Error");
 		CLuaDebugManager::GetDefault()->DeleteHooker();
 		return 0;

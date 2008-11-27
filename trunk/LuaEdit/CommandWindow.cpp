@@ -5,14 +5,14 @@
 #include "DialogWindow.h"
 #include "CommandWindow.h"
 
-#include "LuaHost\LuaDebugInfo.h"
+#include <skates/skates.h>
+
 #include "LuaDebugClient.h"
 #include "LuaDebugHooker.h"
 
 LRESULT CCommandDlg::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
 {
 	TCHAR szCmd[1000];
-	int nRetCode;
 	::GetWindowText(GetDlgItem(IDC_COMMAND), szCmd, sizeof(szCmd));
 
 	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()) {
@@ -20,7 +20,7 @@ LRESULT CCommandDlg::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL
 		return 0;
 	}
 
-	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->RunCmd(szCmd, nRetCode)) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->RunCmd(szCmd)) {
 		MessageBox(_T("RunCmd Error"), _T("ERROR"), MB_OK);
 		return 0;
 	}

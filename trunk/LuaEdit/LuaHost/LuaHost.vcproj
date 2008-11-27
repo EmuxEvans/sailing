@@ -177,58 +177,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\LuaDebugClientRpc.clt.c"
-				>
-			</File>
-			<File
-				RelativePath=".\LuaDebugClientRpc.idl"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="..\..\framework\$(ConfigurationName)-$(PlatformName)\idl_cc $(InputFileName)&#x0D;&#x0A;"
-						Outputs="$(InputName).clt.c;$(InputName).svr.c;$(InputName).h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="..\..\framework\$(ConfigurationName)-$(PlatformName)\idl_cc $(InputFileName)&#x0D;&#x0A;"
-						Outputs="$(InputName).clt.c;$(InputName).svr.c;$(InputName).h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\LuaDebugHostRpc.idl"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="..\..\framework\$(ConfigurationName)-$(PlatformName)\idl_cc $(InputFileName)&#x0D;&#x0A;"
-						Outputs="$(InputName).clt.c;$(InputName).svr.c;$(InputName).h"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="..\..\framework\$(ConfigurationName)-$(PlatformName)\idl_cc $(InputFileName)&#x0D;&#x0A;"
-						Outputs="$(InputName).clt.c;$(InputName).svr.c;$(InputName).h"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\LuaDebugHostRpc.svr.c"
-				>
-			</File>
-			<File
 				RelativePath=".\LuaHost.cpp"
 				>
 			</File>
@@ -238,18 +186,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\LuaDebugClientRpc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LuaDebugHostRpc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\LuaDebugInfo.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

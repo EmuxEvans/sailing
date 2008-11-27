@@ -26,7 +26,7 @@ typedef struct NETWORK_EVENT {
 typedef struct NETWORK_DOWNBUF {
 	RLIST_ITEM		item;
 	unsigned int	len;
-	char			buf[0];
+	char			buf[1];
 } NETWORK_DOWNBUF;
 
 ZION_API int network_init(unsigned int downbuf_size);

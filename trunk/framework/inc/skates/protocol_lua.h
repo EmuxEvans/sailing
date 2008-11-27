@@ -89,10 +89,31 @@ typedef struct PROTOCOL_LUA_DEBUG_CALLBACK {
 	void* userptr;
 } PROTOCOL_LUA_DEBUG_CALLBACK;
 
-ZION_API PROTOCOL_LUA_CLIENT* protocol_lua_attach(PROTOCOL_LUA_DEBUG_CALLBACK* callback, RPCNET_GROUP* grp, unsigned int sid);
-ZION_API void protocol_lua_detach(PROTOCOL_LUA_CLIENT* client);
-ZION_API void protocol_lua_runcmd(PROTOCOL_LUA_CLIENT* client, const char* cmd);
+typedef struct LUADEBUG_STATEINFO {
+	unsigned int sid;
+	char name[100];	/* (n) */
+	char client_ep[40];
+} LUADEBUG_STATEINFO;
+
+typedef struct LUADEBUG_CALLSTACK {
+	char name[100];	/* (n) */
+	char namewhat[100];	/* (n) `global', `local', `field', `method' */
+	char what[100];	/* (S) `Lua', `C', `main', `tail' */
+	char source[100];	/* (S) */
+	int currentline;	/* (l) */
+	int nups;		/* (u) number of upvalues */
+	int linedefined;	/* (S) */
+	int lastlinedefined;	/* (S) */
+	char short_src[100]; /* (S) */
+} LUADEBUG_CALLSTACK;
+
+ZION_API int protocol_lua_attach(RPCNET_GROUP* grp, unsigned int sid, PROTOCOL_LUA_DEBUG_CALLBACK* callback);
+ZION_API int protocol_lua_detach(PROTOCOL_LUA_CLIENT* client);
+ZION_API int protocol_lua_runcmd(PROTOCOL_LUA_CLIENT* client, const char* cmd);
+ZION_API int protocol_lua_getstack(PROTOCOL_LUA_CLIENT* client, LUADEBUG_CALLSTACK* stack, int* count);
+
 ZION_API void protocol_lua_debugbreak(lua_State* L);
+ZION_API void protocol_lua_debugmsg(lua_State* L, int type, const char* msg);
 
 #ifdef __cplusplus
 }

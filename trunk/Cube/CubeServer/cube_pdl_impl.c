@@ -97,6 +97,7 @@ void login_create_player(SVR_USER_CTX* user_ctx, const char* nick, const char* r
 
 	dbapi_release(handle);
 
+	strcpy(user_ctx->conn->nick, nick);
 	strcpy(user_ctx->conn->ri, role);
 	login_create_player_callback(user_ctx, ERR_NOERROR);
 }

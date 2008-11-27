@@ -30,7 +30,7 @@ public:
 		return m_nDepth;
 	}
 
-	BOOL Connect(const char* pEP);
+	BOOL Connect(const char* pEP, unsigned int nSid);
 	BOOL Disconnect();
 	BOOL Continue();
 	BOOL GoStack(int nIndex);
