@@ -5,6 +5,7 @@
 #include "../../inc/skates/protocol_def.h"
 #include "../../inc/skates/protocol_lua.h"
 #include "../../inc/skates/protocol.h"
+#include "../../inc/skates/dymempool.h"
 
 //static int luaL_isstruct(lua_State* L, int idx, PROTOCOL_TYPE* type);
 //static int luaL_isobject(lua_State* L, int idx, PROTOCOL_LUA_CLASS* cls);
@@ -405,22 +406,6 @@ int object_gc(lua_State* L)
 	return 1;
 }
 
-void protocol_lua_newstruct(lua_State* L, PROTOCOL_TYPE* type, void* ptr)
-{
-	struct_return(L, type, -1, -1, ptr); 
-}
-
-void protocol_lua_newobject(lua_State* L, PROTOCOL_LUA_CLASS* cls, void* ptr)
-{
-	PROTOCOL_LUA_OBJECT* obj;
-	obj = (PROTOCOL_LUA_OBJECT*)lua_newuserdata(L, sizeof(PROTOCOL_LUA_OBJECT));
-	luaL_getmetatable(L, PROTOCOL_OBJECT_METATABLE);
-	lua_setmetatable(L, -2);
-	obj->type = PROTOCOL_TYPE_OBJECT;
-	obj->o.t_class = cls;
-	obj->o.ptr = ptr;
-}
-
 int protocol_lua_init(lua_State* L)
 {
 	int ret;
@@ -459,6 +444,43 @@ int protocol_lua_init(lua_State* L)
 
 	
 	return ERR_NOERROR;
+}
+
+static void* protocol_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
+{
+	(void)ud;
+	(void)osize;
+	if(nsize==0) {
+		dymempool_free(ptr);
+		return NULL;
+	} else
+		return dymempool_realloc(ptr, nsize);
+}
+
+lua_State* protocol_lua_netstate(lua_CFunction panic)
+{
+	lua_State* L = lua_newstate(protocol_alloc, NULL);
+	if (L) {
+		if(panic) lua_atpanic(L, panic);
+		protocol_lua_init(L);
+	}		
+	return L;
+}
+
+void protocol_lua_newstruct(lua_State* L, PROTOCOL_TYPE* type, void* ptr)
+{
+	struct_return(L, type, -1, -1, ptr); 
+}
+
+void protocol_lua_newobject(lua_State* L, PROTOCOL_LUA_CLASS* cls, void* ptr)
+{
+	PROTOCOL_LUA_OBJECT* obj;
+	obj = (PROTOCOL_LUA_OBJECT*)lua_newuserdata(L, sizeof(PROTOCOL_LUA_OBJECT));
+	luaL_getmetatable(L, PROTOCOL_OBJECT_METATABLE);
+	lua_setmetatable(L, -2);
+	obj->type = PROTOCOL_TYPE_OBJECT;
+	obj->o.t_class = cls;
+	obj->o.ptr = ptr;
 }
 
 int protocol_lua_getvalue(lua_State* L, int idx, PROTOCOL_LUA_PARAMETER* p, void* v)
