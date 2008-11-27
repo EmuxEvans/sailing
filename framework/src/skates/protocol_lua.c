@@ -1,16 +1,48 @@
 #include <string.h>
+#include <assert.h>
+#include <stdio.h>
 
 #include "../../inc/skates/errcode.h"
 #include "../../inc/skates/os.h"
+#include "../../inc/skates/dymempool.h"
+#include "../../inc/skates/applog.h"
+#include "../../inc/skates/rlist.h"
+#include "../../inc/skates/sock.h"
+#include "../../inc/skates/stream.h"
+#include "../../inc/skates/hashmap.h"
+#include "../../inc/skates/rpc_net.h"
+#include "../../inc/skates/rpc_fun.h"
 #include "../../inc/skates/protocol_def.h"
 #include "../../inc/skates/protocol_lua.h"
 #include "../../inc/skates/protocol.h"
-#include "../../inc/skates/dymempool.h"
+#include "../../inc/skates/threadpool.h"
+#include "protocol_lua.h"
 
 //static int luaL_isstruct(lua_State* L, int idx, PROTOCOL_TYPE* type);
 //static int luaL_isobject(lua_State* L, int idx, PROTOCOL_LUA_CLASS* cls);
 //static PROTOCOL_LUA_OBJECT* luaL_tostruct(lua_State* L, int idx, PROTOCOL_TYPE* type);
 //static PROTOCOL_LUA_OBJECT* luaL_toobject(lua_State* L, int idx, PROTOCOL_LUA_CLASS* cls);
+
+struct PROTOCOL_LUA_CLIENT {
+	RPCNET_GROUP* host;
+	unsigned int sid;
+	unsigned int cid;
+
+	PROTOCOL_LUA_DEBUG_CALLBACK callback;
+};
+
+typedef struct PROTOCOL_LUA_STATE{
+	unsigned int	sid;
+	char			name[100];
+	lua_State*		L;
+
+	RPCNET_GROUP*	host;
+	unsigned int	cid;
+
+	RPCNET_GROUP*	debug_host;
+	unsigned int	debug_cid;
+	lua_State*		dbgL;
+} PROTOCOL_LUA_STATE;
 
 static void struct_return(lua_State* L, PROTOCOL_TYPE* type, int n_var, int idx, void* ptr);
 static void struct_make(lua_State* L, PROTOCOL_TYPE* type, int n_var, int idx, const void* ptr);
@@ -21,6 +53,13 @@ static int struct_tostring(lua_State* L);
 
 static int object_get(lua_State* L);
 static int object_gc(lua_State* L);
+
+PROTOCOL_LUA_STATE state_list[20];
+unsigned int state_seq = 0x2008;
+PROTOCOL_LUA_CLIENT client_list[100];
+
+static PROTOCOL_LUA_CLIENT* client_get(unsigned int cid);
+static PROTOCOL_LUA_STATE* state_get(unsigned int sid);
 
 int luaL_isstruct(lua_State* L, int idx, PROTOCOL_TYPE* type)
 {
@@ -406,7 +445,30 @@ int object_gc(lua_State* L)
 	return 1;
 }
 
-int protocol_lua_init(lua_State* L)
+void protocol_lua_init()
+{
+	memset(state_list, 0, sizeof(state_list));
+	memset(client_list, 0, sizeof(client_list));
+	rpcfun_register(__protocol_lua_desc, 0);
+}
+
+void protocol_lua_final()
+{
+	int idx;
+
+	rpcfun_unregister(__protocol_lua_desc, 0);
+
+	for(idx=0; idx<sizeof(state_list)/sizeof(state_list[0]); idx++) {
+		if(!state_list[idx].L) continue;
+		SYSLOG(LOG_WARNING, MODULE_NAME, "protocol_lua_final: state(%s) not free", state_list[idx].name);
+	}
+	for(idx=0; idx<sizeof(client_list)/sizeof(client_list[0]); idx++) {
+		if(!client_list[idx].host) continue;
+		SYSLOG(LOG_WARNING, MODULE_NAME, "protocol_lua_final: client(%d) not detach", idx);
+	}
+}
+
+int protocol_lua_initstate(lua_State* L)
 {
 	int ret;
 
@@ -457,14 +519,63 @@ static void* protocol_alloc(void *ud, void *ptr, size_t osize, size_t nsize)
 		return dymempool_realloc(ptr, nsize);
 }
 
-lua_State* protocol_lua_netstate(lua_CFunction panic)
+static int protocol_panic (lua_State *L) {
+  (void)L;  /* to avoid warnings */
+  fprintf(stderr, "PANIC: unprotected error in call to Lua API (%s)\n",
+                   lua_tostring(L, -1));
+  return 0;
+}
+
+lua_State* protocol_lua_newstate(lua_CFunction panic, const char* name)
 {
-	lua_State* L = lua_newstate(protocol_alloc, NULL);
-	if (L) {
-		if(panic) lua_atpanic(L, panic);
-		protocol_lua_init(L);
-	}		
+	unsigned int idx;
+	lua_State* L;
+
+	for(idx=0; idx<sizeof(state_list)/sizeof(state_list[0]); idx++) {
+		if(!state_list[idx].L) break;
+	}
+	if(idx==sizeof(state_list)/sizeof(state_list[0])) return NULL;
+
+	L = lua_newstate(protocol_alloc, NULL);
+	if(!L) return NULL;
+
+	lua_atpanic(L, panic?panic:protocol_panic);
+	protocol_lua_initstate(L);
+
+	state_list[idx].sid		= (((state_seq++)&0x7fff)<<16) | idx;
+	state_list[idx].L		= L;
+	strcpy(state_list[idx].name, name);
+	state_list[idx].host	= NULL;
+	state_list[idx].cid		= 0;
+	state_list[idx].debug_host	= NULL;
+	state_list[idx].debug_cid	= 0;
+	state_list[idx].dbgL		= NULL;
+
+	lua_pushstring(L, "PROTOCOL_LUA_ID");
+	lua_pushinteger(L, (lua_Integer)state_list[idx].sid);
+	lua_rawset(L, LUA_REGISTRYINDEX);
+
 	return L;
+}
+
+void protocol_lua_closestate(lua_State* L)
+{
+	unsigned int idx;
+
+	lua_pushstring(L, "PROTOCOL_LUA_ID");
+	lua_rawget(L, LUA_REGISTRYINDEX);
+	if(!lua_isnumber(L, -1)) {
+		lua_pop(L, -1);
+		return;
+	}
+	idx = lua_tointeger(L, -1);
+	lua_pop(L, -1);
+	assert((idx&0xffff)>=0 && (idx&0xffff)<sizeof(state_list)/sizeof(state_list[0]));
+	assert(state_list[idx&0xffff].id==idx);
+	assert(state_list[idx&0xffff].L==L);
+
+	lua_close(L);
+	memset(&state_list[idx&0xffff], 0, sizeof(state_list[0]));
 }
 
 void protocol_lua_newstruct(lua_State* L, PROTOCOL_TYPE* type, void* ptr)
@@ -587,4 +698,276 @@ void protocol_lua_pushvalue(lua_State* L, PROTOCOL_LUA_PARAMETER* p, void* v)
 			return;
 		}
 	}
+}
+
+int LuaDebugClientRpc_Attach_impl(RPCNET_GROUP* group, os_dword cid, os_dword sid)
+{
+	PROTOCOL_LUA_CLIENT* clt;
+	clt = client_get(cid);
+	if(!clt) return ERR_NOT_FOUND;
+
+	clt->callback.attach(clt);
+
+	return ERR_NOERROR;
+}
+
+int LuaDebugClientRpc_Detach_impl(RPCNET_GROUP* group, os_dword cid, os_dword sid)
+{
+	PROTOCOL_LUA_CLIENT* clt;
+	clt = client_get(cid);
+	if(!clt) return ERR_NOT_FOUND;
+
+	clt->callback.detach(clt);
+
+	return ERR_NOERROR;
+}
+
+int LuaDebugClientRpc_BreakPoint_impl(RPCNET_GROUP* group, os_dword cid)
+{
+	PROTOCOL_LUA_CLIENT* clt;
+	clt = client_get(cid);
+	if(!clt) return ERR_NOT_FOUND;
+
+	clt->callback.debugbreak(clt);
+
+	return ERR_NOERROR;
+}
+
+int LuaDebugClientRpc_DebugMsg_impl(RPCNET_GROUP* group, os_dword cid, int Type, const char* Msg)
+{
+	PROTOCOL_LUA_CLIENT* clt;
+	clt = client_get(cid);
+	if(!clt) return ERR_NOT_FOUND;
+
+	clt->callback.debugmsg(clt, Type, Msg);
+
+	return ERR_NOERROR;
+}
+
+int LuaDebugHostRpc_Attach_impl(RPCNET_GROUP* group, os_dword sid, os_dword cid)
+{
+	PROTOCOL_LUA_STATE* state;
+	int ret;
+
+	state = state_get(sid);
+	if(!state) return ERR_NOT_FOUND;
+
+	state->host = group;
+	state->cid = cid;
+
+	ret = LuaDebugClientRpc_Attach(group, cid, sid);
+	if(ret!=ERR_NOERROR) {
+		state->host = NULL;
+		state->cid = 0;
+	}
+
+	return ret;
+}
+
+int LuaDebugHostRpc_Detach_impl(RPCNET_GROUP* group, os_dword sid, os_dword cid)
+{
+	PROTOCOL_LUA_STATE* state;
+	int ret;
+
+	state = state_get(sid);
+	if(!state) return ERR_NOT_FOUND;
+
+	state->host = NULL;
+	state->cid = 0;
+	ret = LuaDebugClientRpc_Detach(group, cid, sid);
+
+	return ret;
+}
+
+int LuaDebugHostRpc_GetStateList_impl(RPCNET_GROUP* group, LUADEBUG_STATEINFO* infos, int* count)
+{
+	int i, m;
+
+	if(*count>sizeof(state_list)/sizeof(state_list[0])) {
+		*count = sizeof(state_list)/sizeof(state_list[0]);
+	}
+
+	for(m=i=0; i<*count; i++) {
+		RPCNET_GROUP* grp;
+
+		if(!state_list[i].L) continue;
+		grp = state_list[i].host;
+
+		infos[m].sid = state_list[i].sid;
+		strcpy(infos[m].name, state_list[i].name);
+		if(grp) {
+			SOCK_ADDR sa;
+			sock_addr2str(rpcnet_group_get_endpoint(grp, &sa), infos[m].client_ep);
+		} else {
+			infos[m].client_ep[0] = '\0';
+		}
+		m++;
+	}
+
+	*count = m;
+	return ERR_NOERROR;
+}
+
+int LuaDebugHostRpc_GetCallStack_impl(RPCNET_GROUP* group, os_dword sid, LUADEBUG_CALLSTACK* stacks, int* depth)
+{
+	PROTOCOL_LUA_STATE* state;
+	int i;
+	lua_Debug ar;
+
+	state = state_get(sid);
+	if(!state) return ERR_NOT_FOUND;
+	if(!state->dbgL) return ERR_OPT_FORBIDDEN;
+
+	for(i=1; i<*depth; i++) {
+		memset(&ar, 0, sizeof(ar));
+		if(!lua_getstack(state->dbgL, i, &ar)) break;
+		if(!lua_getinfo(state->dbgL, "flnSu", &ar)) {
+			assert(0);
+			break;
+		}
+
+		if(ar.name) strcpy(stacks[i-1].name, ar.name);				else strcpy(stacks[i-1].name, "");
+		if(ar.namewhat) strcpy(stacks[i-1].namewhat, ar.namewhat);	else strcpy(stacks[i-1].namewhat, "");
+		if(ar.what) strcpy(stacks[i-1].what, ar.what);				else strcpy(stacks[i-1].what, "");
+		if(ar.source) strcpy(stacks[i-1].source, ar.source);		else strcpy(stacks[i-1].source, "");
+		stacks[i-1].currentline = ar.currentline;
+		stacks[i-1].nups = ar.nups;
+		stacks[i-1].linedefined = ar.linedefined;
+		stacks[i-1].lastlinedefined = ar.lastlinedefined;
+		strcpy(stacks[i-1].short_src, ar.short_src);
+	}
+
+	*depth = i - 1;
+	return ERR_NOERROR;
+}
+
+int LuaDebugHostRpc_RunCmd_impl(RPCNET_GROUP* group, os_dword sid, const char* Cmd)
+{
+	PROTOCOL_LUA_STATE* state;
+	int ret;
+
+	state = state_get(sid);
+	if(!state) return ERR_NOT_FOUND;
+	if(!state->dbgL) return ERR_OPT_FORBIDDEN;
+
+	ret = luaL_dostring(state->dbgL, Cmd);
+	if(!ret) {
+		lua_pop(state->dbgL, 1);
+		return ERR_UNKNOWN;
+	} else {
+		return ERR_NOERROR;
+	}
+}
+
+PROTOCOL_LUA_CLIENT* protocol_lua_attach(PROTOCOL_LUA_DEBUG_CALLBACK* callback, RPCNET_GROUP* grp, unsigned int sid)
+{
+	unsigned int cid;
+	int ret;
+
+	if(grp==NULL) return NULL;
+
+	for(cid=0; cid<sizeof(client_list)/sizeof(client_list[0]); cid++) {
+		if(!client_list[cid].host) break;
+	}
+	if(cid==sizeof(client_list)/sizeof(client_list[0])) return NULL;
+
+	client_list[cid].host = grp;
+	cid = ((state_seq++)<<16) | cid;
+
+	threadpool_s();
+	ret = LuaDebugHostRpc_Attach(grp, sid, cid);
+	threadpool_e();
+
+	if(ret==ERR_NOERROR) {
+		assert(client_list[cid&0xffff].host==grp);
+		assert(client_list[cid&0xffff].sid==sid);
+		assert(client_list[cid&0xffff].cid==cid);
+		return &client_list[cid&0xffff];
+	} else {
+		client_list[cid&0xffff].host = NULL;
+		client_list[cid&0xffff].sid = 0;
+		client_list[cid&0xffff].cid = 0;
+		memcpy(&client_list[cid&0xffff].callback, callback, sizeof(*callback));
+		return NULL;
+	}
+}
+
+void protocol_lua_detach(PROTOCOL_LUA_CLIENT* client)
+{
+	int ret;
+
+	assert(client->host);
+
+	threadpool_s();
+	ret = LuaDebugHostRpc_Detach(client->host, client->sid, client->cid);
+	threadpool_e();
+
+	if(ret==ERR_NOERROR) {
+		assert(client->host==NULL);
+		assert(client->sid==0);
+		assert(client->cid==0);
+	} else {
+		client->host = NULL;
+		client->sid = 0;
+		client->cid = 0;
+	}
+}
+
+void protocol_lua_runcmd(PROTOCOL_LUA_CLIENT* client, const char* cmd)
+{
+	int ret;
+
+	assert(client->host!=NULL);
+	//assert(client->sid==0);
+	//assert(client->cid==0);
+
+	threadpool_s();
+	ret = LuaDebugHostRpc_RunCmd(client->host, client->sid, cmd);
+	threadpool_e();
+}
+
+void protocol_lua_debugbreak(lua_State* L)
+{
+	unsigned int idx;
+
+	lua_pushstring(L, "PROTOCOL_LUA_ID");
+	lua_rawget(L, LUA_REGISTRYINDEX);
+	if(!lua_isnumber(L, -1)) {
+		lua_pop(L, -1);
+		return;
+	}
+
+	idx = lua_tointeger(L, -1);
+	lua_pop(L, -1);
+	assert((idx&0xffff)<sizeof(state_list)/sizeof(state_list[0]));
+	assert(state_list[idx&0xffff].id==idx);
+	idx = idx & 0xffff;
+
+	state_list[idx].debug_host = state_list[idx].host;
+	if(state_list[idx].debug_host) {
+		state_list[idx].debug_cid = state_list[idx].cid;
+		state_list[idx].dbgL = L;
+
+		threadpool_s();
+		LuaDebugClientRpc_BreakPoint(state_list[idx].debug_host, state_list[idx].cid);
+		threadpool_e();
+	}
+}
+
+PROTOCOL_LUA_CLIENT* client_get(unsigned int cid)
+{
+	unsigned int idx;
+	idx = cid & 0xffff;
+	if(idx>=sizeof(client_list)/sizeof(client_list[0])) return NULL;
+	if(client_list[idx].cid!=cid) return NULL;
+	return &client_list[idx];
+}
+
+PROTOCOL_LUA_STATE* state_get(unsigned int sid)
+{
+	unsigned int idx;
+	idx = sid & 0xffff;
+	if(idx>=sizeof(state_list)/sizeof(state_list[0])) return NULL;
+	if(state_list[idx].sid!=sid) return NULL;
+	return &state_list[idx];
 }

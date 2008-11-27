@@ -19,6 +19,7 @@ typedef struct MSG_DATA {
 
 typedef struct THREAD_CTX {
 	int				index;
+	unsigned int	refcount;
 	os_thread_t		tid;
 	unsigned int (ZION_CALLBACK *proc)(void*);
 	void*			arg;
@@ -173,7 +174,9 @@ unsigned int ZION_CALLBACK workthread_proc(void* arg)
 			atom_dec(&thread_busy);
 		}
 	} else {
+		assert(threads[tc->index].refcount==1);
 		tc->proc(tc->arg);
+		assert(threads[tc->index].refcount==1);
 	}
 
 	threads[tc->index].index = -1;
@@ -212,6 +215,7 @@ int threadpool_begin(os_thread_t* handle, unsigned int (ZION_CALLBACK *proc)(voi
 		return ERR_FULL;
 	}
 	threads[index].index = index;
+	threads[index].refcount = 1;
 	threads[index].proc = proc;
 	threads[index].arg = arg;
 	os_mutex_unlock(&threads_mtx);
@@ -230,6 +234,14 @@ int threadpool_s()
 {
 	int index;
 
+	index = threadpool_getindex();
+	if(index>=0) {
+		if(index<(int)thread_count) return ERR_NOERROR;
+		assert(index<sizeof(threads)/sizeof(threads[0]));
+		threads[index].refcount++;
+		return ERR_NOERROR;
+	}
+
 	os_mutex_lock(&threads_mtx);
 	for(index=thread_count; index<sizeof(threads)/sizeof(threads[0]); index++) {
 		if(threads[index].index==-1) break;
@@ -239,6 +251,7 @@ int threadpool_s()
 		return ERR_FULL;
 	}
 	threads[index].index = index;
+	threads[index].refcount = 1;
 	threads[index].proc = NULL;
 	threads[index].arg = NULL;
 	os_thread_get(&threads[index].tid);
@@ -258,7 +271,13 @@ int threadpool_e()
 
 	index = threadpool_getindex();
 	if(index<0) return ERR_NOT_WORKER;
+	assert(index<sizeof(threads)/sizeof(threads[0]));
+	if(index>=0 && index<(int)thread_count) return ERR_NOERROR;
 
+	assert(threads[index].refcount>0);
+	if((--threads[index].refcount)!=0) {
+		return ERR_UNKNOWN;
+	}
 	threads[index].index = -1;
 
 	if(os_thread_key_set(&thread_key, NULL)!=0)

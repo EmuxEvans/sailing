@@ -2,12 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <skates/errcode.h>
-#include <skates/os.h>
-#include <skates/misc.h>
-#include <skates/protocol_def.h>
-#include <skates/protocol_lua.h>
-#include <skates/protocol.h>
+#include <skates/skates.h>
 
 #include "sample_p.proto.h"
 #include "sample_p.proto.lua.h"
@@ -21,9 +16,9 @@ static int my_obj_load(lua_State* L);
 
 int main(int argc, char* argv[])
 {
-	L = luaL_newstate();
+	dymempool_init(60, 2048);
+	L = protocol_lua_newstate(NULL, "welcome");
 	luaL_openlibs(L);
-	protocol_lua_init(L);
 
 	lua_pushstring(L, "new_my_struct");
 	lua_pushcfunction(L, my_struct_func);
@@ -49,6 +44,8 @@ int main(int argc, char* argv[])
 
 		if(line[0]=='@') {
 			ret = luaL_dofile(L, line+1);
+		} else if(strcmp(line, "quit")==0) {
+			break;
 		} else {
 			if(line[0]!='\0') {
 				ret = luaL_dostring(L, line);
@@ -62,6 +59,8 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	protocol_lua_closestate(L);
+	dymempool_final();
 	return 0;
 }
 

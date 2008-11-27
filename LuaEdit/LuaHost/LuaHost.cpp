@@ -180,18 +180,7 @@ int LuaDebugHostRpc_Detach_impl(RPCNET_GROUP* group)
 
 int LuaDebugHostRpc_RunCmd_impl(RPCNET_GROUP* group, const char* Cmd)
 {
-	char line[20*1024];
-
-	printf("@@LuaDebugHostRpc_RunCmd_impl : [[[%s]]]\n", Cmd);
-
-	strcpy(line, Cmd);
-	strtrim(line);
-	strltrim(line);
-
-	if(line[0]=='\0')
-		return ERR_NOERROR;
-
-	luaL_dostring(L, line);
+	luaL_dostring(L, Cmd);
 	return ERR_NOERROR;
 }
 

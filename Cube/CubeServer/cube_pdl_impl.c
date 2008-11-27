@@ -75,7 +75,10 @@ void login_create_player(SVR_USER_CTX* user_ctx, const char* nick, const char* r
 
 	if(user_ctx->conn->uuid==0) return;
 	if(user_ctx->conn->nick[0]!='\0') return;
-	if(nick[0]=='\0') return;
+	if(nick[0]=='\0') {
+		login_create_player_callback(user_ctx, ERR_UNKNOWN);
+		return;
+	}
 
 	handle = dbapi_connect(cube_dbstr);
 	if(handle==NULL) {

@@ -20,9 +20,9 @@ int os_chdir(char* path)
 	return chdir(path);
 }
 
-unsigned int atom_unix_inc(unsigned int volatile* mem)
+os_dword atom_unix_inc(os_dword volatile* mem)
 {
-	unsigned int val;
+	os_dword val;
 
     asm volatile( "mov $1, %0\n\t"
                   "lock; xadd %0,%1"
@@ -33,9 +33,9 @@ unsigned int atom_unix_inc(unsigned int volatile* mem)
 	return val;
 }
 
-unsigned int atom_unix_dec(unsigned int volatile* mem)
+os_dword atom_unix_dec(os_dword volatile* mem)
 {
-	unsigned int val;
+	os_dword val;
 
     asm volatile( "xor  %0, %0\n\t"
                   "dec %0\n\t"
@@ -47,7 +47,7 @@ unsigned int atom_unix_dec(unsigned int volatile* mem)
 	return val;
 }
 
-unsigned int atom_unix_swap(unsigned int volatile* mem, unsigned int prev)
+os_dword atom_unix_swap(os_dword volatile* mem, os_dword prev)
 {
     asm volatile( "lock; xchg %0, %1"
                 : "=r" (prev)
@@ -56,9 +56,9 @@ unsigned int atom_unix_swap(unsigned int volatile* mem, unsigned int prev)
 	return prev;
 }
 
-unsigned int atom_unix_cas(unsigned int volatile* mem, unsigned int val, unsigned int cmp)
+os_dword atom_unix_cas(os_dword volatile* mem, os_dword val, os_dword cmp)
 {
-	unsigned int prev;
+	os_dword prev;
 
     asm volatile( "lock; cmpxchg %1, %2"
                 : "=a" (prev)
@@ -80,7 +80,7 @@ void* atom_unix_cas_ptr(void* volatile *p, void* v, void* c)
 	return prev;
 }
 
-unsigned int atom_unix_exchg_add(unsigned int volatile* mem, unsigned int val)
+os_dword atom_unix_exchg_add(os_dword volatile* mem, os_dword val)
 {
     asm volatile( "lock; xadd %0,%1"
                 : "=r"(val), "=m"(*mem)

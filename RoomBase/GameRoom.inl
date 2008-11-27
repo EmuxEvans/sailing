@@ -3,7 +3,7 @@
 template<class TGameUser>
 CGameUser<TGameUser>::CGameUser(IGameUserController<TGameUser>* pController)
 {
-	memset(m_pRoomList, 0, sizeof(m_pRoomList));
+	memset(m_DynChannel, 0, sizeof(m_DynChannel));
 	m_pController = pController;
 }
 
@@ -21,9 +21,9 @@ void CGameUser<TGameUser>::Connect()
 template<class TGameUser>
 void CGameUser<TGameUser>::Disconnect()
 {
-	for(int idx=0; idx<sizeof(m_pRoomList)/sizeof(m_pRoomList[0]); idx++) {
-		if(!m_pRoomList[idx].pRoom) continue;
-		m_pRoomList[idx].pRoom->Disconnect(m_pRoomList[idx].nUIdx);
+	for(int idx=0; idx<sizeof(m_DynChannel)/sizeof(m_DynChannel[0]); idx++) {
+		if(!m_DynChannel[idx].pRoom) continue;
+		m_DynChannel[idx].pRoom->Disconnect(m_DynChannel[idx].nRIdx);
 	}
 	m_pController->OnDisconnect((TGameUser*)this);
 }
@@ -39,24 +39,24 @@ void CGameUser<TGameUser>::SendData(const void* pData, int nSize)
 }
 
 template<class TGameUser>
-bool CGameUser<TGameUser>::BindRoom(unsigned int& nIndex, IGameRoom* pRoom, int nUIdx)
+bool CGameUser<TGameUser>::BindRoom(unsigned int& nIndex, IGameRoom* pRoom, int nRIdx)
 {
-	for(int idx=0; idx<sizeof(m_pRoomList)/sizeof(m_pRoomList[0]); idx++) {
-		if(m_pRoomList[idx].pRoom!=NULL) continue;
-		m_pRoomList[idx].pRoom = pRoom;
-		m_pRoomList[idx].nUIdx = nUIdx;
+	for(int idx=0; idx<sizeof(m_DynChannel)/sizeof(m_DynChannel[0]); idx++) {
+		if(m_DynChannel[idx].pRoom!=NULL) continue;
+		m_DynChannel[idx].pRoom = pRoom;
+		m_DynChannel[idx].nRIdx = nRIdx;
 		return true;
 	}
 	return false;
 }
 
 template<class TGameUser>
-bool CGameUser<TGameUser>::UnbindRoom(unsigned int nIndex, IGameRoom* pRoom, int nUIdx)
+bool CGameUser<TGameUser>::UnbindRoom(unsigned int nIndex, IGameRoom* pRoom, int nRIdx)
 {
-	for(int idx=0; idx<sizeof(m_pRoomList)/sizeof(m_pRoomList[0]); idx++) {
-		if(m_pRoomList[idx].pRoom!=NULL || m_pRoomList[idx].nUIdx!=NULL) continue;
-		m_pRoomList[idx].pRoom = NULL;
-		m_pRoomList[idx].nUIdx = 0;
+	for(int idx=0; idx<sizeof(m_DynChannel)/sizeof(m_DynChannel[0]); idx++) {
+		if(m_DynChannel[idx].pRoom!=NULL || m_DynChannel[idx].nRIdx!=NULL) continue;
+		m_DynChannel[idx].pRoom = NULL;
+		m_DynChannel[idx].nRIdx = 0;
 		return true;
 	}
 	return false;
@@ -77,7 +77,7 @@ CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::~CGameRoom()
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
 bool CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Join(IGameUser* pUser)
 {
-	unsigned int nIndex, nUIdx;
+	unsigned int nIndex, nRIdx, nUIdx;
 	TGameMember* pMember;
 
 	for(nIndex=0; nIndex<sizeof(m_pMemberList)/sizeof(m_pMemberList[0]); nIndex++) {
@@ -89,35 +89,35 @@ bool CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Join(IGameUser* p
 		return false;
 	}
 
-	nUIdx = (GenGameSeq()<<16|nIndex);
-
-	if(!pUser->BindRoom(this, nUIdx)) {
+	nRIdx = (GenGameSeq()<<16|nIndex);
+	nUIdx = TGameRoom::GetRoomType();
+	if(!pUser->BindRoom(nUIdx, this, nRIdx)) {
 		return false;
 	}
 
-	pMember = TGameMember::Create((TGameUser*)pUser, (TGameRoom*)this, GenGameSeq()<<16|nIndex);
+	pMember = TGameMember::Create((TGameUser*)pUser, nUIdx, (TGameRoom*)this, GenGameSeq()<<16|nIndex);
 
 	return true;
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::OnData(unsigned int nUIdx, const void* pData, int nSize)
+void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::OnData(unsigned int nRIdx, const void* pData, int nSize)
 {
-	TGameMember* pMember = GetMember(nUIdx);
+	TGameMember* pMember = GetMember(nRIdx);
 	if(!pMember) return;
 
 	m_pController->MemberOndata((TGameRoom*)this, pMember, pData, nSize);
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Disconnect(unsigned int nUIdx)
+void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Disconnect(unsigned int nRIdx)
 {
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
 void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::MemberAttach(TGameMember* pMember)
 {
-	unsigned int nIndex = pMember->GetUIdx()&0xffff;
+	unsigned int nIndex = pMember->GetRIdx()&0xffff;
 	assert(nIndex<sizeof(m_pMemberList)/sizeof(m_pMemberList[0]));
 	assert(m_pMemberList[nIndex]==NULL);
 
@@ -128,7 +128,7 @@ void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::MemberAttach(TGam
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
 void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::MemberDetach(TGameMember* pMember)
 {
-	unsigned int nIndex = pMember->GetUIdx()&0xffff;
+	unsigned int nIndex = pMember->GetRIdx()&0xffff;
 	assert(nIndex<sizeof(m_pMemberList)/sizeof(m_pMemberList[0]));
 	assert(m_pMemberList[nIndex]==pMember);
 
@@ -153,9 +153,9 @@ TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetMember
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetMember(unsigned int nUIdx)
+TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetMember(unsigned int nRIdx)
 {
-	int nIndex = (int)(nUIdx & 0xffff);
+	int nIndex = (int)(nRIdx & 0xffff);
 
 	if(nIndex<0 || nIndex>=sizeof(m_pMemberList)/sizeof(m_pMemberList[0])) {
 		return NULL;
@@ -163,7 +163,7 @@ TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetMember
 	if(m_pMemberList[nIndex]==NULL) {
 		return NULL;
 	}
-	if(m_pMemberList[nIndex]->GetUIdx()!=nUIdx) {
+	if(m_pMemberList[nIndex]->GetRIdx()!=nRIdx) {
 		return NULL;
 	}
 
@@ -176,7 +176,7 @@ TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetNextMe
 	int nIndex;
 
 	if(pMember) {
-		nIndex = (int)(pMember->GetUIdx() & 0xffff) + 1;
+		nIndex = (int)(pMember->GetRIdx() & 0xffff) + 1;
 	} else {
 		nIndex = 0;
 	}
@@ -195,7 +195,7 @@ TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetPrevMe
 	int nIndex;
 
 	if(pMember) {
-		nIndex = (int)(pMember->GetUIdx() & 0xffff) - 1;
+		nIndex = (int)(pMember->GetRIdx() & 0xffff) - 1;
 	} else {
 		nIndex = sizeof(m_pMemberList)/sizeof(m_pMemberList[0]) - 1;
 	}
@@ -214,7 +214,7 @@ TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetNextMe
 	int nIndex;
 
 	if(pMember) {
-		nIndex = (int)(pMember->GetUIdx() & 0xffff) + 1;
+		nIndex = (int)(pMember->GetRIdx() & 0xffff) + 1;
 	} else {
 		nIndex = 0;
 	}
@@ -234,7 +234,7 @@ TGameMember* CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::GetPrevMe
 	int nIndex;
 
 	if(pMember) {
-		nIndex = (int)(pMember->GetUIdx() & 0xffff) - 1;
+		nIndex = (int)(pMember->GetRIdx() & 0xffff) - 1;
 	} else {
 		nIndex = sizeof(m_pMemberList)/sizeof(m_pMemberList[0]) - 1;
 	}
@@ -254,11 +254,12 @@ void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Send(TGameMember*
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>
-CGameMember<TGameUser, TGameRoom, TGameMember>::CGameMember(TGameUser* pUser, TGameRoom* pRoom, unsigned int nUIdx)
+CGameMember<TGameUser, TGameRoom, TGameMember>::CGameMember(TGameUser* pUser, unsigned int nUIdx, TGameRoom* pRoom, unsigned int nRIdx)
 {
 	m_pUser = pUser;
-	m_pRoom = pRoom;
 	m_nUIdx = nUIdx;
+	m_pRoom = pRoom;
+	m_nRIdx = nRIdx;
 	m_nMask = 0;
 
 	pRoom->MemberAttach((TGameMember*)this);
@@ -272,15 +273,34 @@ CGameMember<TGameUser, TGameRoom, TGameMember>::~CGameMember()
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>
+TGameUser* CGameMember<TGameUser, TGameRoom, TGameMember>::GetGameUser()
+{
+	return m_pUser;
+}
+
+template<class TGameUser, class TGameRoom, class TGameMember>
+unsigned int CGameMember<TGameUser, TGameRoom, TGameMember>::GetGameUIdx()
+{
+	return m_nUIdx;
+}
+
+template<class TGameUser, class TGameRoom, class TGameMember>
+void CGameMember<TGameUser, TGameRoom, TGameMember>::SetGameUser(TGameUser* pUser, unsigned int nUIdx)
+{
+	m_pUser = pUser;
+	m_nUIdx = nUIdx;
+}
+
+template<class TGameUser, class TGameRoom, class TGameMember>
 TGameRoom* CGameMember<TGameUser, TGameRoom, TGameMember>::GetGameRoom()
 {
 	return m_pRoom;
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>
-unsigned int CGameMember<TGameUser, TGameRoom, TGameMember>::GetUIdx()
+unsigned int CGameMember<TGameUser, TGameRoom, TGameMember>::GetRIdx()
 {
-	return m_nUIdx;
+	return m_nRIdx;
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>
@@ -293,16 +313,4 @@ template<class TGameUser, class TGameRoom, class TGameMember>
 unsigned int CGameMember<TGameUser, TGameRoom, TGameMember>::GetMask() const
 {
 	return m_nMask;
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember>
-TGameUser* CGameMember<TGameUser, TGameRoom, TGameMember>::GetGameUser()
-{
-	return m_pUser;
-}
-
-template<class TGameUser, class TGameRoom, class TGameMember>
-void CGameMember<TGameUser, TGameRoom, TGameMember>::SetGameUser(TGameUser* pUser)
-{
-	m_pUser = pUser;
 }

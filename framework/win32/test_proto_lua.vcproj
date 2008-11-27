@@ -65,7 +65,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="appbox_lib.lib lua.lib ws2_32.lib"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\$(ConfigurationName)-$(PlatformName)"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
@@ -138,7 +140,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="appbox_lib.lib lua.lib ws2_32.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\$(ConfigurationName)-$(PlatformName)"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -329,26 +333,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\skates\dymempool.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\misc.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\os_win32.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\protocol.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\protocol_lua.c"
-				>
-			</File>
-			<File
 				RelativePath="..\test\tools\sample_p.proto.c"
 				>
 			</File>
@@ -404,222 +388,6 @@
 			</File>
 			<File
 				RelativePath="..\test\tools\sample_p.proto.lua.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="lua"
-			>
-			<File
-				RelativePath="..\src\skates\lua\lapi.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lapi.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lauxlib.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lauxlib.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lbaselib.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lcode.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lcode.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ldblib.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ldebug.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ldebug.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ldo.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ldo.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ldump.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lfunc.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lfunc.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lgc.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lgc.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\linit.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\liolib.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\llex.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\llex.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\llimits.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lmathlib.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lmem.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lmem.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\loadlib.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lobject.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lobject.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lopcodes.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lopcodes.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\loslib.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lparser.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lparser.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lstate.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lstate.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lstring.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lstring.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lstrlib.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ltable.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ltable.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ltablib.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ltm.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\ltm.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lua.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\luaconf.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lualib.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lundump.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lundump.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lvm.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lvm.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lzio.c"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\lzio.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\skates\lua\print.c"
 				>
 			</File>
 		</Filter>
