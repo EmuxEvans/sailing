@@ -571,7 +571,7 @@ void protocol_lua_closestate(lua_State* L)
 	idx = lua_tointeger(L, -1);
 	lua_pop(L, -1);
 	assert((idx&0xffff)>=0 && (idx&0xffff)<sizeof(state_list)/sizeof(state_list[0]));
-	assert(state_list[idx&0xffff].id==idx);
+	assert(state_list[idx&0xffff].sid==idx);
 	assert(state_list[idx&0xffff].L==L);
 
 	lua_close(L);
@@ -718,6 +718,9 @@ int LuaDebugClientRpc_Detach_impl(RPCNET_GROUP* group, os_dword cid, os_dword si
 	if(!clt) return ERR_NOT_FOUND;
 
 	clt->callback.detach(clt);
+	clt->host = NULL;
+	clt->sid = 0;
+	clt->cid = 0;
 
 	return ERR_NOERROR;
 }
@@ -859,17 +862,17 @@ int LuaDebugHostRpc_RunCmd_impl(RPCNET_GROUP* group, os_dword sid, const char* C
 	}
 }
 
-PROTOCOL_LUA_CLIENT* protocol_lua_attach(PROTOCOL_LUA_DEBUG_CALLBACK* callback, RPCNET_GROUP* grp, unsigned int sid)
+int protocol_lua_attach(RPCNET_GROUP* grp, unsigned int sid, PROTOCOL_LUA_DEBUG_CALLBACK* callback)
 {
 	unsigned int cid;
 	int ret;
 
-	if(grp==NULL) return NULL;
+	if(grp==NULL) return ERR_INVALID_PARAMETER;
 
 	for(cid=0; cid<sizeof(client_list)/sizeof(client_list[0]); cid++) {
 		if(!client_list[cid].host) break;
 	}
-	if(cid==sizeof(client_list)/sizeof(client_list[0])) return NULL;
+	if(cid==sizeof(client_list)/sizeof(client_list[0])) return ERR_FULL;
 
 	client_list[cid].host = grp;
 	cid = ((state_seq++)<<16) | cid;
@@ -882,17 +885,17 @@ PROTOCOL_LUA_CLIENT* protocol_lua_attach(PROTOCOL_LUA_DEBUG_CALLBACK* callback, 
 		assert(client_list[cid&0xffff].host==grp);
 		assert(client_list[cid&0xffff].sid==sid);
 		assert(client_list[cid&0xffff].cid==cid);
-		return &client_list[cid&0xffff];
+		return ERR_NOERROR;
 	} else {
 		client_list[cid&0xffff].host = NULL;
 		client_list[cid&0xffff].sid = 0;
 		client_list[cid&0xffff].cid = 0;
 		memcpy(&client_list[cid&0xffff].callback, callback, sizeof(*callback));
-		return NULL;
+		return ret;
 	}
 }
 
-void protocol_lua_detach(PROTOCOL_LUA_CLIENT* client)
+int protocol_lua_detach(PROTOCOL_LUA_CLIENT* client)
 {
 	int ret;
 
@@ -911,9 +914,11 @@ void protocol_lua_detach(PROTOCOL_LUA_CLIENT* client)
 		client->sid = 0;
 		client->cid = 0;
 	}
+
+	return ret;
 }
 
-void protocol_lua_runcmd(PROTOCOL_LUA_CLIENT* client, const char* cmd)
+int protocol_lua_runcmd(PROTOCOL_LUA_CLIENT* client, const char* cmd)
 {
 	int ret;
 
@@ -924,6 +929,13 @@ void protocol_lua_runcmd(PROTOCOL_LUA_CLIENT* client, const char* cmd)
 	threadpool_s();
 	ret = LuaDebugHostRpc_RunCmd(client->host, client->sid, cmd);
 	threadpool_e();
+
+	return ret;
+}
+
+int protocol_lua_getstack(PROTOCOL_LUA_CLIENT* client, LUADEBUG_CALLSTACK* stack, int* count)
+{
+	return 0;
 }
 
 void protocol_lua_debugbreak(lua_State* L)
@@ -940,7 +952,7 @@ void protocol_lua_debugbreak(lua_State* L)
 	idx = lua_tointeger(L, -1);
 	lua_pop(L, -1);
 	assert((idx&0xffff)<sizeof(state_list)/sizeof(state_list[0]));
-	assert(state_list[idx&0xffff].id==idx);
+	assert(state_list[idx&0xffff].sid==idx);
 	idx = idx & 0xffff;
 
 	state_list[idx].debug_host = state_list[idx].host;
@@ -950,6 +962,34 @@ void protocol_lua_debugbreak(lua_State* L)
 
 		threadpool_s();
 		LuaDebugClientRpc_BreakPoint(state_list[idx].debug_host, state_list[idx].cid);
+		threadpool_e();
+	}
+}
+
+void protocol_lua_debugmsg(lua_State* L, int type, const char* msg)
+{
+	unsigned int idx;
+
+	lua_pushstring(L, "PROTOCOL_LUA_ID");
+	lua_rawget(L, LUA_REGISTRYINDEX);
+	if(!lua_isnumber(L, -1)) {
+		lua_pop(L, -1);
+		return;
+	}
+	idx = lua_tointeger(L, -1);
+	lua_pop(L, -1);
+
+	assert((idx&0xffff)<sizeof(state_list)/sizeof(state_list[0]));
+	assert(state_list[idx&0xffff].sid==idx);
+	idx = idx & 0xffff;
+
+	state_list[idx].debug_host = state_list[idx].host;
+	if(state_list[idx].debug_host) {
+		state_list[idx].debug_cid = state_list[idx].cid;
+		state_list[idx].dbgL = L;
+
+		threadpool_s();
+		LuaDebugClientRpc_DebugMsg(state_list[idx].debug_host, state_list[idx].cid, type, msg);
 		threadpool_e();
 	}
 }

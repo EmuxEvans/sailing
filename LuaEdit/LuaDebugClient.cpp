@@ -1,17 +1,14 @@
 #include "StdAfx.h"
 
-#include "LuaHost\LuaDebugInfo.h"
-#include "LuaDebugClient.h"
-
 #include <skates\skates.h>
 
-#include "LuaHost\LuaDebugClientRpc.h"
-#include "LuaHost\LuaDebugHostRpc.h"
+#include "LuaDebugClient.h"
 
-class CLuaDebugClient;
+void (*attach)(PROTOCOL_LUA_CLIENT* pClient);
+void (*detach)(PROTOCOL_LUA_CLIENT* pClient);
+void (*debugbreak)(PROTOCOL_LUA_CLIENT* pClient);
+void (*debugmsg)(PROTOCOL_LUA_CLIENT* pClient, int type, const char* msg);
 
-static map<RPCNET_GROUP*, CLuaDebugClient*> client_map;
-static os_mutex_t client_mtx;
 
 class CLuaDebugClient : public ILuaDebugClient
 {
@@ -19,10 +16,10 @@ public:
 	CLuaDebugClient();
 	virtual ~CLuaDebugClient();
 
-	virtual BOOL Connect(LPCSTR pHostEP, ILuaDebugHooker* pHooker);
+	virtual BOOL Connect(LPCSTR pHostEP, unsigned int nSId, ILuaDebugHooker* pHooker);
 	virtual BOOL Disconnect();
 
-	virtual BOOL RunCmd(LPCSTR pCmd, int &nRetCode);
+	virtual BOOL RunCmd(LPCSTR pCmd);
 	virtual BOOL GetCallStack(LUADEBUG_CALLSTACK* pStacks, int nSize, int &nDepth);
 
 	virtual BOOL IsConnected();
@@ -53,32 +50,32 @@ BOOL InitializeLuaDebugClient(const char* addr)
 		return FALSE;
 	}
 
-	os_mutex_init(&client_mtx);
 	mempool_init();
 	sock_init();
 	fdwatch_init();
 	threadpool_init(1);
 	rpcnet_init();
 	rpcfun_init();
+	dymempool_init(50, 2048);
 
 	if(rpcnet_bind(&sa)==ERR_NOERROR) {
-		rpcfun_register(__LuaDebugClientRpc_desc, 0);
+		protocol_lua_init();
 		return TRUE;
 	}
 
+	dymempool_final();
 	rpcfun_final();
 	rpcnet_final();
 	threadpool_final();
 	fdwatch_final();
 	sock_final();
 	mempool_final();
-	os_mutex_destroy(&client_mtx);
 	return FALSE;
 }
 
 BOOL FinalizeLuaDebugClient()
 {
-	rpcfun_unregister(__LuaDebugClientRpc_desc, 0);
+	protocol_lua_final();
 	rpcnet_unbind();
 	rpcfun_final();
 	rpcnet_final();
@@ -86,7 +83,6 @@ BOOL FinalizeLuaDebugClient()
 	fdwatch_final();
 	sock_final();
 	mempool_final();
-	os_mutex_destroy(&client_mtx);
 	return TRUE;
 }
 
@@ -108,11 +104,12 @@ CLuaDebugClient::~CLuaDebugClient()
 	DeleteObject(m_hBPEvent);
 }
 
-BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, ILuaDebugHooker* pHooker)
+BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, unsigned int nSId, ILuaDebugHooker* pHooker)
 {
 	RPCNET_GROUP* pHost;
 	int ret;
 	SOCK_ADDR sa;
+	PROTOCOL_LUA_DEBUG_CALLBACK callback;
 
 	if(sock_str2addr(pHostEP, &sa)==NULL)
 		return FALSE;
@@ -124,16 +121,19 @@ BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, ILuaDebugHooker* pHooker)
 	if(pHost==NULL)
 		return FALSE;
 
-	os_mutex_lock(&client_mtx);
-	client_map[pHost] = this;
-	os_mutex_unlock(&client_mtx);
-
 	m_pHooker = pHooker;
-	threadpool_s();
-	ret = LuaDebugHostRpc_Attach(pHost);
-	threadpool_e();
-
-	return ret!=ERR_NOERROR?FALSE:TRUE;
+	callback.attach		= NULL;
+	callback.detach		= NULL;
+	callback.debugbreak	= NULL;
+	callback.debugmsg	= NULL;
+	callback.userptr	= this;
+	ret = protocol_lua_attach(pHost, nSId, &callback);
+	if(ret!=ERR_NOERROR) {
+		m_pHooker = NULL;
+		return FALSE;
+	} else {
+		return TRUE;
+	}
 }
 
 BOOL CLuaDebugClient::Disconnect()
@@ -141,34 +141,29 @@ BOOL CLuaDebugClient::Disconnect()
 	if(!m_pHost)
 		return FALSE;
 
-	threadpool_s();
-	LuaDebugHostRpc_Detach(m_pHost);
-	threadpool_e();
-	m_pHost = NULL;
+	protocol_lua_detach(NULL);
+
 	return TRUE;
 }
 
-BOOL CLuaDebugClient::RunCmd(LPCSTR pCmd, int &nRetCode)
+BOOL CLuaDebugClient::RunCmd(LPCSTR pCmd)
 {
+	int ret;
+
 	if(!m_pHost) return FALSE;
-	threadpool_s();
-	nRetCode = LuaDebugHostRpc_RunCmd(m_pHost, pCmd);
-	threadpool_e();
-	return nRetCode==ERR_NOERROR?TRUE:FALSE;
+
+	ret = protocol_lua_runcmd(NULL, pCmd);
+	return ret==ERR_NOERROR?TRUE:FALSE;
 }
 
 BOOL CLuaDebugClient::GetCallStack(LUADEBUG_CALLSTACK* pStacks, int nSize, int &nDepth)
 {
 	int ret;
 
-	if(!m_pHost) return FALSE;
-	if(!m_bIsStop) return FALSE;
-
 	nDepth = nSize;
-	ret = LuaDebugHostRpc_GetCallStack(m_pHost, pStacks, &nDepth);
-	if(ret!=ERR_NOERROR) return FALSE;
+	ret = protocol_lua_getstack(NULL, pStacks, &nDepth);
 
-	return TRUE;
+	return ret==ERR_NOERROR?TRUE:FALSE;
 }
 
 BOOL CLuaDebugClient::IsConnected()
@@ -215,80 +210,4 @@ void CLuaDebugClient::OnDetched(RPCNET_GROUP* grp)
 	m_pHooker->OnDisconnect(this);
 	assert(m_pHost==grp);
 	m_pHost = NULL;
-}
-
-int LuaDebugClientRpc_Attach_impl(RPCNET_GROUP* group)
-{
-	CLuaDebugClient* pClient;
-	map<RPCNET_GROUP*, CLuaDebugClient*>::iterator i;
-
-	os_mutex_lock(&client_mtx);
-	i = client_map.find(group);
-	if(i==client_map.end()) {
-		pClient = NULL;
-	} else {
-		pClient = i->second;
-	}
-	os_mutex_unlock(&client_mtx);
-
-	if(pClient==NULL) return ERR_UNKNOWN;
-	pClient->OnAttched(group);
-	return ERR_NOERROR;
-}
-
-int LuaDebugClientRpc_Detach_impl(RPCNET_GROUP* group)
-{
-	CLuaDebugClient* pClient;
-	map<RPCNET_GROUP*, CLuaDebugClient*>::iterator i;
-
-	os_mutex_lock(&client_mtx);
-	i = client_map.find(group);
-	if(i==client_map.end()) {
-		pClient = NULL;
-	} else {
-		pClient = i->second;
-	}
-	os_mutex_unlock(&client_mtx);
-
-	if(pClient==NULL) return ERR_UNKNOWN;
-	pClient->OnDetched(group);
-	return ERR_NOERROR;
-}
-
-int LuaDebugClientRpc_BreakPoint_impl(RPCNET_GROUP* group)
-{
-	CLuaDebugClient* pClient;
-	map<RPCNET_GROUP*, CLuaDebugClient*>::iterator i;
-
-	os_mutex_lock(&client_mtx);
-	i = client_map.find(group);
-	if(i==client_map.end()) {
-		pClient = NULL;
-	} else {
-		pClient = i->second;
-	}
-	os_mutex_unlock(&client_mtx);
-
-	if(pClient==NULL) return ERR_UNKNOWN;
-	pClient->OnRPCBreakPoint();
-	return ERR_NOERROR;
-}
-
-int LuaDebugClientRpc_DebugMsg_impl(RPCNET_GROUP* group, int Type, const char* Msg)
-{
-	CLuaDebugClient* pClient;
-	map<RPCNET_GROUP*, CLuaDebugClient*>::iterator i;
-
-	os_mutex_lock(&client_mtx);
-	i = client_map.find(group);
-	if(i==client_map.end()) {
-		pClient = NULL;
-	} else {
-		pClient = i->second;
-	}
-	os_mutex_unlock(&client_mtx);
-
-	if(pClient==NULL) return ERR_UNKNOWN;
-	pClient->OnRPCDebugMessage(Type, Msg);
-	return ERR_NOERROR;
 }

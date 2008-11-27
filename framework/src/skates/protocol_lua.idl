@@ -1,4 +1,3 @@
-!#include "protocol_lua_def.h"
 
 LuaDebugClientRpc_Attach(
 	[IN] os_dword cid,

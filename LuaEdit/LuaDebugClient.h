@@ -17,10 +17,10 @@ public:
 class ILuaDebugClient
 {
 public:
-	virtual BOOL Connect(LPCSTR pHostEP, ILuaDebugHooker* pHooker) = NULL;
+	virtual BOOL Connect(LPCSTR pHostEP, unsigned int nSId, ILuaDebugHooker* pHooker) = NULL;
 	virtual BOOL Disconnect() = NULL;
 
-	virtual BOOL RunCmd(LPCSTR pCmd, int &nRetCode) = NULL;
+	virtual BOOL RunCmd(LPCSTR pCmd) = NULL;
 	virtual BOOL GetCallStack(LUADEBUG_CALLSTACK* pStacks, int nSize, int &nDepth) = NULL;
 
 	virtual BOOL IsConnected() = NULL;

@@ -1,6 +1,6 @@
 #include "StdAfx.h"
 
-#include "LuaHost\LuaDebugInfo.h"
+#include <skates/skates.h>
 #include "LuaDebugClient.h"
 #include "LuaDebugHooker.h"
 #include "DropFileHandler.h"
@@ -60,11 +60,11 @@ void CLuaDebugHooker::OnDebugMessage(ILuaDebugClient* pClient, int nType, const 
 	m_pCommandWindow->m_Dlg.Print("\n");
 }
 
-BOOL CLuaDebugHooker::Connect(const char* pEP)
+BOOL CLuaDebugHooker::Connect(const char* pEP, unsigned int nSid)
 {
 	BOOL bRet;
 	strcpy(m_szHostEP, pEP);
-	bRet = m_pClient->Connect(pEP, this);
+	bRet = m_pClient->Connect(pEP, nSid, this);
 	return bRet;
 }
 

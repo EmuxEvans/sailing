@@ -5,7 +5,7 @@
 
 #include "resource.h"
 
-#include "LuaHost\LuaDebugInfo.h"
+#include <skates/skates.h>
 #include "LuaDebugClient.h"
 
 #include "AboutDlg.h"
