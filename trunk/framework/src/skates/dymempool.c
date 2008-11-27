@@ -75,7 +75,7 @@ void* dymempool_alloc(unsigned int size)
 	return block+1;
 }
 
-void* dymempool_realloc(unsigned int new_size, void* ptr)
+void* dymempool_realloc(void* ptr, unsigned int new_size)
 {
 	DYMEM_BLOCK* old_block;
 	DYMEM_BLOCK* new_block;

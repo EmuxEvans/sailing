@@ -38,9 +38,12 @@ struct PROTOCOL_LUA_CLASS {
 	int							funcs_count;
 };
 
+ZION_API int protocol_lua_init(lua_State* L);
+ZION_API lua_State* protocol_lua_netstate(lua_CFunction panic);
+
 ZION_API void protocol_lua_newstruct(lua_State* L, PROTOCOL_TYPE* type, void* ptr);
 ZION_API void protocol_lua_newobject(lua_State* L, PROTOCOL_LUA_CLASS* cls, void* ptr);
-ZION_API int protocol_lua_init(lua_State* L);
+
 ZION_API int protocol_lua_getvalue(lua_State* L, int idx, PROTOCOL_LUA_PARAMETER* p, void* v);
 ZION_API void protocol_lua_pushvalue(lua_State* L, PROTOCOL_LUA_PARAMETER* p, void* v);
 
