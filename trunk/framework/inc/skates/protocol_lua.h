@@ -38,8 +38,12 @@ struct PROTOCOL_LUA_CLASS {
 	int							funcs_count;
 };
 
-ZION_API int protocol_lua_init(lua_State* L);
-ZION_API lua_State* protocol_lua_netstate(lua_CFunction panic);
+ZION_API void protocol_lua_init();
+ZION_API void protocol_lua_final();
+
+ZION_API int protocol_lua_initstate(lua_State* L);
+ZION_API lua_State* protocol_lua_newstate(lua_CFunction panic, const char* name);
+ZION_API void protocol_lua_closestate(lua_State* L);
 
 ZION_API void protocol_lua_newstruct(lua_State* L, PROTOCOL_TYPE* type, void* ptr);
 ZION_API void protocol_lua_newobject(lua_State* L, PROTOCOL_LUA_CLASS* cls, void* ptr);
@@ -73,6 +77,22 @@ typedef struct PROTOCOL_LUA_OBJECT {
 
 #define PROTOCOL_STRUCT_METATABLE		"protocol_struct_metatable"
 #define PROTOCOL_OBJECT_METATABLE		"protocol_object_metatable"
+
+struct PROTOCOL_LUA_CLIENT;
+typedef struct PROTOCOL_LUA_CLIENT PROTOCOL_LUA_CLIENT;
+
+typedef struct PROTOCOL_LUA_DEBUG_CALLBACK {
+	void (*attach)(PROTOCOL_LUA_CLIENT* pClient);
+	void (*detach)(PROTOCOL_LUA_CLIENT* pClient);
+	void (*debugbreak)(PROTOCOL_LUA_CLIENT* pClient);
+	void (*debugmsg)(PROTOCOL_LUA_CLIENT* pClient, int type, const char* msg);
+	void* userptr;
+} PROTOCOL_LUA_DEBUG_CALLBACK;
+
+ZION_API PROTOCOL_LUA_CLIENT* protocol_lua_attach(PROTOCOL_LUA_DEBUG_CALLBACK* callback, RPCNET_GROUP* grp, unsigned int sid);
+ZION_API void protocol_lua_detach(PROTOCOL_LUA_CLIENT* client);
+ZION_API void protocol_lua_runcmd(PROTOCOL_LUA_CLIENT* client, const char* cmd);
+ZION_API void protocol_lua_debugbreak(lua_State* L);
 
 #ifdef __cplusplus
 }

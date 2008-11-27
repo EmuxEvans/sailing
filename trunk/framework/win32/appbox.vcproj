@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)Dep\Mysql\include"
+				AdditionalIncludeDirectories="..\inc;&quot;$(SolutionDir)Dep\Mysql\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=__declspec(dllexport)"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -124,7 +124,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="$(SolutionDir)Dep\Mysql\include"
+				AdditionalIncludeDirectories="..\inc;&quot;$(SolutionDir)Dep\Mysql\include&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;MODULE_NAME=\&quot;appbox\&quot;;ZION_API=__declspec(dllexport)"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -676,6 +676,44 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\src\skates\protocol_lua.clt.c"
+			>
+		</File>
+		<File
+			RelativePath="..\src\skates\protocol_lua.h"
+			>
+		</File>
+		<File
+			RelativePath="..\src\skates\protocol_lua.idl"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="$(OutDir)\idl_cc.exe $(InputPath)"
+					Outputs="$(InputDir)$(InputName).h;$(InputDir)$(InputName).clt.c;$(InputDir)$(InputName).svr.c"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="$(OutDir)\idl_cc.exe $(InputPath)"
+					Outputs="$(InputDir)$(InputName).h;$(InputDir)$(InputName).clt.c;$(InputDir)$(InputName).svr.c"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\src\skates\protocol_lua.svr.c"
+			>
+		</File>
+		<File
+			RelativePath="..\src\skates\protocol_lua_def.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

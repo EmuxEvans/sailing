@@ -1,0 +1,44 @@
+!#include "protocol_lua_def.h"
+
+LuaDebugClientRpc_Attach(
+	[IN] os_dword cid,
+	[IN] os_dword sid
+);
+LuaDebugClientRpc_Detach(
+	[IN] os_dword cid,
+	[IN] os_dword sid
+);
+
+LuaDebugClientRpc_BreakPoint(
+	[IN] os_dword cid
+);
+LuaDebugClientRpc_DebugMsg(
+	[IN] os_dword cid,
+	[IN] int Type,
+	[IN] char Msg["strlen(Msg)+1"]
+);
+
+LuaDebugHostRpc_Attach(
+	[IN] os_dword sid,
+	[IN] os_dword cid
+);
+LuaDebugHostRpc_Detach(
+	[IN] os_dword sid,
+	[IN] os_dword cid
+);
+
+LuaDebugHostRpc_GetStateList(
+	[OUT("*count")]	LUADEBUG_STATEINFO infos["*count"],
+	[IN OUT]		int count["1"]
+);
+
+LuaDebugHostRpc_GetCallStack(
+	[IN]			os_dword sid,
+	[OUT("*depth")]	LUADEBUG_CALLSTACK stacks["*depth"],
+	[IN OUT]		int depth["1"]
+);
+
+LuaDebugHostRpc_RunCmd(
+	[IN] os_dword sid,
+	[IN] char Cmd["strlen(Cmd)+1"]
+);

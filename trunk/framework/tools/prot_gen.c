@@ -469,10 +469,7 @@ int generate_clua(const char* name, char* src, unsigned int src_len)
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "// generate by PROT_GEN.\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "// %s\n", asctime(newTime));
-	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/errcode.h>\n");
-	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/os.h>\n");
-	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/protocol_def.h>\n");
-	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/protocol_lua.h>\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/skates.h>\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	make_include_filename(name, buf);
 	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.lua.h\"\n", buf);

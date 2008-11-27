@@ -32,16 +32,16 @@ public:
 	virtual void Disconnect() = NULL;
 	virtual void OnData(const void* pData, int nSize) = NULL;
 	virtual void SendData(const void* pData, int nSize) = NULL;
-	virtual bool BindRoom(unsigned int& nIndex, IGameRoom* pRoom, int nUIdx) = NULL;
-	virtual bool UnbindRoom(unsigned int nIndex, IGameRoom* pRoom, int nUIdx) = NULL;
+	virtual bool BindRoom(unsigned int& nIndex, IGameRoom* pRoom, int nRIdx) = NULL;
+	virtual bool UnbindRoom(unsigned int nIndex, IGameRoom* pRoom, int nRIdx) = NULL;
 };
 
 class IGameRoom
 {
 public:
 	virtual bool Join(IGameUser* pUser) = NULL;
-	virtual void OnData(unsigned int nUIdx, const void* pData, int nSize) = NULL;
-	virtual void Disconnect(unsigned int nUIdx) = NULL;
+	virtual void OnData(unsigned int nRIdx, const void* pData, int nSize) = NULL;
+	virtual void Disconnect(unsigned int nRIdx) = NULL;
 };
 
 template<class TGameUser>
@@ -55,18 +55,18 @@ public:
 	virtual void Disconnect();
 	virtual void OnData(const void* pData, int nSize);
 	virtual void SendData(const void* pData, int nSize);
-	virtual bool BindRoom(unsigned int& nIndex, IGameRoom* pRoom, int nUIdx);
-	virtual bool UnbindRoom(unsigned int nIndex, IGameRoom* pRoom, int nUIdx);
+	virtual bool BindRoom(unsigned int& nIndex, IGameRoom* pRoom, int nRIdx);
+	virtual bool UnbindRoom(unsigned int nIndex, IGameRoom* pRoom, int nRIdx);
 
 private:
 	struct {
 		IGameRoom*		pRoom;
-		unsigned int	nUIdx;
-	}								m_pDynChannel[20];
+		unsigned int	nRIdx;
+	}								m_DynChannel[20];
 	struct {
 		IGameRoom*		pRoom;
-		unsigned int	nUIdx;
-	}								m_pStaChannel[20];
+		unsigned int	nRIdx;
+	}								m_ptaChannel[20];
 	IGameUserController<TGameUser>*	m_pController;
 };
 
@@ -83,15 +83,15 @@ public:
 	virtual ~CGameRoom();
 
 	virtual bool Join(IGameUser* pUser);
-	virtual void OnData(unsigned int nUIdx, const void* pData, int nSize);
-	virtual void Disconnect(unsigned int nUIdx);
+	virtual void OnData(unsigned int nRIdx, const void* pData, int nSize);
+	virtual void Disconnect(unsigned int nRIdx);
 
 	void MemberAttach(TGameMember* pMember);
 	void MemberDetach(TGameMember* pMember);
 
 	int GetMemberCount();
 	TGameMember* GetMember(int nIndex);
-	TGameMember* GetMember(unsigned int nUIdx);
+	TGameMember* GetMember(unsigned int nRIdx);
 	TGameMember* GetNextMember(TGameMember* pMember);
 	TGameMember* GetPrevMember(TGameMember* pMember);
 	TGameMember* GetNextMember(TGameMember* pMember, unsigned int nMask, unsigned int nValue);
@@ -108,23 +108,26 @@ template<class TGameUser, class TGameRoom, class TGameMember>
 class CGameMember
 {
 public:
-	CGameMember(TGameUser* pUser, TGameRoom* pRoom, unsigned int nUIdx);
+	CGameMember(TGameUser* pUser, unsigned int nUIdx, TGameRoom* pRoom, unsigned int nRIdx);
 	virtual ~CGameMember();
 
+	TGameUser* GetGameUser();
+	unsigned int GetGameUIdx();
+	void SetGameUser(TGameUser* pUser, unsigned int nUIdx);
+
+
 	TGameRoom* GetGameRoom();
-	unsigned int GetUIdx();
+	unsigned int GetRIdx();
 
 	void SetMask(unsigned int nMask);
 	unsigned int GetMask() const;
 
-	TGameUser* GetGameUser();
-	void SetGameUser(TGameUser* pUser);
-
 private:
 	TGameRoom*		m_pRoom;
-	unsigned int	m_nUIdx;
+	unsigned int	m_nRIdx;
 	unsigned int	m_nMask;
 	TGameUser*		m_pUser;
+	unsigned int	m_nUIdx;
 };
 
 unsigned int GenGameSeq();

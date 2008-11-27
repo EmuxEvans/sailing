@@ -13,6 +13,7 @@ typedef struct DYMEM_BLOCK {
 } DYMEM_BLOCK;
 
 static ATOM_SLIST_HEADER	dymempool_hds[100];
+static os_dword				dymempool_usage[100];
 static os_dword				dymempool_count[100];
 static unsigned int dymempool_min, dymempool_min_bits;
 static unsigned int dymempool_max, dymempool_max_bits;
@@ -36,6 +37,7 @@ int dymempool_init(unsigned int min, unsigned int max)
 	for(i=0; i<sizeof(dymempool_hds)/sizeof(dymempool_hds[0]); i++) {
 		atom_slist_init(&dymempool_hds[i]);
 	}
+	memset(&dymempool_usage, 0, sizeof(dymempool_usage));
 	memset(&dymempool_count, 0, sizeof(dymempool_count));
 	return ERR_NOERROR;
 }
@@ -67,10 +69,11 @@ void* dymempool_alloc(unsigned int size)
 		block = malloc(sizeof(DYMEM_BLOCK)+(1<<bits));
 		if(block==NULL) return NULL;
 		block->block_index = bits - dymempool_min_bits;
+		dymempool_count[block->block_index]++;
 	}
 
 	block->len = size;
-	dymempool_count[block->block_index]++;
+	dymempool_usage[block->block_index]++;
 
 	return block+1;
 }
@@ -92,8 +95,8 @@ void* dymempool_realloc(void* ptr, unsigned int new_size)
 	}
 	memcpy(new_block+1, old_block+1, old_block->len);
 
-	dymempool_count[new_block->block_index]++;
-	dymempool_count[old_block->block_index]--;
+	dymempool_usage[new_block->block_index]++;
+	dymempool_usage[old_block->block_index]--;
 
 	atom_slist_push(&dymempool_hds[old_block->block_index], &old_block->entry);
 	new_block->len = new_size;
@@ -106,7 +109,7 @@ void dymempool_free(void* ptr)
 	if(!ptr) return;
 	block = (DYMEM_BLOCK*)ptr - 1;
 
-	dymempool_count[block->block_index]--;
+	dymempool_usage[block->block_index]--;
 
 	atom_slist_push(&dymempool_hds[block->block_index], &block->entry);
 
