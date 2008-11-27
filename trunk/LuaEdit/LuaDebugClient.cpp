@@ -4,10 +4,10 @@
 
 #include "LuaDebugClient.h"
 
-void (*attach)(PROTOCOL_LUA_CLIENT* pClient);
-void (*detach)(PROTOCOL_LUA_CLIENT* pClient);
-void (*debugbreak)(PROTOCOL_LUA_CLIENT* pClient);
-void (*debugmsg)(PROTOCOL_LUA_CLIENT* pClient, int type, const char* msg);
+void attach(PROTOCOL_LUA_CLIENT* pClient);
+void detach(PROTOCOL_LUA_CLIENT* pClient);
+void debugbreak(PROTOCOL_LUA_CLIENT* pClient);
+void debugmsg(PROTOCOL_LUA_CLIENT* pClient, int type, const char* msg);
 
 
 class CLuaDebugClient : public ILuaDebugClient
