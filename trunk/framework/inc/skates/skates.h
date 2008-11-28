@@ -28,6 +28,8 @@ extern "C" {
 
 #include "protocol.h"
 #include "protocol_lua.h"
+#include "protocol_lua_debug.h"
+#include "protocol_lua_client.h"
 
 #ifdef __cplusplus
 }
