@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 	}
 
 	dymempool_init(30, 1024);
-	L = protocol_lua_netstate(NULL);
+	L = protocol_lua_newstate(NULL);
 
 	ret = luaL_loadfile(L, argv[1]);
 	if(ret!=0) {

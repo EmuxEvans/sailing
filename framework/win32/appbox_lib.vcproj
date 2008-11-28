@@ -454,6 +454,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\skates\protocol_lua_client.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\protocol_lua_debug.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\skates\rpc_fun.c"
 				>
 			</File>
@@ -568,6 +576,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\inc\skates\protocol_lua_client.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\protocol_lua_debug.h"
+				>
+			</File>
+			<File
 				RelativePath="..\inc\skates\rlist.h"
 				>
 			</File>
@@ -620,7 +636,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="$(OutDir)\idl_cc.exe $(InputPath)"
+					CommandLine="$(OutDir)\idl_cc.exe $(InputPath)&#x0D;&#x0A;"
 					Outputs="$(InputDir)$(InputName).h;$(InputDir)$(InputName).clt.c;$(InputDir)$(InputName).svr.c"
 				/>
 			</FileConfiguration>
@@ -629,17 +645,13 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="$(OutDir)\idl_cc.exe $(InputPath)"
+					CommandLine="$(OutDir)\idl_cc.exe $(InputPath)&#x0D;&#x0A;"
 					Outputs="$(InputDir)$(InputName).h;$(InputDir)$(InputName).clt.c;$(InputDir)$(InputName).svr.c"
 				/>
 			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\src\skates\protocol_lua.svr.c"
-			>
-		</File>
-		<File
-			RelativePath="..\src\skates\protocol_lua_def.h"
 			>
 		</File>
 	</Files>
