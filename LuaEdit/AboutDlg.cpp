@@ -28,16 +28,96 @@ CAttachHostDlg::CAttachHostDlg()
 LRESULT CAttachHostDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	::SetWindowText(GetDlgItem(IDC_HOST_ADDRESS), m_szAddress);
+
+	m_StateList.m_hWnd = GetDlgItem(IDC_STATE_LIST);
+
+	m_StateList.AddColumn(_T("SID"), 1);
+	m_StateList.AddColumn(_T("Name"), 2);
+	m_StateList.AddColumn(_T("Client"), 3);
+	m_StateList.AddColumn(_T("CID"), 4);
+	m_StateList.SetColumnWidth(0, 80);
+	m_StateList.SetColumnWidth(1, 100);
+	m_StateList.SetColumnWidth(2, 130);
+	m_StateList.SetColumnWidth(3, 80);
+	ListView_SetExtendedListViewStyle(GetDlgItem(IDC_STATE_LIST), ListView_GetExtendedListViewStyle(GetDlgItem(IDC_STATE_LIST))|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
+
+	//m_StateList.AddItem(0, 0, "0xFFFFFFFF");
+	//m_StateList.AddItem(0, 1, "CLIENT FOR YOU");
+	//m_StateList.AddItem(0, 2, "255.255.255.255:65536");
+	//m_StateList.AddItem(0, 3, "0xFFFFFFFF");
+
+	return 0;
+}
+
+LRESULT CAttachHostDlg::OnAttachClick(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	int nSelect;
+	char szTmp[100];
+
+	nSelect = m_StateList.GetSelectedIndex();
+	if(nSelect<0) return 0;
+
+	m_StateList.GetItemText(nSelect, 0, szTmp, sizeof(szTmp));
+	sscanf(szTmp, "%x", &m_nCID);
+
+	EndDialog(wID);
+	return 0;
+}
+
+LRESULT CAttachHostDlg::OnConnectClick(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
+	char szAddress[sizeof(m_szAddress)];
+
+	::GetWindowText(GetDlgItem(IDC_HOST_ADDRESS), szAddress, sizeof(szAddress));
+
+	SOCK_ADDR sa;
+	RPCNET_GROUP* pHost;
+	LUADEBUG_STATEINFO infos[20];
+	int count, ret, idx;
+
+	if(!sock_str2addr(szAddress, &sa)) {
+		MessageBox("invalid host address", "ERROR", MB_OK);
+		return 0;
+	}
+
+	pHost = rpcnet_getgroup(&sa);
+	if(!pHost) {
+		MessageBox("invalid host address", "ERROR", MB_OK);
+		return 0;
+	}
+
+	count = sizeof(infos)/sizeof(infos[0]);
+	ret = protocol_luaclt_state(pHost, infos, &count);
+	if(ret!=ERR_NOERROR) {
+		MessageBox("Failed to query", "ERROR", MB_OK);
+		return 0;
+	}
+
+	m_StateList.DeleteAllItems();
+	for(idx=0; idx<count; idx++) {
+		char tmp[100];
+		sprintf(tmp, "0x%x", infos[idx].sid);
+		m_StateList.AddItem(idx, 0, tmp);
+		m_StateList.AddItem(idx, 1, infos[idx].name);
+		m_StateList.AddItem(idx, 2, infos[idx].client_ep);
+		sprintf(tmp, "0x%x", infos[idx].cid);
+		m_StateList.AddItem(idx, 3, tmp);
+	}
+
+	strcpy(m_szAddress, szAddress);
+	char szTmp[500];
+	if(count) {
+		sprintf(szTmp, "%s : %d state found", szAddress, count);
+	} else {
+		sprintf(szTmp, "%s : state not found", szAddress);
+	}
+	::SetWindowText(GetDlgItem(IDC_TEXTBAR), szTmp);
+
 	return 0;
 }
 
 LRESULT CAttachHostDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	if(wID==IDOK) {
-		::GetWindowText(GetDlgItem(IDC_HOST_ADDRESS), m_szAddress, sizeof(m_szAddress));
-		SOCK_ADDR sa;
-		if(!sock_str2addr(m_szAddress, &sa)) return 0;
-	}
 	EndDialog(wID);
 	return 0;
 }

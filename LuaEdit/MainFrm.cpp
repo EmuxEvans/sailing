@@ -145,17 +145,19 @@ LRESULT CMainFrame::OnInitialize(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lPar
 
 LRESULT CMainFrame::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
 {
-	CRegKey key;
-	if(key.Open(HKEY_CURRENT_USER, _T("SOFTWARE\\Sailing\\LuaEdit"), KEY_WRITE)==ERROR_SUCCESS || key.Create(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"))==ERROR_SUCCESS) {
-		sstate::CStgRegistry reg(key.Detach());
-		m_stateMgr.Store(reg);
-	}
-
 	if(CLuaDebugManager::GetDefault()->GetDebugHooker()) {
 		if(CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->IsStop()) {
 			CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->Continue();
 		}
-		CLuaDebugManager::GetDefault()->DeleteHooker();
+		if(CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->IsConnected()) {
+			CLuaDebugManager::GetDefault()->GetDebugHooker()->GetLuaDebugClient()->Disconnect();
+		}
+	}
+
+	CRegKey key;
+	if(key.Open(HKEY_CURRENT_USER, _T("SOFTWARE\\Sailing\\LuaEdit"), KEY_WRITE)==ERROR_SUCCESS || key.Create(HKEY_CURRENT_USER,_T("SOFTWARE\\Sailing\\LuaEdit"))==ERROR_SUCCESS) {
+		sstate::CStgRegistry reg(key.Detach());
+		m_stateMgr.Store(reg);
 	}
 
 	bHandled = FALSE;
@@ -419,7 +421,7 @@ LRESULT CMainFrame::OnDebugAttachHost(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /
 		return 0;
 	}
 
-	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->Connect(m_AttachHostDlg.m_szAddress, 0)) {
+	if(!CLuaDebugManager::GetDefault()->GetDebugHooker()->Connect(m_AttachHostDlg.m_szAddress, m_AttachHostDlg.m_nCID)) {
 		MessageBox("Connect Error");
 		CLuaDebugManager::GetDefault()->DeleteHooker();
 		return 0;

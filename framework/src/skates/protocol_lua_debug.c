@@ -63,6 +63,37 @@ void protocol_lua_final()
 	os_mutex_destroy(&state_mutex);
 }
 
+int protocol_lua_state(LUADEBUG_STATEINFO* infos, int* count)
+{
+	int idx, m = 0;
+
+	if(*count>sizeof(state_list)/sizeof(state_list[0])) {
+		*count = sizeof(state_list)/sizeof(state_list[0]);
+	}
+
+	os_mutex_lock(&state_mutex);
+	for(idx=0; idx<*count; idx++) {
+		if(!state_list[idx].L) continue;
+
+		infos[m].sid	= state_list[idx].sid;
+		strcpy(infos[m].name, state_list[idx].name);
+		if(state_list[idx].host) {
+			SOCK_ADDR sa;
+			sock_addr2str(rpcnet_group_get_endpoint(state_list[idx].host, &sa), infos[m].client_ep);
+			infos[m].cid = 0;
+		} else {
+			infos[m].client_ep[0] = '\0';
+			infos[m].cid = 0;
+		}
+
+		m++;
+	}
+	os_mutex_unlock(&state_mutex);
+
+	*count = m;
+	return ERR_NOERROR;
+}
+
 lua_State* protocol_lua_newstate(lua_CFunction panic, const char* name)
 {
 	lua_State* L;
@@ -135,16 +166,18 @@ void protocol_lua_debugbreak(lua_State* L)
 
 	os_mutex_lock(&state_mutex);
 	state = state_get(sid);
-	state_list[sid].debug_host = state_list[sid].host;
-	state_list[sid].debug_cid = state_list[sid].cid;
-	state_list[sid].dbgL = L;
+	if(state) {
+		state->debug_host = state->host;
+		state->debug_cid = state->cid;
+		state->dbgL = L;
+	}
 	os_mutex_unlock(&state_mutex);
 
-	if(state_list[sid].debug_host) {
+	if(state->debug_host) {
 		threadpool_s();
-		LuaDebugClientRpc_BreakPoint(state_list[sid].debug_host, state_list[sid].cid);
+		LuaDebugClientRpc_BreakPoint(state->debug_host, state->debug_cid);
 		threadpool_e();
-		state_list[sid].debug_host = NULL;
+		state->debug_host = NULL;
 	}
 }
 
@@ -199,7 +232,7 @@ int LuaDebugHostRpc_Attach_impl(RPCNET_GROUP* group, os_dword sid, os_dword cid)
 	state->cid = cid;
 	os_mutex_unlock(&state_mutex);
 
-	if(thost) {
+	if(thost && thost!=group) {
 		LuaDebugClientRpc_Detach(thost, tcid, state->sid);
 	}
 
@@ -241,33 +274,7 @@ int LuaDebugHostRpc_Detach_impl(RPCNET_GROUP* group, os_dword sid, os_dword cid)
 
 int LuaDebugHostRpc_GetStateList_impl(RPCNET_GROUP* group, LUADEBUG_STATEINFO* infos, int* count)
 {
-	int i, m;
-
-	if(*count>sizeof(state_list)/sizeof(state_list[0])) {
-		*count = sizeof(state_list)/sizeof(state_list[0]);
-	}
-
-	os_mutex_lock(&state_mutex);
-	for(m=i=0; i<*count; i++) {
-		RPCNET_GROUP* grp;
-
-		if(!state_list[i].L) continue;
-		grp = state_list[i].host;
-
-		infos[m].sid = state_list[i].sid;
-		strcpy(infos[m].name, state_list[i].name);
-		if(grp) {
-			SOCK_ADDR sa;
-			sock_addr2str(rpcnet_group_get_endpoint(grp, &sa), infos[m].client_ep);
-		} else {
-			infos[m].client_ep[0] = '\0';
-		}
-		m++;
-	}
-	os_mutex_unlock(&state_mutex);
-
-	*count = m;
-	return ERR_NOERROR;
+	return protocol_lua_state(infos, count);
 }
 
 int LuaDebugHostRpc_GetCallStack_impl(RPCNET_GROUP* group, os_dword sid, LUADEBUG_CALLSTACK* stacks, int* depth)

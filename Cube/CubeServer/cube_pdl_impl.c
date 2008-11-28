@@ -166,7 +166,7 @@ void lobby_room_join(SVR_USER_CTX* user_ctx, int index)
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) break;
 	}
-	assert(idx==sizeof(room->members)/sizeof(room->members[0]));
+	assert(idx<sizeof(room->members)/sizeof(room->members[0]));//changed by louguoliang
 
 	room->members[idx].conn = user_ctx->conn;
 	user_ctx->conn->room = room;
