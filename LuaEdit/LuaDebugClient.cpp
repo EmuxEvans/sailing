@@ -32,12 +32,12 @@ public:
 
 	void OnRPCBreakPoint();
 	void OnRPCDebugMessage(int nType, LPCSTR pMsg);
-	void OnAttched(RPCNET_GROUP* grp);
-	void OnDetched(RPCNET_GROUP* grp);
+	void OnAttched();
+	void OnDetched();
 
 protected:
 	BOOL m_bIsStop;
-	RPCNET_GROUP* m_pHost;
+	PROTOCOL_LUA_CLIENT* m_pClient;
 	ILuaDebugHooker* m_pHooker;
 	HANDLE m_hBPEvent;
 };
@@ -94,7 +94,7 @@ ILuaDebugClient* CreateLuaDebugClient()
 CLuaDebugClient::CLuaDebugClient()
 {
 	m_bIsStop = FALSE;
-	m_pHost = NULL;
+	m_pClient = NULL;
 	m_pHooker = NULL;
 	m_hBPEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 }
@@ -107,14 +107,13 @@ CLuaDebugClient::~CLuaDebugClient()
 BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, unsigned int nSId, ILuaDebugHooker* pHooker)
 {
 	RPCNET_GROUP* pHost;
-	int ret;
 	SOCK_ADDR sa;
 	PROTOCOL_LUA_DEBUG_CALLBACK callback;
 
 	if(sock_str2addr(pHostEP, &sa)==NULL)
 		return FALSE;
 
-	if(m_pHost)
+	if(m_pClient)
 		return FALSE;
 
 	pHost = rpcnet_getgroup(&sa);
@@ -127,8 +126,8 @@ BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, unsigned int nSId, ILuaDebugHooker
 	callback.debugbreak	= NULL;
 	callback.debugmsg	= NULL;
 	callback.userptr	= this;
-	ret = protocol_lua_attach(pHost, nSId, &callback);
-	if(ret!=ERR_NOERROR) {
+	m_pClient = protocol_luaclt_attach(pHost, nSId, &callback);
+	if(!m_pClient) {
 		m_pHooker = NULL;
 		return FALSE;
 	} else {
@@ -138,10 +137,10 @@ BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, unsigned int nSId, ILuaDebugHooker
 
 BOOL CLuaDebugClient::Disconnect()
 {
-	if(!m_pHost)
+	if(!m_pClient)
 		return FALSE;
 
-	protocol_lua_detach(NULL);
+	protocol_luaclt_detach(m_pClient);
 
 	return TRUE;
 }
@@ -150,9 +149,9 @@ BOOL CLuaDebugClient::RunCmd(LPCSTR pCmd)
 {
 	int ret;
 
-	if(!m_pHost) return FALSE;
+	if(!m_pClient) return FALSE;
 
-	ret = protocol_lua_runcmd(NULL, pCmd);
+	ret = protocol_luaclt_runcmd(m_pClient, pCmd);
 	return ret==ERR_NOERROR?TRUE:FALSE;
 }
 
@@ -160,15 +159,17 @@ BOOL CLuaDebugClient::GetCallStack(LUADEBUG_CALLSTACK* pStacks, int nSize, int &
 {
 	int ret;
 
+	if(!m_pClient) return FALSE;
+
 	nDepth = nSize;
-	ret = protocol_lua_getstack(NULL, pStacks, &nDepth);
+	ret = protocol_luaclt_getstack(m_pClient, pStacks, &nDepth);
 
 	return ret==ERR_NOERROR?TRUE:FALSE;
 }
 
 BOOL CLuaDebugClient::IsConnected()
 {
-	return m_pHooker?TRUE:FALSE;
+	return m_pClient?TRUE:FALSE;
 }
 
 BOOL CLuaDebugClient::IsStop()
@@ -198,16 +199,14 @@ void CLuaDebugClient::OnRPCDebugMessage(int nType, LPCSTR pMsg)
 	m_pHooker->OnDebugMessage(this, nType, pMsg);
 }
 
-void CLuaDebugClient::OnAttched(RPCNET_GROUP* grp)
+void CLuaDebugClient::OnAttched()
 {
-	assert(m_pHost==NULL);
-	m_pHost = grp;
 	m_pHooker->OnConnect(this);
 }
 
-void CLuaDebugClient::OnDetched(RPCNET_GROUP* grp)
+void CLuaDebugClient::OnDetched()
 {
 	m_pHooker->OnDisconnect(this);
-	assert(m_pHost==grp);
-	m_pHost = NULL;
+	m_pClient = NULL;
+	m_pHooker = NULL;
 }
