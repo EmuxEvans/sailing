@@ -37,7 +37,7 @@ static int debug_msg(lua_State* L)
 }
 static void lua_do()
 {
-	L = luaL_newstate();
+	L = protocol_lua_newstate(NULL, "default");
 	luaL_openlibs(L);
 
 	lua_pushstring(L,"want_return");
@@ -92,20 +92,22 @@ int main(int argc, char* argv[])
 	rpcnet_init();
 	rpcfun_init();
 	dymempool_init(56, 2048);
-	protocol_lua_init();
 
 	ret = rpcnet_bind(&sa);
 	if(ret==ERR_NOERROR) {
+		protocol_lua_init();
+
 		threadpool_s();
 		lua_do();
 		threadpool_e();
 
 		rpcnet_unbind();
+
+		protocol_lua_final();
 	} else {
 		printf("error in rpcnet_bind(), return %d\n", ret);
 	}
 
-	protocol_lua_final();
 	dymempool_final();
 	rpcfun_final();
 	rpcnet_final();

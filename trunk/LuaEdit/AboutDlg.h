@@ -31,16 +31,21 @@ public:
 
 	BEGIN_MSG_MAP(CAttachHostDlg)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
-		COMMAND_ID_HANDLER(IDOK, OnCloseCmd)
+		COMMAND_ID_HANDLER(IDOK, OnAttachClick)
+		COMMAND_ID_HANDLER(IDC_CONNECT, OnConnectClick)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
 	END_MSG_MAP()
 
 	CAttachHostDlg();
 
 	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
+	LRESULT OnAttachClick(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnConnectClick(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
-	TCHAR m_szAddress[100];
+	CListViewCtrl	m_StateList;
+	TCHAR			m_szAddress[100];
+	unsigned int	m_nCID;
 };
 
 class CFindDlg : public CDialogImpl<CFindDlg>

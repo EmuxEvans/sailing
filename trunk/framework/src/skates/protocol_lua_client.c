@@ -28,6 +28,8 @@ struct PROTOCOL_LUA_CLIENT {
 	unsigned int sid;
 
 	PROTOCOL_LUA_DEBUG_CALLBACK callback;
+
+	int tid;
 };
 
 static unsigned int client_seq = 0x2000;
@@ -75,6 +77,17 @@ void luaclt_del(PROTOCOL_LUA_CLIENT* client)
 	}
 }
 
+int protocol_luaclt_state(RPCNET_GROUP* host, LUADEBUG_STATEINFO* infos, int* count)
+{
+	int ret;
+
+	threadpool_s();
+	ret = LuaDebugHostRpc_GetStateList(host, infos, count);
+	threadpool_e();
+
+	return ret;
+}
+
 PROTOCOL_LUA_CLIENT* protocol_luaclt_attach(RPCNET_GROUP* grp, unsigned int sid, PROTOCOL_LUA_DEBUG_CALLBACK* callback)
 {
 	PROTOCOL_LUA_CLIENT* clt;
@@ -82,16 +95,28 @@ PROTOCOL_LUA_CLIENT* protocol_luaclt_attach(RPCNET_GROUP* grp, unsigned int sid,
 
 	if(grp==NULL) return NULL;
 
+	threadpool_s();
+
 	os_mutex_lock(&client_mutex);
 	clt = client_add(grp, sid);
 	if(clt) {
 		memcpy(&clt->callback, callback, sizeof(*callback));
+		clt->tid = threadpool_getindex();
+		clt->refcount++;
 	}
 	os_mutex_unlock(&client_mutex);
-	if(!clt) return NULL;
 
-	threadpool_s();
-	ret = LuaDebugHostRpc_Attach(grp, sid, clt->cid);
+	if(clt) {
+		ret = LuaDebugHostRpc_Attach(grp, sid, clt->cid);
+
+		os_mutex_lock(&client_mutex);
+		clt->tid = -1;
+		clt->refcount--;
+		os_mutex_unlock(&client_mutex);
+	} else {
+		ret = ERR_NOT_FOUND;
+	}
+
 	threadpool_e();
 
 	if(ret!=ERR_NOERROR) {
@@ -124,6 +149,11 @@ void protocol_luaclt_detach(PROTOCOL_LUA_CLIENT* client)
 	os_mutex_unlock(&client_mutex);
 
 	luaclt_del(client);
+}
+
+void* protocol_luaclt_userptr(PROTOCOL_LUA_CLIENT* client)
+{
+	return client->callback.userptr;
 }
 
 int protocol_luaclt_runcmd(PROTOCOL_LUA_CLIENT* client, const char* cmd)
@@ -178,13 +208,10 @@ int LuaDebugClientRpc_Attach_impl(RPCNET_GROUP* group, os_dword cid, os_dword si
 {
 	PROTOCOL_LUA_CLIENT* clt;
 
-	os_mutex_lock(&client_mutex);
 	clt = client_get(cid);
-	if(clt) {
-		clt->refcount++;
+	if(!clt || clt->tid!=threadpool_getindex()) {
+		return ERR_NOT_FOUND;
 	}
-	os_mutex_unlock(&client_mutex);
-	if(!clt) return ERR_NOT_FOUND;
 
 	clt->callback.attach(clt);
 
@@ -269,12 +296,13 @@ PROTOCOL_LUA_CLIENT* client_add(RPCNET_GROUP* host, unsigned int sid)
 	}
 	if(fidx<0) return NULL;
 
-	client_list[idx].refcount = 1;
-	client_list[idx].cid = (((client_seq++)&0x7fff)<<16) | ((unsigned int)idx);
-	client_list[idx].host = host;
-	client_list[idx].sid = sid;
+	client_list[fidx].refcount = 1;
+	client_list[fidx].cid = (((client_seq++)&0x7fff)<<16) | ((unsigned int)fidx);
+	client_list[fidx].host = host;
+	client_list[fidx].sid = sid;
+	client_list[idx].tid = -1;
 
-	return &client_list[idx];
+	return &client_list[fidx];
 }
 
 PROTOCOL_LUA_CLIENT* client_get(unsigned int cid)

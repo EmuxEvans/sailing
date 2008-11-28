@@ -285,7 +285,7 @@ int rpcnet_bind(SOCK_ADDR* endpoint)
 	}
 
 	// bind tcp port
-	sock = sock_bind(endpoint, SOCK_REUSEADDR|SOCK_NONBLOCK);
+	sock = sock_bind(endpoint, SOCK_REUSEADDR);
 	if(sock==SOCK_INVALID_HANDLE) return ERR_UNKNOWN;
 
 	memcpy(&local_group_i.endpoint, endpoint, sizeof(SOCK_ADDR));
@@ -365,6 +365,10 @@ void listener_threadevent(void* ptr)
 	SOCK_ADDR na;
 
 	for(;;) {
+		if(sock_wait_read(listener.fd, 0)!=ERR_NOERROR) {
+			break;
+		}
+
 		sub_sock = sock_accept(listener.fd, &na);
 		if(sub_sock==SOCK_INVALID_HANDLE) {
 			SYSLOG(LOG_ERROR, MODULE_NAME, "listener_threadevent(): accept() failed at %d.\n", errno);	// error occured

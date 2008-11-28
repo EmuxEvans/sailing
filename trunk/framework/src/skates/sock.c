@@ -151,7 +151,7 @@ int sock_wait_read(SOCK_HANDLE handle, int timeout)
 	struct fd_set fds;
 	FD_ZERO(&fds);
 	FD_SET(handle, &fds);
-	if(timeout<=0) {
+	if(timeout==SOCK_INFINITE) {
 		ret = select(0, &fds, NULL, NULL, NULL);
 	} else {
 		struct timeval tv;
@@ -173,7 +173,7 @@ int sock_wait_read(SOCK_HANDLE handle, int timeout)
 	ufds.fd = handle;
 	ufds.events = POLLIN;
 	ufds.revents = 0;
-	ret = poll(&ufds, 1, timeout<=0?0:timeout);
+	ret = poll(&ufds, 1, timeout==SOCK_INFINITE?-1:timeout);
 	if(ret==-1) return ERR_UNKNOWN;
 	return ufds.revents?ERR_NOERROR:ERR_TIMEOUT;
 #endif
@@ -242,6 +242,9 @@ SOCK_HANDLE sock_bind(SOCK_ADDR* addr, int flags)
 	if(getsockname(sock, (struct sockaddr*)&sa, &sa_len)!=0) {
 		closesocket(sock);
 		return(SOCK_INVALID_HANDLE);
+	}
+	if(flags&SOCK_NONBLOCK) {
+		sock_nonblock(sock);
 	}
 
 	addr->ip = *((unsigned int*)&sa.sin_addr);

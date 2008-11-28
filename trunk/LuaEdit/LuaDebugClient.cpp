@@ -4,11 +4,10 @@
 
 #include "LuaDebugClient.h"
 
-void attach(PROTOCOL_LUA_CLIENT* pClient);
-void detach(PROTOCOL_LUA_CLIENT* pClient);
-void debugbreak(PROTOCOL_LUA_CLIENT* pClient);
-void debugmsg(PROTOCOL_LUA_CLIENT* pClient, int type, const char* msg);
-
+static void attach(PROTOCOL_LUA_CLIENT* pClient);
+static void detach(PROTOCOL_LUA_CLIENT* pClient);
+static void debugbreak(PROTOCOL_LUA_CLIENT* pClient);
+static void debugmsg(PROTOCOL_LUA_CLIENT* pClient, int type, const char* msg);
 
 class CLuaDebugClient : public ILuaDebugClient
 {
@@ -60,6 +59,7 @@ BOOL InitializeLuaDebugClient(const char* addr)
 
 	if(rpcnet_bind(&sa)==ERR_NOERROR) {
 		protocol_lua_init();
+		protocol_luaclt_init();
 		return TRUE;
 	}
 
@@ -75,8 +75,10 @@ BOOL InitializeLuaDebugClient(const char* addr)
 
 BOOL FinalizeLuaDebugClient()
 {
+	protocol_luaclt_final();
 	protocol_lua_final();
 	rpcnet_unbind();
+	dymempool_final();
 	rpcfun_final();
 	rpcnet_final();
 	threadpool_final();
@@ -121,10 +123,11 @@ BOOL CLuaDebugClient::Connect(LPCSTR pHostEP, unsigned int nSId, ILuaDebugHooker
 		return FALSE;
 
 	m_pHooker = pHooker;
-	callback.attach		= NULL;
-	callback.detach		= NULL;
-	callback.debugbreak	= NULL;
-	callback.debugmsg	= NULL;
+
+	callback.attach		= attach;
+	callback.detach		= detach;
+	callback.debugbreak	= debugbreak;
+	callback.debugmsg	= debugmsg;
 	callback.userptr	= this;
 	m_pClient = protocol_luaclt_attach(pHost, nSId, &callback);
 	if(!m_pClient) {
@@ -209,4 +212,32 @@ void CLuaDebugClient::OnDetched()
 	m_pHooker->OnDisconnect(this);
 	m_pClient = NULL;
 	m_pHooker = NULL;
+}
+
+void attach(PROTOCOL_LUA_CLIENT* clt)
+{
+	CLuaDebugClient* pClient;
+	pClient = (CLuaDebugClient*)protocol_luaclt_userptr(clt);
+	pClient->OnAttched();
+}
+
+void detach(PROTOCOL_LUA_CLIENT* clt)
+{
+	CLuaDebugClient* pClient;
+	pClient = (CLuaDebugClient*)protocol_luaclt_userptr(clt);
+	pClient->OnDetched();
+}
+
+void debugbreak(PROTOCOL_LUA_CLIENT* clt)
+{
+	CLuaDebugClient* pClient;
+	pClient = (CLuaDebugClient*)protocol_luaclt_userptr(clt);
+	pClient->OnRPCBreakPoint();
+}
+
+void debugmsg(PROTOCOL_LUA_CLIENT* clt, int type, const char* msg)
+{
+	CLuaDebugClient* pClient;
+	pClient = (CLuaDebugClient*)protocol_luaclt_userptr(clt);
+	pClient->OnRPCDebugMessage(type, msg);
 }
