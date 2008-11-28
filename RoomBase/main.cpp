@@ -3,8 +3,11 @@
 
 #include <skates/skates.h>
 
+#include "GameUser.h"
 #include "GameRoom.h"
+#include "GameUser.inl"
 #include "GameRoom.inl"
+
 #include "CubeRoom.proto.h"
 #include "CubeRoom.h"
 
@@ -20,7 +23,7 @@ int main(int argc, char* argv[])
 	}
 
 	dymempool_init(30, 1024);
-	L = protocol_lua_newstate(NULL);
+	L = protocol_lua_newstate(NULL, "default");
 
 	ret = luaL_loadfile(L, argv[1]);
 	if(ret!=0) {
