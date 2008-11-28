@@ -8,8 +8,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaEdit", "LuaEdit.vcproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SciLexer", "scintilla\vcbuild\SciLexer.vcproj", "{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaHost", "LuaHost\LuaHost.vcproj", "{64CD565B-37BD-40ED-AC28-0159BBDF12DB}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "appbox_lib", "..\framework\win32\appbox_lib.vcproj", "{3AEE38B9-C643-48E5-A58B-7488C259500B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua", "..\framework\win32\lua.vcproj", "{C6FB1CF6-9AE7-4D93-8019-61A860855418}"
@@ -32,10 +30,6 @@ Global
 		{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}.Debug|Win32.Build.0 = Debug|Win32
 		{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}.Release|Win32.ActiveCfg = Release|Win32
 		{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}.Release|Win32.Build.0 = Release|Win32
-		{64CD565B-37BD-40ED-AC28-0159BBDF12DB}.Debug|Win32.ActiveCfg = Debug|Win32
-		{64CD565B-37BD-40ED-AC28-0159BBDF12DB}.Debug|Win32.Build.0 = Debug|Win32
-		{64CD565B-37BD-40ED-AC28-0159BBDF12DB}.Release|Win32.ActiveCfg = Release|Win32
-		{64CD565B-37BD-40ED-AC28-0159BBDF12DB}.Release|Win32.Build.0 = Release|Win32
 		{3AEE38B9-C643-48E5-A58B-7488C259500B}.Debug|Win32.ActiveCfg = Debug|Win32
 		{3AEE38B9-C643-48E5-A58B-7488C259500B}.Debug|Win32.Build.0 = Debug|Win32
 		{3AEE38B9-C643-48E5-A58B-7488C259500B}.Release|Win32.ActiveCfg = Release|Win32

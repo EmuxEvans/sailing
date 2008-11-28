@@ -23,7 +23,7 @@ public:
 class CCubeRoom : public CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>, public ICubeRoom
 {
 public:
-	static unsigned int GetRoomType() { return 0; }
+	static unsigned int GetChannelType() { return 0; }
 
 	CCubeRoom(ICubeRoomController* pController) : CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>(pController) {
 	}
@@ -39,12 +39,12 @@ public:
 class CCubeMember : public CGameMember<CCubeUser, CCubeRoom, CCubeMember>
 {
 public:
-	CCubeMember(CCubeUser* pUser, unsigned int nUIdx, CCubeRoom* pRoom, unsigned int nRIdx) : CGameMember<CCubeUser, CCubeRoom, CCubeMember>(pUser, nUIdx, pRoom, nRIdx) {
+	CCubeMember(CCubeUser* pUser, unsigned int nUIdx, CCubeRoom* pRoom, unsigned int nCIdx) : CGameMember<CCubeUser, CCubeRoom, CCubeMember>(pUser, nUIdx, pRoom, nCIdx) {
 	}
 	virtual ~CCubeMember() {
 	}
 
-	static CCubeMember* Create(CCubeUser* pUser, unsigned int nUIdx, CCubeRoom* pRoom, unsigned int nRIdx) {
+	static CCubeMember* Create(CCubeUser* pUser, unsigned int nUIdx, CCubeRoom* pRoom, unsigned int nCIdx) {
 		return NULL;
 	}
 	static void Delete(CCubeMember* pMember) {

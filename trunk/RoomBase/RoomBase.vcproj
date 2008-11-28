@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="appbox_lib.lib lua.lib"
+				AdditionalDependencies="appbox_lib.lib lua.lib ws2_32.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\framework\$(ConfigurationName)-$(PlatformName)"
 				GenerateDebugInformation="true"
@@ -135,6 +135,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="appbox_lib.lib lua.lib ws2_32.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -190,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameUser.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
@@ -217,6 +222,14 @@
 			</File>
 			<File
 				RelativePath=".\GameRoom.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\GameUser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameUser.inl"
 				>
 			</File>
 		</Filter>

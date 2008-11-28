@@ -40,6 +40,7 @@ LRESULT CAttachHostDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*
 	m_StateList.SetColumnWidth(2, 130);
 	m_StateList.SetColumnWidth(3, 80);
 	ListView_SetExtendedListViewStyle(GetDlgItem(IDC_STATE_LIST), ListView_GetExtendedListViewStyle(GetDlgItem(IDC_STATE_LIST))|LVS_EX_FULLROWSELECT|LVS_EX_GRIDLINES);
+	m_StateList.SetWindowLong(GWL_STYLE, m_StateList.GetStyle() | LVS_SINGLESEL);
 
 	//m_StateList.AddItem(0, 0, "0xFFFFFFFF");
 	//m_StateList.AddItem(0, 1, "CLIENT FOR YOU");
