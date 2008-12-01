@@ -219,7 +219,7 @@ int stream_write(LOG_CTX* ctx, const char* buf, unsigned int len)
 	start = ctx->stream.cur + ctx->stream.len;
 	if(start + len > ctx->stream.max) {
 		memcpy(ctx->stream.buf+start, buf, ctx->stream.max - start);
-		memcpy(ctx->stream.buf, buf+ctx->stream.max-start, start+ctx->stream.len - ctx->stream.max);
+		memcpy(ctx->stream.buf, buf+ctx->stream.max-start, len - (ctx->stream.max - start));
 	} else {
 		memcpy(ctx->stream.buf+start, buf, len);
 	}

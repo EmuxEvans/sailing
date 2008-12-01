@@ -309,6 +309,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\tools\prot_parser.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\skates\protocol.c"
 				>
 			</File>
@@ -339,6 +343,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\tools\prot_parser.h"
+				>
+			</File>
+			<File
 				RelativePath="..\inc\skates\protocol.h"
 				>
 			</File>
@@ -351,14 +359,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath="..\test\tools\sample_a.proto"
-			>
-		</File>
-		<File
-			RelativePath="..\test\tools\sample_p.proto"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>
