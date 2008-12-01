@@ -484,9 +484,25 @@ const char* parse_array_def(const char* buf)
 
 const char* parse_parameter(const char* buf)
 {
+	const char* tbuf;
+
 	buf = get_token_id(buf, type, sizeof(type));
 	if(buf==NULL)
 		return NULL;
+
+	tbuf = get_token_char(buf, '<');
+	if(tbuf) {
+		tbuf = get_token_number(tbuf, prelen, sizeof(prelen));
+		if(!tbuf) {
+			return NULL;
+		}
+		tbuf = get_token_char(tbuf, '>');
+		if(!tbuf) {
+			return NULL;
+		}
+		buf = tbuf;
+	}
+
 
 	buf = get_token_id(buf, name, sizeof(name));
 	if(buf==NULL)
