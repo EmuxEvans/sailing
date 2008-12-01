@@ -131,6 +131,8 @@ const char* get_token_keyword(const char* buf, const char* keyword, char* value)
 const char* get_token_number(const char* buf, char* value, int size)
 {
 	int end;
+	const char* tbuf;
+	char kk[100];
 
 	buf = escape_blank(buf);
 
@@ -138,7 +140,14 @@ const char* get_token_number(const char* buf, char* value, int size)
 		if(buf[end]>='0' && buf[end]<='9') continue;
 		if(buf[end]=='+') continue;
 		if(buf[end]=='-') continue;
+		if(buf[end]=='*') continue;
+		if(buf[end]=='/') continue;
 		if(buf[end]=='.') continue;
+		tbuf = get_token_id(buf+end, kk, sizeof(kk));
+		if(tbuf) {
+			end = tbuf - buf;
+			continue;
+		}
 		if(end==0) return NULL;
 		break;
 	}

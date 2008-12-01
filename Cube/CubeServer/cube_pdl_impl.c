@@ -71,7 +71,7 @@ void login_create_player(SVR_USER_CTX* user_ctx, const char* nick, const char* r
 {
 	int ret;
 	DBAPI_HANDLE handle;
-	char sql[100];
+	char sql[1000];
 
 	if(user_ctx->conn->uuid==0) return;
 	if(user_ctx->conn->nick[0]!='\0') return;
@@ -335,6 +335,18 @@ void room_set_ready(SVR_USER_CTX* user_ctx, int flag)
 	room = user_ctx->conn->room;
 	if(room==NULL) return;
 	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
+
+	if(flag) {
+		if(strcmp(room->microphone[0].nick, user_ctx->conn->nick)==0) {
+			for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
+				if(!room->members[idx].conn) continue;
+				room->members[idx].ready = flag;
+			}
+		}
+		cube_room_check(room);
+		return;
+	}
+
 	room->members[user_ctx->conn->room_idx].ready = flag;
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
@@ -398,7 +410,7 @@ void room_chat(SVR_USER_CTX* user_ctx, const char* what)
 	}
 }
 
-void room_xuxu(SVR_USER_CTX* user_ctx, int loud, const char* who, const char* what)
+void room_xuxu(SVR_USER_CTX* user_ctx, int loud, int type, const char* who, const char* what)
 {
 	CUBE_ROOM* room;
 	int idx;
@@ -417,11 +429,11 @@ void room_xuxu(SVR_USER_CTX* user_ctx, int loud, const char* who, const char* wh
 		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			if(room->members[idx].conn==NULL) continue;
 			ctx.conn = room->members[idx].conn;
-			room_xuxu_callback(&ctx, loud, user_ctx->conn->nick, who, what);
+			room_xuxu_callback(&ctx, loud, type, user_ctx->conn->nick, who, what);
 		}
 	} else {
 		ctx.conn = room->members[idx].conn;
-		room_xuxu_callback(&ctx, loud, user_ctx->conn->nick, who, what);
+		room_xuxu_callback(&ctx, loud, type, user_ctx->conn->nick, who, what);
 	}
 }
 

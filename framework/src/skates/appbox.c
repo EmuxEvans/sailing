@@ -380,7 +380,6 @@ int appbox_final()
 	ret = dymempool_final();
 	if(ret!=ERR_NOERROR) SYSLOG(LOG_ERROR, MODULE_NAME, "dymempool_final() fail, ret=%d", ret);
 
-
 	ret = os_thread_wait(cs_thread_id, NULL);
 	if(ret!=ERR_NOERROR) {
 		SYSLOG(LOG_ERROR, MODULE_NAME, "Failed to os_thread_begin(cs_thread_proc), ret=%d", ret);
@@ -680,7 +679,7 @@ unsigned int ZION_CALLBACK cs_thread_proc(void* arg)
 
 		if(sock==SOCK_INVALID_HANDLE && config_cs_masterep.ip!=0 && config_cs_masterep.port!=0) {
 			sock = sock_connect(&config_cs_masterep, 0);
-			if(sock==SOCK_INVALID_HANDLE) {
+			if(sock!=SOCK_INVALID_HANDLE) {
 				SYSLOG(LOG_INFO, MODULE_NAME, "cs_master connected");
 				c_try = 0;
 			} else {

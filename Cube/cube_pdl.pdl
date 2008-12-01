@@ -151,11 +151,13 @@ CMD_CLT chat_callback(
 
 CMD_SVR xuxu(
 	int loud,
+	int type,
     string["$$<=CUBE_NICK_LEN+1"] who[],
     string["$$<=300+1"] what[]
 );
 CMD_CLT xuxu_callback(
 	int loud,
+	int type,
 	string from[],
 	string who[],
 	string what[]
