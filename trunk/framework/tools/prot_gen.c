@@ -175,7 +175,7 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 		if(data_class[i].root[0]=='\0') {
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class %s {\n", data_class[i].name);
 		} else {
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class %s : %s {\n", data_class[i].root);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class %s : %s {\n", data_class[i].name, data_class[i].root);
 		}
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
 		for(j=data_class[i].function_start; j<data_class[i].function_start+data_class[i].function_count; j++) {
