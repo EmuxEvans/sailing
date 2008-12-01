@@ -123,6 +123,15 @@ LRESULT CAttachHostDlg::OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCt
 	return 0;
 }
 
+CFindDlg::CFindDlg()
+{
+	m_szWhat[0] = _T('\0');
+	m_bMatchCase = false;
+	m_bWholeWord = false;
+	m_bSearchUp = false;
+	m_bRegexp = false;
+}
+
 LRESULT CFindDlg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
 	return 0;

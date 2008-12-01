@@ -379,6 +379,7 @@ int struct_tostring(lua_State* L)
 int object_get(lua_State* L)
 {
 	PROTOCOL_LUA_OBJECT* obj;
+	PROTOCOL_LUA_CLASS* c;
 	const char* name;
 	int i;
 
@@ -396,12 +397,17 @@ int object_get(lua_State* L)
 		return 0;
 	}
 	name = lua_tolstring(L, 2, NULL);
-	for(i=0; i<obj->o.t_class->funcs_count; i++) {
-		if(strcmp(obj->o.t_class->funcs[i].name, name)==0) {
-			lua_pushcfunction(L, obj->o.t_class->funcs[i].lua_func);
-			return 1;
+
+	c = obj->o.t_class;
+	do {
+		for(i=0; i<c->funcs_count; i++) {
+			if(strcmp(c->funcs[i].name, name)==0) {
+				lua_pushcfunction(L, c->funcs[i].lua_func);
+				return 1;
+			}
 		}
-	}
+		c = c->root;
+	} while(c!=NULL);
 
 	luaL_error(L, "invalid function.\n");
 	return 0;

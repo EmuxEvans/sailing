@@ -13,6 +13,7 @@ static int is_break;
 
 static int parse_file(const char* file);
 static int parse_pfile(const char* text);
+static int check_file();
 static int generate_hfile(const char* name, char* inc, unsigned int inc_len);
 static int generate_cfile(const char* name, char* src, unsigned int src_len);
 static int generate_hlua(const char* name, char* src, unsigned int src_len);
@@ -50,7 +51,7 @@ static void def_field(const char* mode, const char* type, const char* prefix, co
 static void def_array(const char* mode, const char* type, const char* prefix, const char* name, const char* count);
 static void def_function(const char* return_type, const char* name);
 static void def_parameter(const char* type, const char* name);
-static void def_class_begin(const char* name);
+static void def_class_begin(const char* name, const char* root);
 static void def_class_end(const char* name);
 
 static struct {
@@ -94,6 +95,7 @@ static struct {
 	char name[100];
 	int function_start;
 	int function_count;
+	char root[100];
 } data_class[100];
 static int num_parm = 0, num_func = 0, num_class = 0;
 static int current_class = -1;
@@ -238,6 +240,31 @@ int parse_pfile(const char* buf)
 	return ERR_NOERROR;
 }
 
+int check_file()
+{
+	int c, f, p;
+
+	for(c=0; c<num_class; c++) {
+		if(!data_class[c].is_root) continue;
+		for(f=data_class[c].function_start; f<data_class[c].function_start+data_class[c].function_count; f++) {
+			if(strcmp(data_function[f].return_type, "void")!=0) {
+				if(!check_vailid_otype(data_function[f].return_type)) {
+					printf("invalid return type %s::%s %s\n", data_class[c].name, data_function[f].name, data_function[f].return_type);
+					return 0;
+				}
+			}
+			for(p=data_function[f].parameter_start; p<data_function[f].parameter_start+data_function[f].parameter_count; p++) {
+				if(!check_vailid_otype(data_parameter[p].type)) {
+					printf("invalid parameter type %s::%s %s %s\n", data_class[c].name, data_function[f].name, data_parameter[p].name, data_parameter[p].type);
+					return 0;
+				}
+			}
+		}
+	}
+
+	return 1;
+}
+
 int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 {
 	int i, j, k, type, var;
@@ -315,7 +342,7 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "} %s;\n", data_type[type].name);
 	}
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// YIYI & ERIC 2004-2008.\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// YE 2004-2008.\n");
 	for(type=0; type<num_type; type++) {
 		if(!data_type[type].is_root) continue;
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "extern PROTOCOL_TYPE PROTOCOL_NAME(%s);\n", data_type[type].name);
@@ -325,13 +352,26 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "}\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifdef __cplusplus");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// class\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifdef __cplusplus\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
+	for(i=0; i<num_class; i++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class %s;\n", data_class[i].name);
+	}
+
 	for(i=0; i<num_class; i++) {
 		if(!data_class[i].is_root) continue;
 
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+		if(data_class[i].root[0]=='\0') {
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class %s {\n", data_class[i].name);
+		} else {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class %s : %s {\n", data_class[i].root);
+		}
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
 		for(j=data_class[i].function_start; j<data_class[i].function_start+data_class[i].function_count; j++) {
 			snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual %s %s(", get_ctype(data_function[j].return_type), data_function[j].name);
@@ -373,6 +413,7 @@ int generate_cfile(const char* name, char* src, unsigned int src_len)
 	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/os.h>\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/protocol_def.h>\n");
 	make_include_filename(name, buf);
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.h\"\n", buf);
 	for(type=0; type<num_type; type++) {
 		int count = 0;
@@ -586,8 +627,13 @@ data_class[i].name, data_function[j].name);
 		}
 
 		snprintf(src+strlen(src), src_len-strlen(src), "PROTOCOL_LUA_CLASS PROTOCOL_NAME(%s) = {\n", data_class[i].name);
-		snprintf(src+strlen(src), src_len-strlen(src), "\t\"%s\", &__%s_[0], %d\n",
+		if(data_class[i].root[0]=='\0') {
+		snprintf(src+strlen(src), src_len-strlen(src), "\t\"%s\", NULL, &__%s_[0], %d\n",
 			data_class[i].name, data_class[i].name, data_class[i].function_count);
+		} else {
+		snprintf(src+strlen(src), src_len-strlen(src), "\t\"%s\", PROTOCOL_NAME(%s), &__%s_[0], %d\n",
+			data_class[i].name, data_class[i].root, data_class[i].name, data_class[i].function_count);
+		}
 		snprintf(src+strlen(src), src_len-strlen(src), "};\n");
 	}
 
@@ -973,10 +1019,20 @@ const char* parse_class(const char* buf)
 
 	buf = get_token_id(buf, name, sizeof(name));
 	if(buf==NULL) return NULL;
+	tbuf = buf;
 	buf = get_token_char(buf, '{');
-	if(buf==NULL) return NULL;
+	if(buf==NULL) {
+		buf = get_token_char(tbuf, ':');
+		if(buf==NULL) return NULL;
+		buf = get_token_keyword(buf, "interface", value);
+		if(buf==NULL) return NULL;
+		buf = get_token_char(buf, '{');
+		if(buf==NULL) return NULL;
+	} else {
+		value[0] = '\0';
+	}
 
-	def_class_begin(name);
+	def_class_begin(name, value);
 
 	tbuf = buf;
 	for(;;) {
@@ -1181,7 +1237,7 @@ void def_field(const char* mode, const char* type, const char* prefix, const cha
 	}
 
 	if(!check_vailid_dtype(type)) {
-		printf("so many variable(%s:%s)\n", data_type[num_type-1].name, name);
+		printf("invalid data type(%s::%s %s)\n", data_type[num_type-1].name, name, type);
 		is_break = 1;
 		return;
 	}
@@ -1208,7 +1264,7 @@ void def_array(const char* mode, const char* type, const char* prefix, const cha
 		return;
 	}
 	if(!check_vailid_dtype(type)) {
-		printf("so many variable(%s:%s)\n", data_type[num_type-1].name, name);
+		printf("invalid data type(%s:%s)\n", data_type[num_type-1].name, name);
 		is_break = 1;
 		return;
 	}
@@ -1225,11 +1281,6 @@ void def_array(const char* mode, const char* type, const char* prefix, const cha
 
 void def_function(const char* return_type, const char* name)
 {
-	if(!check_vailid_otype(return_type) && strcmp(return_type, "void")!=0) {
-		printf("so many variable(%s:%s)\n", data_type[num_type-1].name, name);
-		is_break = 1;
-		return;
-	}
 	strcpy(data_function[num_func].return_type, return_type);
 	strcpy(data_function[num_func].name, name);
 	data_function[num_func].parameter_start = num_parm;
@@ -1243,21 +1294,17 @@ void def_function(const char* return_type, const char* name)
 
 void def_parameter(const char* type, const char* name)
 {
-	if(!check_vailid_otype(type)) {
-		printf("so many variable(%s:%s)\n", data_type[num_type-1].name, name);
-		is_break = 1;
-		return;
-	}
 	data_function[num_func-1].parameter_count++;
 	strcpy(data_parameter[num_parm].type, type);
 	strcpy(data_parameter[num_parm].name, name);
 	num_parm++;
 }
 
-void def_class_begin(const char* name)
+void def_class_begin(const char* name, const char* root)
 {
 	current_class = num_class;
 	strcpy(data_class[num_class].name, name);
+	strcpy(data_class[num_class].root, root);
 	data_class[num_class].function_start = num_func;
 	data_class[num_class].function_count = 0;
 	data_class[num_class].is_root = (p_stack_depth==1);

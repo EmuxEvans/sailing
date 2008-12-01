@@ -147,6 +147,7 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
+        MENUITEM "&Web Site",                   ID_WEB_SITE
         MENUITEM "&About Lua Debugger...",      ID_APP_ABOUT
     END
 END

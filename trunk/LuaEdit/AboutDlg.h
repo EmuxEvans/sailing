@@ -53,6 +53,8 @@ class CFindDlg : public CDialogImpl<CFindDlg>
 public:
 	enum { IDD = IDD_EDIT_FIND };
 
+	CFindDlg();
+
 	BEGIN_MSG_MAP(CFindDlg)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCloseCmd)
@@ -62,6 +64,12 @@ public:
 	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCloseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnFindNext(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+
+	TCHAR m_szWhat[15*1024];
+	bool m_bMatchCase;
+	bool m_bWholeWord;
+	bool m_bSearchUp;
+	bool m_bRegexp;
 };
 
 class CReplaceDlg : public CDialogImpl<CReplaceDlg>

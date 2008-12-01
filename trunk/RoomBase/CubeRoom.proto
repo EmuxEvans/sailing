@@ -10,12 +10,16 @@ extern CubeMemberInfo {
 
 interface ICubeUser {
 	void Disconnect();
+
+	ICubeRoom GetCubeRoom();
 };
 
 interface ICubeRoom {
 	os_int GetMemberCount();
+	ICubeMember GetMember(os_int idx);
 };
 
 interface ICubeMember {
+	ICubeRoom GetRoom();
 	string GetNick();
 };
