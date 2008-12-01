@@ -28,7 +28,7 @@ static const char* parse_parameter(const char* buf);
 static void def_include(const char* name);
 static void def_module(const char* name);
 static void def_function(const char* type, const char* name);
-static void def_parameter(const char* type, const char* name, const char* max);
+static void def_parameter(const char* type, const char* prelen, const char* name, const char* max);
 
 typedef struct NDATA_MODULE {
 	char	name[100];
@@ -43,6 +43,7 @@ typedef struct NDATA_FUNCTION {
 
 typedef struct NDATA_PARAMETER {
 	char	type[100];
+	char	prelen[100];
 	char	name[100];
 	char	max[100];
 } NDATA_PARAMETER;
@@ -162,10 +163,22 @@ int parser_nfile(const char* buf)
 	return ERR_NOERROR;
 }
 
+static void print_pdef(int c, int f, char* txt, unsigned int txt_len)
+{
+	int p;
+	for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
+		if(p>nfunctions[f].p_start) {
+			snprintf(txt+strlen(txt), txt_len-strlen(txt), ", ");
+		}
+		snprintf(txt+strlen(txt), txt_len-strlen(txt), ", ");
+	}
+}
+
 int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 {
 	struct tm   *newTime;
     time_t      szClock;
+	int c, f, p;
 
 	inc[0] = '\0';
     time(&szClock);
@@ -175,6 +188,21 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// generate by NPROT_GEN.\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// %s\n", asctime(newTime));
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
+	for(c=0; c<nmodules_count; c++) {
+		for(f=nmodules[c].f_start; f<nmodules[c].f_start+nmodules[c].f_count; f++) {
+			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
+			}
+		}
+	}
+
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	return ERR_NOERROR;
 }
@@ -343,7 +371,7 @@ const char* parse_parameter(const char* buf)
 	} else {
 		max[0] = '\0';
 	}
-	def_parameter(type, name, max);
+	def_parameter(type, "", name, max);
 
 	return buf;
 }
@@ -387,9 +415,10 @@ void def_function(const char* type, const char* name)
 	nmodules[nmodules_count-1].f_count++;
 }
 
-void def_parameter(const char* type, const char* name, const char* max)
+void def_parameter(const char* type, const char* prelen, const char* name, const char* max)
 {
 	strcpy(nparams[nparams_count].type, type);
+	strcpy(nparams[nparams_count].prelen, prelen);
 	strcpy(nparams[nparams_count].name, name);
 	strcpy(nparams[nparams_count].max, max);
 	nparams_count++;
