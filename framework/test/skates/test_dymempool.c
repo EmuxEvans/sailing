@@ -21,8 +21,8 @@ void test_proc()
 {
 	void *v1;
 	v1 = dymempool_alloc(100);
-	v1 = dymempool_realloc(150, v1);
-	v1 = dymempool_realloc(9000, v1);
+	v1 = dymempool_realloc(v1, 1000);
+	v1 = dymempool_realloc(v1, 9000);
 	dymempool_free(v1);
 }
 
