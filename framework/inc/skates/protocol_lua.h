@@ -34,6 +34,7 @@ struct PROTOCOL_LUA_FUNCTION {
 
 struct PROTOCOL_LUA_CLASS {
 	const char*					name;
+	PROTOCOL_LUA_CLASS*			root;
 	PROTOCOL_LUA_FUNCTION*		funcs;
 	int							funcs_count;
 };

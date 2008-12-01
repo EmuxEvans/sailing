@@ -81,6 +81,8 @@
 #define ID_EDIT_FINDNEXT                32825
 #define ID_EDIT_REPLACE32826            32826
 #define ID_EDIT_REPLACE32827            32827
+#define ID_HELP_WEBSITE                 32834
+#define ID_WEB_SITE                     32835
 #define IDD_EDIT_REPLACE                57664
 
 // Next default values for new objects
@@ -88,7 +90,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
-#define _APS_NEXT_COMMAND_VALUE         32834
+#define _APS_NEXT_COMMAND_VALUE         32836
 #define _APS_NEXT_CONTROL_VALUE         1022
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
