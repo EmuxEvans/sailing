@@ -7,7 +7,7 @@ extern "C" {
 #endif
 
 #define CUBE_ROOM_TIMER		100		// ms
-#define CUBE_ROOM_TIMEOUT	20000	// ms
+#define CUBE_ROOM_TIMEOUT	40000	// ms
 
 struct CUBE_CONNECTION;
 typedef struct CUBE_CONNECTION CUBE_CONNECTION;
@@ -42,6 +42,7 @@ struct CUBE_ROOM {
 		CUBE_CONNECTION* conn;
 		int ready;
 		int loaded;
+		int terminated;
 		unsigned int p2p_status;
 		char pos[200];
 	} members[CUBE_ROOM_MEMBER_MAX];

@@ -294,7 +294,7 @@ void lobby_warehouse_get(SVR_USER_CTX* user_ctx)
 
 void lobby_equipment_set(SVR_USER_CTX* user_ctx, const char* value)
 {
-	int ret;
+	int ret, idx;
 	DBAPI_HANDLE handle;
 	char sql[100*1024];
 
@@ -314,6 +314,16 @@ void lobby_equipment_set(SVR_USER_CTX* user_ctx, const char* value)
 	dbapi_release(handle);
 
 	strcpy(user_ctx->conn->equ, value);
+
+	if(user_ctx->conn->room) {
+		for(idx=0; idx<sizeof(user_ctx->conn->room->members)/sizeof(user_ctx->conn->room->members[0]); idx++) {
+			SVR_USER_CTX ctx;
+			if(!user_ctx->conn->room->members[idx].conn) continue;
+			ctx.conn = user_ctx->conn->room->members[idx].conn;
+			room_notify_infochange(&ctx, user_ctx->conn->uuid, user_ctx->conn->nick, user_ctx->conn->ri, user_ctx->conn->equ);
+		}
+	}
+
 }
 
 void lobby_equipment_get(SVR_USER_CTX* user_ctx)
@@ -391,8 +401,8 @@ void room_terminate(SVR_USER_CTX* user_ctx)
 	room = user_ctx->conn->room;
 	if(room==NULL) return;
 	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
-	room->state = CUBE_ROOM_STATE_ACTIVE;
-	cube_room_terminate(room);
+	room->members[user_ctx->conn->room_idx].terminated = 1;
+	cube_room_check(room);
 }
 
 void room_chat(SVR_USER_CTX* user_ctx, const char* what)

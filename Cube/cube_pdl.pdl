@@ -109,6 +109,13 @@ CMD_CLT notify_join(
 	string equ[]
 );
 
+CMD_CLT notify_infochange(
+	int peerid,
+	string nick[],
+	string ri[],
+	string equ[]
+);
+
 CMD_SVR leave(
 );
 CMD_CLT notify_leave(
