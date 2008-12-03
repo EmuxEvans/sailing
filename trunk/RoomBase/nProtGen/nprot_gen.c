@@ -10,7 +10,7 @@
 #include "..\..\framework\tools\prot_parser.h"
 
 static char txt[50*1024];
-static char type[100], name[100], max[2000];
+static char type[100], prelen[100], name[100], max[2000];
 
 static int parser_nfile(const char* buf);
 static int generate_hfile(const char* name, char* inc, unsigned int inc_len);
