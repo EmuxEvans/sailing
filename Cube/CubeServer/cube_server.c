@@ -254,17 +254,15 @@ void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 void cube_room_check(CUBE_ROOM* room)
 {
 	int idx, count, ready, loaded, singer, p2p, terminated;
-	unsigned int p2pmask;
 
 	singer = -1;
 	count = ready = loaded = p2p = terminated = 0;
-	p2pmask = cube_room_p2pmask(room, -1);
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
 		if(room->members[idx].ready) ready++;
 		if(room->members[idx].loaded) loaded++;
 		if(room->members[idx].terminated) terminated++;
-		if((room->members[idx].p2p_status|(1<<idx))==p2pmask) p2p++;
+		if(room->members[idx].p2p_status) p2p++;
 		if(strcmp(room->members[idx].conn->nick, room->microphone[0].nick)==0) singer = idx;
 		count++;
 	}
@@ -301,7 +299,7 @@ void cube_room_check(CUBE_ROOM* room)
 		}
 		return;
 	}
-	if(count==loaded && count==p2p && room->state==CUBE_ROOM_STATE_LOADING) {
+	if(count==loaded && count==p2p+1 && room->state==CUBE_ROOM_STATE_LOADING) {
 		room->state = CUBE_ROOM_STATE_GAMING;
 		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			SVR_USER_CTX ctx;
@@ -371,6 +369,7 @@ int cube_room_joinable(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 void cube_room_tick(CUBE_ROOM* room)
 {
 	int singer, idx;
+	SVR_USER_CTX ctx;
 
 	if(room->state!=CUBE_ROOM_STATE_LOADING) return;
 	if(room->start_time>cube_room_curtime(room)) return;
@@ -379,15 +378,19 @@ void cube_room_tick(CUBE_ROOM* room)
 	if(singer<0) return;
 
 	if(!room->members[singer].loaded) {
+		ctx.conn = room->members[singer].conn;
 		cube_room_leave(room, room->members[singer].conn);
+		lobby_room_join_owner(&ctx, ctx.conn->nick);
 		return;
 	}
 
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
 		if(singer==idx) continue;
-		if(room->members[idx].p2p_status&(1<<singer)) continue;
+		if(!room->members[idx].p2p_status) continue;
+		ctx.conn = room->members[idx].conn;
 		cube_room_leave(room, room->members[idx].conn);
+		lobby_room_join_owner(&ctx, ctx.conn->nick);
 	}
 }
 
