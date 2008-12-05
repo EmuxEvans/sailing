@@ -390,7 +390,9 @@ void room_p2p_connected(SVR_USER_CTX* user_ctx, const char* nick)
 	midx = cube_room_member_index(room, nick);
 	assert(midx>=0);
 	if(midx<0) return;
-	room->members[user_ctx->conn->room_idx].p2p_status |= (1<<midx);
+	if(strcmp(room->members[midx].conn->nick, room->singer)!=0) return;
+	if(strcmp(room->singer, user_ctx->conn->nick)==0) return;
+	room->members[user_ctx->conn->room_idx].p2p_status = 1;
 
 	cube_room_check(room);
 }
@@ -400,7 +402,9 @@ void room_terminate(SVR_USER_CTX* user_ctx)
 	CUBE_ROOM* room;
 	room = user_ctx->conn->room;
 	if(room==NULL) return;
-	if(room->state!=CUBE_ROOM_STATE_ACTIVE) return;
+
+	if(room->state!=CUBE_ROOM_STATE_GAMING) return;
+
 	room->members[user_ctx->conn->room_idx].terminated = 1;
 	cube_room_check(room);
 }
@@ -416,6 +420,7 @@ void room_chat(SVR_USER_CTX* user_ctx, const char* what)
 
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
+		ctx.conn = room->members[idx].conn;
 		room_chat_callback(&ctx, user_ctx->conn->nick, what);
 	}
 }
