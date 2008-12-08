@@ -390,9 +390,9 @@ void room_p2p_connected(SVR_USER_CTX* user_ctx, const char* nick)
 	midx = cube_room_member_index(room, nick);
 	assert(midx>=0);
 	if(midx<0) return;
-	if(strcmp(room->members[midx].conn->nick, room->singer)!=0) return;
-	if(strcmp(room->singer, user_ctx->conn->nick)==0) return;
-	room->members[user_ctx->conn->room_idx].p2p_status = 1;
+	if(strcmp(room->singer, user_ctx->conn->nick)!=0) return;
+
+	room->members[midx].p2p_status = 1;
 
 	cube_room_check(room);
 }
