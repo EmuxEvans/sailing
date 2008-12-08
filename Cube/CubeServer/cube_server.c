@@ -244,8 +244,6 @@ void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 
 	conn->room = NULL;
 	room->members[conn->room_idx].conn = NULL;
-	room->members[conn->room_idx].ready = 0;
-	room->members[conn->room_idx].loaded = 0;
 
 	cube_room_giveup(room, conn->nick);
 	cube_room_check(room);
@@ -288,6 +286,7 @@ void cube_room_check(CUBE_ROOM* room)
 		room->state = CUBE_ROOM_STATE_LOADING;
 		room->start_time = cube_room_curtime(room) + CUBE_ROOM_TIMEOUT/CUBE_ROOM_TIMER;
 		strcpy(room->singer, room->members[singer].conn->nick);
+
 		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			SVR_USER_CTX ctx;
 			if(room->members[idx].conn==NULL) continue;
@@ -297,6 +296,7 @@ void cube_room_check(CUBE_ROOM* room)
 			room->members[idx].terminated = 0;
 			room->members[idx].p2p_status = 0;
 		}
+
 		return;
 	}
 	if(count==loaded && count==p2p+1 && room->state==CUBE_ROOM_STATE_LOADING) {
@@ -426,14 +426,14 @@ void cube_room_onjoin(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 		if(room->members[idx].conn==NULL) continue;
 
 		ctx.conn = conn;
-		room_notify_join(&ctx, room->members[idx].conn->index, room->members[idx].conn->nick, room->members[idx].conn->ri, room->members[idx].conn->equ);
+		room_notify_join(&ctx, room->members[idx].conn->uuid, room->members[idx].conn->nick, room->members[idx].conn->ri, room->members[idx].conn->equ);
 		room_walk_callback(&ctx, room->members[idx].conn->nick, room->members[idx].pos);
 		if(room->members[idx].ready) room_notify_ready(&ctx, room->members[idx].conn->nick, room->members[idx].ready);
 
 		if(room->members[idx].conn==conn) continue;
 
 		ctx.conn = room->members[idx].conn;
-		room_notify_join(&ctx, conn->index, conn->nick, room->members[conn->room_idx].conn->ri, room->members[conn->room_idx].conn->equ);
+		room_notify_join(&ctx, conn->uuid, conn->nick, room->members[conn->room_idx].conn->ri, room->members[conn->room_idx].conn->equ);
 		room_walk_callback(&ctx, conn->nick, room->members[conn->room_idx].pos);
 	}
 
@@ -460,7 +460,7 @@ void cube_room_terminate(CUBE_ROOM* room)
 
 		for(j=0; j<sizeof(room->members)/sizeof(room->members[0]); j++) {
 			if(room->members[j].conn==NULL) continue;
-			room_notify_join(&ctx, room->members[j].conn->index, room->members[j].conn->nick, room->members[j].conn->ri, room->members[j].conn->equ);
+			room_notify_join(&ctx, room->members[j].conn->uuid, room->members[j].conn->nick, room->members[j].conn->ri, room->members[j].conn->equ);
 			room_walk_callback(&ctx, room->members[j].conn->nick, room->members[j].pos);
 		}
 
