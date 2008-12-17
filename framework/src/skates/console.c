@@ -28,11 +28,13 @@ typedef struct CONSOLE_HOOKER {
 } CONSOLE_HOOKER;
 
 typedef struct CONSOLE_MAP_ITEM {
+	int		id;
 	char	name[CONSOLE_ITEM_NAME_LEN+1];
 	char	addr[CONSOLE_ITEM_ADDR_LEN+1];
 } CONSOLE_MAP_ITEM;
 
 typedef struct CONSOLE_SERVER {
+	int					id;
 	char				name[100];
 	char				ep[100];
 	CONSOLE_CONNECTION*	conn;
@@ -59,7 +61,7 @@ static CONSOLE_CALLBACK console_global_hook = NULL;
 
 static int load_config(CONSOLE_INSTANCE* instance, const char* config_file);
 static int save_config(CONSOLE_INSTANCE* instance, const char* config_file);
-static int insert_item(CONSOLE_INSTANCE* instance, const char* name, const char* addr);
+static int insert_item(CONSOLE_INSTANCE* instance, int id, const char* name, const char* addr);
 static int remove_item(CONSOLE_INSTANCE* instance, const char* name);
 
 static unsigned int ZION_CALLBACK console_thread(void* arg);
@@ -401,7 +403,7 @@ int csmng_func(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 
 		for(i=count=0; i<conn->instance->maxitems; i++) {
 			if(conn->instance->items[i].name[0]=='\0') continue;
-			sprintf(buf, "name=%s addr=%s", conn->instance->items[i].name, conn->instance->items[i].addr);
+			sprintf(buf, "id=%04d name=%s addr=%s", conn->instance->items[i].id, conn->instance->items[i].name, conn->instance->items[i].addr);
 			ret = console_puts(conn, ERR_NOERROR, buf);
 			if(ret!=ERR_NOERROR) return ret;
 			count++;
@@ -411,21 +413,20 @@ int csmng_func(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 		}
 		return ERR_NOERROR;
 	} else if(strcmp(name, "csmng.table.add")==0) {
+		int id;
 		char name[CONSOLE_ITEM_NAME_LEN+1];
 		char addr[CONSOLE_ITEM_ADDR_LEN+1];
 		SOCK_ADDR sa;
 		const char* buf;
 
-		buf = strget_space(line, name, sizeof(name));
-		if(buf==NULL)
+		if(		(buf=strget2int_space(line, &id))==NULL
+			||	(buf=strget_space(buf, name, sizeof(name)))==NULL
+			||	(buf=strget_space(buf, addr, sizeof(addr)))==NULL
+			||	!sock_str2addr(addr, &sa)) {
 			return console_puts(conn, ERR_INVALID_PARAMETER, "invalid parameter");
-		buf = strget_space(buf, addr, sizeof(addr));
-		if(buf==NULL)
-			return console_puts(conn, ERR_INVALID_PARAMETER, "invalid parameter");
-		if(!sock_str2addr(addr, &sa))
-			return console_puts(conn, ERR_INVALID_PARAMETER, "invalid parameter");
+		}
 
-		return console_puts(conn, insert_item(conn->instance, name, addr), "");
+		return console_puts(conn, insert_item(conn->instance, id, name, addr), "");
 	} else if( strcmp(name, "csmng.table.delete")==0 ) {
 		char name[CONSOLE_ITEM_NAME_LEN+1];
 		const char* buf;
@@ -455,31 +456,30 @@ int csmng_func(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 		return console_puts(conn, ret, "");
 	} else if(strcmp(name, "csmng.servers.register")==0) {
 		int i;
+		int id;
 		char name[100];
 		char ep[100];
 		const char* t;
 
-		if((t=strget_space(line, name, sizeof(name)))==NULL || (t=strget_space(line, ep, sizeof(ep)))==NULL) {
+		if(		(t=strget2int_space(line, &id))==NULL
+			||	(t=strget_space(t, name, sizeof(name)))==NULL
+			||	(t=strget_space(t, ep, sizeof(ep)))==NULL) {
 			return console_puts(conn, ERR_INVALID_PARAMETER, "invalid parameter");
 		}
 
 		for(i=0; i<CONSOLE_SERVER_COUNT; i++) {
-			if(strcmp(conn->instance->servers[i].name, name)==0) {
-				strcpy(conn->instance->servers[i].name, name);
-				strcpy(conn->instance->servers[i].ep, ep);
-				conn->instance->servers[i].conn = conn;
-				break;
-			}
+			if(strcmp(conn->instance->servers[i].name, name)==0) break;
 		}
 		if(i==CONSOLE_SERVER_COUNT) {
 			for(i=0; i<CONSOLE_SERVER_COUNT; i++) {
-				if(strcmp(conn->instance->servers[i].name, "")==0) {
-					strcpy(conn->instance->servers[i].name, name);
-					strcpy(conn->instance->servers[i].ep, ep);
-					conn->instance->servers[i].conn = conn;
-					break;
-				}
+				if(strcmp(conn->instance->servers[i].name, "")==0) break;
 			}
+		}
+		if(i<CONSOLE_SERVER_COUNT) {
+			conn->instance->servers[i].id = id;
+			strcpy(conn->instance->servers[i].name, name);
+			strcpy(conn->instance->servers[i].ep, ep);
+			conn->instance->servers[i].conn = conn;
 		}
 
 		return console_puts(conn, ERR_NOERROR, "");
@@ -593,7 +593,7 @@ int save_config(CONSOLE_INSTANCE* instance, const char* config_file)
 	return ERR_NOERROR;
 }
 
-int insert_item(CONSOLE_INSTANCE* instance, const char* name, const char* addr)
+int insert_item(CONSOLE_INSTANCE* instance, int id, const char* name, const char* addr)
 {
 	unsigned int i;
 
@@ -606,6 +606,7 @@ int insert_item(CONSOLE_INSTANCE* instance, const char* name, const char* addr)
 	}
 	if(i==instance->maxitems) return ERR_FULL;
 
+	instance->items[i].id = id;
 	strcpy(instance->items[i].name, name);
 	strcpy(instance->items[i].addr, addr);
 

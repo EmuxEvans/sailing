@@ -85,8 +85,8 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// generate by PROT_GEN.\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// %s\n", asctime(newTime));
 	make_define_filename(name, buf);
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_include__\n", buf);
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_include__\n", buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_INCLUDE__\n", buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_INCLUDE__\n", buf);
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	for(i=0; i<num_inc; i++) {
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#include \"%s.h\"\n", data_include[i].file);
@@ -195,7 +195,6 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 
 	return ERR_NOERROR;
 }
@@ -276,10 +275,14 @@ int generate_hlua(const char* name, char* src, unsigned int src_len)
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "// generate by PROT_GEN.\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "// %s\n", asctime(newTime));
-	make_include_filename(name, buf);
+	make_define_filename(name, buf);
+	snprintf(src+strlen(src), src_len-strlen(src), "#ifndef __%s_LUA_INCLUDE__\n", buf);
+	snprintf(src+strlen(src), src_len-strlen(src), "#define __%s_LUA_INCLUDE__\n", buf);
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	for(i=0; i<num_inc; i++) {
 		snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.lua.h\"\n", data_include[i].file);
 	}
+	make_include_filename(name, buf);
 	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.h\"\n", buf);
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 
@@ -296,7 +299,9 @@ int generate_hlua(const char* name, char* src, unsigned int src_len)
 	snprintf(src+strlen(src), src_len-strlen(src), "#ifdef __cplusplus\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "}\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "#endif\n");
+
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "#endif\n");
 
 	return ERR_NOERROR;
 }

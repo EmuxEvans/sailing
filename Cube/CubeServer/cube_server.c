@@ -83,7 +83,7 @@ static void ondisconnect(NETWORK_HANDLE handle, void* userptr)
 	os_mutex_lock(&room_mtx);
 	if(conn->room!=NULL) {
 		room = conn->room;
-		cube_room_leave(room, conn);
+		cube_room_leave(room, conn, 0);
 	}
 	os_mutex_unlock(&room_mtx);
 
@@ -225,7 +225,7 @@ CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char*
 	return room;
 }
 
-void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn)
+void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn, int reason)
 {
 	int idx;
 	SVR_USER_CTX ctx;
@@ -239,7 +239,7 @@ void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn)
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
 		ctx.conn = room->members[idx].conn;
-		room_notify_leave(&ctx, conn->nick);
+		room_notify_leave(&ctx, conn->nick, reason);
 	}
 
 	conn->room = NULL;
@@ -379,7 +379,7 @@ void cube_room_tick(CUBE_ROOM* room)
 
 	if(!room->members[singer].loaded) {
 		ctx.conn = room->members[singer].conn;
-		cube_room_leave(room, room->members[singer].conn);
+		cube_room_leave(room, room->members[singer].conn, 0);
 		lobby_room_join_owner(&ctx, ctx.conn->nick);
 		return;
 	}
@@ -389,7 +389,7 @@ void cube_room_tick(CUBE_ROOM* room)
 		if(singer==idx) continue;
 		if(!room->members[idx].p2p_status) continue;
 		ctx.conn = room->members[idx].conn;
-		cube_room_leave(room, room->members[idx].conn);
+		cube_room_leave(room, room->members[idx].conn, 0);
 		lobby_room_join_owner(&ctx, ctx.conn->nick);
 	}
 }

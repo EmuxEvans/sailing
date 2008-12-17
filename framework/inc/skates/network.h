@@ -47,14 +47,16 @@ ZION_API int network_downbufs_fill(NETWORK_DOWNBUF* downbufs[], unsigned int cou
 ZION_API void network_downbufs_free(NETWORK_DOWNBUF* downbufs[], unsigned int count);
 
 ZION_API unsigned int network_recvbuf_len(NETWORK_HANDLE handle);
+ZION_API const void* network_recvbuf_ptr(NETWORK_HANDLE handle, unsigned int start, unsigned int len);
 ZION_API int network_recvbuf_get(NETWORK_HANDLE handle, void* buf, unsigned int start, unsigned int len);
 ZION_API int network_recvbuf_commit(NETWORK_HANDLE handle, unsigned int len);
 
 ZION_API int network_send(NETWORK_HANDLE handle, NETWORK_DOWNBUF* downbufs[], unsigned int count);
 ZION_API int network_disconnect(NETWORK_HANDLE handle);
 
-ZION_API SOCK_HANDLE network_get_sock(NETWORK_HANDLE handle);
+ZION_API void network_set_userptr(NETWORK_HANDLE handle, void* userptr);
 ZION_API void* network_get_userptr(NETWORK_HANDLE handle);
+ZION_API SOCK_HANDLE network_get_sock(NETWORK_HANDLE handle);
 ZION_API const SOCK_ADDR* network_get_peername(NETWORK_HANDLE handle);
 
 #ifdef __cplusplus

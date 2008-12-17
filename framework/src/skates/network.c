@@ -356,6 +356,24 @@ unsigned int network_recvbuf_len(NETWORK_HANDLE handle)
 	return ret;
 }
 
+const void* network_recvbuf_ptr(NETWORK_HANDLE handle, unsigned int start, unsigned int len)
+{
+	unsigned int t;
+	const void* ret = NULL;
+
+	os_mutex_lock(&recvbuf_mutex);
+	if(start+len<=handle->recvbuf_len) {
+		start = (handle->recvbuf_cur + start) % handle->recvbuf_max;
+		t = handle->recvbuf_max - start;
+		if(t>len) {
+			ret = &handle->recvbuf_buf[start];
+		}
+	}
+	os_mutex_unlock(&recvbuf_mutex);
+
+	return ret;
+}
+
 int network_recvbuf_get(NETWORK_HANDLE handle, void* buf, unsigned int start, unsigned int len)
 {
 	unsigned int t;
@@ -418,14 +436,19 @@ int network_disconnect(NETWORK_HANDLE handle)
 	return ERR_NOERROR;
 }
 
-SOCK_HANDLE network_get_sock(NETWORK_HANDLE handle)
+void network_set_userptr(NETWORK_HANDLE handle, void* userptr)
 {
-	return handle->sock;
+	handle->userptr = userptr;
 }
 
 void* network_get_userptr(NETWORK_HANDLE handle)
 {
 	return handle->userptr;
+}
+
+SOCK_HANDLE network_get_sock(NETWORK_HANDLE handle)
+{
+	return handle->sock;
 }
 
 const SOCK_ADDR* network_get_peername(NETWORK_HANDLE handle)

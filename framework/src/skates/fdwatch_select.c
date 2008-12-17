@@ -108,9 +108,7 @@ int fdwatch_rearm(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 	assert(item->flags&FDWATCH_DISABLE);
 	if(!(item->flags&FDWATCH_DISABLE)) return ERR_INVALID_PARAMETER;
 
-//	os_mutex_lock(&handle->list_mtx);
 	item->flags &= ~FDWATCH_DISABLE;
-//	os_mutex_lock(&handle->list_mtx);
 
 	return ERR_NOERROR;
 }

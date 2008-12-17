@@ -132,7 +132,7 @@ void lobby_room_create(SVR_USER_CTX* user_ctx, const char* name)
 	}
 
 	if(user_ctx->conn->room) {
-		cube_room_leave(user_ctx->conn->room, user_ctx->conn);
+		cube_room_leave(user_ctx->conn->room, user_ctx->conn, 0);
 	}
 
 	room->members[0].conn = user_ctx->conn;
@@ -160,7 +160,7 @@ void lobby_room_join(SVR_USER_CTX* user_ctx, int index)
 	}
 
 	if(user_ctx->conn->room) {
-		cube_room_leave(user_ctx->conn->room, user_ctx->conn);
+		cube_room_leave(user_ctx->conn->room, user_ctx->conn, 0);
 	}
 
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
@@ -215,7 +215,7 @@ void lobby_room_join_owner(SVR_USER_CTX* user_ctx, const char* nick)
 	}
 
 	if(user_ctx->conn->room) {
-		cube_room_leave(user_ctx->conn->room, user_ctx->conn);
+		cube_room_leave(user_ctx->conn->room, user_ctx->conn, 0);
 	}
 
 	assert(room->members[idx].conn==NULL);
@@ -331,10 +331,19 @@ void lobby_equipment_get(SVR_USER_CTX* user_ctx)
 	lobby_equipment_callback(user_ctx, user_ctx->conn->equ);
 }
 
+void room_kick(SVR_USER_CTX* user_ctx, const char* nick)
+{
+	int index;
+	if(user_ctx->conn->room==NULL) return;
+	index = cube_room_member_index(user_ctx->conn->room, nick);
+	if(index<0) return;
+	cube_room_leave(user_ctx->conn->room, user_ctx->conn, 1979);
+}
+
 void room_leave(SVR_USER_CTX* user_ctx)
 {
 	if(user_ctx->conn->room==NULL) return;
-	cube_room_leave(user_ctx->conn->room, user_ctx->conn);
+	cube_room_leave(user_ctx->conn->room, user_ctx->conn, 0);
 }
 
 void room_set_ready(SVR_USER_CTX* user_ctx, int flag)

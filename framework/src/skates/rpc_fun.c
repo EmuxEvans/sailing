@@ -27,18 +27,18 @@ typedef struct SEQ_ITEM {
 static RPCFUN_ASYNC_OVERLAPPED  NOCALLBACK_OVERLAPPED;
 RPCFUN_ASYNC_OVERLAPPED* RPCFUN_NOCALLBACK = &NOCALLBACK_OVERLAPPED;
 
-static os_mutex_t		response_mutex;
-static os_mutex_t		seq_mutex;
+static os_mutex_t			response_mutex;
+static os_mutex_t			seq_mutex;
 static SEQ_ITEM				seq_list[RPCFUN_OVERLAP_MAXCOUNT];
 static ATOM_SLIST_HEADER	seq_header;
 static unsigned int			seq_genseq;
 //
-static os_mutex_t		func_mutex;
+static os_mutex_t			func_mutex;
 static HASHMAP_HANDLE		func_map;
 //
-static os_mutex_t		overlap_mutex;
+static os_mutex_t			overlap_mutex;
 //
-static MEMPOOL_HANDLE		stream_pool;
+static MEMPOOL_HANDLE		stream_pool = NULL;
 static STREAM_INTERFACE		stream_interface;
 //
 static int rpcfun_append_function(RPCFUN_FUNCTION_DESC* desc);
@@ -150,6 +150,11 @@ int rpcfun_final()
 int rpcfun_register(RPCFUN_FUNCTION_DESC* desc, int count)
 {
 	int i, ret = 0;
+
+	if(!stream_pool) {
+		return ERR_OPT_FORBIDDEN;
+	}
+
 	if(count==0) {
 		for(;;) {
 			if(desc[count].funcname==NULL) break;
@@ -176,6 +181,11 @@ int rpcfun_register(RPCFUN_FUNCTION_DESC* desc, int count)
 void rpcfun_unregister(RPCFUN_FUNCTION_DESC* desc, int count)
 {
 	int i;
+
+	if(!stream_pool) {
+		return;
+	}
+
 	if(count==0) {
 		for(;;) {
 			if(desc[count].funcname==NULL) break;

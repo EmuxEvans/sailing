@@ -9,7 +9,7 @@
 
 #include "prot_parser.h"
 
-static char mode[100], type[100], name[100], value[2000];
+static char mode[100], type[100], name[100], prelen[100], value[2000];
 int is_break;
 
 DATA_INCLUDE data_include[100];
@@ -303,11 +303,8 @@ const char* parse_node_def(const char* buf)
 	const char* tbuf;
 
 	tbuf = buf;
-	tbuf = get_token_keyword(buf, "extern", mode);
-	if(tbuf==NULL) {
-		tbuf = get_token_keyword(buf, "internal", mode);
-		if(tbuf==NULL) return NULL;
-	}
+	tbuf = get_token_keyword(buf, "struct", mode);
+	if(tbuf==NULL) return NULL;
 	buf = tbuf;
 
 	buf = get_token_id(buf, name, sizeof(name));
@@ -667,6 +664,7 @@ void make_define_filename(const char* file, char* out)
 	for(i=0; i<(int)strlen(out); i++) {
 		if(out[i]=='.') out[i] = '_';
 	}
+	_strupr(out);
 }
 
 int check_vailid_dtype(const char* type)

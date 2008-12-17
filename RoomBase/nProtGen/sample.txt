@@ -1,10 +1,11 @@
 
 include sample.proto;
 
-module WelcomeTo {
-	client aaaaaaaa(
+module Guild {
+	client Login(
 		os_int a[10*100]
 	);
+	server LoginCallback(
+		os_int ret
+	);
 };
-
-
