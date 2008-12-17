@@ -182,7 +182,6 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 	struct tm   *newTime;
     time_t      szClock;
 	int i, c, f, p;
-	char buf[1000];
 
 	inc[0] = '\0';
     time(&szClock);
@@ -194,19 +193,13 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// %s\n", asctime(newTime));
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 
-	make_define_filename(name, buf);
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_INCLUDE__\n", buf);
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_INCLUDE__\n", buf);
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-
 	for(i=0; i<num_inc; i++) {
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#include \"%s.h\"\n", data_include[i].file);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "include %s\n", data_include[i].file);
 	}
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 
 	for(c=0; c<nmodules_count; c++) {
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class I%sClient {\n", nmodules[c].name);
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "interface I%sClient {\n", nmodules[c].name);
 		for(f=nmodules[c].f_start; f<nmodules[c].f_start+nmodules[c].f_count; f++) {
 			if(nfunctions[f].type!='C') continue;
 			snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void %s(", nfunctions[f].name);
@@ -217,8 +210,7 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 			snprintf(inc+strlen(inc), inc_len-strlen(inc), ");\n");
 		}
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "};\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class I%sServer {\n", nmodules[c].name);
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "interface I%sServer {\n", nmodules[c].name);
 		for(f=nmodules[c].f_start; f<nmodules[c].f_start+nmodules[c].f_count; f++) {
 			if(nfunctions[f].type!='S') continue;
 			snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void %s(", nfunctions[f].name);
@@ -232,7 +224,6 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	}
 
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
 	return ERR_NOERROR;
 }
 
