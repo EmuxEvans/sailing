@@ -1,15 +1,23 @@
 
-extern MicrophoneInfo {
+struct MicrophoneInfo {
 	os_dword		uuid;
 	string<100>		mtv;
 };
 
-extern CubeRoomInfo {
+struct CubeRoleInfo {
+	os_dword		uuid;
+	string<100>		nick;
+	string<2*1024>	roledata;
+	string<2*1024>	equipment;
+	string<2*1024>	warehouse;
+};
+
+struct CubeRoomInfo {
 	os_dword		id;
 	string<100>		name;
 };
 
-extern CubeMemberInfo {
+struct CubeMemberInfo {
 	string<100>		nick;
 	string<1024>	roleinfo;
 	string<1024>	equipment;
@@ -20,6 +28,8 @@ interface ICubeUser {
 	void Disconnect();
 
 	ICubeRoom GetCubeRoom();
+	CubeRoleInfo GetRoleInfo();
+
 };
 
 interface ICubeRoom {
@@ -29,7 +39,7 @@ interface ICubeRoom {
 	MicrophoneInfo	GetMicrophoneInfo(os_int index);
 	os_int			AcquireMicrophone(ICubeUser user, string<100> mtv);
 	void			GiveupMicrophone(ICubeUser user);
-		
+
 	os_int			GetMemberCount();
 	ICubeMember		GetMember(os_int idx);
 
@@ -37,10 +47,10 @@ interface ICubeRoom {
 	void			SetRoomState(os_int state);
 	os_dword		GetMemberFlags();
 	void			SetMemberFlags(os_dword flags);
-
 };
 
 interface ICubeMember {
+	ICubeUser		GetUser();
 	ICubeRoom		GetRoom();
 	os_dword		GetUUID();
 	string			GetNick();

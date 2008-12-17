@@ -47,6 +47,7 @@ typedef struct APPBOX_SETTING {
 #define APPBOX_SETTING_END(name)						\
 	{ NULL, 0, NULL, NULL, 0 } };
 
+ZION_API int appbox_get_id();
 ZION_API const char* appbox_get_name();
 
 ZION_API int appbox_config_load(const char* filename);

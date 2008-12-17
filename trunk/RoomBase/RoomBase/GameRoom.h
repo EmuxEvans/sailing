@@ -9,7 +9,7 @@ public:
 	virtual bool MemberPrepareJoin(TGameRoom* pRoom, TGameUser* pUser) = NULL;
 	virtual void MemberJoin(TGameRoom* pRoom, TGameMember* pMember) = NULL;
 	virtual void MemberLeave(TGameRoom* pRoom, TGameMember* pMember) = NULL;
-	virtual void MemberOndata(TGameRoom* pRoom, TGameMember* pMember, const void* pData, int nSize) = NULL;
+	virtual void MemberOndata(TGameRoom* pRoom, TGameMember* pMember, const void* pData, unsigned int nSize) = NULL;
 };
 
 #define GAMEROOM_MATCH				(1<<0)	// Æ¥Åä
@@ -50,7 +50,7 @@ template<class TGameUser, class TGameRoom, class TGameMember>
 class CGameMember
 {
 public:
-	CGameMember(TGameUser* pUser, unsigned int nUIdx, TGameRoom* pRoom, unsigned int nCIdx);
+	CGameMember(TGameUser* pUser, TGameRoom* pRoom, unsigned int nCIdx);
 	virtual ~CGameMember();
 
 	TGameUser* GetGameUser();
@@ -69,5 +69,4 @@ private:
 	unsigned int	m_nCIdx;
 	unsigned int	m_nMask;
 	TGameUser*		m_pUser;
-	unsigned int	m_nUIdx;
 };

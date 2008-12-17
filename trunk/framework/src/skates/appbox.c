@@ -33,6 +33,7 @@ static int module_count;
 static CONFIG_ITEM configs[1000];
 static int config_count = 0;
 
+static int config_serverid = -1;
 static char config_appname[200] = "appname";
 static char config_syslog[200] = "console://";
 static char config_dbglog[200] = "console://";
@@ -51,6 +52,7 @@ static int config_dymempool_min = 0;
 static int config_dymempool_max = 0;
 
 APPBOX_SETTING_BEGIN(appbox_settings)
+	APPBOX_SETTING_INTEGER("serverid", config_serverid)
 	APPBOX_SETTING_STRING("appname", config_appname, sizeof(config_appname))
 	APPBOX_SETTING_STRING("module_list", config_module_list, sizeof(config_module_list))
 	APPBOX_SETTING_STRING("syslog.path", config_syslog, sizeof(config_syslog))
@@ -77,6 +79,11 @@ static int appbox_console_get(CONSOLE_CONNECTION* conn, const char* name, const 
 static int appbox_console_threadpool(CONSOLE_CONNECTION* conn, const char* name, const char* line);
 static int appbox_console_coredump(CONSOLE_CONNECTION* conn, const char* name, const char* line);
 static unsigned int ZION_CALLBACK cs_thread_proc(void* arg);
+
+int appbox_get_id()
+{
+	return config_serverid;
+}
 
 const char* appbox_get_name()
 {
@@ -667,7 +674,6 @@ unsigned int ZION_CALLBACK cs_thread_proc(void* arg)
 	SOCK_HANDLE sock;
 	int count, ret, c_try;
 
-
 	sock = SOCK_INVALID_HANDLE;
 	c_try = count = 0;
 	while(!appbox_quit_flag) {
@@ -692,7 +698,7 @@ unsigned int ZION_CALLBACK cs_thread_proc(void* arg)
 
 		if(sock!=SOCK_INVALID_HANDLE) {
 			char line[100];
-			sprintf(line, "csmng.register %s ", appbox_get_name());
+			sprintf(line, "csmng.register %d %s", appbox_get_id(), appbox_get_name());
 			sock_addr2str(&config_cs_endpoint, line+strlen(line));
 			ret = sock_writeline(sock, "ping");
 			if(ret==ERR_NOERROR) {

@@ -48,6 +48,8 @@ typedef struct NDATA_PARAMETER {
 	char	max[100];
 } NDATA_PARAMETER;
 
+static char mode = 0;
+
 static NDATA_MODULE nmodules[100];
 static int nmodules_count = 0;
 static NDATA_FUNCTION nfunctions[1000];
@@ -69,6 +71,7 @@ int main(int argc, char* argv[])
 		printf("invalid type\n");
 		return 0;
 	}
+	mode = strcmp(argv[1], "client")==0?'C':'S';
 
 	if(load_textfile(argv[2], txt, sizeof(txt))<=0) {
 		printf("can't open %s\n", argv[2]);
@@ -178,7 +181,8 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 {
 	struct tm   *newTime;
     time_t      szClock;
-	int c, f, p;
+	int i, c, f, p;
+	char buf[1000];
 
 	inc[0] = '\0';
     time(&szClock);
@@ -190,20 +194,45 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// %s\n", asctime(newTime));
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 
+	make_define_filename(name, buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_INCLUDE__\n", buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_INCLUDE__\n", buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
+	for(i=0; i<num_inc; i++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "#include \"%s.h\"\n", data_include[i].file);
+	}
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
 	for(c=0; c<nmodules_count; c++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class I%sClient {\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
 		for(f=nmodules[c].f_start; f<nmodules[c].f_start+nmodules[c].f_count; f++) {
+			if(nfunctions[f].type!='C') continue;
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void %s(", nfunctions[f].name);
 			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
+				if(p>nfunctions[f].p_start) snprintf(inc+strlen(inc), inc_len-strlen(inc), ", ");
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s", get_ctype(nparams[p].type), nparams[p].name);
 			}
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), ");\n");
 		}
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "};\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class I%sServer {\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
+		for(f=nmodules[c].f_start; f<nmodules[c].f_start+nmodules[c].f_count; f++) {
+			if(nfunctions[f].type!='S') continue;
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void %s(", nfunctions[f].name);
+			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
+				if(p>nfunctions[f].p_start) snprintf(inc+strlen(inc), inc_len-strlen(inc), ", ");
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s", get_ctype(nparams[p].type), nparams[p].name);
+			}
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), ");\n");
+		}
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "};\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 	}
 
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
 	return ERR_NOERROR;
 }
 
@@ -214,6 +243,43 @@ int generate_cfile(const char* name, char* src, unsigned int src_len)
 
 int generate_hcltfile(const char* name, char* inc, unsigned int inc_len)
 {
+	struct tm   *newTime;
+    time_t      szClock;
+	int c, f, p;
+	char buf[1000];
+
+	inc[0] = '\0';
+    time(&szClock);
+    newTime = localtime(&szClock);
+
+	inc[0] = '\0';
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// generate by NPROT_GEN.\n");
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "// %s\n", asctime(newTime));
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
+	make_define_filename(name, buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#ifndef __%s_CLIENT_INCLUDE__\n", buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#define __%s_CLIENT_INCLUDE__\n", buf);
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
+	for(c=0; c<nmodules_count; c++) {
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class C%sClient {\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
+		for(f=nmodules[c].f_start; f<nmodules[c].f_start+nmodules[c].f_count; f++) {
+			if(nfunctions[f].type!='S') continue;
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void %s(", nfunctions[f].name);
+			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
+				if(p>nfunctions[f].p_start) snprintf(inc+strlen(inc), inc_len-strlen(inc), ", ");
+				snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s", get_ctype(nparams[p].type), nparams[p].name);
+			}
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), ");\n");
+		}
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "};\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+	}
+
+	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
 	return ERR_NOERROR;
 }
 
@@ -407,7 +473,7 @@ void def_module(const char* name)
 
 void def_function(const char* type, const char* name)
 {
-	nfunctions[nfunctions_count].type = 'C';
+	nfunctions[nfunctions_count].type = strcmp(type, "client")==0?'C':'S';
 	strcpy(nfunctions[nfunctions_count].name, name);
 	nfunctions[nfunctions_count].p_start = nparams_count;
 	nfunctions[nfunctions_count].p_count = 0;

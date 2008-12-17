@@ -116,10 +116,14 @@ CMD_CLT notify_infochange(
 	string equ[]
 );
 
+CMD_SVR kick(
+    string["$$<=CUBE_NICK_LEN+1"] nick[]
+);
 CMD_SVR leave(
 );
 CMD_CLT notify_leave(
-	string nick[]
+	string nick[],
+	int reason
 );
 
 CMD_CLT notify_load(

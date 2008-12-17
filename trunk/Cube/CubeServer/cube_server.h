@@ -65,7 +65,7 @@ extern CUBE_CONNECTION* conn_list[1000];
 extern CUBE_ROOM* room_list[1000];
 
 CUBE_ROOM* cube_room_create(CUBE_CONNECTION* conn, const char* name, const char* owner);
-void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn);
+void cube_room_leave(CUBE_ROOM* room, CUBE_CONNECTION* conn, int reason);
 void cube_room_check(CUBE_ROOM* room);
 int cube_room_member_count(CUBE_ROOM* room);
 int cube_room_member_index(CUBE_ROOM* room, const char* nick);
