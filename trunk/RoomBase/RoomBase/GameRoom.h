@@ -10,7 +10,6 @@ public:
 	virtual void MemberJoin(TGameRoom* pRoom, TGameMember* pMember) = NULL;
 	virtual void MemberLeave(TGameRoom* pRoom, TGameMember* pMember) = NULL;
 	virtual void MemberOndata(TGameRoom* pRoom, TGameMember* pMember, const void* pData, int nSize) = NULL;
-	virtual void OnTimer(TGameRoom* pRoom, int nTimerId) = NULL;
 };
 
 #define GAMEROOM_MATCH				(1<<0)	// Æ¥Åä
