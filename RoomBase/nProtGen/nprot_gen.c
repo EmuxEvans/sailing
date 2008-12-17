@@ -13,8 +13,7 @@ static char txt[50*1024];
 static char type[100], prelen[100], name[100], max[2000];
 
 static int parser_nfile(const char* buf);
-static int generate_hfile(const char* name, char* inc, unsigned int inc_len);
-static int generate_cfile(const char* name, char* src, unsigned int src_len);
+static int generate_pfile(const char* name, char* inc, unsigned int inc_len);
 static int generate_hcltfile(const char* name, char* inc, unsigned int inc_len);
 static int generate_ccltfile(const char* name, char* src, unsigned int src_len);
 static int generate_hsvrfile(const char* name, char* inc, unsigned int inc_len);
@@ -85,21 +84,12 @@ int main(int argc, char* argv[])
 	}
 
 	memset(txt, 0, sizeof(txt));
-	ret = generate_hfile(argv[2], txt, sizeof(txt));
+	ret = generate_pfile(argv[2], txt, sizeof(txt));
 	if(ret!=ERR_NOERROR) {
 		printf("error: parse!\n");
 		return 0;
 	}
-	sprintf(file, "%s.hpp", argv[2]);
-	save_textfile(file, txt, 0);
-
-	memset(txt, 0, sizeof(txt));
-	ret = generate_cfile(argv[2], txt, sizeof(txt));
-	if(ret!=ERR_NOERROR) {
-		printf("error: parse!\n");
-		return 0;
-	}
-	sprintf(file, "%s.cpp", argv[2]);
+	sprintf(file, "%s.proto", argv[2]);
 	save_textfile(file, txt, 0);
 
 	memset(txt, 0, sizeof(txt));
@@ -177,7 +167,7 @@ static void print_pdef(int c, int f, char* txt, unsigned int txt_len)
 	}
 }
 
-int generate_hfile(const char* name, char* inc, unsigned int inc_len)
+int generate_pfile(const char* name, char* inc, unsigned int inc_len)
 {
 	struct tm   *newTime;
     time_t      szClock;
@@ -255,19 +245,38 @@ int generate_hcltfile(const char* name, char* inc, unsigned int inc_len)
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 
 	for(c=0; c<nmodules_count; c++) {
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class C%sClient {\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class C%sClient : public I%sClient {\n", nmodules[c].name, nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "protected:\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	C%sClient() { m_bHandled = false; }\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	~C%sClient() {}\n", nmodules[c].name);
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void SetHandled(bool bHandled=true) { m_bHandled = bHandled; }\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool IsHandled() { return m_bHandled; };\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool m_bHandled;\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
+
 		for(f=nmodules[c].f_start; f<nmodules[c].f_start+nmodules[c].f_count; f++) {
 			if(nfunctions[f].type!='S') continue;
-			snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void %s(", nfunctions[f].name);
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual void %s(", nfunctions[f].name);
 			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
 				if(p>nfunctions[f].p_start) snprintf(inc+strlen(inc), inc_len-strlen(inc), ", ");
 				snprintf(inc+strlen(inc), inc_len-strlen(inc), "%s %s", get_ctype(nparams[p].type), nparams[p].name);
 			}
-			snprintf(inc+strlen(inc), inc_len-strlen(inc), ");\n");
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), ") {}\n");
 		}
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "};\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class C%sClientInstance {\n", nmodules[c].name, nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	C%sClientInstance();\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	~C%sClientInstance();\n", nmodules[c].name);
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool Dispatch(const void* pData, unsigned int nSize);\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual C%sClient* GetNext(C%sClient* pClient);\n", nmodules[c].name, nmodules[c].name);
+
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "};\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
+
 	}
 
 	snprintf(inc+strlen(inc), inc_len-strlen(inc), "#endif\n");
@@ -276,6 +285,42 @@ int generate_hcltfile(const char* name, char* inc, unsigned int inc_len)
 
 int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 {
+	struct tm   *newTime;
+    time_t      szClock;
+	int c, f;
+
+	src[0] = '\0';
+    time(&szClock);
+    newTime = localtime(&szClock);
+
+	src[0] = '\0';
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "// generate by NPROT_GEN.\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "// %s\n", asctime(newTime));
+	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.clt.hpp\"\n", name);
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
+
+	for(c=0; c<nmodules_count; c++) {
+		for(f=nmodules[c].f_start; f<nmodules[c].f_start+nmodules[c].f_count; f++) {
+			if(nfunctions[f].type!='S') continue;
+		}
+
+		snprintf(src+strlen(src), src_len-strlen(src), "C%sClientInstance::C%sClientInstance()\n", nmodules[c].name, nmodules[c].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "{\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "}\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "C%sClientInstance::C%sClientInstance()\n", nmodules[c].name, nmodules[c].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "{\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "}\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "bool C%sClientInstance::Dispatch(const void* pData, unsigned int nSize)\n", nmodules[c].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "{\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "	return false;\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "}\n");
+		snprintf(src+strlen(src), src_len-strlen(src), "\n");
+	}
+	snprintf(src+strlen(src), src_len-strlen(src), "// END OF FILE\n");
+
 	return ERR_NOERROR;
 }
 
