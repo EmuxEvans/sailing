@@ -1,4 +1,9 @@
 
+extern MicrophoneInfo {
+	os_dword		uuid;
+	string<100>		mtv;
+};
+
 extern CubeRoomInfo {
 	os_dword		id;
 	string<100>		name;
@@ -6,6 +11,9 @@ extern CubeRoomInfo {
 
 extern CubeMemberInfo {
 	string<100>		nick;
+	string<1024>	roleinfo;
+	string<1024>	equipment;
+	os_dword		flags;
 };
 
 interface ICubeUser {
@@ -15,11 +23,26 @@ interface ICubeUser {
 };
 
 interface ICubeRoom {
-	os_int GetMemberCount();
-	ICubeMember GetMember(os_int idx);
+	CubeRoomInfo	GetInfo();
+
+	os_int			GetMicrophoneCount();
+	MicrophoneInfo	GetMicrophoneInfo(os_int index);
+	os_int			AcquireMicrophone(ICubeUser user, string<100> mtv);
+	void			GiveupMicrophone(ICubeUser user);
+		
+	os_int			GetMemberCount();
+	ICubeMember		GetMember(os_int idx);
+
+	os_int			GetRoomState();
+	void			SetRoomState(os_int state);
+	os_dword		GetMemberFlags();
+	void			SetMemberFlags(os_dword flags);
+
 };
 
 interface ICubeMember {
-	ICubeRoom GetRoom();
-	string GetNick();
+	ICubeRoom		GetRoom();
+	os_dword		GetUUID();
+	string			GetNick();
+	CubeMemberInfo	GetInfo();
 };
