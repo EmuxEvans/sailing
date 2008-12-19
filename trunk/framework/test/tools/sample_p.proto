@@ -1,18 +1,18 @@
 const os_int c1 = 1000;
 
-internal A {
+struct A {
 	os_int i1 = 100;
 	os_int i2[100];
 	string<100> s1;
 	string<100> sa[1000];
 };
 
-extern B {
+struct B {
 	A a;
 	A aa[100];
 };
 
-extern MY_STRUCT {
+struct MY_STRUCT {
 	os_int a_int = 100;
 	B b;
 };

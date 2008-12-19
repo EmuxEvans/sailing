@@ -364,6 +364,10 @@
 				RelativePath="..\test\skates\test_rqueue.c"
 				>
 			</File>
+			<File
+				RelativePath="..\src\skates\threadpool.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="include"
