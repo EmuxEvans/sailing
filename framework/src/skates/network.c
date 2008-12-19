@@ -4,42 +4,33 @@
 #include "../../inc/skates/errcode.h"
 #include "../../inc/skates/os.h"
 #include "../../inc/skates/sock.h"
-#include "../../inc/skates/mempool.h"
 #include "../../inc/skates/rlist.h"
+#include "../../inc/skates/mempool.h"
 #include "../../inc/skates/network.h"
 
-#include "../../inc/skates/rlist.h"
+#include "../../inc/skates/threadpool.h"
 #include "../../inc/skates/fdwatch.h"
 
-// static config : begin
-#define NETWORK_QUEUE_ITEM_MAX			10000
-#define NETWORK_FDWAIT_TIME				200
-// static config : end
-
-#define QUEUE_ITEM_QUIT				0
-#define QUEUE_ITEM_TCP_ACCEPT		1
-#define QUEUE_ITEM_TCP_WRITE		3
-#define QUEUE_ITEM_TCP_ONDATA		4
-#define QUEUE_ITEM_TCP_DISCONNECT	5
-
 typedef struct TCP_ENDPOINT {
-	FDWATCH_ITEM fdwitem;
+	FDWATCH_ITEM			fdwitem;
+	RLIST_ITEM				shutdown_item;
+	int						ref_count;
 
-	SOCK_HANDLE sock;
-	SOCK_ADDR sa;
-	NETWORK_ONACCEPT OnAccept;
-	void* userptr;
-
-	RLIST_ITEM	shutdown_item;
-	int			ref_count;
+	SOCK_HANDLE				sock;
+	SOCK_ADDR				sa;
+	NETWORK_ONACCEPT		OnAccept;
+	void*					userptr;
 } TCP_ENDPOINT;
 
 typedef struct NETWORK_CONNECTION {
-	FDWATCH_ITEM fdwitem;
-	SOCK_HANDLE sock;
-	SOCK_ADDR peername;
-	void* userptr;
+	FDWATCH_ITEM			fdwitem;
+	int						ref_count;
+	int						rdcount, wrcount, alive;
+	RLIST_ITEM				shutdown_item;
 
+	SOCK_HANDLE				sock;
+	SOCK_ADDR				peername;
+	void*					userptr;
 	NETWORK_ONCONNECT		OnConnect;
 	NETWORK_ONDATA			OnData;
 	NETWORK_ONDISCONNECT	OnDisconnect;
@@ -54,100 +45,80 @@ typedef struct NETWORK_CONNECTION {
 	unsigned int			downbuf_cur;
 } NETWORK_CONNECTION;
 
-typedef struct QUEUE_ITEM{
-	int		type;
-	union {
-		TCP_ENDPOINT*		tcp_ep;
-		NETWORK_CONNECTION*	tcp_conn;
-		void*				data;
-	};
-} QUEUE_ITEM;
-
 static unsigned int downbuf_size;
 static MEMPOOL_HANDLE downbuf_pool;
 static os_mutex_t downbuf_mutex;
-static os_mutex_t recvbuf_mutex;
 static MEMPOOL_HANDLE conn_pool;
 
 static TCP_ENDPOINT tcp_eps[100];
-static RLIST_HEAD tcp_shutdown_eps;
-static os_mutex_t tcp_shutdown_mutex;
+
+static RLIST_HEAD shutdown_eps;
+static RLIST_HEAD shutdown_con;
+static os_mutex_t shutdown_mutex;
 
 static FDWATCH_HANDLE network_fdw;
+static void accept_fdevent(FDWATCH_ITEM* item, int events);
+static void tcpcon_fdevent(FDWATCH_ITEM* item, int events);
 
-static QUEUE_ITEM event_queue[NETWORK_QUEUE_ITEM_MAX];
-static unsigned int event_queue_cur;
-static unsigned int event_queue_len;
-static os_mutex_t event_queue_mutex;
-static os_condition_t event_queue_cond;
-static os_thread_t event_thread;
+static void accept_event(void* data);
+static void read_event(void* data);
+static void write_event(void* data);
+static void close_event(void* data);
 
-static int notify_thread_quit;
-static os_thread_t notify_thread;
+static void opt_accept(TCP_ENDPOINT* ep);
+static int opt_read(NETWORK_CONNECTION* conn);
+static void opt_write(NETWORK_CONNECTION* conn);
+static void opt_close(NETWORK_CONNECTION* conn);
 
 static unsigned int ZION_CALLBACK notify_proc(void* arg);
-static unsigned int ZION_CALLBACK event_proc(void* arg);
+static os_thread_t notify_tid;
+static volatile int notify_quit;
 
-static void event_post(int type, void* data);
-
-static void accept_event(FDWATCH_ITEM* item, int events);
-static void connection_event(FDWATCH_ITEM* item, int events);
-
-static void event_opt_accept(TCP_ENDPOINT* ep);
-static int event_opt_read(NETWORK_CONNECTION* conn);
-static int event_opt_write(NETWORK_CONNECTION* conn);
-static void event_opt_close(NETWORK_CONNECTION* conn);
-
-int network_init(unsigned int size)
+int network_init(unsigned int downbuf_size)
 {
-	int l;
+	int ret;
 
-	downbuf_size = size;
-	downbuf_pool = mempool_create("NETWORK_DOWNBUF", sizeof(NETWORK_DOWNBUF)+size, 0);
+	downbuf_pool = mempool_create("NETWORK.DOWNBUF", sizeof(NETWORK_DOWNBUF)+downbuf_size-1, 0);
+	conn_pool = mempool_create("NETWORK.CONN", sizeof(NETWORK_CONNECTION), 0);
+	assert(downbuf_pool && conn_pool);
+
 	os_mutex_init(&downbuf_mutex);
-	os_mutex_init(&recvbuf_mutex);
-	conn_pool = mempool_create("NETWORK_CONNECTION", sizeof(NETWORK_CONNECTION), 0);
+	os_mutex_init(&shutdown_mutex);
 
-	memset(&tcp_eps, 0, sizeof(tcp_eps));
-	for(l=0; l<sizeof(tcp_eps)/sizeof(tcp_eps[0]); l++) {
-		tcp_eps[l].sock = SOCK_INVALID_HANDLE;
-	}
-	rlist_init(&tcp_shutdown_eps);
-	os_mutex_init(&tcp_shutdown_mutex);
+	memset(tcp_eps, 0, sizeof(tcp_eps));
+	rlist_init(&shutdown_eps);
+	rlist_init(&shutdown_con);
 
 	network_fdw = fdwatch_create();
+	if(network_fdw) {
+		notify_quit = 1;
+		ret = os_thread_begin(&notify_tid, notify_proc, NULL);
+		if(ret==0) {
+			while(notify_quit) os_sleep(10);
+			return ERR_NOERROR;
+		}
+		fdwatch_destroy(network_fdw);
+	} else {
+		ret = ERR_UNKNOWN;
+	}
 
-	event_queue_cur = 0;
-	event_queue_len = 0;
-	os_mutex_init(&event_queue_mutex);
-	os_condition_init(&event_queue_cond);
-	os_thread_begin(&event_thread, event_proc, NULL);
-
-	notify_thread_quit = 0;
-	os_thread_begin(&notify_thread, notify_proc, NULL);
-
-	return ERR_NOERROR;
+	mempool_destroy(downbuf_pool);
+	mempool_destroy(conn_pool);
+	os_mutex_destroy(&downbuf_mutex);
+	os_mutex_destroy(&shutdown_mutex);
+	return ERR_UNKNOWN;
 }
 
 int network_final()
 {
-	event_post(QUEUE_ITEM_QUIT, NULL);
-	os_thread_wait(event_thread, NULL);
-
-	notify_thread_quit = 1;
-	os_thread_wait(notify_thread, NULL);
-
-	os_condition_destroy(&event_queue_cond);
-	os_mutex_destroy(&event_queue_mutex);
-
-	os_mutex_destroy(&tcp_shutdown_mutex);
+	notify_quit = 1;
+	os_thread_wait(notify_tid, NULL);
 
 	fdwatch_destroy(network_fdw);
-
+	mempool_destroy(downbuf_pool);
 	mempool_destroy(conn_pool);
 	os_mutex_destroy(&downbuf_mutex);
-	os_mutex_destroy(&recvbuf_mutex);
-	mempool_destroy(downbuf_pool);
+	os_mutex_destroy(&shutdown_mutex);
 
 	return ERR_NOERROR;
 }
@@ -157,11 +128,11 @@ int network_tcp_register(SOCK_ADDR* sa, NETWORK_ONACCEPT OnAccept, void* userptr
 	int index, ret;
 
 	for(index=0; index<sizeof(tcp_eps)/sizeof(tcp_eps[0]); index++) {
-		if(tcp_eps[index].sock==SOCK_INVALID_HANDLE) break;
+		if(tcp_eps[index].ref_count==0) break;
 	}
 	if(index==sizeof(tcp_eps)/sizeof(tcp_eps[0])) return ERR_FULL;
 
-	tcp_eps[index].sock = sock_bind(sa, SOCK_REUSEADDR);
+	tcp_eps[index].sock = sock_bind(sa, SOCK_REUSEADDR|SOCK_NONBLOCK);
 	if(tcp_eps[index].sock==SOCK_INVALID_HANDLE) {
 		return ERR_UNKNOWN;
 	}
@@ -171,12 +142,14 @@ int network_tcp_register(SOCK_ADDR* sa, NETWORK_ONACCEPT OnAccept, void* userptr
 		return ERR_UNKNOWN;
 	}
 
+	rlist_clear(&tcp_eps[index].shutdown_item, &tcp_eps[index]);
+	tcp_eps[index].ref_count = 1;
+
 	memcpy(&tcp_eps[index].sa, sa, sizeof(*sa));
 	tcp_eps[index].OnAccept = OnAccept;
 	tcp_eps[index].userptr = userptr;
-	tcp_eps[index].ref_count = 1;
 
-	ret = fdwatch_set(&tcp_eps[index].fdwitem, tcp_eps[index].sock, FDWATCH_READ, accept_event, &tcp_eps[index]);
+	ret = fdwatch_set(&tcp_eps[index].fdwitem, tcp_eps[index].sock, FDWATCH_READ, accept_fdevent, &tcp_eps[index]);
 	if(ret!=ERR_NOERROR) {
 		sock_unbind(tcp_eps[index].sock);
 		tcp_eps[index].sock = SOCK_INVALID_HANDLE;
@@ -186,7 +159,7 @@ int network_tcp_register(SOCK_ADDR* sa, NETWORK_ONACCEPT OnAccept, void* userptr
 	ret = fdwatch_add(network_fdw, &tcp_eps[index].fdwitem);
 	if(ret!=ERR_NOERROR) {
 		sock_unbind(tcp_eps[index].sock);
-		tcp_eps[index].sock = SOCK_INVALID_HANDLE;
+		memset(&tcp_eps[index], 0, sizeof(tcp_eps[index]));
 		return ret;
 	}
 
@@ -198,21 +171,20 @@ int network_tcp_unregister(const SOCK_ADDR* sa)
 	int index;
 
 	for(index=0; index<sizeof(tcp_eps)/sizeof(tcp_eps[0]); index++) {
-		if(tcp_eps[index].sock==SOCK_INVALID_HANDLE) continue;
-		if(memcmp(&tcp_eps[index].sa, sa, sizeof(*sa))!=0) continue;
-		break;
+		if(tcp_eps[index].ref_count==0) continue;
+		if(memcmp(&tcp_eps[index].sa, sa, sizeof(*sa))==0) break;
 	}
 	if(index==sizeof(tcp_eps)/sizeof(tcp_eps[0])) return ERR_NOT_FOUND;
 
-	rlist_clear(&tcp_eps[index].shutdown_item, &tcp_eps[index]);
-	rlist_push_back(&tcp_shutdown_eps, &tcp_eps[index].shutdown_item);
-	while(tcp_eps[index].ref_count!=0) os_sleep(1000);
+	assert(tcp_eps[index].shutdown_item.next==NULL);
+	assert(tcp_eps[index].shutdown_item.prev==NULL);
+	assert(tcp_eps[index].shutdown_item.ptr==&tcp_eps[index]);
+
+	rlist_push_back(&shutdown_eps, &tcp_eps[index].shutdown_item);
+	while(tcp_eps[index].ref_count!=0) os_sleep(10);
 
 	sock_unbind(tcp_eps[index].sock);
-
-	tcp_eps[index].sock = SOCK_INVALID_HANDLE;
-	tcp_eps[index].OnAccept = NULL;
-	tcp_eps[index].userptr = NULL;
+	memset(&tcp_eps[index], 0, sizeof(tcp_eps[index]));
 
 	return ERR_NOERROR;
 }
@@ -229,7 +201,11 @@ int network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr, NETWORK_H
 	conn = mempool_alloc(conn_pool);
 	if(conn==NULL) return ERR_NO_ENOUGH_MEMORY;
 
-	fdwatch_set(&conn->fdwitem, sock, FDWATCH_READ|FDWATCH_WRITE, connection_event, conn);
+	fdwatch_set(&conn->fdwitem, sock, FDWATCH_READ|FDWATCH_WRITE, tcpcon_fdevent, conn);
+	conn->ref_count = 1;
+	conn->rdcount = 0;
+	conn->wrcount = 0;
+	conn->alive = 1;
 	conn->sock			= sock;
 	sock_peername(sock, &conn->peername);
 	conn->userptr		= userptr;
@@ -255,13 +231,12 @@ int network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr, NETWORK_H
 	rlist_init(&conn->downbufs);
 	conn->downbuf_cur = 0;
 
-	*handle = conn;
 	if(fdwatch_add(network_fdw, &conn->fdwitem)!=ERR_NOERROR) {
 		if(conn->recvbuf_pool) mempool_free(conn->recvbuf_pool, conn->recvbuf_buf);
 		mempool_free(conn_pool, conn);
-		*handle = NULL;
 		return ERR_UNKNOWN;
 	}
+	*handle = conn;
 
 	return ERR_NOERROR;
 }
@@ -349,69 +324,55 @@ void network_downbufs_free(NETWORK_DOWNBUF* downbufs[], unsigned int count)
 
 unsigned int network_recvbuf_len(NETWORK_HANDLE handle)
 {
-	unsigned int ret;
-	os_mutex_lock(&recvbuf_mutex);
-	ret = handle->recvbuf_len;
-	os_mutex_unlock(&recvbuf_mutex);
-	return ret;
+	return handle->recvbuf_len;
 }
 
 const void* network_recvbuf_ptr(NETWORK_HANDLE handle, unsigned int start, unsigned int len)
 {
 	unsigned int t;
-	const void* ret = NULL;
-
-	os_mutex_lock(&recvbuf_mutex);
 	if(start+len<=handle->recvbuf_len) {
 		start = (handle->recvbuf_cur + start) % handle->recvbuf_max;
 		t = handle->recvbuf_max - start;
 		if(t>len) {
-			ret = &handle->recvbuf_buf[start];
+			return &handle->recvbuf_buf[start];
 		}
 	}
-	os_mutex_unlock(&recvbuf_mutex);
-
-	return ret;
+	return NULL;
 }
 
 int network_recvbuf_get(NETWORK_HANDLE handle, void* buf, unsigned int start, unsigned int len)
 {
 	unsigned int t;
-	int ret = ERR_NOERROR;
 
-	os_mutex_lock(&recvbuf_mutex);
-	if(start+len<=handle->recvbuf_len) {
-		start = (handle->recvbuf_cur + start) % handle->recvbuf_max;
-		t = handle->recvbuf_max - start;
-		if(t>len) {
-			memcpy(buf, &handle->recvbuf_buf[start], len);
-		} else {
-			memcpy(buf, &handle->recvbuf_buf[start], t);
-			memcpy((char*)buf+t, &handle->recvbuf_buf[0], len-t);
-		}
-	} else ret = ERR_UNKNOWN;
-	os_mutex_unlock(&recvbuf_mutex);
+	if(start+len>handle->recvbuf_len)
+		return ERR_UNKNOWN;
 
-	return ret;
+	start = (handle->recvbuf_cur + start) % handle->recvbuf_max;
+	t = handle->recvbuf_max - start;
+	if(t>len) {
+		memcpy(buf, &handle->recvbuf_buf[start], len);
+	} else {
+		memcpy(buf, &handle->recvbuf_buf[start], t);
+		memcpy((char*)buf+t, &handle->recvbuf_buf[0], len-t);
+	}
+
+	return ERR_NOERROR;
 }
 
 int network_recvbuf_commit(NETWORK_HANDLE handle, unsigned int len)
 {
-	int ret = ERR_NOERROR;
+	if(len>handle->recvbuf_len)
+		return ERR_INVALID_PARAMETER;
 
-	os_mutex_lock(&recvbuf_mutex);
-	if(len<=handle->recvbuf_len) {
-		if(handle->recvbuf_len==len) {
-			handle->recvbuf_cur = 0;
-			handle->recvbuf_len = 0;
-		} else {
-			handle->recvbuf_cur += len;
-			handle->recvbuf_len -= len;
-		}
-	} else ret = ERR_UNKNOWN;
-	os_mutex_unlock(&recvbuf_mutex);
+	if(handle->recvbuf_len==len) {
+		handle->recvbuf_cur = 0;
+		handle->recvbuf_len = 0;
+	} else {
+		handle->recvbuf_cur += len;
+		handle->recvbuf_len -= len;
+	}
 
-	return ret;
+	return ERR_NOERROR;
 }
 
 int network_send(NETWORK_HANDLE handle, NETWORK_DOWNBUF* downbufs[], unsigned int count)
@@ -424,8 +385,6 @@ int network_send(NETWORK_HANDLE handle, NETWORK_DOWNBUF* downbufs[], unsigned in
 		rlist_push_back(&handle->downbufs, &downbufs[l]->item);
 	}
 	os_mutex_unlock(&downbuf_mutex);
-
-	event_post(QUEUE_ITEM_TCP_WRITE, handle);
 
 	return ERR_NOERROR;
 }
@@ -456,179 +415,163 @@ const SOCK_ADDR* network_get_peername(NETWORK_HANDLE handle)
 	return &handle->peername;
 }
 
-unsigned int ZION_CALLBACK notify_proc(void* arg)
-{
-	while(!notify_thread_quit) {
-		os_mutex_lock(&tcp_shutdown_mutex);
-		while(!rlist_empty(&tcp_shutdown_eps)) {
-			TCP_ENDPOINT* ep;
-			ep = (TCP_ENDPOINT*)rlist_get_userdata(rlist_front(&tcp_shutdown_eps));
-			fdwatch_remove(network_fdw, &ep->fdwitem);
-			atom_dec(&ep->ref_count);
-			rlist_pop_front(&tcp_shutdown_eps);
-		}
-		os_mutex_unlock(&tcp_shutdown_mutex);
-
-		fdwatch_dispatch(network_fdw, NETWORK_FDWAIT_TIME);
-	}
-	return 0;
-}
-
-unsigned int ZION_CALLBACK event_proc(void* arg)
-{
-	QUEUE_ITEM temp[sizeof(event_queue)/sizeof(event_queue[0])];
-	unsigned int temp_len, l;
-	int quit_flag;
-
-	quit_flag = 0;
-
-	while(!quit_flag) {
-		os_mutex_lock(&event_queue_mutex);
-
-		if(event_queue_len==0) {
-			os_condition_wait(&event_queue_cond, &event_queue_mutex);
-		}
-
-		if(event_queue_cur+event_queue_len>sizeof(event_queue)/sizeof(event_queue[0])) {
-			unsigned int t;
-			t = sizeof(event_queue)/sizeof(event_queue[0]) - event_queue_cur;
-			memcpy(&temp[0], &event_queue[event_queue_cur], sizeof(event_queue[0])*t);
-			memcpy(&temp[t], &event_queue[0], sizeof(event_queue[0])*(event_queue_len-t));
-		} else {
-			memcpy(&temp[0], &event_queue[event_queue_cur], sizeof(event_queue[0])*event_queue_len);
-		}
-		temp_len = event_queue_len;
-		event_queue_cur = 0;
-		event_queue_len = 0;
-
-		os_mutex_unlock(&event_queue_mutex);
-
-		for(l=0; l<temp_len; l++) {
-			switch(temp[l].type) {
-			case QUEUE_ITEM_QUIT:
-				quit_flag = 1;
-				break;
-			case QUEUE_ITEM_TCP_ACCEPT:
-				event_opt_accept(temp[l].tcp_ep);
-				break;
-			case QUEUE_ITEM_TCP_WRITE:
-				if(temp[l].tcp_conn->OnConnect) {
-					temp[l].tcp_conn->OnConnect(temp[l].tcp_conn, temp[l].tcp_conn->userptr);
-					temp[l].tcp_conn->OnConnect = NULL;
-				}
-				event_opt_write(temp[l].tcp_conn);
-				break;
-			case QUEUE_ITEM_TCP_ONDATA:
-				temp[l].tcp_conn->OnData(temp[l].tcp_conn, temp[l].tcp_conn->userptr);
-				break;
-			case QUEUE_ITEM_TCP_DISCONNECT:
-				event_opt_close(temp[l].tcp_conn);
-				break;
-			}
-		}
-	}
-
-	return 0;
-}
-
-void event_post(int type, void* data)
-{
-	int done = 0;
-	do {
-		os_mutex_lock(&event_queue_mutex);
-		if(event_queue_len<sizeof(event_queue)/sizeof(event_queue[0])) {
-			unsigned index;
-			index = (event_queue_cur+event_queue_len)%(sizeof(event_queue)/sizeof(event_queue[0]));
-			event_queue[index].type = type;
-			event_queue[index].data = data;
-			event_queue_len++;
-			done = 1;
-		}
-		os_mutex_unlock(&event_queue_mutex);
-	} while(!done);
-
-	os_condition_signal(&event_queue_cond);
-}
-
-void accept_event(FDWATCH_ITEM* item, int events)
+void accept_fdevent(FDWATCH_ITEM* item, int events)
 {
 	TCP_ENDPOINT* ep;
 	ep = (TCP_ENDPOINT*)item;
 	atom_inc(&ep->ref_count);
-	event_post(QUEUE_ITEM_TCP_ACCEPT, ep);
+	threadpool_queueitem(accept_event, ep);
 }
 
-void connection_event(FDWATCH_ITEM* item, int events)
+void tcpcon_fdevent(FDWATCH_ITEM* item, int events)
 {
 	NETWORK_CONNECTION* conn;
 	conn = (NETWORK_CONNECTION*)item;
-
 	if(events&FDWATCH_WRITE) {
-		event_post(QUEUE_ITEM_TCP_WRITE, conn);
+		atom_inc(&conn->ref_count);
+		threadpool_queueitem(write_event, conn);
 	}
 	if(events&FDWATCH_READ) {
-		if(event_opt_read(conn)!=ERR_NOERROR) {
-			fdwatch_remove(network_fdw, &conn->fdwitem);
-			event_post(QUEUE_ITEM_TCP_DISCONNECT, conn);
-		}
+		atom_inc(&conn->ref_count);
+		threadpool_queueitem(read_event, conn);
 	}
 }
 
-void event_opt_accept(TCP_ENDPOINT* ep)
+void accept_event(void* data)
+{
+	TCP_ENDPOINT* ep;
+	ep = (TCP_ENDPOINT*)data;
+	opt_accept(ep);
+	atom_dec(&ep->ref_count);
+}
+
+void read_event(void* data)
+{
+	NETWORK_CONNECTION* conn = (NETWORK_CONNECTION*)data;
+
+	if(atom_inc(&conn->rdcount)==1) {
+		do {
+			if(conn->alive) {
+				if(!opt_read(conn)) {
+					conn->alive = 0;
+					assert(conn->shutdown_item.next==NULL);
+					assert(conn->shutdown_item.prev==NULL);
+					assert(conn->shutdown_item.ptr==conn);
+					os_mutex_lock(&shutdown_mutex);
+					rlist_push_back(&shutdown_con, &conn->shutdown_item);
+					os_mutex_unlock(&shutdown_mutex);
+				}
+			}
+		} while(atom_dec(&conn->rdcount)>0);
+	}
+
+	if(atom_dec(&conn->ref_count)==0)
+		opt_close(conn);
+}
+
+void write_event(void* data)
+{
+	NETWORK_CONNECTION* conn = (NETWORK_CONNECTION*)data;
+
+	if(atom_inc(&conn->wrcount)==1) {
+		do {
+			if(conn->alive) {
+				opt_write(conn);
+			}
+		} while(atom_dec(&conn->wrcount)>0);
+	}
+
+	if(atom_dec(&conn->ref_count)==0)
+		opt_close(conn);
+}
+
+void close_event(void* data)
+{
+	NETWORK_CONNECTION* conn = (NETWORK_CONNECTION*)data;
+	if(atom_dec(&conn->ref_count)==0) opt_close(conn);
+}
+
+unsigned int ZION_CALLBACK notify_proc(void* arg)
+{
+	TCP_ENDPOINT* sd_eps[10];
+	NETWORK_CONNECTION* sd_con[100];
+	int sd_eps_count, sd_con_count;
+
+	notify_quit = 0;
+	while(!notify_quit) {
+
+		sd_eps_count = sd_con_count = 0;
+		os_mutex_lock(&shutdown_mutex);
+		for(;;) {
+			if(sd_eps_count==sizeof(sd_eps)/sizeof(sd_eps[0])) break;
+			if(rlist_empty(&shutdown_eps)) break;
+			sd_eps[sd_eps_count++] = (TCP_ENDPOINT*)rlist_get_userdata(rlist_front(&shutdown_eps));
+			rlist_pop_front(&shutdown_eps);
+		}
+		for(;;) {
+			if(sd_con_count==sizeof(sd_con)/sizeof(sd_con[0])) break;
+			if(rlist_empty(&shutdown_con)) break;
+			sd_con[sd_con_count++] = (NETWORK_CONNECTION*)rlist_get_userdata(rlist_front(&shutdown_con));
+			rlist_pop_front(&shutdown_con);
+		}
+		os_mutex_unlock(&shutdown_mutex);
+		for(; sd_eps_count>0; sd_eps_count--) {
+			fdwatch_remove(network_fdw, &sd_eps[sd_eps_count-1]->fdwitem);
+			atom_dec(&sd_eps[sd_eps_count-1]->ref_count);
+		}
+		for(; sd_con_count>0; sd_con_count--) {
+			fdwatch_remove(network_fdw, &sd_con[sd_con_count-1]->fdwitem);
+			threadpool_queueitem(close_event, sd_con[sd_con_count-1]);
+		}
+
+		fdwatch_dispatch(network_fdw, 10);
+	}
+	return 0;
+}
+
+void opt_accept(TCP_ENDPOINT* ep)
 {
 	SOCK_ADDR pname;
 	SOCK_HANDLE clt;
-
 	for(;;) {
 		clt = sock_accept(ep->sock, &pname);
 		if(clt==SOCK_INVALID_HANDLE) break;
 
 		ep->OnAccept(ep->userptr, clt, &pname);
 	}
-
-	atom_dec(&ep->ref_count);
 }
 
-int event_opt_read(NETWORK_CONNECTION* conn)
+int opt_read(NETWORK_CONNECTION* conn)
 {
+	int ret;
 	while(1) {
 		unsigned int start, len;
-		int ret;
 
-		os_mutex_lock(&recvbuf_mutex);
 		start = (conn->recvbuf_cur+conn->recvbuf_len)%conn->recvbuf_max;
 		if(start<conn->recvbuf_cur) {
 			len = conn->recvbuf_cur - start;
 		} else {
 			len = conn->recvbuf_max - start;
 		}
-		os_mutex_unlock(&recvbuf_mutex);
 
 		ret = sock_read(conn->sock, &conn->recvbuf_buf[start], len);
-		if(ret<0) {
-			return ret;
-		}
-		if(ret==0) break;
-
-		os_mutex_lock(&recvbuf_mutex);
+		if(ret<=0) break;
 		conn->recvbuf_len += ret;
-		os_mutex_unlock(&recvbuf_mutex);
 
-		event_post(QUEUE_ITEM_TCP_ONDATA, conn);
+		conn->OnData(conn, conn->userptr);
 
 		if(conn->recvbuf_len==conn->recvbuf_max) {
 			sock_disconnect(conn->sock);
-			return ERR_UNKNOWN;
+			return 0;
 		}
 	}
 
-	return ERR_NOERROR;
+	return ret==0?1:0;
 }
 
-int event_opt_write(NETWORK_CONNECTION* conn)
+void opt_write(NETWORK_CONNECTION* conn)
 {
 	NETWORK_DOWNBUF* downbuf;
-
 	downbuf = (NETWORK_DOWNBUF*)rlist_front(&conn->downbufs);
 	while(!rlist_is_head(&conn->downbufs, &downbuf->item)) {
 		int ret;
@@ -646,11 +589,9 @@ int event_opt_write(NETWORK_CONNECTION* conn)
 
 		downbuf = (NETWORK_DOWNBUF*)rlist_front(&conn->downbufs);
 	}
-
-	return 0;
 }
 
-void event_opt_close(NETWORK_CONNECTION* conn)
+void opt_close(NETWORK_CONNECTION* conn)
 {
 	conn->OnDisconnect(conn, conn->userptr);
 }

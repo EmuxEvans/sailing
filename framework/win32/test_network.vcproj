@@ -320,6 +320,10 @@
 				RelativePath="..\test\skates\test_network.c"
 				>
 			</File>
+			<File
+				RelativePath="..\src\skates\threadpool.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="include"
