@@ -11,6 +11,7 @@
 
 #include <skates/rlist.h>
 #include <skates/fdwatch.h>
+#include <skates/threadpool.h>
 
 static void onaccept_proc(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname);
 static void onconnect_proc(NETWORK_HANDLE handle, void* userptr);
@@ -35,6 +36,7 @@ int main(int argc, char* argv[])
 	sock_init();
 	fdwatch_init();
 	mempool_init();
+	threadpool_init(1);
 	network_init(20000);
 
 	if(strcmp(argv[1], "client")==0) {
@@ -44,6 +46,7 @@ int main(int argc, char* argv[])
 	}
 
 	network_final();
+	threadpool_final();
 	mempool_final();
 	fdwatch_final();
 	sock_final();
