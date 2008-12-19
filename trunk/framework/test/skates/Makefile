@@ -6,9 +6,9 @@ INCLUDES=$(OS_INC_DIR) -I$(BASE_DIR)/inc
 LIBS=$(OS_LIB_DIR) $(OS_LIB)
 BINS=test_network$(EXE_PREFIX) test_fdwatch$(EXE_PREFIX) test_rqueue$(EXE_PREFIX) test_dbapi$(EXE_PREFIX) test_console$(EXE_PREFIX) test_log$(EXE_PREFIX) test_dymempool$(EXE_PREFIX) test_sock$(EXE_PREFIX) test_threadpool$(EXE_PREFIX) test_timer$(EXE_PREFIX) test_rpcnet$(EXE_PREFIX) test_rpcfun$(EXE_PREFIX) test_syncrpc$(EXE_PREFIX) test_asyncrpc$(EXE_PREFIX)
 
-OBJS_NETWORK=test_network.o $(BASE_DIR)/src/skates/sock.o $(BASE_DIR)/src/skates/fdwatch_$(FDWATCH_USE).o $(BASE_DIR)/src/skates/network.o $(BASE_DIR)/src/skates/mempool.o $(BASE_DIR)/src/skates/os_unix.o
+OBJS_NETWORK=test_network.o $(BASE_DIR)/src/skates/sock.o $(BASE_DIR)/src/skates/threadpool.o $(BASE_DIR)/src/skates/fdwatch_$(FDWATCH_USE).o $(BASE_DIR)/src/skates/network.o $(BASE_DIR)/src/skates/mempool.o $(BASE_DIR)/src/skates/os_unix.o
 OBJS_FDWATCH=test_fdwatch.o $(BASE_DIR)/src/skates/sock.o $(BASE_DIR)/src/skates/fdwatch_$(FDWATCH_USE).o
-OBJS_RQUEUE=test_rqueue.o $(BASE_DIR)/src/skates/sock.o $(BASE_DIR)/src/skates/fdwatch_$(FDWATCH_USE).o $(BASE_DIR)/src/skates/network.o $(BASE_DIR)/src/skates/hashmap.o $(BASE_DIR)/src/skates/mempool.o $(BASE_DIR)/src/skates/rqueue.o fake_applog.o $(BASE_DIR)/src/skates/os_unix.o
+OBJS_RQUEUE=test_rqueue.o $(BASE_DIR)/src/skates/sock.o $(BASE_DIR)/src/skates/threadpool.o $(BASE_DIR)/src/skates/fdwatch_$(FDWATCH_USE).o $(BASE_DIR)/src/skates/network.o $(BASE_DIR)/src/skates/hashmap.o $(BASE_DIR)/src/skates/mempool.o $(BASE_DIR)/src/skates/rqueue.o fake_applog.o $(BASE_DIR)/src/skates/os_unix.o
 OBJS_DBAPI=test_dbapi.o $(BASE_DIR)/src/skates/os_unix.o $(BASE_DIR)/src/skates/mempool.o $(BASE_DIR)/src/skates/hashmap.o $(BASE_DIR)/src/skates/dbapi.o $(BASE_DIR)/src/skates/dbapi_sqlite.o
 OBJS_CONSOLE=test_console.o $(BASE_DIR)/src/skates/sock.o $(BASE_DIR)/src/skates/fdwatch_$(FDWATCH_USE).o $(BASE_DIR)/src/skates/misc.o $(BASE_DIR)/src/skates/os_unix.o $(BASE_DIR)/src/skates/console.o
 OBJS_LOG=test_log.o $(BASE_DIR)/src/skates/log.o $(BASE_DIR)/src/skates/os_unix.o

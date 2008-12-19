@@ -96,7 +96,7 @@ int gen_client(const char* filename)
 {
 	int f;
 	char str[1000];
-	fprintf(fp_clt,"#include <stdio.h>\n");
+	fprintf(fp_clt,"#include <string.h>\n");
 	fprintf(fp_clt,"#include <skates/skates.h>\n");
 	fprintf(fp_clt,"\n");
 	fprintf(fp_clt,"#include \"%s.h\"\n", filename);
@@ -120,7 +120,7 @@ int gen_client(const char* filename)
 int gen_server(const char* filename)
 {
 	int f;
-	fprintf(fp_svr,"#include <stdio.h>\n");
+	fprintf(fp_svr,"#include <string.h>\n");
 	fprintf(fp_svr,"#include <skates/skates.h>\n");
 	fprintf(fp_svr,"\n");
 	fprintf(fp_svr,"#include \"%s.h\"\n", filename);

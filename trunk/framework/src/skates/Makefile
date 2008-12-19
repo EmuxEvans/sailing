@@ -26,21 +26,29 @@ LUA_FULL_INC=$(foreach inc,$(LUA_INC),lua/$(inc))
 LUA_FULL_SRC=$(foreach src,$(LUA_SRC),lua/$(src))
 LUA_FULL_OBJ=$(subst .c,.o,$(LUA_FULL_SRC))
 LUA_FULL_LIB=lua/lua.a
+LUA_RPC_FILE=protocol_lua.h protocol_lua.clt.c protocol_lua.svr.c
 
-
-INCS=$(OS_INC_DIR) $(APPBOX_INC) -DDBAPI_MYSQL_$(DBAPI_MYSQL)
+INCS=$(OS_INC_DIR) $(APPBOX_INC) -DDBAPI_MYSQL_$(DBAPI_MYSQL) -I../../inc
 LIBS=$(OS_LIB_DIR) $(APPBOX_LIB) $(OS_LIB)
-OBJS=os_unix.o misc.o mempool.o hashmap.o sock.o log.o dymempool.o stream.o protocol.o protocol_lua.o dbapi.o dbapi_sqlite.o dbapi_mysql.o threadpool.o timer.o fdwatch_$(FDWATCH_USE).o console.o network.o rqueue.o rpc_net.o rpc_fun.o appbox.o applog.o appbox_unix.o appbox_args.o
+OBJS=		os_unix.o misc.o mempool.o hashmap.o sock.o log.o dymempool.o stream.o\
+			protocol_lua.clt.o protocol_lua.svr.o\
+			protocol.o protocol_lua.o protocol_lua_client.o protocol_lua_debug.o\
+			dbapi.o dbapi_sqlite.o dbapi_mysql.o threadpool.o timer.o fdwatch_$(FDWATCH_USE).o\
+			console.o network.o rqueue.o rpc_net.o rpc_fun.o appbox.o applog.o appbox_unix.o appbox_args.o
 MAIN_OBJS=appbox_main.o
 
 .c.o:
 	$(CC) $(CC_FLAG) $(INCS) -DMODULE_NAME=\"appbox\" -DAPPBOX_MAIN $< $(OBJ_CC_FLAG) $@
 #	$(CC) $(CC_FLAG) $(INCS) -DMODULE_NAME=\"appbox\" -DAPPBOX_MAIN $< -S $(OBJ_CC_FLAG) $@.S
 
+%.h: %.idl; $(OUTPUT_DIR)/idl_cc $<
+%.clt.c: %.idl; $(OUTPUT_DIR)/idl_cc $<
+%.svr.c: %.idl; $(OUTPUT_DIR)/idl_cc $<
+
 all: $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX)
 
 clean:
-	rm -rf $(OBJS) $(MAIN_OBJS) $(SQLITE_FULL_OBJ) $(SQLITE_FULL_LIB) $(LUA_FULL_OBJ) $(LUA_FULL_LIB) *.S $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX)
+	rm -rf $(OBJS) $(MAIN_OBJS) $(SQLITE_FULL_OBJ) $(SQLITE_FULL_LIB) $(LUA_FULL_OBJ) $(LUA_FULL_LIB) *.S $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(LUA_RPC_FILE)
 
 $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(MAIN_OBJS)
 	cp -f $(OUTPUT_DIR)/appbox$(DLL_PREFIX) .
@@ -48,12 +56,12 @@ $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(MAIN
 	cp -f appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/
 	rm -f appbox$(DLL_PREFIX) appbox_main$(EXE_PREFIX)
 
-$(OUTPUT_DIR)/appbox$(DLL_PREFIX): $(OBJS) $(SQLITE_FULL_LIB) $(LUA_FULL_LIB)
+$(OUTPUT_DIR)/appbox$(DLL_PREFIX): $(LUA_RPC_FILE) $(OBJS) $(SQLITE_FULL_LIB) $(LUA_FULL_LIB)
 	mkdir -p $(OUTPUT_DIR)
 	$(CC) $(CC_FLAG) $(OBJS) $(SQLITE_FULL_LIB) $(LUA_FULL_LIB) $(LIBS) $(DLL_CC_FLAG) $@
 	rm -f appbox$(DLL_PREFIX)
 
-$(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX): $(OBJS) $(SQLITE_FULL_LIB) $(LUA_FULL_LIB)
+$(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX): $(LUA_RPC_FILE) $(OBJS) $(SQLITE_FULL_LIB) $(LUA_FULL_LIB)
 	$(STA_LIB) $@ $(OBJS) $(SQLITE_FULL_OBJ) $(LUA_FULL_OBJ)
 
 $(SQLITE_FULL_LIB): $(SQLITE_FULL_INC) $(SQLITE_FULL_SRC)

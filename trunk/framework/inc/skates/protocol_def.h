@@ -31,7 +31,7 @@ typedef struct PROTOCOL_VARIABLE	PROTOCOL_VARIABLE;
 typedef struct PROTOCOL_TYPE		PROTOCOL_TYPE;
 
 struct PROTOCOL_VARIABLE {
-	char*					name;
+	const char*				name;
 	int						type;
 	PROTOCOL_TYPE*			obj_type;
 	unsigned int			prelen;
@@ -40,7 +40,7 @@ struct PROTOCOL_VARIABLE {
 };
 
 struct PROTOCOL_TYPE {
-	char*					name;
+	const char*				name;
 	PROTOCOL_VARIABLE*		var_list;
 	int						var_count;
 	unsigned int			size;
