@@ -27,6 +27,8 @@ struct PROTOCOL_CALLBACK {
 ZION_API int protocol_parse(const char* buf, PROTOCOL_CALLBACK* callback, void* ptr);
 ZION_API void protocol_break(PROTOCOL_CALLBACK* callback);
 
+ZION_API int protocol_convert(const char* value, void* buf, int type, unsigned int len);
+
 ZION_API int protocol_binary_read(PROTOCOL_TYPE* type, const void* data, unsigned int* data_len, void* buf);
 ZION_API int protocol_binary_write(PROTOCOL_TYPE* type, const void* buf, void* data, unsigned int* data_len);
 

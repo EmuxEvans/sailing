@@ -23,7 +23,6 @@ static void proto_new_array(PROTOCOL_CALLBACK* callback, const char* name);
 static void proto_new_begin(PROTOCOL_CALLBACK* callback);
 static void proto_new_item(PROTOCOL_CALLBACK* callback, const char* value);
 static void proto_new_end(PROTOCOL_CALLBACK* callback);
-static int proto_convert(const char* value, void* buf, int type, unsigned int len);
 
 typedef struct PROTO_PARSE {
 	PROTOCOL_TYPE*			root;
@@ -624,7 +623,7 @@ void proto_new_field(PROTOCOL_CALLBACK* callback, const char* name, const char* 
 		return;
 	}
 
-	if(proto_convert(value, (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].obj_type->var_list[i].offset, parse->stack[parse->stack_count-1].obj_type->var_list[i].type, parse->stack[parse->stack_count-1].obj_type->var_list[i].prelen)!=ERR_NOERROR) {
+	if(protocol_convert(value, (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].obj_type->var_list[i].offset, parse->stack[parse->stack_count-1].obj_type->var_list[i].type, parse->stack[parse->stack_count-1].obj_type->var_list[i].prelen)!=ERR_NOERROR) {
 		protocol_break(callback);
 		return;
 	}
@@ -694,7 +693,7 @@ void proto_new_item(PROTOCOL_CALLBACK* callback, const char* value)
 		return;
 	}
 
-	if(proto_convert(value, (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].prelen * parse->stack[parse->stack_count-1].count, parse->stack[parse->stack_count-1].type, parse->stack[parse->stack_count-1].prelen)!=ERR_NOERROR) {
+	if(protocol_convert(value, (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].prelen * parse->stack[parse->stack_count-1].count, parse->stack[parse->stack_count-1].type, parse->stack[parse->stack_count-1].prelen)!=ERR_NOERROR) {
 		protocol_break(callback);
 		return;
 	}
@@ -713,7 +712,7 @@ void proto_new_end(PROTOCOL_CALLBACK* callback)
 	}
 }
 
-int proto_convert(const char* value, void* buf, int type, unsigned int len)
+int protocol_convert(const char* value, void* buf, int type, unsigned int len)
 {
 	os_long v;
 
