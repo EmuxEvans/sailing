@@ -11,7 +11,6 @@ static lua_State* L;
 static void lua_do();
 static int my_struct_func(lua_State* L);
 static int my_object_func(lua_State* L);
-static int my_lua_func(lua_State* L);
 static int my_obj_save(lua_State* L);
 static int my_obj_load(lua_State* L);
 

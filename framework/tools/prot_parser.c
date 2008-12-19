@@ -663,8 +663,10 @@ void make_define_filename(const char* file, char* out)
 	make_include_filename(file, out);
 	for(i=0; i<(int)strlen(out); i++) {
 		if(out[i]=='.') out[i] = '_';
+		if(out[i]>='a' && out[i]<='z') {
+			out[i] = out[i] - 'a' + 'A';
+		}
 	}
-	_strupr(out);
 }
 
 int check_vailid_dtype(const char* type)

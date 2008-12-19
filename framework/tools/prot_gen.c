@@ -187,7 +187,7 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 					snprintf(inc+strlen(inc), inc_len-strlen(inc), ", %s %s", get_ctype(data_parameter[k].type), data_parameter[k].name);
 				}
 			}
-			snprintf(inc+strlen(inc), inc_len-strlen(inc), ") = NULL;\n");
+			snprintf(inc+strlen(inc), inc_len-strlen(inc), ") = 0;\n");
 		}
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "};\n");
 	}
