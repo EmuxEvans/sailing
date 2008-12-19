@@ -584,6 +584,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\inc\skates\circle_buffer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\inc\skates\console.h"
 				>
 			</File>

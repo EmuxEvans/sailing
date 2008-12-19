@@ -235,7 +235,7 @@ void rqueue_destroy(RQUEUE* queue)
 	os_mutex_unlock(&rqueue_mutex);
 }
 
-int rqueue_read(RQUEUE* queue, void* buf, unsigned int* size)
+int rqueue_read(RQUEUE* queue, void* buf, unsigned int* size, unsigned int flags)
 {
 	int ret;
 	unsigned int r_size;
@@ -300,7 +300,7 @@ RQUEUE_CLIENT* rqueue_get(const SOCK_ADDR* sa)
 	return client;
 }
 
-int rqueue_write(RQUEUE_CLIENT* client, const void* buf, unsigned int len)
+int rqueue_write(RQUEUE_CLIENT* client, const void* buf, unsigned int len, unsigned int flags)
 {
 	int ret;
 	unsigned int count, slen;

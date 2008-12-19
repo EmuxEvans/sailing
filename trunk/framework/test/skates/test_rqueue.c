@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 	getchar();
 
 	for(l=0; l<sizeof(s_tids)/sizeof(s_tids[0]); l++) {
-		rqueue_write(rqueue_get(&s_sa), &quit_flag, sizeof(quit_flag));
+		rqueue_write(rqueue_get(&s_sa), &quit_flag, sizeof(quit_flag), 0);
 	}
 	quit_flag = 1;
 
@@ -92,7 +92,7 @@ unsigned int ZION_CALLBACK server_proc(void* arg)
 
 	for(;;) {
 		size = sizeof(buf);
-		ret = rqueue_read((RQUEUE*)arg, buf, &size);
+		ret = rqueue_read((RQUEUE*)arg, buf, &size, 0);
 		if(ret!=ERR_NOERROR) {
 			continue;
 		}
@@ -115,7 +115,7 @@ unsigned int ZION_CALLBACK client_proc(void* arg)
 	while(!quit_flag) {
 		sprintf(buf, "%p ZION_CALLBACK %u", buf, i++);
 
-		ret = rqueue_write((RQUEUE_CLIENT*)arg, buf, strlen(buf)+1);
+		ret = rqueue_write((RQUEUE_CLIENT*)arg, buf, strlen(buf)+1, 0);
 		if(ret!=ERR_NOERROR) {
 			printf("Failed to rqueue_write(), return %d\n", ret);
 			continue;
