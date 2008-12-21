@@ -74,9 +74,11 @@ static unsigned int ZION_CALLBACK notify_proc(void* arg);
 static os_thread_t notify_tid;
 static volatile int notify_quit;
 
-int network_init(unsigned int downbuf_size)
+int network_init(unsigned int _downbuf_size)
 {
 	int ret;
+
+	downbuf_size = _downbuf_size;
 
 	downbuf_pool = mempool_create("NETWORK.DOWNBUF", sizeof(NETWORK_DOWNBUF)+downbuf_size-1, 0);
 	conn_pool = mempool_create("NETWORK.CONN", sizeof(NETWORK_CONNECTION), 0);
@@ -189,23 +191,23 @@ int network_tcp_unregister(const SOCK_ADDR* sa)
 	return ERR_NOERROR;
 }
 
-int network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr, NETWORK_HANDLE* handle)
+NETWORK_HANDLE network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr)
 {
 	NETWORK_CONNECTION* conn;
-	*handle = NULL;
 
 	if(event->recvbuf_pool==NULL && event->recvbuf_buf==NULL) {
-		return ERR_INVALID_PARAMETER;
+		return NULL;
 	}
 
 	conn = mempool_alloc(conn_pool);
-	if(conn==NULL) return ERR_NO_ENOUGH_MEMORY;
+	if(conn==NULL) return NULL;
 
 	fdwatch_set(&conn->fdwitem, sock, FDWATCH_READ|FDWATCH_WRITE, tcpcon_fdevent, conn);
 	conn->ref_count = 1;
 	conn->rdcount = 0;
 	conn->wrcount = 0;
 	conn->alive = 1;
+	rlist_clear(&conn->shutdown_item, conn);
 	conn->sock			= sock;
 	sock_peername(sock, &conn->peername);
 	conn->userptr		= userptr;
@@ -221,7 +223,7 @@ int network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr, NETWORK_H
 		conn->recvbuf_buf = (char*)mempool_alloc(event->recvbuf_pool);
 		if(conn->recvbuf_buf==NULL) {
 			mempool_free(conn_pool, conn);
-			return ERR_NO_ENOUGH_MEMORY;
+			return NULL;
 		}
 	}
 	conn->recvbuf_cur = 0;
@@ -234,11 +236,10 @@ int network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr, NETWORK_H
 	if(fdwatch_add(network_fdw, &conn->fdwitem)!=ERR_NOERROR) {
 		if(conn->recvbuf_pool) mempool_free(conn->recvbuf_pool, conn->recvbuf_buf);
 		mempool_free(conn_pool, conn);
-		return ERR_UNKNOWN;
+		return NULL;
 	}
-	*handle = conn;
 
-	return ERR_NOERROR;
+	return conn;
 }
 
 int network_del(NETWORK_HANDLE handle)

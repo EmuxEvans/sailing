@@ -69,7 +69,7 @@ void onaccept_proc(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 	event.recvbuf_buf = NULL;
 	event.recvbuf_max = recvbuf_size;
 
-	if(network_add(sock, &event, NULL, NULL)!=ERR_NOERROR) {
+	if(!network_add(sock, &event, NULL)) {
 		sock_disconnect(sock);
 		sock_close(sock);
 	}
@@ -84,9 +84,23 @@ void onconnect_proc(NETWORK_HANDLE handle, void* userptr)
 
 void ondata_proc(NETWORK_HANDLE handle, void* userptr)
 {
+	unsigned int count;
+	NETWORK_DOWNBUF* bufs[10];
+
 	char addr[50];
 	sock_addr2str(network_get_peername(handle), addr);
 	printf("%p ondata(%d).\n", handle, network_recvbuf_len(handle));
+
+	count = network_downbufs_alloc(bufs, sizeof(bufs)/sizeof(bufs[0]), network_recvbuf_len(handle));
+	if(count>0) {
+		const void* buf;
+		buf = network_recvbuf_ptr(handle, 0, network_recvbuf_len(handle));
+		if(buf) {
+			network_downbufs_fill(bufs, count, 0, buf, network_recvbuf_len(handle));
+			network_send(handle, bufs, count);
+		}
+	}
+
 	network_recvbuf_commit(handle, network_recvbuf_len(handle));
 }
 
@@ -104,7 +118,7 @@ void print_usage()
 void server_do()
 {
 	recvbuf_pool = mempool_create("RECVBUF", recvbuf_size, 0);
-	if(network_tcp_register(sock_str2addr("0.0.0.0:1980", &sa), onaccept_proc, NULL)!=ERR_NOERROR) {
+	if(network_tcp_register(&sa, onaccept_proc, NULL)!=ERR_NOERROR) {
 		printf("Failed to network_tcp_register.\n");
 		exit(0);
 	}
@@ -137,7 +151,7 @@ unsigned int ZION_CALLBACK client_thread_proc(void* arg)
 {
 	SOCK_HANDLE sock = SOCK_INVALID_HANDLE;
 	char str_out[100];
-	char str_in[104];
+	char str_in[100];
 	int k = 0, len;
 
 	while(!quit_flag) {
