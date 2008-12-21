@@ -11,6 +11,7 @@
 #include <skates/fdwatch.h>
 #include <skates/mempool.h>
 #include <skates/network.h>
+#include <skates/threadpool.h>
 
 static RQUEUE* queue;
 static RQUEUE_CLIENT* client;
@@ -40,6 +41,7 @@ int main(int argc, char* argv[])
 	sock_init();
 	fdwatch_init();
 	mempool_init();
+	threadpool_init(1);
 	network_init(20000);
 	rqueue_init();
 
@@ -77,6 +79,7 @@ int main(int argc, char* argv[])
 
 	rqueue_final();
 	network_final();
+	threadpool_final();
 	mempool_final();
 	fdwatch_final();
 	sock_final();

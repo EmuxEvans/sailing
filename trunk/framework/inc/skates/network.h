@@ -35,7 +35,7 @@ ZION_API int network_final();
 ZION_API int network_tcp_register(SOCK_ADDR* sa, NETWORK_ONACCEPT OnAccept, void* userptr);
 ZION_API int network_tcp_unregister(const SOCK_ADDR* sa);
 
-ZION_API int network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr, NETWORK_HANDLE* handle);
+ZION_API NETWORK_HANDLE network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr);
 ZION_API int network_del(NETWORK_HANDLE handle);
 
 ZION_API unsigned int network_downbuf_size();
