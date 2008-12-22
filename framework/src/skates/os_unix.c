@@ -20,7 +20,7 @@ int os_chdir(char* path)
 	return chdir(path);
 }
 
-os_dword atom_unix_add(os_dword volatile *mem, os_dword val)
+static os_dword atom_unix_add(os_dword volatile *mem, os_dword val)
 {
     asm volatile ("lock; xaddl %0,%1"
                   : "=r" (val), "=m" (*mem)
@@ -29,17 +29,9 @@ os_dword atom_unix_add(os_dword volatile *mem, os_dword val)
     return val;
 }
 
-os_dword atom_unix_sub(os_dword volatile *mem, os_dword val)
-{
-    asm volatile ("lock; subl %1, %0"
-                  : /* no output */
-                  : "m" (*(mem)), "r" (val)
-                  : "memory", "cc");
-}
-
 os_dword atom_unix_inc(os_dword volatile* mem)
 {
-    return apr_atomic_add32(mem, 1);
+    return atom_unix_add(mem, 1);
 }
 
 os_dword atom_unix_dec(os_dword volatile* mem)
@@ -54,9 +46,9 @@ os_dword atom_unix_dec(os_dword volatile* mem)
     return prev;
 }
 
-os_dword atom_unix_swap(os_dword volatile* mem, os_dword prev)
+os_dword atom_unix_swap(os_dword volatile* mem, os_dword val)
 {
-    apr_uint32_t prev = val;
+    os_dword prev = val;
 
     asm volatile ("xchgl %0, %1"
                   : "=r" (prev), "+m" (*mem)
@@ -64,32 +56,15 @@ os_dword atom_unix_swap(os_dword volatile* mem, os_dword prev)
     return prev;
 }
 
-os_dword atom_unix_cas(os_dword volatile* mem, os_dword val, os_dword cmp)
+os_dword atom_unix_cas(os_dword volatile* mem, os_dword with, os_dword cmp)
 {
-    apr_uint32_t prev;
+    os_dword prev;
 
     asm volatile ("lock; cmpxchgl %1, %2"
                   : "=a" (prev)
                   : "r" (with), "m" (*(mem)), "0"(cmp)
                   : "memory", "cc");
     return prev;
-}
-
-void* atom_unix_cas_ptr(void* volatile *p, void* v, void* c)
-{
-    void *prev;
-#if sizeof(prev) == 4
-    asm volatile ("lock; cmpxchgl %2, %1"
-                  : "=a" (prev), "=m" (*mem)
-                  : "r" (with), "m" (*mem), "0" (cmp));
-#elif sizeof(prev) == 8
-    asm volatile ("lock; cmpxchgq %q2, %1"
-                  : "=a" (prev), "=m" (*mem)
-                  : "r" ((unsigned long)with), "m" (*mem),
-                    "0" ((unsigned long)cmp));
-#else
-#error sizeof(void*) value not supported
-#endif
 }
 
 void atom_slist_init(ATOM_SLIST_HEADER* header)
