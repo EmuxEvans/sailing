@@ -1,6 +1,6 @@
 FDWATCH_USE=kqueue
 
-DBAPI_MYSQL=ENABLE
+DBAPI_MYSQL=DISABLE
 
 MAKE=gmake
 STA_LIB=ar rcs
@@ -12,7 +12,7 @@ YACC_FLAG=-d
 
 REL_CC_FLAG=-D__FREEBSD__ -DNDEBUG -Wall -Werror -O2
 DBG_CC_FLAG=-D__FREEBSD__ -D_DEBUG -Wall -Werror -g
-OBJ_CC_FLAG=-c -o
+OBJ_CC_FLAG=-c -fPIC -o
 EXE_CC_FLAG=-o
 DLL_CC_FLAG=-shared -o
 
@@ -21,7 +21,7 @@ DLL_PREFIX=.so
 DLL_LIB_PREFIX=.so
 STA_LIB_PREFIX=.a
 
-OS_LIB=-pthread -lc_r
+OS_LIB=-pthread -lm
 OS_INC_DIR=
 OS_LIB_DIR=
 
