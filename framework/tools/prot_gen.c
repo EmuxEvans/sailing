@@ -213,6 +213,8 @@ int generate_cfile(const char* name, char* src, unsigned int src_len)
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "// generate by PROT_GEN.\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "// %s\n", asctime(newTime));
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <stddef>\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/errcode.h>\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/os.h>\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/protocol_def.h>\n");
@@ -249,7 +251,7 @@ int generate_cfile(const char* name, char* src, unsigned int src_len)
 			} else {
 				sprintf(obj_type, "NULL");
 			}
-			snprintf(src+strlen(src), src_len-strlen(src), "	{\"%s\", %s, %s, %s, %s, PROTOCOL_STRUCT_OFFSET(%s, %s)},\n", data_variable[var].name, stype, obj_type, prelen, data_variable[var].maxlen[0]=='\0'?"0":data_variable[var].maxlen, data_type[type].name, data_variable[var].name);
+			snprintf(src+strlen(src), src_len-strlen(src), "	{\"%s\", %s, %s, %s, %s, (unsigned int)offsetof(%s, %s)},\n", data_variable[var].name, stype, obj_type, prelen, data_variable[var].maxlen[0]=='\0'?"0":data_variable[var].maxlen, data_type[type].name, data_variable[var].name);
 
 			count++;
 		}
