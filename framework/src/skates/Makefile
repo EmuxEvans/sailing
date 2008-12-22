@@ -52,7 +52,7 @@ clean:
 
 $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(MAIN_OBJS)
 	cp -f $(OUTPUT_DIR)/appbox$(DLL_PREFIX) .
-	$(CC) $(CC_FLAG) ./appbox$(DLL_PREFIX) $(MAIN_OBJS) $(EXE_CC_FLAG) appbox_main$(EXE_PREFIX)
+	$(CC) $(CC_FLAG) ./appbox$(DLL_PREFIX) $(MAIN_OBJS) $(OS_LIB) $(EXE_CC_FLAG) appbox_main$(EXE_PREFIX)
 	cp -f appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/
 	rm -f appbox$(DLL_PREFIX) appbox_main$(EXE_PREFIX)
 

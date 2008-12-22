@@ -95,6 +95,7 @@ ZION_INLINE const char* os_library_error();
 #define atom_dec(p)				atom_unix_dec((os_dword volatile*)p)
 #define atom_swap(p, v)			atom_unix_swap((os_dword volatile*)p, (os_dword)v)
 #define atom_cas(p, v, c)		atom_unix_cas((os_dword volatile*)p, (os_dword)v, (os_dword)c)
+#define atom_cas_ptr(p, v, c)		atom_unix_cas_ptr((volatile void**)p, (void*)v, (const void*)c)
 
 typedef struct ATOM_SLIST_ENTRY			{ struct ATOM_SLIST_ENTRY *Next; }		ATOM_SLIST_ENTRY;
 typedef struct ATOM_SLIST_HEADER		{ ATOM_SLIST_ENTRY* First; long Count;}	ATOM_SLIST_HEADER;
@@ -278,6 +279,7 @@ ZION_API os_dword atom_unix_inc(os_dword volatile *p);
 ZION_API os_dword atom_unix_dec(os_dword volatile *p);
 ZION_API os_dword atom_unix_swap(os_dword volatile *p, os_dword v);
 ZION_API os_dword atom_unix_cas(os_dword volatile *p, os_dword v, unsigned c);
+ZION_API void* atom_unix_cas_ptr(volatile void **mem, void *with, const void *cmp);
 
 #ifdef __cplusplus
 }
