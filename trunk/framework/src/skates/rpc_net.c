@@ -41,7 +41,10 @@ struct RPCNET_CONNECTION {
 	int st_flag;
 
 	RPCNET_GROUP*			group;
-	RPCNET_THREAD_CONTEXT*	ctx;
+	union {
+		RPCNET_THREAD_CONTEXT*	ctx;
+		void* ctx_void;
+	};
 };
 
 struct RPCNET_GROUP {
@@ -1020,7 +1023,7 @@ RPCNET_CONNECTION* group_get_outgoing(RPCNET_GROUP* group, RPCNET_THREAD_CONTEXT
 	RPCNET_CONNECTION* conn = NULL;
 	for(item=rlist_front(&group->out_conns_list); !rlist_is_head(&group->out_conns_list, item); item=rlist_next(item)) {
 		conn = (RPCNET_CONNECTION*)rlist_get_userdata(rlist_front(&group->out_conns_list));
-		if(atom_cas_ptr(&conn->ctx, ctx, NULL)==NULL) {
+		if(atom_cas_ptr(&conn->ctx_void, ctx, NULL)==NULL) {
 			break;
 		}
 	}
