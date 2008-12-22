@@ -213,7 +213,7 @@ int generate_cfile(const char* name, char* src, unsigned int src_len)
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "// generate by PROT_GEN.\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "// %s\n", asctime(newTime));
-	snprintf(src+strlen(src), src_len-strlen(src), "#include <stddef>\n");
+	snprintf(src+strlen(src), src_len-strlen(src), "#include <stddef.h>\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/errcode.h>\n");
 	snprintf(src+strlen(src), src_len-strlen(src), "#include <skates/os.h>\n");
