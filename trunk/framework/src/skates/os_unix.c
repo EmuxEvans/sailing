@@ -20,7 +20,7 @@ int os_chdir(char* path)
 	return chdir(path);
 }
 
-os_dword atom_unix_add(os_dword volatile *p, os_dword v)
+os_dword atom_unix_add(os_dword volatile *mem, os_dword val)
 {
     asm volatile ("lock; xaddl %0,%1"
                   : "=r" (val), "=m" (*mem)
@@ -29,7 +29,7 @@ os_dword atom_unix_add(os_dword volatile *p, os_dword v)
     return val;
 }
 
-os_dword atom_unix_sub(os_dword volatile *p, os_dword v)
+os_dword atom_unix_sub(os_dword volatile *mem, os_dword val)
 {
     asm volatile ("lock; subl %1, %0"
                   : /* no output */
