@@ -35,7 +35,7 @@ clean:
 	rm -rf *.o $(BINS) $(DEPS_SYNCRPC) $(DEPS_ASYNCRPC)
 
 test_network$(EXE_PREFIX): $(OBJS_NETWORK)
-	gcc $(INCLUDES) $(LIBS) $(OBJS_NETWORK) -o $@
+	gcc $(INCLUDES) $(LIBS) $(OBJS_NETWORK) $(OS_LIB) -o $@
 
 test_fdwatch$(EXE_PREFIX): $(OBJS_FDWATCH)
 	gcc $(INCLUDES) $(LIBS) $(OBJS_FDWATCH) -o $@
