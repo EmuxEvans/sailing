@@ -20,73 +20,76 @@ int os_chdir(char* path)
 	return chdir(path);
 }
 
+os_dword atom_unix_add(os_dword volatile *p, os_dword v)
+{
+    asm volatile ("lock; xaddl %0,%1"
+                  : "=r" (val), "=m" (*mem)
+                  : "0" (val), "m" (*mem)
+                  : "memory", "cc");
+    return val;
+}
+
+os_dword atom_unix_sub(os_dword volatile *p, os_dword v)
+{
+    asm volatile ("lock; subl %1, %0"
+                  : /* no output */
+                  : "m" (*(mem)), "r" (val)
+                  : "memory", "cc");
+}
+
 os_dword atom_unix_inc(os_dword volatile* mem)
 {
-	os_dword val;
-
-    asm volatile( "mov $1, %0\n\t"
-                  "lock; xadd %0,%1"
-                : "=r"(val), "=m"(*mem)
-                : "m"(*mem)
-                : "memory", "cc");
-
-	return val;
+    return apr_atomic_add32(mem, 1);
 }
 
 os_dword atom_unix_dec(os_dword volatile* mem)
 {
-	os_dword val;
+    unsigned char prev;
 
-    asm volatile( "xor  %0, %0\n\t"
-                  "dec %0\n\t"
-                  "lock; xadd %0, %1"
-                : "=r" (val), "=m" (*(mem))
-                : "m" (*(mem))
-                : "memory", "cc");
+    asm volatile ("lock; decl %0; setnz %1"
+                  : "=m" (*mem), "=qm" (prev)
+                  : "m" (*mem)
+                  : "memory");
 
-	return val;
+    return prev;
 }
 
 os_dword atom_unix_swap(os_dword volatile* mem, os_dword prev)
 {
-    asm volatile( "lock; xchg %0, %1"
-                : "=r" (prev)
-                : "m" (*(mem)), "0"(prev)
-                : "memory");
-	return prev;
+    apr_uint32_t prev = val;
+
+    asm volatile ("xchgl %0, %1"
+                  : "=r" (prev), "+m" (*mem)
+                  : "0" (prev));
+    return prev;
 }
 
 os_dword atom_unix_cas(os_dword volatile* mem, os_dword val, os_dword cmp)
 {
-	os_dword prev;
+    apr_uint32_t prev;
 
-    asm volatile( "lock; cmpxchg %1, %2"
-                : "=a" (prev)
-                : "r" (val), "m" (*(mem)), "0"(cmp)
-                : "memory", "cc");
-
-	return prev;
+    asm volatile ("lock; cmpxchgl %1, %2"
+                  : "=a" (prev)
+                  : "r" (with), "m" (*(mem)), "0"(cmp)
+                  : "memory", "cc");
+    return prev;
 }
 
 void* atom_unix_cas_ptr(void* volatile *p, void* v, void* c)
 {
-	void* prev;
-
-    asm volatile( "lock; cmpxchg %1, %2"
-                : "=a" (prev)
-                : "r" (v), "m" (*(p)), "0"(c)
-                : "memory", "cc");
-
-	return prev;
-}
-
-os_dword atom_unix_exchg_add(os_dword volatile* mem, os_dword val)
-{
-    asm volatile( "lock; xadd %0,%1"
-                : "=r"(val), "=m"(*mem)
-                : "0"(val), "m"(*mem)
-                : "memory", "cc");
-	return val;
+    void *prev;
+#if sizeof(prev) == 4
+    asm volatile ("lock; cmpxchgl %2, %1"
+                  : "=a" (prev), "=m" (*mem)
+                  : "r" (with), "m" (*mem), "0" (cmp));
+#elif sizeof(prev) == 8
+    asm volatile ("lock; cmpxchgq %q2, %1"
+                  : "=a" (prev), "=m" (*mem)
+                  : "r" ((unsigned long)with), "m" (*mem),
+                    "0" ((unsigned long)cmp));
+#else
+#error sizeof(void*) value not supported
+#endif
 }
 
 void atom_slist_init(ATOM_SLIST_HEADER* header)
