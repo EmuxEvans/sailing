@@ -67,6 +67,24 @@ os_dword atom_unix_cas(os_dword volatile* mem, os_dword with, os_dword cmp)
     return prev;
 }
 
+
+void* atom_unix_cas_ptr(volatile void **mem, void *with, const void *cmp)
+{
+    void *prev;
+#ifndef __x86_64__
+    asm volatile ("lock; cmpxchgl %2, %1"
+                  : "=a" (prev), "=m" (*mem)
+                  : "r" (with), "m" (*mem), "0" (cmp));
+#else
+    asm volatile ("lock; cmpxchgq %q2, %1"
+                  : "=a" (prev), "=m" (*mem)
+                  : "r" ((unsigned long)with), "m" (*mem),
+                    "0" ((unsigned long)cmp));
+#endif
+    return prev;
+}
+
+
 void atom_slist_init(ATOM_SLIST_HEADER* header)
 {
 	header->First = NULL;
