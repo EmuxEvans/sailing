@@ -8,7 +8,7 @@ extern "C" {
 #define PROTOCOL_NAME(name) __protocol_0_0_1_##name
 #define PROTOCOL_ARRAY_SIZE(name)	__array_size_##name
 
-#define PROTOCOL_STRUCT_OFFSET(type, var)			((unsigned int)&(((type*)NULL)->var))
+#define PROTOCOL_STRUCT_OFFSET(type, var)			(unsigned int)(((os_qword)&(((type*)NULL)->var)))
 
 #define PROTOCOL_TYPE_FAKEVAR		0x1000
 #define PROTOCOL_TYPE_ARRAY			0x0100
