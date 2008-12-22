@@ -95,6 +95,7 @@ ZION_INLINE const char* os_library_error();
 #define atom_dec(p)						(os_dword)InterlockedDecrement((LONG*)p)
 #define atom_swap(p, v)					(os_dword)InterlockedExchange((LONG*), (LONG*)v)
 #define atom_cas(p, v, c)				(os_dword)InterlockedCompareExchange((LONG*)p, (LONG)v, (LONG)c)
+#define atom_cas_ptr(p, v, c)			InterlockedCompareExchangePointer(p, v, c)
 
 #define ATOM_SLIST_ENTRY				SLIST_ENTRY
 #define ATOM_SLIST_HEADER				SLIST_HEADER
