@@ -74,27 +74,29 @@ int fdwatch_add(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 {
 	struct kevent kqevt[2];
 	int ret;
+	struct timespec ts;
 
-	memset(&kqevt,0,sizeof(struct kevent));
 	if(item->flags&FDWATCH_READ) {
-		kqevt[0].ident	= item->fd;
-		kqevt[0].filter	= EVFILT_READ;
-		if(item->flags&FDWATCH_ONCE)	kqevt[0].flags  = EV_ADD|EV_ENABLE|EV_ONESHOT;
-		else							kqevt[0].flags  = EV_ADD|EV_ENABLE;
-		kqevt[0].udata = item;
+		if(item->flags&FDWATCH_ONCE) {
+			EV_SET(&kqevt[0], item->fd, EVFILT_READ, EV_ADD|EV_CLEAR|EV_ONESHOT, 0, 0, item);
+		} else {
+			EV_SET(&kqevt[0], item->fd, EVFILT_READ, EV_ADD|EV_CLEAR, 0, 0, item);
+		}
 	}	
 	if(item->flags&FDWATCH_WRITE) {
-		kqevt[1].ident	= item->fd;
-		kqevt[1].filter	= EVFILT_WRITE;
-		if(item->flags&FDWATCH_ONCE)	kqevt[1].flags  = EV_ADD|EV_ENABLE|EV_ONESHOT;
-		else							kqevt[1].flags  = EV_ADD|EV_ENABLE;
-		kqevt[1].udata = item;
+		if(item->flags&FDWATCH_ONCE) {
+			EV_SET(&kqevt[1], item->fd, EVFILT_WRITE, EV_ADD|EV_CLEAR|EV_ONESHOT, 0, 0, item);
+		} else {
+			EV_SET(&kqevt[1], item->fd, EVFILT_WRITE, EV_ADD|EV_CLEAR, 0, 0, item);
+		}
 	}	
 
+	ts.tv_sec = 0;
+	ts.tv_nsec = 0;
 	switch(item->flags&(FDWATCH_READ|FDWATCH_WRITE)) {
-	case FDWATCH_READ:					ret = kevent(handle->kq, &kqevt[0], 1, NULL, 0, NULL); break;
-	case FDWATCH_WRITE:					ret = kevent(handle->kq, &kqevt[1], 1, NULL, 0, NULL); break;
-	case FDWATCH_READ|FDWATCH_WRITE:	ret = kevent(handle->kq, &kqevt[0], 2, NULL, 0, NULL); break;
+	case FDWATCH_READ:					ret = kevent(handle->kq, &kqevt[0], 1, NULL, 0, &ts); break;
+	case FDWATCH_WRITE:					ret = kevent(handle->kq, &kqevt[1], 1, NULL, 0, &ts); break;
+	case FDWATCH_READ|FDWATCH_WRITE:	ret = kevent(handle->kq, &kqevt[0], 2, NULL, 0, &ts); break;
 	default: return ERR_INVALID_PARAMETER;
 	}
 	if(ret==-1) {
@@ -109,21 +111,17 @@ int fdwatch_remove(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 {
 	struct kevent kqevt[2];
 	int ret;
+	struct timespec ts;
 
-	memset(&kqevt,0,sizeof(struct kevent));
 	if(item->flags&FDWATCH_READ) {
-		kqevt[0].ident	= item->fd;
-		kqevt[0].filter	= EVFILT_READ;
-		kqevt[0].flags  = EV_DELETE;
-		kqevt[0].udata	= item;
+		EV_SET(&kqevt[0], item->fd, EVFILT_READ, EV_DELETE, 0, 0, item);
 	}
 	if(item->flags&FDWATCH_WRITE) {
-		kqevt[1].ident	= item->fd;
-		kqevt[1].filter	= EVFILT_WRITE;
-		kqevt[1].flags  = EV_DELETE;
-		kqevt[1].udata	= item;
+		EV_SET(&kqevt[1], item->fd, EVFILT_WRITE, EV_DELETE, 0, 0, item);
 	}
 
+	ts.tv_sec = 0;
+	ts.tv_nsec = 0;
 	switch(item->flags&(FDWATCH_READ|FDWATCH_WRITE)) {
 	case FDWATCH_READ:					ret = kevent(handle->kq, &kqevt[0], 1, NULL, 0, NULL); break;
 	case FDWATCH_WRITE:					ret = kevent(handle->kq, &kqevt[1], 1, NULL, 0, NULL); break;
@@ -191,8 +189,8 @@ int fdwatch_dispatch(FDWATCH_HANDLE handle, int timeout)
 			ret = kevent(handle->kq, NULL, 0, kqevts, sizeof(kqevts)/sizeof(kqevts[0]), NULL);
 		} else {
 			struct timespec tv;
-			tv.tv_sec = timeout /1000;
-			tv.tv_nsec = (timeout%1000) * 1000;
+			tv.tv_sec = timeout / 1000;
+			tv.tv_nsec = (timeout % 1000) * 1000;
 			ret = kevent(handle->kq, NULL, 0, kqevts, sizeof(kqevts)/sizeof(kqevts[0]), &tv);
 		}
 		if(ret>=0) break;
