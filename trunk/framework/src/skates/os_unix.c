@@ -31,7 +31,7 @@ static os_dword atom_unix_add(os_dword volatile *mem, os_dword val)
 
 os_dword atom_unix_inc(os_dword volatile* mem)
 {
-    return atom_unix_add(mem, 1);
+    return atom_unix_add(mem, 1) + 1;
 }
 
 os_dword atom_unix_dec(os_dword volatile* mem)
