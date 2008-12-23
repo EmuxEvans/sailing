@@ -387,6 +387,14 @@ int network_send(NETWORK_HANDLE handle, NETWORK_DOWNBUF* downbufs[], unsigned in
 	}
 	os_mutex_unlock(&downbuf_mutex);
 
+	if(atom_inc(&handle->wrcount)==1) {
+		do {
+			if(handle->alive) {
+				opt_write(handle);
+			}
+		} while(atom_dec(&handle->wrcount)>0);
+	}
+
 	return ERR_NOERROR;
 }
 
