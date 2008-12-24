@@ -459,6 +459,10 @@ void read_event(void* data)
 	NETWORK_CONNECTION* conn = (NETWORK_CONNECTION*)data;
 
 	if(atom_inc(&conn->rdcount)==1) {
+		if(conn->OnConnect) {
+			conn->OnConnect(conn, conn->userptr);
+			conn->OnConnect = NULL;
+		}
 		do {
 			if(conn->alive) {
 				if(!opt_read(conn)) {
