@@ -14,7 +14,7 @@
 #include "../../inc/skates/threadpool.h"
 #include "../../inc/skates/applog.h"
 
-#define RPCNET_SUBSYS_NONE					255
+#define RPCNET_SUBSYS_NONE		255
 
 #define RPCCONN_TYPE_INCOMING	1
 #define RPCCONN_TYPE_OUTGOING	2
@@ -26,9 +26,9 @@
 #define RPCCONN_STATE_CLOSED	3
 
 typedef struct RPCNET_STREAM {
-	STREAM_INTERFACE* i;
-	RPCNET_THREAD_CONTEXT* ctx;
-	unsigned int cur;
+	STREAM_INTERFACE*		i;
+	RPCNET_THREAD_CONTEXT* 	ctx;
+	unsigned int			cur;
 } RPCNET_STREAM;
 
 struct RPCNET_CONNECTION {
@@ -141,7 +141,7 @@ struct EP2IDX_ITEM {
 	EP2IDX_ITEM*		next;
 	SOCK_ADDR			ep;
 };
-static os_mutex_t	ep2idx_mutex;
+static os_mutex_t		ep2idx_mutex;
 static int				ep2idx_count;
 static EP2IDX_ITEM		ep2idx_array[RPCNEWTORK_EPINDEX_MAXVALUE];
 static EP2IDX_ITEM*		ep2idx_map[65536];
