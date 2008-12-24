@@ -47,7 +47,6 @@ int cubeserver_final()
 
 void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 {
-	int ret;
 	NETWORK_HANDLE handle;
 	CCubeUser* user;
 	NETWORK_EVENT event;
@@ -65,8 +64,8 @@ void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 	event.recvbuf_max = sizeof(user->m_szRecvBuf);
 	event.recvbuf_pool = NULL;
 
-	ret = network_add(sock, &event, user, &handle);
-	if(ret!=ERR_NOERROR) {
+	handle = network_add(sock, &event, user);
+	if(!handle) {
 		delete user;
 		sock_disconnect(sock);
 		return;
