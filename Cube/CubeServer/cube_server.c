@@ -93,7 +93,7 @@ static void ondisconnect(NETWORK_HANDLE handle, void* userptr)
 
 static void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 {
-	int idx, ret;
+	int idx;
 	CUBE_CONNECTION* conn;
 	NETWORK_EVENT event;
 
@@ -125,8 +125,8 @@ static void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 	conn->index = idx;
 	conn_list[idx] = conn;
 
-	ret = network_add(sock, &event, conn, &conn->handle);
-	if(ret!=ERR_NOERROR) {
+	conn->handle = network_add(sock, &event, conn);
+	if(!conn->handle) {
 		mempool_free(conn_pool, conn);
 		sock_close(sock);
 		os_mutex_unlock(&room_mtx);
