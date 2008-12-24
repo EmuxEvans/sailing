@@ -6,9 +6,12 @@ SRCS=cube_server.c cube_pdl_impl.c cube_pdl.CubeServer.c
 OBJS=$(subst .c,.o,$(SRCS))
 MODULE_NAME=cube
 
-.c.o  :;$(CC)  $(CC_FLAG) $(INCS) -DMODULE_NAME=\"$(MODULE_NAME)\" -DMODULE_$(MODULE_NAME) -c -r $< -o $@
+.c.o  :;$(CC)  $(CC_FLAG) $(INCS) -DMODULE_NAME=\"$(MODULE_NAME)\" -DMODULE_$(MODULE_NAME) -r $< $(OBJ_CC_FLAG) $@
 
 all: CubeServer/cube_pdl.CubeServer.c $(OUTPUT_DIR)/modules/cube$(DLL_PREFIX)
+
+clean:
+	rm -f CubeServer/*.o
 
 CubeServer/cube_pdl.CubeServer.c: cube_pdl.pdl
 	rm -f CubeServer/cube_pdl.CubeServer.c
