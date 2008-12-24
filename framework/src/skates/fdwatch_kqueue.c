@@ -164,7 +164,7 @@ int fdwatch_rearm(FDWATCH_HANDLE handle, FDWATCH_ITEM* item)
 	default: return ERR_INVALID_PARAMETER;
 	}
 	if(ret==-1) {
-		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_rearm(kqueue) : kevent() fail, errno()=%s", errno);
+		SYSLOG(LOG_ERROR, MODULE_NAME, "fdwatch_rearm(kqueue) : kevent() fail, errno()=%d", errno);
 		return ERR_UNKNOWN;
 	}
 

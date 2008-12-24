@@ -316,9 +316,12 @@ int rpcnet_unbind()
 {
 	local_group = NULL;
 	// del listener_fd from epoll_fd
-	atom_cas((unsigned int*)&listener.st_flag, RPCCONN_STATE_SHUTDOWN, RPCCONN_STATE_AVAILABLE);
+	listener.st_flag = RPCCONN_STATE_SHUTDOWN;
 	// wait listener
-	while(listener.st_flag!=RPCCONN_STATE_CLOSED);
+	while(listener.st_flag!=RPCCONN_STATE_CLOSED) {
+		os_sleep(10);
+	}
+	SYSLOG(LOG_INFO, MODULE_NAME, "rpcnet_unbind");
 	sock_unbind(listener.fd);
 	listener.fd = SOCK_INVALID_HANDLE;
 	return ERR_NOERROR;
@@ -344,11 +347,12 @@ unsigned int ZION_CALLBACK ionthread_proc(void* param)
 	int ret;
 
 	while(0==rpcnet_quitflag) {
-		if(RPCCONN_STATE_SHUTDOWN==atom_cas((unsigned int*)&listener.st_flag, RPCCONN_STATE_CLOSED, RPCCONN_STATE_SHUTDOWN)) {
+		if(listener.st_flag==RPCCONN_STATE_SHUTDOWN) {
 			ret = fdwatch_remove(epoll_fd, &listener.item_fdw);
 			if(ret!=ERR_NOERROR) {
 				SYSLOG(LOG_ERROR, MODULE_NAME, "ionthread_proc(): epoll_ctl(listener.item_fdw) failed at %d.\n", ret);
 			}
+			listener.st_flag = RPCCONN_STATE_CLOSED;
 		}
 
 		ret = fdwatch_dispatch(epoll_fd, 10);
