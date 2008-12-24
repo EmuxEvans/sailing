@@ -11,7 +11,7 @@ MODULE_NAME=cube
 all: CubeServer/cube_pdl.CubeServer.c $(OUTPUT_DIR)/modules/cube$(DLL_PREFIX)
 
 clean:
-	rm -f CubeServer/*.o
+	rm -f CubeServer/*.o CubeServer/*.CubeServer.*
 
 CubeServer/cube_pdl.CubeServer.c: cube_pdl.pdl
 	rm -f CubeServer/cube_pdl.CubeServer.c

@@ -1,13 +1,13 @@
 cd ../framework
 
-cd src/skates
-make clean all
-make NODEBUG=1 clean all
-cd ../..
 cd tools
-make clean all
-make NODEBUG=1 clean all
+gmake clean all
+gmake NODEBUG=1 clean all
 cd ..
+cd src/skates
+gmake clean all
+gmake NODEBUG=1 clean all
+cd ../..
 
 cd ../Cube
 mkdir debug
