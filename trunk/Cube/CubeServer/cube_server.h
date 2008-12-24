@@ -20,6 +20,7 @@ struct CUBE_CONNECTION {
 	int uuid;
 	char nick[CUBE_NICK_LEN+1];
 
+	int sex;
 	char ri[CUBE_ROLEINFO_LEN+1];
 	char wh[CUBE_WAREHOUSE_LEN+1];
 	char equ[CUBE_EQUIPMENT_LEN+1];

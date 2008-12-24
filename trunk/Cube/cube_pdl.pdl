@@ -23,6 +23,7 @@ CMD_CLT login_callback(
 );
 CMD_SVR create_player(
     string["$$<=CUBE_NICK_LEN+1"] nick[],
+    int sex,
     string["$$<=CUBE_ROLEINFO_LEN+1"] role[]
 );
 CMD_CLT create_player_callback(
@@ -73,6 +74,7 @@ CMD_SVR roleinfo_set(
 CMD_SVR roleinfo_get(
 );
 CMD_CLT roleinfo_callback(
+	int sex,
     string value[]
 );
 
@@ -105,6 +107,7 @@ CMD_CLT info_callback(
 CMD_CLT notify_join(
 	int peerid,
 	string nick[],
+	int sex,
 	string ri[],
 	string equ[]
 );
@@ -112,6 +115,7 @@ CMD_CLT notify_join(
 CMD_CLT notify_infochange(
 	int peerid,
 	string nick[],
+	int sex,
 	string ri[],
 	string equ[]
 );

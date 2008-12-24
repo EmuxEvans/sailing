@@ -19,13 +19,13 @@ int main(int argc, char* argv[])
 	c.Connect("127.0.0.1:2008");
 	d.Connect("127.0.0.1:2008");
 	login_login(a.GetUserCtx(), "a a");
-	login_create_player(a.GetUserCtx(), "a", "");
+	login_create_player(a.GetUserCtx(), "a", 1, "");
 	login_login(b.GetUserCtx(), "b b");
-	login_create_player(b.GetUserCtx(), "b", "");
+	login_create_player(b.GetUserCtx(), "b", 1, "");
 	login_login(c.GetUserCtx(), "c c");
-	login_create_player(c.GetUserCtx(), "c", "");
+	login_create_player(c.GetUserCtx(), "c", 1, "");
 	login_login(d.GetUserCtx(), "d d");
-	login_create_player(d.GetUserCtx(), "d", "");
+	login_create_player(d.GetUserCtx(), "d", 1, "");
 
 	lobby_room_join_owner(a.GetUserCtx(), "a");
 	a.Dispatch();
