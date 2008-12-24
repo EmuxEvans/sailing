@@ -67,7 +67,7 @@ void login_login(SVR_USER_CTX* user_ctx, const char* token)
 	}
 }
 
-void login_create_player(SVR_USER_CTX* user_ctx, const char* nick, const char* role)
+void login_create_player(SVR_USER_CTX* user_ctx, const char* nick, int sex, const char* role)
 {
 	int ret;
 	DBAPI_HANDLE handle;
@@ -262,7 +262,7 @@ void lobby_roleinfo_set(SVR_USER_CTX* user_ctx, const char* value)
 
 void lobby_roleinfo_get(SVR_USER_CTX* user_ctx)
 {
-	lobby_roleinfo_callback(user_ctx, user_ctx->conn->ri);
+	lobby_roleinfo_callback(user_ctx, user_ctx->conn->sex, user_ctx->conn->ri);
 }
 
 void lobby_warehouse_set(SVR_USER_CTX* user_ctx, const char* value)
@@ -320,7 +320,7 @@ void lobby_equipment_set(SVR_USER_CTX* user_ctx, const char* value)
 			SVR_USER_CTX ctx;
 			if(!user_ctx->conn->room->members[idx].conn) continue;
 			ctx.conn = user_ctx->conn->room->members[idx].conn;
-			room_notify_infochange(&ctx, user_ctx->conn->uuid, user_ctx->conn->nick, user_ctx->conn->ri, user_ctx->conn->equ);
+			room_notify_infochange(&ctx, user_ctx->conn->uuid, user_ctx->conn->nick, user_ctx->conn->sex, user_ctx->conn->ri, user_ctx->conn->equ);
 		}
 	}
 
@@ -337,7 +337,7 @@ void room_kick(SVR_USER_CTX* user_ctx, const char* nick)
 	if(user_ctx->conn->room==NULL) return;
 	index = cube_room_member_index(user_ctx->conn->room, nick);
 	if(index<0) return;
-	cube_room_leave(user_ctx->conn->room, user_ctx->conn, 1979);
+	cube_room_leave(user_ctx->conn->room, user_ctx->conn->room->members[index].conn, 1979);
 }
 
 void room_leave(SVR_USER_CTX* user_ctx)
