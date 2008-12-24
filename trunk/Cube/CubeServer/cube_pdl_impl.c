@@ -30,7 +30,7 @@ void login_login(SVR_USER_CTX* user_ctx, const char* token)
 		return;
 	}
 
-	sprintf(sql, "select uuid, nick, ri, wh, equ from account where username='%s' and password='%s'", username, password);
+	sprintf(sql, "select uuid, nick, sex, ri, wh, equ from account where username='%s' and password='%s'", username, password);
 	ret = dbapi_query(handle, sql, &rs, 1);
 	if(ret!=ERR_NOERROR) {
 		login_login_callback(user_ctx, ERR_UNKNOWN, "");
@@ -39,9 +39,10 @@ void login_login(SVR_USER_CTX* user_ctx, const char* token)
 	}
 	user_ctx->conn->uuid = atoi(dbapi_recordset_get(rs, 0, 0));
 	strcpy(user_ctx->conn->nick, dbapi_recordset_get(rs, 0, 1));
-	strcpy(user_ctx->conn->ri, dbapi_recordset_get(rs, 0, 2));
-	strcpy(user_ctx->conn->wh, dbapi_recordset_get(rs, 0, 3));
-	strcpy(user_ctx->conn->equ, dbapi_recordset_get(rs, 0, 4));
+	user_ctx->conn->sex = atoi(dbapi_recordset_get(rs, 0, 2));
+	strcpy(user_ctx->conn->ri, dbapi_recordset_get(rs, 0, 3));
+	strcpy(user_ctx->conn->wh, dbapi_recordset_get(rs, 0, 4));
+	strcpy(user_ctx->conn->equ, dbapi_recordset_get(rs, 0, 5));
 	dbapi_recordset_free(rs);
 
 	dbapi_release(handle);
@@ -87,7 +88,7 @@ void login_create_player(SVR_USER_CTX* user_ctx, const char* nick, int sex, cons
 		return;
 	}
 
-	sprintf(sql, "update account set nick='%s', ri='%s' where uuid=%d", nick, role, user_ctx->conn->uuid);
+	sprintf(sql, "update account set nick='%s', sex=%d, ri='%s' where uuid=%d", nick, sex, role, user_ctx->conn->uuid);
 	ret = dbapi_execute(handle, sql);
 	if(ret!=ERR_NOERROR) {
 		login_create_player_callback(user_ctx, ERR_UNKNOWN);
@@ -98,6 +99,7 @@ void login_create_player(SVR_USER_CTX* user_ctx, const char* nick, int sex, cons
 	dbapi_release(handle);
 
 	strcpy(user_ctx->conn->nick, nick);
+	user_ctx->conn->sex = sex;
 	strcpy(user_ctx->conn->ri, role);
 	login_create_player_callback(user_ctx, ERR_NOERROR);
 }
