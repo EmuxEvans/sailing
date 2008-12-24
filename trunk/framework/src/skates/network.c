@@ -25,7 +25,8 @@ typedef struct TCP_ENDPOINT {
 typedef struct NETWORK_CONNECTION {
 	FDWATCH_ITEM			fdwitem;
 	int						ref_count;
-	int						rdcount, wrcount, alive;
+	int						rdcount, wrcount;
+	int						is_connect, alive;
 	RLIST_ITEM				shutdown_item;
 
 	SOCK_HANDLE				sock;
@@ -206,6 +207,7 @@ NETWORK_HANDLE network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr
 	conn->ref_count = 1;
 	conn->rdcount = 0;
 	conn->wrcount = 0;
+	conn->is_connect = 0;
 	conn->alive = 1;
 	rlist_clear(&conn->shutdown_item, conn);
 	conn->sock			= sock;
@@ -440,7 +442,8 @@ void tcpcon_fdevent(FDWATCH_ITEM* item, int events)
 		atom_inc(&conn->ref_count);
 		threadpool_queueitem(write_event, conn);
 	}
-	if(events&FDWATCH_READ) {
+	if((events&FDWATCH_READ) || !conn->is_connect) {
+		conn->is_connect = 1;
 		atom_inc(&conn->ref_count);
 		threadpool_queueitem(read_event, conn);
 	}

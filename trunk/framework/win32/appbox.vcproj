@@ -648,6 +648,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\inc\skates\protocol_def.h"
+				>
+			</File>
+			<File
 				RelativePath="..\inc\skates\protocol_lua.h"
 				>
 			</File>
