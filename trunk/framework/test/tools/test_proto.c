@@ -52,7 +52,8 @@ int main(int argc, char* argv[])
 	memset(buf, 0xff, sizeof(buf));
 	protocol_text_write(&PROTOCOL_NAME(B), &vv, buf, &len);
 	memset(&vv, 0xff, sizeof(vv));
-	protocol_text_read(&PROTOCOL_NAME(B), buf, &vv);
+	len = (unsigned int)strlen(buf);
+	protocol_text_read(&PROTOCOL_NAME(B), buf, &len, &vv);
 
 	protocol_parse(buf, &callback, NULL);
 	return 0;

@@ -63,7 +63,6 @@ static void tcpcon_fdevent(FDWATCH_ITEM* item, int events);
 
 static void accept_event(void* data);
 static void read_event(void* data);
-static void write_event(void* data);
 static void close_event(void* data);
 
 static void opt_accept(TCP_ENDPOINT* ep);
@@ -439,8 +438,13 @@ void tcpcon_fdevent(FDWATCH_ITEM* item, int events)
 	NETWORK_CONNECTION* conn;
 	conn = (NETWORK_CONNECTION*)item;
 	if(events&FDWATCH_WRITE) {
-		atom_inc(&conn->ref_count);
-		threadpool_queueitem(write_event, conn);
+		if(atom_inc(&conn->wrcount)==1) {
+			do {
+				if(conn->alive) {
+					opt_write(conn);
+				}
+			} while(atom_dec(&conn->wrcount)>0);
+		}
 	}
 	if((events&FDWATCH_READ) || !conn->is_connect) {
 		conn->is_connect = 1;
@@ -485,22 +489,22 @@ void read_event(void* data)
 		opt_close(conn);
 }
 
-void write_event(void* data)
-{
-	NETWORK_CONNECTION* conn = (NETWORK_CONNECTION*)data;
-
-	if(atom_inc(&conn->wrcount)==1) {
-		do {
-			if(conn->alive) {
-				opt_write(conn);
-			}
-		} while(atom_dec(&conn->wrcount)>0);
-	}
-
-	if(atom_dec(&conn->ref_count)==0)
-		opt_close(conn);
-}
-
+//void write_event(void* data)
+//{
+//	NETWORK_CONNECTION* conn = (NETWORK_CONNECTION*)data;
+//
+//	if(atom_inc(&conn->wrcount)==1) {
+//		do {
+//			if(conn->alive) {
+//				opt_write(conn);
+//			}
+//		} while(atom_dec(&conn->wrcount)>0);
+//	}
+//
+//	if(atom_dec(&conn->ref_count)==0)
+//		opt_close(conn);
+//}
+//
 void close_event(void* data)
 {
 	NETWORK_CONNECTION* conn = (NETWORK_CONNECTION*)data;
