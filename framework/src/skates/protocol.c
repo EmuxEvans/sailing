@@ -418,7 +418,7 @@ int protocol_binary_write(PROTOCOL_TYPE* type, const void* buf, void* data, unsi
 	if(ret>=(int)(*data_len-write_len)) return ERR_INVALID_DATA;	\
 	write_len += (unsigned int)ret;
 
-int protocol_text_read(PROTOCOL_TYPE* type, const char* data, void* buf)
+int protocol_text_read(PROTOCOL_TYPE* type, const char* data, unsigned int* data_len, void* buf)
 {
 	PROTO_PARSE parse;
 	char callback_type[100];
@@ -546,12 +546,14 @@ int protocol_file_read(PROTOCOL_TYPE* type, const char* filename, void* buf)
 {
 	int ret;
 	char data[50*1024];
+	unsigned int len;
 
 	ret = load_textfile(filename, data, sizeof(data));
 	if(ret<0)
 		return ret;
 
-	return protocol_text_read(type, data, buf);
+	len = (unsigned int)strlen(data);
+	return protocol_text_read(type, data, &len, buf);
 }
 
 int protocol_file_write(PROTOCOL_TYPE* type, const void* buf, const char* filename)
