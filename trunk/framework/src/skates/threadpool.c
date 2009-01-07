@@ -38,7 +38,6 @@ static os_sem_t					msgq_sem;
 static MSG_DATA					msgq[THREADPOOL_QUEUE_MAX];
 static unsigned int				msgq_cur, msgq_count;
 static unsigned int				thread_count;
-static unsigned int				thread_busy = 0;
 static os_thread_key_t			thread_key;
 static THREAD_CTX				threads[THREADPOOL_MAX_WORKERTHREAD];
 static os_mutex_t				threads_mtx;
@@ -61,6 +60,8 @@ int threadpool_init(unsigned int thread_num)
 		threads[i].index = i;
 		threads[i].proc = NULL;
 		threads[i].arg = NULL;
+		threads[i].info.times = 0;
+		threads[i].info.event_proc = NULL;
 
 		if(os_thread_begin(&threads[i].tid, workthread_proc, &threads[i])!=0) {
 			for(i=0; i<thread_count; i++) {
@@ -169,9 +170,10 @@ unsigned int ZION_CALLBACK workthread_proc(void* arg)
 			os_mutex_unlock(&msgq_mtx);
 
 			if(msg.proc==NULL) break;
-			atom_inc(&thread_busy);
+			tc->info.times++;
+			tc->info.event_proc = msg.proc;
 			msg.proc(msg.arg);
-			atom_dec(&thread_busy);
+			tc->info.event_proc = NULL;
 		}
 	} else {
 		assert(threads[tc->index].refcount==1);
@@ -218,6 +220,8 @@ int threadpool_begin(os_thread_t* handle, unsigned int (ZION_CALLBACK *proc)(voi
 	threads[index].refcount = 1;
 	threads[index].proc = proc;
 	threads[index].arg = arg;
+	threads[index].info.times = 0;
+	threads[index].info.event_proc = NULL;
 	os_mutex_unlock(&threads_mtx);
 
 	ret = os_thread_begin(&threads[index].tid, workthread_proc, &threads[index]);
@@ -296,9 +300,7 @@ int threadpool_getinfo(int index, THREADPOOL_INFO* info)
 	return ERR_NOERROR;
 }
 
-void threadpool_getstatus(THREADPOOL_STATUS* status)
+unsigned int threadpool_queuesize()
 {
-	status->queue_size = msgq_count;
-	status->count = thread_count;
-	status->busy = thread_busy;
+	return msgq_count;
 }
