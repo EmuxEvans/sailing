@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../inc/skates/skates.h"
-#include "../inc/skates/appbox_svc.h"
-#include "../inc/skates/appbox_args.h"
+#include <skates/skates.h>
+#include <skates/appbox_svc.h>
+#include <skates/appbox_args.h>
 
 static char mapfile[100] = "";
 static char histroyfile[100] = "";

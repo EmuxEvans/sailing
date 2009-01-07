@@ -48,13 +48,15 @@ CSMNG_OBJS=csmng.o
 all: $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/csmng$(EXE_PREFIX)
 
 clean:
-	rm -rf $(OBJS) $(MAIN_OBJS) $(SQLITE_FULL_OBJ) $(SQLITE_FULL_LIB) $(LUA_FULL_OBJ) $(LUA_FULL_LIB) *.S
+	rm -rf *.o lua/*.o sqlite/*.o
+	rm -rf *.S lua/*.S sqlite/*.S
+	rm -rf $(SQLITE_FULL_LIB) $(LUA_FULL_OBJ) $(LUA_FULL_LIB)
 	rm -rf $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/csmng$(EXE_PREFIX)
 	rm -rf $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX)
 	rm -rf $(LUA_RPC_FILE)
 
 $(OUTPUT_DIR)/csmng$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(CSMNG_OBJS)
-	$(CC) $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(CSMNG_OBJS) $(OS_LIB) $(EXE_CC_FLAG) csmng$(EXE_PREFIX)
+	$(CC) $(CC_FLAG) $(CSMNG_OBJS) $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(OS_LIB) $(EXE_CC_FLAG) $@
 
 $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(MAIN_OBJS)
 	cp -f $(OUTPUT_DIR)/appbox$(DLL_PREFIX) .
