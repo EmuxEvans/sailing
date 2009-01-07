@@ -33,7 +33,7 @@ int syslog_close()
 	return log_close(syslog_handle);
 }
 
-void syslog(int level, const char* src, const char* fmt, ...)
+void syslog_write(int level, const char* src, const char* fmt, ...)
 {
 	time_t timet;
 	struct tm time_tm;
@@ -85,7 +85,7 @@ int dbglog_close()
 	return log_close(dbglog_handle);
 }
 
-void dbglog(int level, const char* src, const char* fmt, ...)
+void dbglog_write(int level, const char* src, const char* fmt, ...)
 {
 	time_t timet;
 	struct tm time_tm;

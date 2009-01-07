@@ -133,6 +133,7 @@ void init_daemon(const char* _pid)
 
 void signal_proc(int signal)
 {
+	SYSLOG(LOG_INFO, MODULE_NAME, "signal %d");
 }
 
 void wait_signal()
