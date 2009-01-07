@@ -43,11 +43,11 @@ void ZION_API mempool_final();
 #endif
 
 typedef struct MEMPOOL_INFO {
-	char	name[100];
-	int		count, free;
+	const char* name;
+	int		size, count, free;
 } MEMPOOL_INFO;
 
-ZION_API int mempool_get_info(MEMPOOL_INFO* info, int count);
+ZION_API int mempool_get_info(MEMPOOL_INFO* info, int* idx);
 
 #ifdef __cplusplus
 }

@@ -213,9 +213,25 @@ void mempool_free(MEMPOOL_HANDLE handle, void* ptr)
 	atom_slist_push(&handle->unuse_list, &item->entry);
 }
 
-int mempool_get_info(MEMPOOL_INFO* info, int count)
+int mempool_get_info(MEMPOOL_INFO* info, int* idx)
 {
-	return 0;
+	int i;
+
+	if(*idx<0 || *idx>=sizeof(cb_array)/sizeof(cb_array[0])) {
+		return ERR_INVALID_PARAMETER;
+	}
+
+	for(i=*idx; i<sizeof(cb_array)/sizeof(cb_array[0]); i++) {
+		if(cb_array[i].size==0) continue;
+		info->name = cb_array[i].name;
+		info->size = cb_array[i].size;
+		info->count = cb_array[i].res_count;
+		info->free = cb_array[i].unuse_count;
+		*idx = i+1;
+		return ERR_NOERROR;
+	}
+
+	return ERR_UNKNOWN;
 }
 
 MEMPOOL_HANDLE cb_alloc()

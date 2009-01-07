@@ -77,6 +77,7 @@ static const CONFIG_ITEM* get_config_item(const char* name);
 static int appbox_console_set(CONSOLE_CONNECTION* conn, const char* name, const char* line);
 static int appbox_console_get(CONSOLE_CONNECTION* conn, const char* name, const char* line);
 static int appbox_console_threadpool(CONSOLE_CONNECTION* conn, const char* name, const char* line);
+static int appbox_console_mempool(CONSOLE_CONNECTION* conn, const char* name, const char* line);
 static int appbox_console_coredump(CONSOLE_CONNECTION* conn, const char* name, const char* line);
 static unsigned int ZION_CALLBACK cs_thread_proc(void* arg);
 
@@ -308,7 +309,7 @@ int appbox_init()
 		assert(ret==ERR_NOERROR);
 		ret = appbox_reg_command(MODULE_NAME, "threadpool_info", appbox_console_threadpool);
 		assert(ret==ERR_NOERROR);
-		ret = appbox_reg_command(MODULE_NAME, "threadpool_status", appbox_console_threadpool);
+		ret = appbox_reg_command(MODULE_NAME, "mempool_info", appbox_console_mempool);
 		assert(ret==ERR_NOERROR);
 	}
 
@@ -402,7 +403,7 @@ int appbox_final()
 		assert(ret==ERR_NOERROR);
 		ret = appbox_unreg_command(MODULE_NAME, "threadpool_info", appbox_console_threadpool);
 		assert(ret==ERR_NOERROR);
-		ret = appbox_unreg_command(MODULE_NAME, "threadpool_status", appbox_console_threadpool);
+		ret = appbox_unreg_command(MODULE_NAME, "mempool_info", appbox_console_mempool);
 		assert(ret==ERR_NOERROR);
 
 		ret = console_destroy(con_instance);
@@ -654,6 +655,23 @@ int appbox_console_threadpool(CONSOLE_CONNECTION* conn, const char* name, const 
 			if(info.event_proc==NULL) fcount++;
 		}
 		console_print(conn, ERR_NOERROR, "max=%d free=%d queuesize=%u", threadpool_getcount(), fcount, threadpool_queuesize());
+		return ERR_NOERROR;
+	}
+
+	return ERR_UNKNOWN;
+}
+
+int appbox_console_mempool(CONSOLE_CONNECTION* conn, const char* name, const char* line)
+{
+	if(strcmp(name, MODULE_NAME".mempool_info")==0) {
+		int idx = 0, sum = 0;
+		MEMPOOL_INFO info;
+		for(;;) {
+			if(mempool_get_info(&info, &idx)!=ERR_NOERROR) break;
+			console_print(conn, ERR_NOERROR, "%8d/%8d <%20s> size=%8d mem=%d", info.count, info.free, info.name, info.size, info.size*info.count);
+			sum += info.size*info.count;
+		}
+		console_print(conn, ERR_NOERROR, "sum=%d", sum);
 		return ERR_NOERROR;
 	}
 
