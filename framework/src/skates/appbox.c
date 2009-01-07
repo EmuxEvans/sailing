@@ -646,15 +646,14 @@ int appbox_console_get(CONSOLE_CONNECTION* conn, const char* name, const char* l
 int appbox_console_threadpool(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 {
 	if(strcmp(name, MODULE_NAME".threadpool_info")==0) {
-		return ERR_NOERROR;
-	}
-
-	if(strcmp(name, MODULE_NAME".threadpool_status")==0) {
-		THREADPOOL_STATUS status;
-		threadpool_getstatus(&status);
-		console_print(conn, ERR_NOERROR, "queue_size %d", status.queue_size);
-		console_print(conn, ERR_NOERROR, "count %d", status.count);
-		console_print(conn, ERR_NOERROR, "busy %d", status.busy);
+		int idx, fcount;
+		for(fcount=idx=0; idx<threadpool_getcount(); idx++) {
+			THREADPOOL_INFO info;
+			threadpool_getinfo(idx, &info);
+			console_print(conn, ERR_NOERROR, "%12u %p", info.times, info.event_proc);
+			if(info.event_proc==NULL) fcount++;
+		}
+		console_print(conn, ERR_NOERROR, "max=%d free=%d queuesize=%u", threadpool_getcount(), fcount, threadpool_queuesize());
 		return ERR_NOERROR;
 	}
 

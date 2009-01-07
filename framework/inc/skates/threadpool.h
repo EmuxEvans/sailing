@@ -22,17 +22,12 @@ ZION_API int threadpool_s();
 ZION_API int threadpool_e();
 
 typedef struct {
-	const char* name;
+	unsigned int	times;
+	void*			event_proc;
 } THREADPOOL_INFO;
 
-typedef struct {
-	int		queue_size;
-	int		count;
-	int		busy;
-} THREADPOOL_STATUS;
-
 ZION_API int threadpool_getinfo(int index, THREADPOOL_INFO* info);
-ZION_API void threadpool_getstatus(THREADPOOL_STATUS* status);
+ZION_API unsigned int threadpool_queuesize();
 
 #ifdef __cplusplus
 }
