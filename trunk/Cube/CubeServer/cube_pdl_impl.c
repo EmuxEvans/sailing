@@ -340,6 +340,7 @@ void room_kick(SVR_USER_CTX* user_ctx, const char* nick)
 	index = cube_room_member_index(user_ctx->conn->room, nick);
 	if(index<0) return;
 	cube_room_leave(user_ctx->conn->room, user_ctx->conn->room->members[index].conn, 1979);
+	lobby_room_join_owner(user_ctx, user_ctx->conn->nick);
 }
 
 void room_leave(SVR_USER_CTX* user_ctx)
