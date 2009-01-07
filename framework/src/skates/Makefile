@@ -37,6 +37,7 @@ OBJS=		os_unix.o misc.o mempool.o hashmap.o sock.o log.o dymempool.o stream.o\
 			console.o network.o rqueue.o rpc_net.o rpc_fun.o appbox.o applog.o appbox_unix.o appbox_args.o
 MAIN_OBJS=appbox_main.o
 CSMNG_OBJS=csmng.o
+CSCLT_OBJS=csclt.o
 .c.o:
 	$(CC) $(CC_FLAG) $(INCS) -DMODULE_NAME=\"appbox\" -DAPPBOX_MAIN $< $(OBJ_CC_FLAG) $@
 #	$(CC) $(CC_FLAG) $(INCS) -DMODULE_NAME=\"appbox\" -DAPPBOX_MAIN $< -S $(OBJ_CC_FLAG) $@.S
@@ -45,7 +46,7 @@ CSMNG_OBJS=csmng.o
 %.clt.c: %.idl; $(OUTPUT_DIR)/idl_cc $<
 %.svr.c: %.idl; $(OUTPUT_DIR)/idl_cc $<
 
-all: $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/csmng$(EXE_PREFIX)
+all: $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX) $(OUTPUT_DIR)/csmng$(EXE_PREFIX) $(OUTPUT_DIR)/csclt$(EXE_PREFIX)
 
 clean:
 	rm -rf *.o lua/*.o sqlite/*.o
@@ -57,6 +58,9 @@ clean:
 
 $(OUTPUT_DIR)/csmng$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(CSMNG_OBJS)
 	$(CC) $(CC_FLAG) $(CSMNG_OBJS) $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(OS_LIB) $(EXE_CC_FLAG) $@
+
+$(OUTPUT_DIR)/csclt$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(CSCLT_OBJS)
+	$(CC) $(CC_FLAG) $(CSCLT_OBJS) $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) $(OS_LIB) $(EXE_CC_FLAG) $@
 
 $(OUTPUT_DIR)/appbox_main$(EXE_PREFIX): $(OUTPUT_DIR)/appbox$(DLL_PREFIX) $(MAIN_OBJS)
 	cp -f $(OUTPUT_DIR)/appbox$(DLL_PREFIX) .
