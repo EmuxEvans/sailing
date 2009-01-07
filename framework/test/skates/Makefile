@@ -34,9 +34,9 @@ all: $(BINS)
 clean:
 	rm -rf appbox.a *.o $(BINS) $(DEPS_SYNCRPC) $(DEPS_ASYNCRPC)
 
-appbox.a: $(OUTPUT_DIR)/appbox.a
+appbox.a:
 	cd ../../src/skates; $(MAKE) $(OUTPUT_DIR)/appbox.a
-	cp $^ .
+	cp $(OUTPUT_DIR)/appbox.a .
 
 test_network$(EXE_PREFIX): $(OBJS_NETWORK) appbox.a
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
