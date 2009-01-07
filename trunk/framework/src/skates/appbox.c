@@ -650,7 +650,7 @@ int appbox_console_threadpool(CONSOLE_CONNECTION* conn, const char* name, const 
 		for(fcount=idx=0; idx<threadpool_getcount(); idx++) {
 			THREADPOOL_INFO info;
 			threadpool_getinfo(idx, &info);
-			console_print(conn, ERR_NOERROR, "%12u %p", info.times, info.event_proc);
+			console_print(conn, ERR_NOERROR, "%d %p %12u", idx, info.event_proc, info.times);
 			if(info.event_proc==NULL) fcount++;
 		}
 		console_print(conn, ERR_NOERROR, "max=%d free=%d queuesize=%u", threadpool_getcount(), fcount, threadpool_queuesize());
