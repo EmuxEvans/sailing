@@ -11,12 +11,12 @@ extern "C" {
 #define LOG_DEBUG				3
 
 #ifndef	SYSLOG_DISABLE
-	#define SYSLOG	syslog
+	#define SYSLOG	syslog_write
 #else
 	#define SYSLOG(...)
 #endif
 #ifndef	DBGLOG_DISABLE
-	#define DBGLOG	dbglog
+	#define DBGLOG	dbglog_write
 #else
 	#define DBGLOG(...)
 #endif
@@ -25,14 +25,14 @@ extern "C" {
 ZION_API int syslog_open(const char* url);
 ZION_API void syslog_enable(int enable);
 ZION_API int syslog_close();
-ZION_API void syslog(int level, const char* src, const char* fmt, ...);
+ZION_API void syslog_write(int level, const char* src, const char* fmt, ...);
 #endif
 
 #ifndef DBGLOG_DISABLE
 ZION_API int dbglog_open(const char* url);
 ZION_API void dbglog_enable(int enable);
 ZION_API int dbglog_close();
-ZION_API void dbglog(int level, const char* src, const char* fmt, ...);
+ZION_API void dbglog_write(int level, const char* src, const char* fmt, ...);
 #endif
 
 #ifdef __cplusplus

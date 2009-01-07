@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 #ifndef ZION_API
-#define ZION_API
+#define ZION_API extern
 #endif
 #ifndef ZION_CLASS
 #define ZION_CLASS
