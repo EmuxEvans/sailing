@@ -24,9 +24,8 @@ typedef struct TCP_ENDPOINT {
 
 typedef struct NETWORK_CONNECTION {
 	FDWATCH_ITEM			fdwitem;
-	int						ref_count;
 	int						rdcount, wrcount;
-	int						is_connect, alive;
+	int						state, ref_count;
 	RLIST_ITEM				shutdown_item;
 
 	SOCK_HANDLE				sock;
@@ -45,6 +44,11 @@ typedef struct NETWORK_CONNECTION {
 	RLIST_HEAD				downbufs;
 	unsigned int			downbuf_cur;
 } NETWORK_CONNECTION;
+
+#define TCPCONN_STATE_CONNECTING		0
+#define TCPCONN_STATE_AVALIABLE			1
+#define TCPCONN_STATE_SHUTINGDOWN		2
+#define TCPCONN_STATE_CLOSEED			3
 
 static unsigned int downbuf_size;
 static MEMPOOL_HANDLE downbuf_pool;
@@ -203,11 +207,10 @@ NETWORK_HANDLE network_add(SOCK_HANDLE sock, NETWORK_EVENT* event, void* userptr
 	if(conn==NULL) return NULL;
 
 	fdwatch_set(&conn->fdwitem, sock, FDWATCH_READ|FDWATCH_WRITE, tcpcon_fdevent, conn);
-	conn->ref_count = 1;
 	conn->rdcount = 0;
 	conn->wrcount = 0;
-	conn->is_connect = 0;
-	conn->alive = 1;
+	conn->state = TCPCONN_STATE_CONNECTING;
+	conn->ref_count = 1;
 	rlist_clear(&conn->shutdown_item, conn);
 	conn->sock			= sock;
 	sock_peername(sock, &conn->peername);
@@ -390,7 +393,7 @@ int network_send(NETWORK_HANDLE handle, NETWORK_DOWNBUF* downbufs[], unsigned in
 
 	if(atom_inc(&handle->wrcount)==1) {
 		do {
-			if(handle->alive) {
+			if(handle->state==TCPCONN_STATE_AVALIABLE) {
 				opt_write(handle);
 			}
 		} while(atom_dec(&handle->wrcount)>0);
@@ -440,16 +443,27 @@ void tcpcon_fdevent(FDWATCH_ITEM* item, int events)
 	if(events&FDWATCH_WRITE) {
 		if(atom_inc(&conn->wrcount)==1) {
 			do {
-				if(conn->alive) {
+				if(conn->state==TCPCONN_STATE_AVALIABLE) {
 					opt_write(conn);
 				}
 			} while(atom_dec(&conn->wrcount)>0);
 		}
+
+		if(conn->state==TCPCONN_STATE_CONNECTING) {
+			conn->state = TCPCONN_STATE_AVALIABLE;
+			assert(conn->rdcount==0);
+			conn->rdcount = 1;
+			assert(conn->ref_count==1);
+			conn->ref_count = 2;
+			threadpool_queueitem(read_event, conn);
+			return;
+		}
 	}
-	if((events&FDWATCH_READ) || !conn->is_connect) {
-		conn->is_connect = 1;
-		atom_inc(&conn->ref_count);
-		threadpool_queueitem(read_event, conn);
+	if((events&FDWATCH_READ)) {
+		if(atom_inc(&conn->rdcount)==1) {
+			atom_inc(&conn->ref_count);
+			threadpool_queueitem(read_event, conn);
+		}
 	}
 }
 
@@ -465,50 +479,35 @@ void read_event(void* data)
 {
 	NETWORK_CONNECTION* conn = (NETWORK_CONNECTION*)data;
 
-	if(atom_inc(&conn->rdcount)==1) {
-		if(conn->OnConnect) {
-			conn->OnConnect(conn, conn->userptr);
-			conn->OnConnect = NULL;
-		}
-		do {
-			if(conn->alive) {
-				if(!opt_read(conn)) {
-					conn->alive = 0;
-					assert(conn->shutdown_item.next==NULL);
-					assert(conn->shutdown_item.prev==NULL);
-					assert(conn->shutdown_item.ptr==conn);
-					os_mutex_lock(&shutdown_mutex);
-					rlist_push_back(&shutdown_con, &conn->shutdown_item);
-					os_mutex_unlock(&shutdown_mutex);
-				}
-			}
-		} while(atom_dec(&conn->rdcount)>0);
+	if(conn->OnConnect) {
+		conn->OnConnect(conn, conn->userptr);
+		conn->OnConnect = NULL;
 	}
+	do {
+		if(conn->state==TCPCONN_STATE_AVALIABLE) {
+			if(!opt_read(conn)) {
+				conn->state = TCPCONN_STATE_SHUTINGDOWN;
+				assert(conn->shutdown_item.next==NULL);
+				assert(conn->shutdown_item.prev==NULL);
+				assert(conn->shutdown_item.ptr==conn);
+				os_mutex_lock(&shutdown_mutex);
+				rlist_push_back(&shutdown_con, &conn->shutdown_item);
+				os_mutex_unlock(&shutdown_mutex);
+			}
+		}
+	} while(atom_dec(&conn->rdcount)>0);
 
-	if(atom_dec(&conn->ref_count)==0)
+	if(atom_dec(&conn->ref_count)==0) {
 		opt_close(conn);
+	}
 }
 
-//void write_event(void* data)
-//{
-//	NETWORK_CONNECTION* conn = (NETWORK_CONNECTION*)data;
-//
-//	if(atom_inc(&conn->wrcount)==1) {
-//		do {
-//			if(conn->alive) {
-//				opt_write(conn);
-//			}
-//		} while(atom_dec(&conn->wrcount)>0);
-//	}
-//
-//	if(atom_dec(&conn->ref_count)==0)
-//		opt_close(conn);
-//}
-//
 void close_event(void* data)
 {
 	NETWORK_CONNECTION* conn = (NETWORK_CONNECTION*)data;
-	if(atom_dec(&conn->ref_count)==0) opt_close(conn);
+	if(atom_dec(&conn->ref_count)==0) {
+		opt_close(conn);
+	}
 }
 
 unsigned int ZION_CALLBACK notify_proc(void* arg)
