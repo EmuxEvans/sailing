@@ -645,11 +645,11 @@ int appbox_console_get(CONSOLE_CONNECTION* conn, const char* name, const char* l
 
 int appbox_console_threadpool(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 {
-	if(strcmp(name, "threadpool_info")==0) {
+	if(strcmp(name, MODULE_NAME".threadpool_info")==0) {
 		return ERR_NOERROR;
 	}
 
-	if(strcmp(name, "threadpool_status")==0) {
+	if(strcmp(name, MODULE_NAME".threadpool_status")==0) {
 		THREADPOOL_STATUS status;
 		threadpool_getstatus(&status);
 		console_print(conn, ERR_NOERROR, "queue_size %d", status.queue_size);
