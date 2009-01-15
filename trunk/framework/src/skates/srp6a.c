@@ -67,7 +67,7 @@ int srp6a_server_set_username(srp6a_server_t* srp, const char* username)
 
 int srp6a_client_set_password(srp6a_client_t* srp, const char* password)
 {
-	SHA1_CTX ctxt;
+	SHA1_CTXT ctxt;
 	unsigned char dig[SHA_DIGESTSIZE];
 
 	SHA1Init(&ctxt);
@@ -94,7 +94,7 @@ int srp6a_client_set_password(srp6a_client_t* srp, const char* password)
 
 int srp6a_server_set_password(srp6a_server_t* srp, const char* password)
 {
-	SHA1_CTX ctxt;
+	SHA1_CTXT ctxt;
 	unsigned char dig[SHA_DIGESTSIZE];
 
 	SHA1Init(&ctxt);
@@ -126,7 +126,7 @@ int srp6a_client_set_param(srp6a_client_t* srp,
 {
 	int i;
 	unsigned char buf1[SHA_DIGESTSIZE], buf2[SHA_DIGESTSIZE];
-	SHA1_CTX ctxt;
+	SHA1_CTXT ctxt;
 
 	if(!bignum_from_bin(&srp->modulus, modulus, modlen)) {
 		return -1;
@@ -177,7 +177,7 @@ int srp6a_server_set_param(srp6a_server_t* srp,
 			const unsigned char * salt, int saltlen)
 {
 	unsigned char buf1[SHA_DIGESTSIZE], buf2[SHA_DIGESTSIZE];
-	SHA1_CTX ctxt;
+	SHA1_CTXT ctxt;
 	int i;
 
 	if(!bignum_from_bin(&srp->modulus, modulus, modlen)) {
@@ -251,7 +251,7 @@ int srp6a_server_gen_pub(srp6a_server_t* srp, unsigned char* pkey, int* pkeylen)
 	//SRP_RESULT ret;
 	//BigInteger k;
 	//cstr * s;
-	SHA1_CTX ctxt;
+	SHA1_CTXT ctxt;
 	unsigned char dig[SHA_DIGESTSIZE];
 	unsigned char* modulus;
 	int modlen, genlen;
@@ -304,7 +304,7 @@ int srp6a_server_gen_pub(srp6a_server_t* srp, unsigned char* pkey, int* pkeylen)
 int srp6a_client_comput_key(srp6a_client_t* srp, const unsigned char * key, int keylen, unsigned char * res, int * reslen)
 {
 	bignum_t k;
-	SHA1_CTX ctxt;
+	SHA1_CTXT ctxt;
 	unsigned char dig[SHA_DIGESTSIZE];
 	unsigned char* modulus;
 	int modlen, genlen;
@@ -396,7 +396,7 @@ int srp6a_client_comput_key(srp6a_client_t* srp, const unsigned char * key, int 
 int srp6a_server_comput_key(srp6a_server_t* srp, const unsigned char * pubkey, int pubkeylen, unsigned char * res, int * reslen)
 {
 	bignum_t t1, t2, t3;
-	SHA1_CTX ctxt;
+	SHA1_CTXT ctxt;
 	unsigned char dig[SHA_DIGESTSIZE];
 	int modlen;
 	unsigned char *s;
@@ -525,7 +525,7 @@ int srp6a_client_verify(srp6a_client_t* srp, const unsigned char * proof, int pr
 
 void t_mgf1(unsigned char * mask, unsigned masklen, const unsigned char * seed, unsigned seedlen)
 {
-	SHA1_CTX ctxt;
+	SHA1_CTXT ctxt;
 	unsigned i = 0;
 	unsigned pos = 0;
 	unsigned char cnt[4];
