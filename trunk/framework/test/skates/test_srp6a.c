@@ -84,7 +84,6 @@ void dotest()
 int main(int argc, char* argv[])
 {
 	int i, j;
-	DWORD a, b;
 
 	memset(salt, 0xf0, 10);
 	saltlen = 10;
@@ -97,13 +96,10 @@ int main(int argc, char* argv[])
 		memcpy(generator, srp6a_keys[i].generator, 1);
 		genlen = 1;
 
-		//printf("do test %d\n", i);
-		a = GetTickCount();
+		printf("do test %d\n", i);
 		for(j=0; j<100; j++) {
-		dotest();
+			dotest();
 		}
-		b = GetTickCount();
-		printf("%d %d\n", i, b-a);
 	}
 
 	dymempool_final();
