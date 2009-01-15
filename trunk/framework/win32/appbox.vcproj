@@ -382,6 +382,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\skates\bignum.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\skates\console.c"
 				>
 			</File>
@@ -546,7 +550,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\skates\sha1.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\skates\sock.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\srp6a.c"
 				>
 			</File>
 			<File
@@ -581,6 +593,10 @@
 			</File>
 			<File
 				RelativePath="..\inc\skates\applog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\bignum.h"
 				>
 			</File>
 			<File
@@ -680,11 +696,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\inc\skates\sha1.h"
+				>
+			</File>
+			<File
 				RelativePath="..\inc\skates\skates.h"
 				>
 			</File>
 			<File
 				RelativePath="..\inc\skates\sock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\srp6a.h"
+				>
+			</File>
+			<File
+				RelativePath="..\inc\skates\srp6a_key.inc"
 				>
 			</File>
 			<File
