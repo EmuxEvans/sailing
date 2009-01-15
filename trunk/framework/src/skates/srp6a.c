@@ -1,4 +1,3 @@
-#include <malloc.h>
 #include <stdlib.h>
 
 #include "../../inc/skates/errcode.h"
@@ -71,9 +70,9 @@ int srp6a_client_set_password(srp6a_client_t* srp, const char* password)
 	unsigned char dig[SHA_DIGESTSIZE];
 
 	SHA1Init(&ctxt);
-	SHA1Update(&ctxt, srp->username, srp->username_len);
-	SHA1Update(&ctxt, ":", 1);
-	SHA1Update(&ctxt, password, strlen(password));
+	SHA1Update(&ctxt, (const unsigned char*)srp->username, (size_t)(srp->username_len));
+	SHA1Update(&ctxt, (const unsigned char*)":", 1);
+	SHA1Update(&ctxt, (const unsigned char*)password, strlen(password));
 	SHA1Final(dig, &ctxt);	/* dig = H(U | ":" | P) */
 
 	SHA1Init(&ctxt);
@@ -98,9 +97,9 @@ int srp6a_server_set_password(srp6a_server_t* srp, const char* password)
 	unsigned char dig[SHA_DIGESTSIZE];
 
 	SHA1Init(&ctxt);
-	SHA1Update(&ctxt, srp->username, srp->username_len);
-	SHA1Update(&ctxt, ":", 1);
-	SHA1Update(&ctxt, password, strlen(password));
+	SHA1Update(&ctxt, (const unsigned char*)srp->username, srp->username_len);
+	SHA1Update(&ctxt, (const unsigned char*)":", 1);
+	SHA1Update(&ctxt, (const unsigned char*)password, strlen(password));
 	SHA1Final(dig, &ctxt);	/* dig = H(U | ":" | P) */
 
 	SHA1Init(&ctxt);
@@ -159,7 +158,7 @@ int srp6a_client_set_param(srp6a_client_t* srp,
 	SHA1Update(&srp->hash, buf1, sizeof(buf1));
 
 	SHA1Init(&ctxt);
-	SHA1Update(&ctxt, srp->username, srp->username_len);
+	SHA1Update(&ctxt, (const unsigned char*)srp->username, srp->username_len);
 	SHA1Final(buf1, &ctxt);	/* buf1 = H(user) */
 
 	/* hash: (H(N) xor H(g)) | H(U) */
@@ -211,7 +210,7 @@ int srp6a_server_set_param(srp6a_server_t* srp,
 	SHA1Update(&srp->ckhash, buf1, sizeof(buf1));
 
 	SHA1Init(&ctxt);
-	SHA1Update(&ctxt, srp->username, srp->username_len);
+	SHA1Update(&ctxt, (const unsigned char*)srp->username, srp->username_len);
 	SHA1Final(buf1, &ctxt);	/* buf1 = H(user) */
 
 	/* ckhash: (H(N) xor H(g)) | H(U) */
@@ -260,7 +259,7 @@ int srp6a_server_gen_pub(srp6a_server_t* srp, unsigned char* pkey, int* pkeylen)
 
 	// gen k
 	modlen = bignum_bytelen(&srp->modulus);
-	modulus = _malloca(modlen);
+	modulus = (unsigned char*)alloca(modlen);
 	if(modulus==NULL)
 		return -1;
 	bignum_to_bin(&srp->modulus, modulus, &modlen);
@@ -311,7 +310,7 @@ int srp6a_client_comput_key(srp6a_client_t* srp, const unsigned char * key, int 
 	bignum_t gb, e;
 
 	modlen = bignum_bytelen(&srp->modulus);
-	modulus = _malloca(modlen);
+	modulus = (unsigned char*)alloca(modlen);
 	if(modulus==NULL)
 		return -1;
 	bignum_to_bin(&srp->modulus, modulus, &modlen);
@@ -410,7 +409,7 @@ int srp6a_server_comput_key(srp6a_server_t* srp, const unsigned char * pubkey, i
 	SHA1Update(&srp->ckhash, pubkey, pubkeylen);
 
 	slen = mlen = bignum_bytelen(&srp->pubkey) + 10;
-	s = _malloca(slen);
+	s = (unsigned char*)alloca(slen);
 	bignum_to_bin(&srp->pubkey, s, &slen);
 	/* get encoding of B */
 

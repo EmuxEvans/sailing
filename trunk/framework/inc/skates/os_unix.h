@@ -284,3 +284,6 @@ ZION_API void* atom_unix_cas_ptr(volatile void **mem, void *with, const void *cm
 #ifdef __cplusplus
 }
 #endif
+
+#include <stdlib.h>
+

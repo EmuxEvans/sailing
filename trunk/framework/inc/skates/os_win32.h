@@ -274,3 +274,7 @@ ZION_INLINE const char* os_library_error()
 #ifdef __cplusplus
 }
 #endif
+
+#include <malloc.h>
+#define alloca _alloca
+
