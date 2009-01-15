@@ -88,6 +88,7 @@ int main(int argc, char* argv[])
 
 	memset(salt, 0xf0, 10);
 	saltlen = 10;
+	dymempool_init(1000, 10*1024);
 
 	for(i=0; i<sizeof(srp6a_keys)/sizeof(srp6a_keys[0]); i++) {
 		if(i==8) continue;
@@ -104,6 +105,8 @@ int main(int argc, char* argv[])
 		b = GetTickCount();
 		printf("%d %d\n", i, b-a);
 	}
+
+	dymempool_final();
 
 	return 0;
 }
