@@ -555,3 +555,25 @@ void t_mgf1(unsigned char * mask, unsigned masklen, const unsigned char * seed, 
 	memset(hout, 0, sizeof(hout));
 	memset((unsigned char *)&ctxt, 0, sizeof(ctxt));
 }
+
+#include "../../inc/skates/dymempool.h"
+
+void *XMALLOC(size_t n)
+{
+	return dymempool_alloc(n);
+}
+
+void *XREALLOC(void *p, size_t n)
+{
+	return dymempool_realloc(p, n);
+}
+
+void *XCALLOC(size_t n, size_t s)
+{
+	return dymempool_alloc(n*s);
+}
+
+void XFREE(void *p)
+{
+	dymempool_free(p);
+}
