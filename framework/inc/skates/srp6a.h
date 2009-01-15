@@ -27,8 +27,8 @@ typedef struct srp6a_client_t {
 	unsigned char	salt[100];
 	int				salt_len;
 
-	SHA1_CTX hash;
-	SHA1_CTX ckhash;
+	SHA1_CTXT hash;
+	SHA1_CTXT ckhash;
 	unsigned char k[RFC2945_KEY_LEN];
 } srp6a_client_t;
 
@@ -48,10 +48,10 @@ typedef struct srp6a_server_t {
 	unsigned char	salt[100];
 	int				salt_len;
 
-	SHA1_CTX hash;
-	SHA1_CTX ckhash;
-	SHA1_CTX oldhash;
-	SHA1_CTX oldckhash;
+	SHA1_CTXT hash;
+	SHA1_CTXT ckhash;
+	SHA1_CTXT oldhash;
+	SHA1_CTXT oldckhash;
 	unsigned char k[RFC2945_KEY_LEN];
 	unsigned char r[RFC2945_RESP_LEN];
 
