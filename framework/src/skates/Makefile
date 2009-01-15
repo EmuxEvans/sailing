@@ -63,7 +63,7 @@ MAIN_OBJS=appbox_main.o
 CSMNG_OBJS=csmng.o
 CSCLT_OBJS=csclt.o
 .c.o:
-	$(CC) $(CC_FLAG) $(INCS) -DMODULE_NAME=\"appbox\" -DAPPBOX_MAIN $< $(OBJ_CC_FLAG) $@
+	$(CC) $(CC_FLAG) $(INCS) -DXMALLOC=xmalloc -DMODULE_NAME=\"appbox\" -DAPPBOX_MAIN $< $(OBJ_CC_FLAG) $@
 #	$(CC) $(CC_FLAG) $(INCS) -DMODULE_NAME=\"appbox\" -DAPPBOX_MAIN $< -S $(OBJ_CC_FLAG) $@.S
 
 %.h: %.idl; $(OUTPUT_DIR)/idl_cc $<

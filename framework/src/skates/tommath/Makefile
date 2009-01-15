@@ -2,7 +2,7 @@ BASE_DIR=../../..
 
 include $(BASE_DIR)/Makefile.def
 
-TOMMATH_CC_FLAG=-I$(BASE_DIR)/inc/skates/tommath -DLUA_USE_MKSTEMP $(subst -Werror,,$(subst -Wall,,$(OBJ_CC_FLAG)))
+TOMMATH_CC_FLAG=-DXMALLOC=xmalloc -I$(BASE_DIR)/inc/skates/tommath -DLUA_USE_MKSTEMP $(subst -Werror,,$(subst -Wall,,$(OBJ_CC_FLAG)))
 
 TOMMATH_SRC=bn_error.c bn_fast_mp_invmod.c bn_fast_mp_montgomery_reduce.c bn_fast_s_mp_mul_digs.c bn_fast_s_mp_mul_high_digs.c \
 			bn_fast_s_mp_sqr.c bn_mp_2expt.c bn_mp_abs.c bn_mp_add.c bn_mp_add_d.c bn_mp_addmod.c bn_mp_and.c bn_mp_clamp.c \
