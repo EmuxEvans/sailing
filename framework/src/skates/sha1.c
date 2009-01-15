@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "../../inc/skates/errcode.h"
 #include "../../inc/skates/os.h"
 #include "../../inc/skates/sha1.h"
