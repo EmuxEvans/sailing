@@ -49,7 +49,7 @@ test_rqueue$(EXE_PREFIX): $(OBJS_RQUEUE) appbox.a
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
 test_dbapi$(EXE_PREFIX): $(OBJS_DBAPI) appbox.a
-	gcc $(INCLUDES) $(LIBS) $^ -o $@
+	gcc $(INCLUDES) $(LIBS) $(MYSQL_LIB) $^ -o $@
 
 test_console$(EXE_PREFIX): $(OBJS_CONSOLE) appbox.a
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
