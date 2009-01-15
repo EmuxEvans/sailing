@@ -66,7 +66,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib sqlite.lib lua.lib"
+				AdditionalDependencies="ws2_32.lib sqlite.lib lua.lib tommath.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
 				GenerateManifest="false"
@@ -144,7 +144,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib sqlite.lib lua.lib"
+				AdditionalDependencies="ws2_32.lib sqlite.lib lua.lib tommath.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)&quot;"
 				GenerateManifest="true"
