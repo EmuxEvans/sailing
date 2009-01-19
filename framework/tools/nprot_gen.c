@@ -7,7 +7,7 @@
 #include <skates/misc.h>
 #include <skates/protocol.h>
 
-#include "..\..\framework\tools\prot_parser.h"
+#include "prot_parser.h"
 
 static char txt[50*1024];
 static char type[100], prelen[100], name[100], max[2000];
@@ -156,17 +156,6 @@ int parser_nfile(const char* buf)
 	return ERR_NOERROR;
 }
 
-static void print_pdef(int c, int f, char* txt, unsigned int txt_len)
-{
-	int p;
-	for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
-		if(p>nfunctions[f].p_start) {
-			snprintf(txt+strlen(txt), txt_len-strlen(txt), ", ");
-		}
-		snprintf(txt+strlen(txt), txt_len-strlen(txt), ", ");
-	}
-}
-
 int generate_pfile(const char* name, char* inc, unsigned int inc_len)
 {
 	struct tm   *newTime;
@@ -250,8 +239,8 @@ int generate_hcltfile(const char* name, char* inc, unsigned int inc_len)
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "private:\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	const char* m_pName;\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void SetHandled(bool bHandled=true) { m_bHandled = bHandled; }\n", nmodules[c].name);
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool IsHandled() { return m_bHandled; };\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void SetHandled(bool bHandled=true) { m_bHandled = bHandled; }\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool IsHandled() { return m_bHandled; };\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool m_bHandled;\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
@@ -273,7 +262,7 @@ int generate_hcltfile(const char* name, char* inc, unsigned int inc_len)
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool IsTextMode() const { return m_bTextMode; }\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void SetTextMode(bool bTextMode=false) { m_bTextMode = bTextMode; }\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool Dispatch(const void* pData, unsigned int nSize);\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool Dispatch(const void* pData, unsigned int nSize);\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "private:\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool				m_bTextMode;\n");
@@ -611,8 +600,8 @@ int generate_hsvrfile(const char* name, char* inc, unsigned int inc_len)
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "private:\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	const char* m_pName;\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void SetHandled(bool bHandled=true) { m_bHandled = bHandled; }\n", nmodules[c].name);
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool IsHandled() { return m_bHandled; };\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void SetHandled(bool bHandled=true) { m_bHandled = bHandled; }\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool IsHandled() { return m_bHandled; };\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool m_bHandled;\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
@@ -634,7 +623,7 @@ int generate_hsvrfile(const char* name, char* inc, unsigned int inc_len)
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool IsTextMode() const { return m_bTextMode; }\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void SetTextMode(bool bTextMode=false) { m_bTextMode = bTextMode; }\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool Dispatch(const void* pData, unsigned int nSize);\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool Dispatch(const void* pData, unsigned int nSize);\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "private:\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool				m_bTextMode;\n");
@@ -1054,7 +1043,6 @@ const char* parse_function(const char* buf)
 const char* parse_parameter(const char* buf)
 {
 	const char* tbuf;
-	char slen[100];
 
 	buf = get_token_id(buf, type, sizeof(type));
 	if(buf==NULL)
@@ -1065,12 +1053,12 @@ const char* parse_parameter(const char* buf)
 		const char* end;
 		end = strchr(tbuf, '>');
 		if(!end) return NULL;
-		if(end-tbuf>=sizeof(slen)) return NULL;
-		memcpy(slen, tbuf, end-tbuf);
-		slen[end-tbuf] = '\0';
+		if(end-tbuf>=sizeof(prelen)) return NULL;
+		memcpy(prelen, tbuf, end-tbuf);
+		prelen[end-tbuf] = '\0';
 		buf = end + 1;
 	} else {
-		slen[0] = '\0';
+		prelen[0] = '\0';
 	}
 
 
@@ -1093,7 +1081,7 @@ const char* parse_parameter(const char* buf)
 	} else {
 		max[0] = '\0';
 	}
-	def_parameter(type, slen, name, max);
+	def_parameter(type, prelen, name, max);
 
 	return buf;
 }

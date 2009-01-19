@@ -13,7 +13,7 @@ SQLITE_INC=	btree.h btreeInt.h fts3.h fts3_hash.h fts3_tokenizer.h hash.h hwtime
 SQLITE_FULL_INC=$(foreach inc,$(SQLITE_INC),sqlite/$(inc))
 SQLITE_FULL_SRC=$(foreach src,$(SQLITE_SRC),sqlite/$(src))
 SQLITE_FULL_OBJ=$(subst .c,.o,$(SQLITE_FULL_SRC))
-SQLITE_FULL_LIB=sqlite/sqlite.a
+SQLITE_FULL_LIB=sqlite/sqlite$(STA_LIB_PREFIX)
 
 LUA_SRC=    lapi.c lauxlib.c lbaselib.c lcode.c ldblib.c ldebug.c ldo.c ldump.c lfunc.c lgc.c linit.c\
             liolib.c llex.c lmathlib.c lmem.c loadlib.c lobject.c lopcodes.c loslib.c lparser.c lstate.c\
@@ -25,7 +25,7 @@ LUA_INC=    lapi.h lauxlib.h lcode.h ldebug.h ldo.h lfunc.h lgc.h llex.h llimits
 LUA_FULL_INC=$(foreach inc,$(LUA_INC),lua/$(inc))
 LUA_FULL_SRC=$(foreach src,$(LUA_SRC),lua/$(src))
 LUA_FULL_OBJ=$(subst .c,.o,$(LUA_FULL_SRC))
-LUA_FULL_LIB=lua/lua.a
+LUA_FULL_LIB=lua/lua$(STA_LIB_PREFIX)
 LUA_RPC_FILE=protocol_lua.h protocol_lua.clt.c protocol_lua.svr.c
 
 TOMMATH_SRC=bn_error.c bn_fast_mp_invmod.c bn_fast_mp_montgomery_reduce.c bn_fast_s_mp_mul_digs.c bn_fast_s_mp_mul_high_digs.c \
@@ -49,7 +49,7 @@ TOMMATH_INC=
 TOMMATH_FULL_INC=$(foreach inc,$(TOMMATH_INC),tommath/$(inc))
 TOMMATH_FULL_SRC=$(foreach src,$(TOMMATH_SRC),tommath/$(src))
 TOMMATH_FULL_OBJ=$(subst .c,.o,$(TOMMATH_FULL_SRC))
-TOMMATH_FULL_LIB=tommath/tommath.a 
+TOMMATH_FULL_LIB=tommath/tommath$(STA_LIB_PREFIX)
 
 INCS=$(OS_INC_DIR) $(APPBOX_INC) -DDBAPI_MYSQL_$(DBAPI_MYSQL) -I../../inc
 LIBS=$(OS_LIB_DIR) $(APPBOX_LIB) $(OS_LIB)
@@ -102,11 +102,11 @@ $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX): $(LUA_RPC_FILE) $(OBJS) $(SQLITE_FULL_LIB
 	$(STA_LIB) $@ $(OBJS) $(SQLITE_FULL_OBJ) $(LUA_FULL_OBJ) $(TOMMATH_FULL_OBJ)
 
 $(SQLITE_FULL_LIB): $(SQLITE_FULL_INC) $(SQLITE_FULL_SRC)
-	cd sqlite; $(MAKE) sqlite.a
+	cd sqlite; $(MAKE) sqlite$(STA_LIB_PREFIX)
 
 $(LUA_FULL_LIB): $(LUA_FULL_INC) $(LUA_FULL_SRC)
-	cd lua; $(MAKE) lua.a
+	cd lua; $(MAKE) lua$(STA_LIB_PREFIX)
 
 $(TOMMATH_FULL_LIB): $(TOMMATH_FULL_INC) $(TOMMATH_FULL_SRC)
-	cd tommath; $(MAKE) tommath.a
+	cd tommath; $(MAKE) tommath$(STA_LIB_PREFIX)
 

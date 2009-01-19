@@ -14,7 +14,7 @@ LUA_INC=	lapi.h lauxlib.h lcode.h ldebug.h ldo.h lfunc.h lgc.h llex.h llimits.h 
 
 LUA_OBJ= $(subst .c,.o,$(LUA_SRC))
 
-LUA_LIB= lua.a
+LUA_LIB= lua$(STA_LIB_PREFIX)
 
 .c.o:
 	$(CC) $< $(LUA_CC_FLAG) $@

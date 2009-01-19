@@ -33,54 +33,54 @@ DEPS_ASYNCRPC=async_rpc.h async_rpc.clt.c async_rpc.svr.c
 all: $(BINS)
 
 clean:
-	rm -rf appbox.a *.o $(BINS) $(DEPS_SYNCRPC) $(DEPS_ASYNCRPC)
+	rm -rf appbox$(STA_LIB_PREFIX) *.o $(BINS) $(DEPS_SYNCRPC) $(DEPS_ASYNCRPC)
 
-appbox.a:
-	cd ../../src/skates; $(MAKE) $(OUTPUT_DIR)/appbox.a
-	cp $(OUTPUT_DIR)/appbox.a .
+appbox$(STA_LIB_PREFIX):
+	cd ../../src/skates; $(MAKE) $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX)
+	cp $(OUTPUT_DIR)/appbox$(STA_LIB_PREFIX) .
 
-test_network$(EXE_PREFIX): $(OBJS_NETWORK) appbox.a
+test_network$(EXE_PREFIX): $(OBJS_NETWORK) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_fdwatch$(EXE_PREFIX): $(OBJS_FDWATCH) appbox.a
+test_fdwatch$(EXE_PREFIX): $(OBJS_FDWATCH) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_rqueue$(EXE_PREFIX): $(OBJS_RQUEUE) appbox.a
+test_rqueue$(EXE_PREFIX): $(OBJS_RQUEUE) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_dbapi$(EXE_PREFIX): $(OBJS_DBAPI) appbox.a
+test_dbapi$(EXE_PREFIX): $(OBJS_DBAPI) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $(MYSQL_LIB) $^ -o $@
 
-test_console$(EXE_PREFIX): $(OBJS_CONSOLE) appbox.a
+test_console$(EXE_PREFIX): $(OBJS_CONSOLE) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_log$(EXE_PREFIX): $(OBJS_LOG) appbox.a
+test_log$(EXE_PREFIX): $(OBJS_LOG) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_dymempool$(EXE_PREFIX): $(OBJS_DYMEMPOOL) appbox.a
+test_dymempool$(EXE_PREFIX): $(OBJS_DYMEMPOOL) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_sock$(EXE_PREFIX): $(OBJS_SOCK) appbox.a
+test_sock$(EXE_PREFIX): $(OBJS_SOCK) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_threadpool$(EXE_PREFIX): $(OBJS_THREADPOOL) appbox.a
+test_threadpool$(EXE_PREFIX): $(OBJS_THREADPOOL) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_timer$(EXE_PREFIX): $(OBJS_TIMER) appbox.a
+test_timer$(EXE_PREFIX): $(OBJS_TIMER) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_rpcnet$(EXE_PREFIX): $(OBJS_RPCNET) appbox.a
+test_rpcnet$(EXE_PREFIX): $(OBJS_RPCNET) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_rpcfun$(EXE_PREFIX): $(OBJS_RPCFUN) appbox.a
+test_rpcfun$(EXE_PREFIX): $(OBJS_RPCFUN) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
-test_syncrpc$(EXE_PREFIX): $(DEPS_SYNCRPC) $(OBJS_SYNCRPC) appbox.a
-	gcc $(INCLUDES) $(LIBS) $(OBJS_SYNCRPC) appbox.a -o $@
+test_syncrpc$(EXE_PREFIX): $(DEPS_SYNCRPC) $(OBJS_SYNCRPC) appbox$(STA_LIB_PREFIX)
+	gcc $(INCLUDES) $(LIBS) $(OBJS_SYNCRPC) appbox$(STA_LIB_PREFIX) -o $@
 
-test_asyncrpc$(EXE_PREFIX): $(DEPS_ASYNCRPC) $(OBJS_ASYNCRPC) appbox.a
-	gcc $(INCLUDES) $(LIBS) $(OBJS_ASYNCRPC) appbox.a -o $@
+test_asyncrpc$(EXE_PREFIX): $(DEPS_ASYNCRPC) $(OBJS_ASYNCRPC) appbox$(STA_LIB_PREFIX)
+	gcc $(INCLUDES) $(LIBS) $(OBJS_ASYNCRPC) appbox$(STA_LIB_PREFIX) -o $@
 
-test_srp6a$(EXE_PREFIX): $(OBJS_SRP6A) appbox.a
+test_srp6a$(EXE_PREFIX): $(OBJS_SRP6A) appbox$(STA_LIB_PREFIX)
 	gcc $(INCLUDES) $(LIBS) $^ -o $@
 
