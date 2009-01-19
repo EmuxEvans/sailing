@@ -32,8 +32,8 @@ ZION_API int protocol_convert(const char* value, void* buf, int type, unsigned i
 ZION_API int protocol_binary_read(PROTOCOL_TYPE* type, const void* data, unsigned int* data_len, void* buf);
 ZION_API int protocol_binary_write(PROTOCOL_TYPE* type, const void* buf, void* data, unsigned int* data_len);
 
-ZION_API int protocol_text_read(PROTOCOL_TYPE* type, const char* data, unsigned int* data_len, void* buf);
-ZION_API int protocol_text_write(PROTOCOL_TYPE* type, const void* buf, char* data, unsigned int* data_len);
+ZION_API int protocol_text_read(PROTOCOL_TYPE* type, const char* name, const char* data, unsigned int* data_len, void* buf);
+ZION_API int protocol_text_write(PROTOCOL_TYPE* type, const char* name, const void* buf, char* data, unsigned int* data_len);
 
 ZION_API int protocol_file_read(PROTOCOL_TYPE* type, const char* filename, void* buf);
 ZION_API int protocol_file_write(PROTOCOL_TYPE* type, const void* buf, const char* filename);

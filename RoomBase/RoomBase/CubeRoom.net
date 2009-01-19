@@ -1,15 +1,15 @@
 
-include sample.proto;
+include CubeRoom.proto;
 
 module Guild {
 	server Login(
 		os_int a,
 		string<100> s1,
-		msg m
+		MicrophoneInfo m
 	);
 	client LoginCallback(
 		os_int ret,
 		string<100> s1,
-		msg m
+		MicrophoneInfo m
 	);
 };

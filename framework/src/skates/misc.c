@@ -7,24 +7,26 @@
 #include "../../inc/skates/os.h"
 #include "../../inc/skates/misc.h"
 
-void strtrim(char* str)
+char* strtrim(char* str)
 {
 	size_t s;
 	for(s=strlen(str); s>0; s--) {
 		if(str[s-1]!=' ') break;
 	}
 	str[s] = '\0';
+	return str;
 }
 
-void strltrim(char* str)
+char* strltrim(char* str)
 {
 	char* cur;
 	for(cur=str; *cur!='\0'; cur++) {
-		if(*cur!=' ') {
-			if(cur!=str) memmove(str, cur, strlen(cur)+1);
-			return;
-		}
+		if(*cur!=' ') break;
 	}
+	if(cur!=str) {
+		memmove(str, cur, strlen(cur)+1);
+	}
+	return str;
 }
 
 static unsigned char HEXVAL[] =				// used for convertion from string to binary

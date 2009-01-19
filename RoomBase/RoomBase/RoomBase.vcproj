@@ -249,12 +249,92 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 		</Filter>
+		<Filter
+			Name="aaaa"
+			>
+		</Filter>
 		<File
 			RelativePath=".\ClassDiagram.cd"
 			>
 		</File>
 		<File
 			RelativePath=".\CubeRoom.lua"
+			>
+		</File>
+		<File
+			RelativePath=".\CubeRoom.net"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="$(OutDir)\nProtGen.exe client $(InputFileName)"
+					Outputs="&quot;$(InputPath).proto&quot;;&quot;$(InputPath).clt.hpp&quot;;&quot;$(InputPath).clt.cpp&quot;;&quot;$(InputPath).svr.hpp&quot;;&quot;$(InputPath).svr.cpp&quot;"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="$(OutDir)\nProtGen.exe client $(InputFileName)"
+					Outputs="&quot;$(InputPath).proto&quot;;&quot;$(InputPath).clt.hpp&quot;;&quot;$(InputPath).clt.cpp&quot;;&quot;$(InputPath).svr.hpp&quot;;&quot;$(InputPath).svr.cpp&quot;"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\CubeRoom.net.clt.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\CubeRoom.net.clt.hpp"
+			>
+		</File>
+		<File
+			RelativePath=".\CubeRoom.net.proto"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\CubeRoom.net.proto.c"
+			>
+		</File>
+		<File
+			RelativePath=".\CubeRoom.net.proto.h"
+			>
+		</File>
+		<File
+			RelativePath=".\CubeRoom.net.proto.lua.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\CubeRoom.net.proto.lua.h"
+			>
+		</File>
+		<File
+			RelativePath=".\CubeRoom.net.svr.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\CubeRoom.net.svr.hpp"
 			>
 		</File>
 		<File

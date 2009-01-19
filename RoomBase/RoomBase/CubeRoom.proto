@@ -24,24 +24,24 @@ struct CubeMemberInfo {
 	os_dword		flags;
 };
 
-interface ICubeUser {
+interface ICubeUserX {
 	void Disconnect();
 
-	ICubeRoom GetCubeRoom();
+	ICubeRoomX GetCubeRoom();
 	CubeRoleInfo GetRoleInfo();
 
 };
 
-interface ICubeRoom {
+interface ICubeRoomX {
 	CubeRoomInfo	GetInfo();
 
 	os_int			GetMicrophoneCount();
 	MicrophoneInfo	GetMicrophoneInfo(os_int index);
-	os_int			AcquireMicrophone(ICubeUser user, string<100> mtv);
-	void			GiveupMicrophone(ICubeUser user);
+	os_int			AcquireMicrophone(ICubeUserX user, string<100> mtv);
+	void			GiveupMicrophone(ICubeUserX user);
 
 	os_int			GetMemberCount();
-	ICubeMember		GetMember(os_int idx);
+	ICubeMemberX	GetMember(os_int idx);
 
 	os_int			GetRoomState();
 	void			SetRoomState(os_int state);
@@ -49,9 +49,9 @@ interface ICubeRoom {
 	void			SetMemberFlags(os_dword flags);
 };
 
-interface ICubeMember {
-	ICubeUser		GetUser();
-	ICubeRoom		GetRoom();
+interface ICubeMemberX {
+	ICubeUserX		GetUser();
+	ICubeRoomX		GetRoom();
 	os_dword		GetUUID();
 	string			GetNick();
 	CubeMemberInfo	GetInfo();
