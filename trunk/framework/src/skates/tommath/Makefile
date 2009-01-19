@@ -24,7 +24,7 @@ TOMMATH_SRC=bn_error.c bn_fast_mp_invmod.c bn_fast_mp_montgomery_reduce.c bn_fas
 
 TOMMATH_OBJ= $(subst .c,.o,$(TOMMATH_SRC))
 
-TOMMATH_LIB= tommath.a
+TOMMATH_LIB= tommath$(STA_LIB_PREFIX)
 
 .c.o:
 	$(CC) $< $(TOMMATH_CC_FLAG) $@

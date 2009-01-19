@@ -16,7 +16,7 @@ SQLITE_INC=	btree.h btreeInt.h fts3.h fts3_hash.h fts3_tokenizer.h hash.h hwtime
 
 SQLITE_OBJ= $(subst .c,.o,$(SQLITE_SRC))
 
-SQLITE_LIB= sqlite.a
+SQLITE_LIB= sqlite$(STA_LIB_PREFIX)
 
 .c.o:
 	$(CC) -DSQLITE_CORE=1 $< $(SQLITE_CC_FLAG) $@

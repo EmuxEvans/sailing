@@ -7,7 +7,7 @@ IDL_DEPS = idl.tab.h idl.tab.c idl.lex.c
 PDL_OBJS = pdl.tab.o pdl.lex.o pdl_cc.o pdl_codegen.o
 IDL_OBJS = idl.tab.o idl.lex.o idl_cc.o idl_codegen.o
 PRO_SRCS = prot_gen.c prot_parser.c $(BASE_DIR)/src/skates/os_unix.c $(BASE_DIR)/src/skates/misc.c
-PRO_SRCS = nprot_gen.c prot_parser.c $(BASE_DIR)/src/skates/os_unix.c $(BASE_DIR)/src/skates/misc.c
+NPRO_SRCS = nprot_gen.c prot_parser.c $(BASE_DIR)/src/skates/os_unix.c $(BASE_DIR)/src/skates/misc.c
 BINS=$(OUTPUT_DIR)/pdl_cc $(OUTPUT_DIR)/idl_cc $(OUTPUT_DIR)/prot_gen $(OUTPUT_DIR)/nprot_gen
 
 #.y .tab.c:
@@ -35,6 +35,6 @@ $(OUTPUT_DIR)/idl_cc: $(IDL_DEPS) $(IDL_OBJS)
 $(OUTPUT_DIR)/prot_gen: $(PRO_SRCS)
 	$(CC) $(CC_FLAG) $(OS_LIB) -I$(BASE_DIR)/inc -DMODULE_NAME=\"prot_gen\" $^ -o $@
 
-$(OUTPUT_DIR)/Nprot_gen: $(NPRO_SRCS)
+$(OUTPUT_DIR)/nprot_gen: $(NPRO_SRCS)
 	$(CC) $(CC_FLAG) $(OS_LIB) -I$(BASE_DIR)/inc -DMODULE_NAME=\"nprot_gen\" $^ -o $@
 
