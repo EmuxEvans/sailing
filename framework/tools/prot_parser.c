@@ -241,7 +241,7 @@ const char* get_token_number(const char* buf, char* value, int size)
 		if(buf[end]=='.') continue;
 		tbuf = get_token_id(buf+end, kk, sizeof(kk));
 		if(tbuf) {
-			end = tbuf - buf;
+			end = tbuf - buf - 1;
 			continue;
 		}
 		if(end==0) return NULL;

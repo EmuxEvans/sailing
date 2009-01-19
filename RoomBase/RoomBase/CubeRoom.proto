@@ -1,4 +1,23 @@
 
+const os_int LOGIN_USERNAME_MAXLEN = 20;
+const os_int LOGIN_SALT_MAXLEN = 40;
+const os_int LOGIN_PUBKEY_MAXLEN = 40;
+const os_int LOGIN_SESSION_MAXLEN = 40;
+const os_int LOGIN_PROOF_MAXLEN = 40;
+
+struct LoginSalt {
+	os_byte data[LOGIN_SALT_MAXLEN];
+};
+struct LoginPubkey {
+	os_byte data[LOGIN_PUBKEY_MAXLEN];
+};
+struct LoginSession {
+	os_byte data[LOGIN_SESSION_MAXLEN];
+};
+struct LoginProof {
+	os_byte data[LOGIN_PROOF_MAXLEN];
+};
+
 struct MicrophoneInfo {
 	os_dword		uuid;
 	string<100>		mtv;
@@ -24,24 +43,24 @@ struct CubeMemberInfo {
 	os_dword		flags;
 };
 
-interface ICubeUserX {
+interface ICubeUser {
 	void Disconnect();
 
-	ICubeRoomX GetCubeRoom();
+	ICubeRoom GetCubeRoom();
 	CubeRoleInfo GetRoleInfo();
 
 };
 
-interface ICubeRoomX {
+interface ICubeRoom {
 	CubeRoomInfo	GetInfo();
 
 	os_int			GetMicrophoneCount();
 	MicrophoneInfo	GetMicrophoneInfo(os_int index);
-	os_int			AcquireMicrophone(ICubeUserX user, string<100> mtv);
-	void			GiveupMicrophone(ICubeUserX user);
+	os_int			AcquireMicrophone(ICubeUser user, string<100> mtv);
+	void			GiveupMicrophone(ICubeUser user);
 
 	os_int			GetMemberCount();
-	ICubeMemberX	GetMember(os_int idx);
+	ICubeMember		GetMember(os_int idx);
 
 	os_int			GetRoomState();
 	void			SetRoomState(os_int state);
@@ -49,9 +68,9 @@ interface ICubeRoomX {
 	void			SetMemberFlags(os_dword flags);
 };
 
-interface ICubeMemberX {
-	ICubeUserX		GetUser();
-	ICubeRoomX		GetRoom();
+interface ICubeMember {
+	ICubeUser		GetUser();
+	ICubeRoom		GetRoom();
 	os_dword		GetUUID();
 	string			GetNick();
 	CubeMemberInfo	GetInfo();

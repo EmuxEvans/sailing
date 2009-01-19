@@ -328,6 +328,7 @@ int generate_clua(const char* name, char* src, unsigned int src_len)
 	snprintf(src+strlen(src), src_len-strlen(src), "#include \"%s.lua.h\"\n", buf);
 
 	for(i=0; i<num_class; i++) {
+		if(!data_class[i].is_root) continue;
 		snprintf(src+strlen(src), src_len-strlen(src), "\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "\n");
 

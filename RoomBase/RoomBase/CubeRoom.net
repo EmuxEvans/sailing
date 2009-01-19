@@ -1,6 +1,15 @@
 
 include CubeRoom.proto;
 
+module Login {
+	server begin(string<LOGIN_USERNAME_MAXLEN> username);
+	client begin_callback(LoginSalt salt, LoginPubkey pubkey);
+	server exchange(LoginSession session);
+	client exchange_callback(LoginSession session);
+	server verify(LoginProof proof);
+	client verify_callback(os_int code, LoginProof proof);
+};
+
 module Guild {
 	server Login(
 		os_int a,
