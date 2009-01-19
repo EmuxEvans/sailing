@@ -35,10 +35,7 @@ void dotest()
 	// step 1:
 	srp6a_client_set_username(&srpc, username);
 	// printf("[client] send username\n");
-	srp6a_client_set_param(&srpc, modulus, modlen, generator, genlen, salt, saltlen);
-	cbuf_len = sizeof(cbuf);
-	srp6a_client_gen_pub(&srpc, cbuf, &cbuf_len); // A => cbuf
-	// printf("[client] send A\n");
+	srp6a_client_set_password(&srpc, password);
 
 	// step 2:
 	srp6a_server_set_username(&srps, username);
@@ -49,12 +46,17 @@ void dotest()
 	// printf("[server] send B\n");
 
 	// step 3:
+	srp6a_client_set_param(&srpc, modulus, modlen, generator, genlen, salt, saltlen);
+	cbuf_len = sizeof(cbuf);
+	srp6a_client_gen_pub(&srpc, cbuf, &cbuf_len); // A => cbuf
+	// printf("[client] send A\n");
+
+	// stop 4:
 	ks_len = sizeof(ks);
 	srp6a_server_comput_key(&srps, cbuf, cbuf_len, ks, &ks_len); // session_key => sess
 	// printf("[server] send session key\n");
 
 	// step 4:
-	srp6a_client_set_password(&srpc, password);
 	kc_len = sizeof(kc);
 	srp6a_client_comput_key(&srpc, sbuf, sbuf_len, kc, &kc_len);
 
