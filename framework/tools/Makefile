@@ -8,7 +8,7 @@ PDL_OBJS = pdl.tab.o pdl.lex.o pdl_cc.o pdl_codegen.o
 IDL_OBJS = idl.tab.o idl.lex.o idl_cc.o idl_codegen.o
 PRO_SRCS = prot_gen.c prot_parser.c $(BASE_DIR)/src/skates/os_unix.c $(BASE_DIR)/src/skates/misc.c
 PRO_SRCS = nprot_gen.c prot_parser.c $(BASE_DIR)/src/skates/os_unix.c $(BASE_DIR)/src/skates/misc.c
-BINS=$(OUTPUT_DIR)/pdl_cc $(OUTPUT_DIR)/idl_cc $(OUTPUT_DIR)/prot_gen
+BINS=$(OUTPUT_DIR)/pdl_cc $(OUTPUT_DIR)/idl_cc $(OUTPUT_DIR)/prot_gen $(OUTPUT_DIR)/nprot_gen
 
 #.y .tab.c:
 %.tab.c %.tab.h: %.y
