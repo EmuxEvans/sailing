@@ -7,7 +7,7 @@ class CCubeMember;
 typedef IGameUserController<CCubeUser> ICubeUserController;
 typedef IGameRoomController<CCubeUser, CCubeRoom, CCubeMember> ICubeRoomController;
 
-class CCubeUser : public CGameUser<CCubeUser>, public ICubeUser
+class CCubeUser : public CGameUser<CCubeUser>, public ICubeUserX
 {
 public:
 	void* operator new (size_t n);
@@ -27,7 +27,7 @@ public:
 	//
 	virtual void Disconnect() {
 	}
-	virtual ICubeRoom* GetCubeRoom() {
+	virtual ICubeRoomX* GetCubeRoom() {
 		return NULL;
 	}
 	virtual CubeRoleInfo* GetRoleInfo() {
@@ -38,7 +38,7 @@ public:
 	NETWORK_HANDLE m_pHandle;
 };
 
-class CCubeRoom : public CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>, public ICubeRoom
+class CCubeRoom : public CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>, public ICubeRoomX
 {
 public:
 	void* operator new (size_t n);
@@ -58,7 +58,7 @@ public:
 	}
 };
 
-class CCubeMember : public CGameMember<CCubeUser, CCubeRoom, CCubeMember>, public ICubeMember
+class CCubeMember : public CGameMember<CCubeUser, CCubeRoom, CCubeMember>, public ICubeMemberX
 {
 public:
 	void* operator new (size_t n);
@@ -71,10 +71,10 @@ public:
 	}
 
 	//
-	virtual ICubeUser* GetUser() {
+	virtual ICubeUserX* GetUser() {
 		return NULL;
 	}
-	virtual ICubeRoom* GetRoom() {
+	virtual ICubeRoomX* GetRoom() {
 		return NULL;
 	}
 	virtual os_dword GetUUID() {

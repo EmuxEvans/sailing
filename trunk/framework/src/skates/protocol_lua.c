@@ -367,7 +367,7 @@ int struct_tostring(lua_State* L)
 	}
 	obj = (PROTOCOL_LUA_OBJECT*)lua_touserdata(L, 1);
 	buf_len = sizeof(buf);
-	ret = protocol_text_write(obj->s.type, obj->s.ptr, buf, &buf_len);
+	ret = protocol_text_write(obj->s.type, NULL, obj->s.ptr, buf, &buf_len);
 	if(ret!=ERR_NOERROR) {
 		buf[0] = '\0';
 		buf_len = 0;

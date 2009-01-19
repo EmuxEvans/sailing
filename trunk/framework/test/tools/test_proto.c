@@ -50,10 +50,10 @@ int main(int argc, char* argv[])
 	protocol_binary_read(&PROTOCOL_NAME(B), buf, &len, &vv);
 	len = sizeof(buf);
 	memset(buf, 0xff, sizeof(buf));
-	protocol_text_write(&PROTOCOL_NAME(B), &vv, buf, &len);
+	protocol_text_write(&PROTOCOL_NAME(B), NULL, &vv, buf, &len);
 	memset(&vv, 0xff, sizeof(vv));
 	len = (unsigned int)strlen(buf);
-	protocol_text_read(&PROTOCOL_NAME(B), buf, &len, &vv);
+	protocol_text_read(&PROTOCOL_NAME(B), NULL, buf, &len, &vv);
 
 	protocol_parse(buf, &callback, NULL);
 	return 0;

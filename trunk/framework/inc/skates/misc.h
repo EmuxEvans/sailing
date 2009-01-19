@@ -13,8 +13,8 @@ extern "C" {
 #endif
 
 // string
-ZION_API void strtrim(char* str);
-ZION_API void strltrim(char* str);
+ZION_API char* strtrim(char* str);
+ZION_API char* strltrim(char* str);
 
 ZION_API int hex2bin(const char* hex, unsigned char* buf, int buflen);
 ZION_API void bin2hex(const unsigned char* buf, int buflen, char* hex);

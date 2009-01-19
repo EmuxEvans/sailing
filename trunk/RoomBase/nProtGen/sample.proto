@@ -1,2 +1,9 @@
 
+struct msg {
+	os_int i1 = 100;
+	os_int i2[100];
+	string<100> s1;
+	string<100> sa[1000];
+};
+
 
