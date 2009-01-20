@@ -1,0 +1,77 @@
+
+const os_int LOGIN_USERNAME_MAXLEN = 20;
+const os_int LOGIN_SALT_MAXLEN = 40;
+const os_int LOGIN_PUBKEY_MAXLEN = 40;
+const os_int LOGIN_SESSION_MAXLEN = 40;
+const os_int LOGIN_PROOF_MAXLEN = 40;
+
+struct LoginSalt {
+	os_byte data[LOGIN_SALT_MAXLEN];
+};
+struct LoginPubkey {
+	os_byte data[LOGIN_PUBKEY_MAXLEN];
+};
+struct LoginSession {
+	os_byte data[LOGIN_SESSION_MAXLEN];
+};
+struct LoginProof {
+	os_byte data[LOGIN_PROOF_MAXLEN];
+};
+
+struct MicrophoneInfo {
+	os_dword		uuid;
+	string<100>		mtv;
+};
+
+struct CubeRoleInfo {
+	os_dword		uuid;
+	string<100>		nick;
+	string<2*1024>	roledata;
+	string<2*1024>	equipment;
+	string<2*1024>	warehouse;
+};
+
+struct CubeRoomInfo {
+	os_dword		id;
+	string<100>		name;
+};
+
+struct CubeMemberInfo {
+	string<100>		nick;
+	string<1024>	roleinfo;
+	string<1024>	equipment;
+	os_dword		flags;
+};
+
+interface ICubeUser {
+	void Disconnect();
+
+	ICubeRoom GetCubeRoom();
+	CubeRoleInfo GetRoleInfo();
+
+};
+
+interface ICubeRoom {
+	CubeRoomInfo	GetInfo();
+
+	os_int			GetMicrophoneCount();
+	MicrophoneInfo	GetMicrophoneInfo(os_int index);
+	os_int			AcquireMicrophone(ICubeUser user, string<100> mtv);
+	void			GiveupMicrophone(ICubeUser user);
+
+	os_int			GetMemberCount();
+	ICubeMember		GetMember(os_int idx);
+
+	os_int			GetRoomState();
+	void			SetRoomState(os_int state);
+	os_dword		GetMemberFlags();
+	void			SetMemberFlags(os_dword flags);
+};
+
+interface ICubeMember {
+	ICubeUser		GetUser();
+	ICubeRoom		GetRoom();
+	os_dword		GetUUID();
+	string			GetNick();
+	CubeMemberInfo	GetInfo();
+};

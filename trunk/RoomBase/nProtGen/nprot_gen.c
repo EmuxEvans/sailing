@@ -77,7 +77,23 @@ int main(int argc, char* argv[])
 		return 0;
 	}
 
-	ret = parser_nfile(txt);
+	{
+		char opath[200], path[200];
+		char *a, *b;
+
+		os_getcwd(opath, sizeof(opath));
+		strcpy(path, argv[2]);
+		a = strrchr(path, '\\');
+		b = strrchr(path, '/');
+		if(b>a) a = b;
+		if(a!=NULL) {
+			*a = '\0';
+			os_chdir(path);
+		}
+		ret = parser_nfile(txt);
+		os_chdir(opath);
+	}
+
 	if(ret!=ERR_NOERROR) {
 		printf("error: parse!\n");
 		return 0;
@@ -265,10 +281,10 @@ int generate_hcltfile(const char* name, char* inc, unsigned int inc_len)
 			snprintf(inc+strlen(inc), inc_len-strlen(inc), ") {}\n");
 		}
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "};\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class C%sClient : public I%sServer {\n", nmodules[c].name, nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class C%sClientBase : public I%sServer {\n", nmodules[c].name, nmodules[c].name);
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	C%sClient(bool bTextMode, C%sClientHook** pHooks, int nHookMax, char* pRecvBuf, int nRecvBufSize);\n", nmodules[c].name, nmodules[c].name);
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	~C%sClient();\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	C%sClientBase(bool bTextMode, C%sClientHook** pHooks, int nHookMax, char* pRecvBuf, int nRecvBufSize);\n", nmodules[c].name, nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	~C%sClientBase();\n", nmodules[c].name);
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool IsTextMode() const { return m_bTextMode; }\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void SetTextMode(bool bTextMode=false) { m_bTextMode = bTextMode; }\n");
@@ -395,7 +411,7 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 			snprintf(src+strlen(src), src_len-strlen(src), "\n");
 		}
 
-		snprintf(src+strlen(src), src_len-strlen(src), "C%sClient::C%sClient(bool bTextMode, C%sClientHook** pHooks, int nHookMax, char* pRecvBuf, int nRecvBufSize)\n", nmodules[c].name, nmodules[c].name, nmodules[c].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "C%sClientBase::C%sClientBase(bool bTextMode, C%sClientHook** pHooks, int nHookMax, char* pRecvBuf, int nRecvBufSize)\n", nmodules[c].name, nmodules[c].name, nmodules[c].name);
 		snprintf(src+strlen(src), src_len-strlen(src), "{\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "	m_bTextMode = bTextMode;\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "	m_pHooks = pHooks;\n");
@@ -405,11 +421,11 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 		snprintf(src+strlen(src), src_len-strlen(src), "	memset(m_pHooks, 0, sizeof(m_pHooks[0])*nHookMax);\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "}\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "\n");
-		snprintf(src+strlen(src), src_len-strlen(src), "C%sClient::~C%sClient()\n", nmodules[c].name, nmodules[c].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "C%sClientBase::~C%sClientBase()\n", nmodules[c].name, nmodules[c].name);
 		snprintf(src+strlen(src), src_len-strlen(src), "{\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "}\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "\n");
-		snprintf(src+strlen(src), src_len-strlen(src), "bool C%sClient::Dispatch(const void* pData, unsigned int nSize)\n", nmodules[c].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "bool C%sClientBase::Dispatch(const void* pData, unsigned int nSize)\n", nmodules[c].name);
 		snprintf(src+strlen(src), src_len-strlen(src), "{\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "	if(m_bTextMode) {\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "		const char* end;\n");
@@ -445,7 +461,7 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 
 		for(f=nmodules[c].f_start; f<nmodules[c].f_start+nmodules[c].f_count; f++) {
 			if(nfunctions[f].type!='S') continue;
-			snprintf(src+strlen(src), src_len-strlen(src), "void C%sClient::%s(", nmodules[c].name, nfunctions[f].name);
+			snprintf(src+strlen(src), src_len-strlen(src), "void C%sClientBase::%s(", nmodules[c].name, nfunctions[f].name);
 			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
 				if(p>nfunctions[f].p_start) snprintf(src+strlen(src), src_len-strlen(src), ", ");
 				snprintf(src+strlen(src), src_len-strlen(src), "%s %s", get_ctype(nparams[p].type), nparams[p].name);
@@ -626,10 +642,10 @@ int generate_hsvrfile(const char* name, char* inc, unsigned int inc_len)
 			snprintf(inc+strlen(inc), inc_len-strlen(inc), ") {}\n");
 		}
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "};\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class C%sServer : public I%sClient {\n", nmodules[c].name, nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class C%sServerBase : public I%sClient {\n", nmodules[c].name, nmodules[c].name);
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	C%sServer(bool bTextMode, C%sServerHook** pHooks, int nHookMax, char* pRecvBuf, int nRecvBufSize);\n", nmodules[c].name, nmodules[c].name);
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	~C%sServer();\n", nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	C%sServerBase(bool bTextMode, C%sServerHook** pHooks, int nHookMax, char* pRecvBuf, int nRecvBufSize);\n", nmodules[c].name, nmodules[c].name);
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	~C%sServerBase();\n", nmodules[c].name);
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool IsTextMode() const { return m_bTextMode; }\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	void SetTextMode(bool bTextMode=false) { m_bTextMode = bTextMode; }\n");
@@ -756,7 +772,7 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 			snprintf(src+strlen(src), src_len-strlen(src), "\n");
 		}
 
-		snprintf(src+strlen(src), src_len-strlen(src), "C%sServer::C%sServer(bool bTextMode, C%sServerHook** pHooks, int nHookMax, char* pRecvBuf, int nRecvBufSize)\n", nmodules[c].name, nmodules[c].name, nmodules[c].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "C%sServerBase::C%sServerBase(bool bTextMode, C%sServerHook** pHooks, int nHookMax, char* pRecvBuf, int nRecvBufSize)\n", nmodules[c].name, nmodules[c].name, nmodules[c].name);
 		snprintf(src+strlen(src), src_len-strlen(src), "{\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "	m_bTextMode = bTextMode;\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "	m_pHooks = pHooks;\n");
@@ -766,11 +782,11 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 		snprintf(src+strlen(src), src_len-strlen(src), "	memset(m_pHooks, 0, sizeof(m_pHooks[0])*nHookMax);\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "}\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "\n");
-		snprintf(src+strlen(src), src_len-strlen(src), "C%sServer::~C%sServer()\n", nmodules[c].name, nmodules[c].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "C%sServerBase::~C%sServerBase()\n", nmodules[c].name, nmodules[c].name);
 		snprintf(src+strlen(src), src_len-strlen(src), "{\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "}\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "\n");
-		snprintf(src+strlen(src), src_len-strlen(src), "bool C%sServer::Dispatch(const void* pData, unsigned int nSize)\n", nmodules[c].name);
+		snprintf(src+strlen(src), src_len-strlen(src), "bool C%sServerBase::Dispatch(const void* pData, unsigned int nSize)\n", nmodules[c].name);
 		snprintf(src+strlen(src), src_len-strlen(src), "{\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "	if(m_bTextMode) {\n");
 		snprintf(src+strlen(src), src_len-strlen(src), "		const char* end;\n");
@@ -806,7 +822,7 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 
 		for(f=nmodules[c].f_start; f<nmodules[c].f_start+nmodules[c].f_count; f++) {
 			if(nfunctions[f].type!='C') continue;
-			snprintf(src+strlen(src), src_len-strlen(src), "void C%sServer::%s(", nmodules[c].name, nfunctions[f].name);
+			snprintf(src+strlen(src), src_len-strlen(src), "void C%sServerBase::%s(", nmodules[c].name, nfunctions[f].name);
 			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
 				if(p>nfunctions[f].p_start) snprintf(src+strlen(src), src_len-strlen(src), ", ");
 				snprintf(src+strlen(src), src_len-strlen(src), "%s %s", get_ctype(nparams[p].type), nparams[p].name);
