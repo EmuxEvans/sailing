@@ -76,6 +76,7 @@ char* CCubeClientWarp<TClientBase, TClientHook>::GetSendBuf(unsigned int& nSendB
 template<class TClientBase, class TClientHook>
 void CCubeClientWarp<TClientBase, TClientHook>::SendBuf(const char* pSendBuf, unsigned int nSendBufSize)
 {
+	return m_pClient->SendBuf(pSendBuf, nSendBufSize);
 }
 
 template<class TClientBase, class TClientHook>

@@ -33,15 +33,16 @@ void CGameUser<TGameUser>::OnDisconnect()
 	m_pController->OnDisconnect((TGameUser*)this);
 }
 
-template<class TGameUser>
-void CGameUser<TGameUser>::OnData(const void* pData, unsigned int nSize)
-{
-}
+//template<class TGameUser>
+//void CGameUser<TGameUser>::OnData(const void* pData, unsigned int nSize)
+//{
+//	assert(0);
+//}
 
 template<class TGameUser>
-void CGameUser<TGameUser>::SendData(const void* pData, unsigned int nSize)
+void CGameUser<TGameUser>::SendData(IGameChannel<TGameUser>* pChannel, const void* pData, unsigned int nSize)
 {
-	m_pController->SendData((TGameUser*)this, pData, nSize);
+	m_pController->SendData((TGameUser*)this, pChannel, pData, nSize);
 }
 
 template<class TGameUser>
@@ -56,6 +57,8 @@ bool CGameUser<TGameUser>::BindChannel(IGameChannel<TGameUser>* pChannel, unsign
 	if(pChannel->IsDynamic()) {
 		for(int idx=0; idx<sizeof(m_DynChannel)/sizeof(m_DynChannel[0]); idx++) {
 			if(m_DynChannel[idx].pChannel!=NULL) continue;
+			memset(&m_DynChannel[idx], 0, sizeof(m_DynChannel[idx]));
+			strcpy(m_DynChannel[idx].szName, pChannel->GetName());
 			m_DynChannel[idx].pChannel = pChannel;
 			m_DynChannel[idx].nCIdx = nCIdx;
 			return true;
@@ -64,7 +67,10 @@ bool CGameUser<TGameUser>::BindChannel(IGameChannel<TGameUser>* pChannel, unsign
 		assert(pChannel->GetType()<sizeof(m_StaChannel)/sizeof(m_StaChannel[0]));
 		assert(m_StaChannel[pChannel->GetType()].pChannel==NULL);
 		if(pChannel->GetType()>=sizeof(m_StaChannel)/sizeof(m_StaChannel[0])) return false;
+		if(strlen(pChannel->GetName())>=sizeof(m_StaChannel[0])) return false;
 		if(m_StaChannel[pChannel->GetType()].pChannel!=NULL) return false;
+		memset(&m_StaChannel[pChannel->GetType()], 0, sizeof(m_StaChannel[0]));
+		strcpy(m_StaChannel[pChannel->GetType()].szName, pChannel->GetName());
 		m_StaChannel[pChannel->GetType()].pChannel = pChannel;
 		m_StaChannel[pChannel->GetType()].nCIdx = nCIdx;
 	}
@@ -78,7 +84,6 @@ bool CGameUser<TGameUser>::UnbindChannel(IGameChannel<TGameUser>* pChannel, unsi
 		for(int idx=0; idx<sizeof(m_DynChannel)/sizeof(m_DynChannel[0]); idx++) {
 			if(m_DynChannel[idx].pChannel!=NULL || m_DynChannel[idx].nCIdx!=NULL) continue;
 			m_DynChannel[idx].pChannel = NULL;
-			m_DynChannel[idx].nCIdx = 0;
 			return true;
 		}
 	} else {
@@ -87,7 +92,6 @@ bool CGameUser<TGameUser>::UnbindChannel(IGameChannel<TGameUser>* pChannel, unsi
 		if(pChannel->GetType()>=sizeof(m_StaChannel)/sizeof(m_StaChannel[0])) return false;
 		if(m_StaChannel[pChannel->GetType()].pChannel!=pChannel) return false;
 		m_StaChannel[pChannel->GetType()].pChannel = NULL;
-		m_StaChannel[pChannel->GetType()].nCIdx = 0;
 	}
 	return false;
 }

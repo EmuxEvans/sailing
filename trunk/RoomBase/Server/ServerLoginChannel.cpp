@@ -23,7 +23,7 @@ const char* _password = "password";
 CServerLoginChannel::CServerLoginChannel() : CLoginServerBase(TCP_TEXTMODE, &m_pHooks, 1), CLoginServerHook("LoginServerHook")
 {
 	m_pHooks = this;
-	SetChannel(0, false);
+	SetChannel("Login", 0, false);
 	srp6a_server_init(&srps);
 	step = LOGINSTEP_START;
 }

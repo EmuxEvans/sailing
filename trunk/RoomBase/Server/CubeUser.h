@@ -17,6 +17,8 @@ public:
 		m_pHandle = handle;
 	}
 
+	virtual void OnData(const void* pData, unsigned int nSize);
+
 	//
 	virtual void Disconnect() {
 		if(m_pHandle)
@@ -38,7 +40,7 @@ public:
 	virtual void OnConnect(CCubeUser* pUser);
 	virtual void OnDisconnect(CCubeUser* pUser);
 	virtual void OnData(CCubeUser* pUser, const void* pData, unsigned int nSize);
-	virtual void SendData(CCubeUser* pUser, const void* pData, unsigned int nSize);
+	virtual void SendData(CCubeUser* pUser, IGameChannel<CCubeUser>* pChannel, const void* pData, unsigned int nSize);
 	virtual void Disconnect();
 private:
 	CServerLoginChannel m_LoginChannel;

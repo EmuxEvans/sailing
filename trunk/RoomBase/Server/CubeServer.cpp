@@ -118,8 +118,6 @@ void ondata(NETWORK_HANDLE handle, void* userptr)
 
 		network_recvbuf_commit(handle, sizeof(len)+len);
 	}
-
-	user->OnData(NULL, 0);
 }
 
 void ondisconnect(NETWORK_HANDLE handle, void* userptr)
