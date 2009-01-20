@@ -1,0 +1,10 @@
+
+include ../Cube.proto;
+include ../Cube.net.proto;
+
+interface ICubeClient {
+	os_int Connect(string addr);
+	os_int Disconnect();
+	os_int IsConnected();
+	ILoginServer GetLogin();
+};
