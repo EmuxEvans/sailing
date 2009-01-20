@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Server"
+	Name="server"
 	ProjectGUID="{3C9A498E-97F0-4919-95AC-AB8D1E41F132}"
 	RootNamespace="RoomBase"
 	Keyword="Win32Proj"
@@ -172,7 +172,7 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Source Files"
+			Name="source"
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
@@ -185,20 +185,12 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GameRoom.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameUser.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="Header Files"
+			Name="include"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
@@ -210,31 +202,9 @@
 				RelativePath=".\CubeServer.h"
 				>
 			</File>
-			<File
-				RelativePath=".\GameRoom.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GameRoom.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\GameUser.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GameUser.inl"
-				>
-			</File>
 		</Filter>
 		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
-		</Filter>
-		<Filter
-			Name="AutoGen"
+			Name="autogen"
 			>
 			<File
 				RelativePath="..\CubeRoom.net.proto"
@@ -244,7 +214,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+						CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
 					/>
 				</FileConfiguration>
@@ -253,7 +223,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+						CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
 					/>
 				</FileConfiguration>

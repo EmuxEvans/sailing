@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="nprotgen"
-	ProjectGUID="{1844D440-E9B5-4A96-B976-42AD6E0B3506}"
-	RootNamespace="nProtGen"
+	Name="common"
+	ProjectGUID="{63DB25BB-6189-449A-ADAD-9CCF1FE758E4}"
+	RootNamespace="common"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -20,7 +20,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="0"
 			>
 			<Tool
@@ -41,8 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -60,17 +59,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				LinkIncremental="2"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -82,9 +74,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -92,7 +81,7 @@
 			Name="Release|Win32"
 			OutputDirectory="..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
@@ -115,8 +104,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -133,19 +121,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -155,9 +134,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -173,19 +149,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\framework\src\skates\misc.c"
+				RelativePath=".\GameRoom.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\nprot_gen.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\framework\src\skates\os_win32.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\framework\tools\prot_parser.c"
+				RelativePath=".\GameUser.cpp"
 				>
 			</File>
 		</Filter>
@@ -195,18 +163,22 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\framework\tools\prot_parser.h"
+				RelativePath=".\GameRoom.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameRoom.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\GameUser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameUser.inl"
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\sample.proto"
-			>
-		</File>
-		<File
-			RelativePath=".\sample.txt"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

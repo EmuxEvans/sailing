@@ -3,10 +3,10 @@
 
 #include <skates/skates.h>
 
-#include "GameUser.h"
-#include "GameRoom.h"
-#include "GameUser.inl"
-#include "GameRoom.inl"
+#include "../common/GameUser.h"
+#include "../common/GameRoom.h"
+#include "../common/GameUser.inl"
+#include "../common/GameRoom.inl"
 
 #include "../CubeRoom.proto.h"
 #include "CubeRoom.h"
