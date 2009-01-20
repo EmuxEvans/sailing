@@ -130,7 +130,7 @@ int fdwatch_dispatch(FDWATCH_HANDLE handle, int timeout)
 	FDWATCH_ITEM* item;
 	FDWATCH_ITEM* pool[FD_SETSIZE];
 	int count, ret, fdmax;
-	fd_set rdfds, wrfds;
+	fd_set rdfds, wrfds, erfds;
 
 	assert(handle && handle->inuse);
 	if(handle==NULL || (!handle->inuse)) return ERR_INVALID_HANDLE;
@@ -138,6 +138,7 @@ int fdwatch_dispatch(FDWATCH_HANDLE handle, int timeout)
 	//
 	FD_ZERO(&rdfds);
 	FD_ZERO(&wrfds);
+	FD_ZERO(&erfds);
 	fdmax = 0;
 	count = 0;
 
@@ -149,7 +150,7 @@ int fdwatch_dispatch(FDWATCH_HANDLE handle, int timeout)
 		while(!rlist_is_head(&handle->enable_list, &item->item) && count<FD_SETSIZE) {
 			if((item->flags&FDWATCH_DISABLE)==0) {
 				pool[count++] = item;
-				if(item->flags&FDWATCH_READ)	FD_SET(item->fd, &rdfds);
+				if(item->flags&FDWATCH_READ)	{ FD_SET(item->fd, &rdfds); FD_SET(item->fd, &erfds); }
 				if(item->flags&FDWATCH_WRITE)	FD_SET(item->fd, &wrfds);
 				if(fdmax<item->fd) fdmax = item->fd;
 			}
@@ -170,9 +171,9 @@ int fdwatch_dispatch(FDWATCH_HANDLE handle, int timeout)
 			struct timeval tv;
 			tv.tv_sec	= timeout / 1000;
 			tv.tv_usec	= (timeout%1000)*1000;
-			ret = select(fdmax+1, &rdfds, &wrfds, NULL, &tv);
+			ret = select(fdmax+1, &rdfds, &wrfds, &erfds, &tv);
 		} else {
-			ret = select(fdmax+1, &rdfds, &wrfds, NULL, NULL);
+			ret = select(fdmax+1, &rdfds, &wrfds, &erfds, NULL);
 		}
 		if(ret>=0) break;
 		if(WSAGetLastError()!=WSAEINTR) {
@@ -183,7 +184,7 @@ int fdwatch_dispatch(FDWATCH_HANDLE handle, int timeout)
 
 	for(;count>0; count--) {
 		int events = 0;
-		if(pool[count-1]->flags&FDWATCH_READ && FD_ISSET(pool[count-1]->fd, &rdfds)) {
+		if(pool[count-1]->flags&FDWATCH_READ && (FD_ISSET(pool[count-1]->fd, &rdfds) || FD_ISSET(pool[count-1]->fd, &erfds))) {
 			events |= FDWATCH_READ;
 		}
 		if(pool[count-1]->flags&FDWATCH_WRITE && FD_ISSET(pool[count-1]->fd, &wrfds)) {
@@ -206,4 +207,3 @@ int fdwatch_break(FDWATCH_HANDLE handle)
 	handle->quit_flag = 1;
 	return ERR_NOERROR;
 }
-
