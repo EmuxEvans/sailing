@@ -43,6 +43,7 @@ void dotest()
 	srp6a_server_set_password(&srps, password);
 	sbuf_len = sizeof(sbuf);
 	srp6a_server_gen_pub(&srps, sbuf, &sbuf_len); // B => sbuf
+	// printf("[server] send salt\n");
 	// printf("[server] send B\n");
 
 	// step 3:
@@ -59,8 +60,7 @@ void dotest()
 	// step 4:
 	kc_len = sizeof(kc);
 	srp6a_client_comput_key(&srpc, sbuf, sbuf_len, kc, &kc_len);
-
-	// step 5:
+	// printf("[client] send session key\n");
 	kc_len = sizeof(kc);
 	srp6a_client_respond(&srpc, kc, &kc_len);
 	// printf("[client] send client proof\n");

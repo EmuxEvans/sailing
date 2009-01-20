@@ -404,14 +404,14 @@ int generate_clua(const char* name, char* src, unsigned int src_len)
 				snprintf(src+strlen(src), src_len-strlen(src), "		return 0;\n");
 				snprintf(src+strlen(src), src_len-strlen(src), "	}\n");
 			}
-			snprintf(src+strlen(src), src_len-strlen(src), "	%s (%s::*%s)(%s);\n", get_ctype(data_function[j].return_type), data_class[i].name, data_function[j].name, arg_def);
-			snprintf(src+strlen(src), src_len-strlen(src), "	*((void**)&%s) = ((void**)(*((void**)obj)))[%d];\n", data_function[j].name, j-data_class[i].function_start);
+			snprintf(src+strlen(src), src_len-strlen(src), "	%s (%s::*%s)(%s);\n", get_ctype(data_function[j].return_type), data_class[i].name, "__function", arg_def);
+			snprintf(src+strlen(src), src_len-strlen(src), "	*((void**)&%s) = ((void**)(*((void**)obj)))[%d];\n", "__function", j-data_class[i].function_start);
 			if(strcmp(data_function[j].return_type, "void")==0) {
-				snprintf(src+strlen(src), src_len-strlen(src), "	(((%s*)obj)->*%s)(%s);\n", data_class[i].name, data_function[j].name, arg_list);
+				snprintf(src+strlen(src), src_len-strlen(src), "	(((%s*)obj)->*%s)(%s);\n", data_class[i].name, "__function", arg_list);
 				snprintf(src+strlen(src), src_len-strlen(src), "	return 0;\n");
 			} else {
 				snprintf(src+strlen(src), src_len-strlen(src), "	return_value = (((%s*)obj)->*%s)(%s);\n",
-data_class[i].name, data_function[j].name, arg_list);
+data_class[i].name, "__function", arg_list);
 				snprintf(src+strlen(src), src_len-strlen(src), "	protocol_lua_pushvalue(L, &__%s_%s_return_, &return_value);\n",
 data_class[i].name, data_function[j].name);
 				snprintf(src+strlen(src), src_len-strlen(src), "	return 1;\n");

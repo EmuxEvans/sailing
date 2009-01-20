@@ -2,6 +2,7 @@
 
 #define LOGINSTEP_START		0
 #define LOGINSTEP_PUBKEY	1
+#define LOGINSTEP_SESSION	2
 #define LOGINSTEP_PROOF		3
 #define LOGINSTEP_DONE		4
 #define LOGINSTEP_ERROR		-1
@@ -17,7 +18,8 @@ public:
 	virtual void Disconnect(CCubeUser* pUser, unsigned int nCIdx);
 
 protected:
-	virtual char* GetRecvBuf(unsigned int& nRecvBufSize);
+	virtual char* GetSendBuf(unsigned int& nSendBufSize);
+	virtual void SendBuf(const char* pSendBuf, unsigned int nSendBufSize);
 protected:
 	CLoginServerHook* m_pHooks;
 	CCubeUser* m_pUser;
@@ -25,7 +27,8 @@ protected:
 public:
 	int GetLoginStep() { return step; }
 
-	virtual void begin(char* username, LoginPubkey* pubkey, LoginSession* session);
+	virtual void begin(char* username);
+	virtual void session(LoginPubkey* pubkey);
 	virtual void verify(LoginProof* proof);
 private:
 	srp6a_server_t srps;

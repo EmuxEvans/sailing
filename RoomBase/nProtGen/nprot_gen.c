@@ -292,7 +292,8 @@ int generate_hcltfile(const char* name, char* inc, unsigned int inc_len)
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool Dispatch(const void* pData, unsigned int nSize);\n", nmodules[c].name);
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "protected:\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual char* GetRecvBuf(unsigned int& nRecvBufSize) = NULL;\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual char* GetSendBuf(unsigned int& nSendBufSize) = NULL;\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual void SendBuf(const char* pSendBuf, unsigned int nSendBufSize) = NULL;\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "private:\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool				m_bTextMode;\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	C%sClientHook** m_pHooks;\n", nmodules[c].name);
@@ -466,14 +467,14 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 			snprintf(src+strlen(src), src_len-strlen(src), ")\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "{\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	int m_nlen;\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "	unsigned int nRecvBufSize;\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "	char* pRecvBuf;\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "	pRecvBuf = GetRecvBuf(nRecvBufSize);\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "	unsigned int nSendBufSize;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "	char* pSendBuf;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "	pSendBuf = GetSendBuf(nSendBufSize);\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	if(m_bTextMode) {\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen = 0;\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s {\" );\n", nfunctions[f].name);
-			snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s {\" );\n", nfunctions[f].name);
+			snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		\n");
 
 			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
@@ -481,50 +482,50 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 				case PROTOCOL_TYPE_CHAR:
 				case PROTOCOL_TYPE_SHORT:
 				case PROTOCOL_TYPE_INT:
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%d;\", (int)%s);\n", nparams[p].name, nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%d;\", (int)%s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				case PROTOCOL_TYPE_LONG:
 #ifdef _WIN32
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%I64d;\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%I64d;\", %s);\n", nparams[p].name, nparams[p].name);
 #else
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%lld;\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%lld;\", %s);\n", nparams[p].name, nparams[p].name);
 #endif
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				case PROTOCOL_TYPE_BYTE:
 				case PROTOCOL_TYPE_WORD:
 				case PROTOCOL_TYPE_DWORD:
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%u;\", (unsigned int)%s);\n", nparams[p].name, nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%u;\", (unsigned int)%s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				case PROTOCOL_TYPE_QWORD:
 #ifdef _WIN32
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%I64u;\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%I64u;\", %s);\n", nparams[p].name, nparams[p].name);
 #else
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%llu;\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%llu;\", %s);\n", nparams[p].name, nparams[p].name);
 #endif
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				case PROTOCOL_TYPE_FLOAT:
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%f;\", %s);\n", nparams[p].name, nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%f;\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				case PROTOCOL_TYPE_STRING:
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=\\\"%%s\\\";\", %s);\n", nparams[p].name, nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=\\\"%%s\\\";\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				default:
 					snprintf(src+strlen(src), src_len-strlen(src), "		{\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			int ____ret, ____len;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			____len = nRecvBufSize-m_nlen;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_text_write(&PROTOCOL_NAME(%s), \"%s=\", %s, pRecvBuf+m_nlen, (unsigned int*)&____len);\n", nparams[p].type, nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "			____len = nSendBufSize-m_nlen;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_text_write(&PROTOCOL_NAME(%s), \"%s=\", %s, pSendBuf+m_nlen, (unsigned int*)&____len);\n", nparams[p].type, nparams[p].name, nparams[p].name);
 					snprintf(src+strlen(src), src_len-strlen(src), "			assert(____ret==ERR_NOERROR);\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			if(____ret!=ERR_NOERROR) return;\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			m_nlen += ____len;\n");
@@ -534,12 +535,12 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 			}
 
 			snprintf(src+strlen(src), src_len-strlen(src), "		\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"}\");\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"}\");\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	} else {\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen = 1;\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		*((os_byte*)pRecvBuf) = %d;\n", f-nmodules[c].f_start);
+			snprintf(src+strlen(src), src_len-strlen(src), "		*((os_byte*)pSendBuf) = %d;\n", f-nmodules[c].f_start);
 			snprintf(src+strlen(src), src_len-strlen(src), "\n");
 
 			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
@@ -556,25 +557,25 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 				case PROTOCOL_TYPE_DWORD:
 				case PROTOCOL_TYPE_QWORD:
 				case PROTOCOL_TYPE_FLOAT:
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert((int)nRecvBufSize-m_nlen>=sizeof(%s));\n", nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		if((int)nRecvBufSize-m_nlen<sizeof(%s)) return;\n", nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		*((%s*)(pRecvBuf+m_nlen)) = %s;\n", nparams[p].type, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert((int)nSendBufSize-m_nlen>=sizeof(%s));\n", nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		if((int)nSendBufSize-m_nlen<sizeof(%s)) return;\n", nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		*((%s*)(pSendBuf+m_nlen)) = %s;\n", nparams[p].type, nparams[p].name);
 					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += sizeof(%s);\n", nparams[p].name);
 					break;
 				case PROTOCOL_TYPE_STRING:
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert((int)nRecvBufSize-m_nlen>=(int)sizeof(short));\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if((int)nRecvBufSize-m_nlen<(int)sizeof(short)) return;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		*((os_word*)(pRecvBuf+m_nlen)) = (os_word)strlen(%s);\n", nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert((int)nRecvBufSize-m_nlen>=(int)sizeof(os_word)+*((short*)(pRecvBuf+m_nlen)));\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if((int)nRecvBufSize-m_nlen<(int)sizeof(os_word)+*((short*)(pRecvBuf+m_nlen))) return;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		memcpy(pRecvBuf+m_nlen+sizeof(os_word), %s, (size_t)(*((short*)(pRecvBuf+m_nlen))));\n", nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += sizeof(os_word) + *((os_word*)(pRecvBuf+m_nlen));\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert((int)nSendBufSize-m_nlen>=(int)sizeof(short));\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if((int)nSendBufSize-m_nlen<(int)sizeof(short)) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		*((os_word*)(pSendBuf+m_nlen)) = (os_word)strlen(%s);\n", nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert((int)nSendBufSize-m_nlen>=(int)sizeof(os_word)+*((short*)(pSendBuf+m_nlen)));\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if((int)nSendBufSize-m_nlen<(int)sizeof(os_word)+*((short*)(pSendBuf+m_nlen))) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		memcpy(pSendBuf+m_nlen+sizeof(os_word), %s, (size_t)(*((short*)(pSendBuf+m_nlen))));\n", nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += sizeof(os_word) + *((os_word*)(pSendBuf+m_nlen));\n");
 					break;
 				default:
 					snprintf(src+strlen(src), src_len-strlen(src), "		{\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			int ____ret, ____len;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			____len = nRecvBufSize - m_nlen;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_binary_write(&PROTOCOL_NAME(%s), %s, pRecvBuf+m_nlen, (unsigned int *)&____len);\n", nparams[p].type, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "			____len = nSendBufSize - m_nlen;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_binary_write(&PROTOCOL_NAME(%s), %s, pSendBuf+m_nlen, (unsigned int *)&____len);\n", nparams[p].type, nparams[p].name);
 					snprintf(src+strlen(src), src_len-strlen(src), "			assert(____ret==ERR_NOERROR);\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			m_nlen += ____len;\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "		}\n");
@@ -653,7 +654,8 @@ int generate_hsvrfile(const char* name, char* inc, unsigned int inc_len)
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool Dispatch(const void* pData, unsigned int nSize);\n", nmodules[c].name);
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "protected:\n");
-		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual char* GetRecvBuf(unsigned int& nRecvBufSize) = NULL;\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual char* GetSendBuf(unsigned int& nSendBufSize) = NULL;\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual void SendBuf(const char* pSendBuf, unsigned int nSendBufSize) = NULL;\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "private:\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	bool				m_bTextMode;\n");
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	C%sServerHook** m_pHooks;\n", nmodules[c].name);
@@ -827,14 +829,14 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 			snprintf(src+strlen(src), src_len-strlen(src), ")\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "{\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	int m_nlen;\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "	unsigned int nRecvBufSize;\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "	char* pRecvBuf;\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "	pRecvBuf = GetRecvBuf(nRecvBufSize);\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "	unsigned int nSendBufSize;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "	char* pSendBuf;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "	pSendBuf = GetSendBuf(nSendBufSize);\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	if(m_bTextMode) {\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen = 0;\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s {\" );\n", nfunctions[f].name);
-			snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s {\" );\n", nfunctions[f].name);
+			snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		\n");
 
 			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
@@ -842,50 +844,50 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 				case PROTOCOL_TYPE_CHAR:
 				case PROTOCOL_TYPE_SHORT:
 				case PROTOCOL_TYPE_INT:
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%d;\", (int)%s);\n", nparams[p].name, nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%d;\", (int)%s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				case PROTOCOL_TYPE_LONG:
 #ifdef _WIN32
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%I64d;\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%I64d;\", %s);\n", nparams[p].name, nparams[p].name);
 #else
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%lld;\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%lld;\", %s);\n", nparams[p].name, nparams[p].name);
 #endif
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				case PROTOCOL_TYPE_BYTE:
 				case PROTOCOL_TYPE_WORD:
 				case PROTOCOL_TYPE_DWORD:
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%u;\", (unsigned int)%s);\n", nparams[p].name, nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%u;\", (unsigned int)%s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				case PROTOCOL_TYPE_QWORD:
 #ifdef _WIN32
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%I64u;\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%I64u;\", %s);\n", nparams[p].name, nparams[p].name);
 #else
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%llu;\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%llu;\", %s);\n", nparams[p].name, nparams[p].name);
 #endif
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				case PROTOCOL_TYPE_FLOAT:
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=%%f;\", %s);\n", nparams[p].name, nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=%%f;\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				case PROTOCOL_TYPE_STRING:
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"%s=\\\"%%s\\\";\", %s);\n", nparams[p].name, nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"%s=\\\"%%s\\\";\", %s);\n", nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 					break;
 				default:
 					snprintf(src+strlen(src), src_len-strlen(src), "		{\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			int ____ret, ____len;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			____len = nRecvBufSize-m_nlen;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_text_write(&PROTOCOL_NAME(%s), \"%s=\", %s, pRecvBuf+m_nlen, (unsigned int*)&____len);\n", nparams[p].type, nparams[p].name, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "			____len = nSendBufSize-m_nlen;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_text_write(&PROTOCOL_NAME(%s), \"%s=\", %s, pSendBuf+m_nlen, (unsigned int*)&____len);\n", nparams[p].type, nparams[p].name, nparams[p].name);
 					snprintf(src+strlen(src), src_len-strlen(src), "			assert(____ret==ERR_NOERROR);\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			if(____ret!=ERR_NOERROR) return;\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			m_nlen += ____len;\n");
@@ -895,12 +897,12 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 			}
 
 			snprintf(src+strlen(src), src_len-strlen(src), "		\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pRecvBuf+m_nlen, nRecvBufSize-m_nlen, \"}\");\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nRecvBufSize);\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nRecvBufSize) return;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"}\");\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	} else {\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen = 1;\n");
-			snprintf(src+strlen(src), src_len-strlen(src), "		*((os_byte*)pRecvBuf) = %d;\n", f-nmodules[c].f_start);
+			snprintf(src+strlen(src), src_len-strlen(src), "		*((os_byte*)pSendBuf) = %d;\n", f-nmodules[c].f_start);
 			snprintf(src+strlen(src), src_len-strlen(src), "\n");
 
 			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
@@ -917,25 +919,25 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 				case PROTOCOL_TYPE_DWORD:
 				case PROTOCOL_TYPE_QWORD:
 				case PROTOCOL_TYPE_FLOAT:
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(nRecvBufSize-m_nlen>=sizeof(%s));\n", nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(nRecvBufSize-m_nlen<sizeof(%s)) return;\n", nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		*((%s*)(pRecvBuf+m_nlen)) = %s;\n", nparams[p].type, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(nSendBufSize-m_nlen>=sizeof(%s));\n", nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(nSendBufSize-m_nlen<sizeof(%s)) return;\n", nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		*((%s*)(pSendBuf+m_nlen)) = %s;\n", nparams[p].type, nparams[p].name);
 					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += sizeof(%s);\n", nparams[p].name);
 					break;
 				case PROTOCOL_TYPE_STRING:
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert(nRecvBufSize-m_nlen>=sizeof(os_word));\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if(nRecvBufSize-m_nlen<sizeof(os_word)) return;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		*((os_word*)(pRecvBuf+m_nlen)) = (os_word)strlen(%s);\n", nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		assert((int)nRecvBufSize-m_nlen>=(int)sizeof(os_word)+*((short*)(pRecvBuf+m_nlen)));\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		if((int)nRecvBufSize-m_nlen<(int)sizeof(os_word)+*((short*)(pRecvBuf+m_nlen))) return;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "		memcpy(pRecvBuf+m_nlen+sizeof(os_word), %s, (size_t)(*((os_word*)(pRecvBuf+m_nlen))));\n", nparams[p].name);
-					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += sizeof(os_word) + *((os_word*)(pRecvBuf+m_nlen));\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert(nSendBufSize-m_nlen>=sizeof(os_word));\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if(nSendBufSize-m_nlen<sizeof(os_word)) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		*((os_word*)(pSendBuf+m_nlen)) = (os_word)strlen(%s);\n", nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		assert((int)nSendBufSize-m_nlen>=(int)sizeof(os_word)+*((short*)(pSendBuf+m_nlen)));\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		if((int)nSendBufSize-m_nlen<(int)sizeof(os_word)+*((short*)(pSendBuf+m_nlen))) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "		memcpy(pSendBuf+m_nlen+sizeof(os_word), %s, (size_t)(*((os_word*)(pSendBuf+m_nlen))));\n", nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += sizeof(os_word) + *((os_word*)(pSendBuf+m_nlen));\n");
 					break;
 				default:
 					snprintf(src+strlen(src), src_len-strlen(src), "		{\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			int ____ret, ____len;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			____len = nRecvBufSize - m_nlen;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_binary_write(&PROTOCOL_NAME(%s), %s, pRecvBuf+m_nlen, (unsigned int*)&____len);\n", nparams[p].type, nparams[p].name);
+					snprintf(src+strlen(src), src_len-strlen(src), "			____len = nSendBufSize - m_nlen;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_binary_write(&PROTOCOL_NAME(%s), %s, pSendBuf+m_nlen, (unsigned int*)&____len);\n", nparams[p].type, nparams[p].name);
 					snprintf(src+strlen(src), src_len-strlen(src), "			assert(____ret==ERR_NOERROR);\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			m_nlen += ____len;\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "		}\n");
