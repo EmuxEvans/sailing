@@ -63,6 +63,9 @@ void CCubeClient::OnConnect(NETWORK_HANDLE handle)
 
 void CCubeClient::OnData()
 {
+	if(TCP_TEXTMODE) {
+	} else {
+	}
 }
 
 void CCubeClient::OnDiconnect()

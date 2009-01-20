@@ -10,6 +10,7 @@ public:
 	static unsigned int GetChannelType() { return 0; }
 
 	CCubeRoom(ICubeRoomController* pController) : CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>(pController) {
+		SetChannel("CubeRoom", 0, false);
 	}
 	virtual ~CCubeRoom() {
 	}

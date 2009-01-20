@@ -27,6 +27,13 @@ void CCubeUser::operator delete(void* p)
 	mempool_free(user_pool, p);
 }
 
+void CCubeUser::OnData(const void* pData, unsigned int nSize)
+{
+	if(TCP_TEXTMODE) {
+	} else {
+	}
+}
+
 void CCubeUserController::OnConnect(CCubeUser* pUser)
 {
 	m_LoginChannel.Join(pUser);
@@ -40,7 +47,7 @@ void CCubeUserController::OnData(CCubeUser* pUser, const void* pData, unsigned i
 {
 }
 
-void CCubeUserController::SendData(CCubeUser* pUser, const void* pData, unsigned int nSize)
+void CCubeUserController::SendData(CCubeUser* pUser, IGameChannel<CCubeUser>* pChannel, const void* pData, unsigned int nSize)
 {
 }
 

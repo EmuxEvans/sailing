@@ -538,6 +538,7 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"}\");\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen++;\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	} else {\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen = 1;\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		*((os_byte*)pSendBuf) = %d;\n", f-nmodules[c].f_start);
@@ -585,7 +586,7 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 
 
 			snprintf(src+strlen(src), src_len-strlen(src), "	}\n");
-
+			snprintf(src+strlen(src), src_len-strlen(src), "	SendBuf(pSendBuf, (unsigned int)m_nlen);\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "}\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "\n");
 		}
@@ -900,6 +901,7 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen += snprintf(pSendBuf+m_nlen, nSendBufSize-m_nlen, \"}\");\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		assert(m_nlen<(int)nSendBufSize);\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		if(m_nlen>=(int)nSendBufSize) return;\n");
+			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen++;\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	} else {\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		m_nlen = 1;\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "		*((os_byte*)pSendBuf) = %d;\n", f-nmodules[c].f_start);
@@ -947,7 +949,7 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 
 
 			snprintf(src+strlen(src), src_len-strlen(src), "	}\n");
-
+			snprintf(src+strlen(src), src_len-strlen(src), "	SendBuf(pSendBuf, (unsigned int)m_nlen);\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "}\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "\n");
 		}
