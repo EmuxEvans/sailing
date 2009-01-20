@@ -177,6 +177,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\CubeClient.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
@@ -186,107 +190,63 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\CubeClient.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="autogen"
 			>
 			<File
-				RelativePath="..\CubeRoom.net.clt.cpp"
+				RelativePath="..\Cube.net.clt.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\CubeRoom.net.clt.hpp"
+				RelativePath="..\Cube.net.clt.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\CubeRoom.net.proto"
+				RelativePath="..\Cube.net.proto.c"
 				>
 			</File>
 			<File
-				RelativePath="..\CubeRoom.net.proto.c"
+				RelativePath="..\Cube.net.proto.h"
 				>
 			</File>
 			<File
-				RelativePath="..\CubeRoom.net.proto.h"
+				RelativePath="..\Cube.net.proto.lua.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\CubeRoom.net.proto.lua.cc"
+				RelativePath="..\Cube.net.proto.lua.h"
 				>
 			</File>
 			<File
-				RelativePath="..\CubeRoom.net.proto.lua.h"
+				RelativePath="..\Cube.net.svr.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\CubeRoom.proto.c"
+				RelativePath="..\Cube.net.svr.hpp"
 				>
 			</File>
 			<File
-				RelativePath="..\CubeRoom.proto.h"
+				RelativePath="..\Cube.proto.c"
 				>
 			</File>
 			<File
-				RelativePath="..\CubeRoom.proto.lua.cc"
+				RelativePath="..\Cube.proto.h"
 				>
 			</File>
 			<File
-				RelativePath="..\CubeRoom.proto.lua.h"
+				RelativePath="..\Cube.proto.lua.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.proto.lua.h"
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\ClassDiagram.cd"
-			>
-		</File>
-		<File
-			RelativePath=".\CubeRoom.lua"
-			>
-		</File>
-		<File
-			RelativePath="..\CubeRoom.net"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					CommandLine="$(OutDir)\nprotgen.exe client $(InputPath)&#x0D;&#x0A;"
-					Outputs="&quot;$(InputPath).proto&quot;;&quot;$(InputPath).clt.hpp&quot;;&quot;$(InputPath).clt.cpp&quot;;&quot;$(InputPath).svr.hpp&quot;;&quot;$(InputPath).svr.cpp&quot;"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					CommandLine="$(OutDir)\nprotgen.exe client $(InputPath)&#x0D;&#x0A;"
-					Outputs="&quot;$(InputPath).proto&quot;;&quot;$(InputPath).clt.hpp&quot;;&quot;$(InputPath).clt.cpp&quot;;&quot;$(InputPath).svr.hpp&quot;;&quot;$(InputPath).svr.cpp&quot;"
-				/>
-			</FileConfiguration>
-		</File>
-		<File
-			RelativePath="..\CubeRoom.proto"
-			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCustomBuildTool"
-					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
-					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
-				/>
-			</FileConfiguration>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

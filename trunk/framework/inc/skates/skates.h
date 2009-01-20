@@ -26,6 +26,10 @@ extern "C" {
 #include "applog.h"
 #include "appbox.h"
 
+#include "bignum.h"
+#include "sha1.h"
+#include "srp6a.h"
+
 #include "protocol.h"
 #include "protocol_lua.h"
 #include "protocol_lua_debug.h"

@@ -1,8 +1,14 @@
 #pragma once
 
+//class IGameUser;
+//class IGameChannel;
+
+template<class TGameUser>
 class IGameUser;
+template<class TGameUser>
 class IGameChannel;
 
+template<class TGameUser>
 class IGameUser
 {
 public:
@@ -11,16 +17,28 @@ public:
 	virtual void OnData(const void* pData, unsigned int nSize) = NULL;
 	virtual void SendData(const void* pData, unsigned int nSize) = NULL;
 	virtual void Disconnect() = NULL;
-	virtual bool BindChannel(IGameChannel* pRoom, unsigned int nCIdx) = NULL;
-	virtual bool UnbindChannel(IGameChannel* pRoom, unsigned int nCIdx) = NULL;
+	virtual bool BindChannel(IGameChannel<TGameUser>* pRoom, unsigned int nCIdx) = NULL;
+	virtual bool UnbindChannel(IGameChannel<TGameUser>* pRoom, unsigned int nCIdx) = NULL;
 };
 
+template<class TGameUser>
 class IGameChannel
 {
 public:
-	virtual bool Join(IGameUser* pUser) = NULL;
-	virtual void OnData(unsigned int nCIdx, const void* pData, unsigned int nSize) = NULL;
-	virtual void Disconnect(unsigned int nCIdx) = NULL;
+	virtual bool Join(TGameUser* pUser) = NULL;
+	virtual void OnData(TGameUser* pUser, unsigned int nCIdx, const void* pData, unsigned int nSize) = NULL;
+	virtual void Disconnect(TGameUser* pUser, unsigned int nCIdx) = NULL;
+
+public:
+	void SetChannel(unsigned int nType, bool bDynamic) {
+		m_nType = nType;
+		m_bDynamic = bDynamic;
+	}
+	bool IsDynamic() const { return m_bDynamic; }
+	unsigned int GetType() const { return m_nType; }
+private:
+	bool m_bDynamic;
+	unsigned int m_nType;
 };
 
 template<class TGameUser>
@@ -35,7 +53,7 @@ public:
 };
 
 template<class TGameUser>
-class CGameUser : public IGameUser
+class CGameUser : public IGameUser<TGameUser>
 {
 public:
 	CGameUser(IGameUserController<TGameUser>* pController);
@@ -46,18 +64,18 @@ public:
 	virtual void OnData(const void* pData, unsigned int nSize);
 	virtual void SendData(const void* pData, unsigned int nSize);
 	virtual void Disconnect();
-	virtual bool BindChannel(IGameChannel* pChannel, unsigned int nCIdx);
-	virtual bool UnbindChannel(IGameChannel* pChannel, unsigned int nCIdx);
+	virtual bool BindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx);
+	virtual bool UnbindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx);
 
 private:
 	struct {
-		IGameChannel*	pChannel;
+		IGameChannel<TGameUser>*	pChannel;
 		unsigned int	nCIdx;
 	}								m_DynChannel[20];
 	struct {
-		IGameChannel*	pChannel;
+		IGameChannel<TGameUser>*	pChannel;
 		unsigned int	nCIdx;
-	}								m_ptaChannel[20];
+	}								m_StaChannel[20];
 	IGameUserController<TGameUser>*	m_pController;
 };
 

@@ -1,43 +1,5 @@
 #pragma once
 
-class CCubeUser;
-class CCubeRoom;
-class CCubeMember;
-
-typedef IGameUserController<CCubeUser> ICubeUserController;
-typedef IGameRoomController<CCubeUser, CCubeRoom, CCubeMember> ICubeRoomController;
-
-class CCubeUser : public CGameUser<CCubeUser>, public ICubeUser
-{
-public:
-	void* operator new (size_t n);
-	void operator delete(void* p);
-
-public:
-	CCubeUser(ICubeUserController* pController) : CGameUser<CCubeUser>(pController) {
-		m_pHandle = NULL;
-	}
-	virtual ~CCubeUser() {
-	}
-
-	void BindNetworkHandle(NETWORK_HANDLE handle) {
-		m_pHandle = handle;
-	}
-
-	//
-	virtual void Disconnect() {
-	}
-	virtual ICubeRoom* GetCubeRoom() {
-		return NULL;
-	}
-	virtual CubeRoleInfo* GetRoleInfo() {
-		return NULL;
-	}
-
-	char m_szRecvBuf[2*1024];
-	NETWORK_HANDLE m_pHandle;
-};
-
 class CCubeRoom : public CGameRoom<CCubeUser, CCubeRoom, CCubeMember, 8>, public ICubeRoom
 {
 public:
@@ -86,15 +48,6 @@ public:
 	virtual CubeMemberInfo* GetInfo() {
 		return NULL;
 	}
-};
-
-class CCubeUserController : public ICubeUserController {
-public:
-	virtual void OnConnect(CCubeUser* pUser);
-	virtual void OnDisconnect(CCubeUser* pUser);
-	virtual void OnData(CCubeUser* pUser, const void* pData, unsigned int nSize);
-	virtual void SendData(CCubeUser* pUser, const void* pData, unsigned int nSize);
-	virtual void Disconnect();
 };
 
 class CCubeRoomController : public ICubeRoomController {

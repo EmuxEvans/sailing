@@ -1,0 +1,24 @@
+
+include Cube.proto;
+
+module Login {
+	server begin(string<LOGIN_USERNAME_MAXLEN> username, LoginPubkey pubkey);
+	client begin_callback(LoginSalt salt, LoginPubkey pubkey, LoginSession session);
+	server verify(LoginProof proof);
+	client verify_callback(LoginProof proof);
+
+	client on_error(os_int code);
+};
+
+module Guild {
+	server Login(
+		os_int a,
+		string<100> s1,
+		MicrophoneInfo m
+	);
+	client LoginCallback(
+		os_int ret,
+		string<100> s1,
+		MicrophoneInfo m
+	);
+};

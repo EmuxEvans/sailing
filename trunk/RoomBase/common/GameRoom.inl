@@ -13,7 +13,7 @@ CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::~CGameRoom()
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-bool CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Join(IGameUser* pUser)
+bool CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Join(IGameUser<TGameUser>* pUser)
 {
 	unsigned int nIndex, nCIdx;
 	TGameMember* pMember;
