@@ -11,7 +11,7 @@
 #include "../Cube.proto.h"
 #include "../Cube.net.proto.h"
 #include "../Cube.net.clt.hpp"
-
+#include "CubeClient.proto.h"
 #include "CubeClient.h"
 
 CCubeClient::CCubeClient() : m_Login(this, TCP_TEXTMODE)
@@ -20,4 +20,14 @@ CCubeClient::CCubeClient() : m_Login(this, TCP_TEXTMODE)
 
 CCubeClient::~CCubeClient()
 {
+}
+
+os_int CCubeClient::Connect(char* addr)
+{
+	return 0;
+}
+
+os_int CCubeClient::Disconnect()
+{
+	return 0;
 }

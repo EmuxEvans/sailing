@@ -21,18 +21,18 @@ private:
 	TClientHook* m_pHooks[100];
 };
 
-class CCubeClient
+class CCubeClient : public ICubeClient
 {
 public:
 	CCubeClient();
 	~CCubeClient();
 
-	bool Connect(const char* pAddr);
-	void Disconnect();
+	virtual os_int Connect(char* addr);
+	virtual os_int Disconnect();
+	virtual ILoginServer* GetLogin() { return &m_Login; }
 
 public:
 	CCubeClientWarp<CLoginClientBase, CLoginClientHook> m_Login;
-
 public:
 	char* GetRecvBuf(unsigned int& nRecvBufSize) {
 		nRecvBufSize = sizeof(m_RecvBuf);

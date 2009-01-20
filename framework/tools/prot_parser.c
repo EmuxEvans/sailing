@@ -48,6 +48,11 @@ static void def_class_end(const char* name);
 PARSER_STACK p_stack[10];
 int p_stack_depth = 0;
 
+static struct {
+	char fullpath[300];
+} file_list[100];
+static int file_count = 0;
+
 int parse_file(const char* file)
 {
 	int i, ret;
@@ -71,12 +76,13 @@ int parse_file(const char* file)
 		strcpy(p_stack[p_stack_depth].file, a+1);
 	}
 	strcpy(p_stack[p_stack_depth].path, path);
-	for(i=0; i<p_stack_depth; i++) {
-		if(strcmp(p_stack[p_stack_depth].path, p_stack[i].path)!=0) continue;
-		if(strcmp(p_stack[p_stack_depth].file, p_stack[i].file)!=0) continue;
+	sprintf(file_list[file_count].fullpath, "%s/%s", p_stack[p_stack_depth].path, p_stack[p_stack_depth].file);
+	for(i=0; i<file_count; i++) {
+		if(strcmp(file_list[i].fullpath, file_list[file_count].fullpath)!=0) continue;
 		os_chdir(p_stack[p_stack_depth].o_path);
-		return ERR_UNKNOWN;
+		return ERR_NOERROR;
 	}
+	file_count++;
 	p_stack_depth++;
 
 	ret = load_textfile(p_stack[p_stack_depth-1].file, p_stack[p_stack_depth-1].txt, sizeof(p_stack[p_stack_depth-1].txt));
