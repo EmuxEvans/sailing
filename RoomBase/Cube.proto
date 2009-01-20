@@ -1,4 +1,5 @@
 
+const os_int TCP_TEXTMODE = 1;
 const os_int LOGIN_USERNAME_MAXLEN = 20;
 const os_int LOGIN_SALT_MAXLEN = 40;
 const os_int LOGIN_PUBKEY_MAXLEN = 40;
@@ -41,37 +42,4 @@ struct CubeMemberInfo {
 	string<1024>	roleinfo;
 	string<1024>	equipment;
 	os_dword		flags;
-};
-
-interface ICubeUser {
-	void Disconnect();
-
-	ICubeRoom GetCubeRoom();
-	CubeRoleInfo GetRoleInfo();
-
-};
-
-interface ICubeRoom {
-	CubeRoomInfo	GetInfo();
-
-	os_int			GetMicrophoneCount();
-	MicrophoneInfo	GetMicrophoneInfo(os_int index);
-	os_int			AcquireMicrophone(ICubeUser user, string<100> mtv);
-	void			GiveupMicrophone(ICubeUser user);
-
-	os_int			GetMemberCount();
-	ICubeMember		GetMember(os_int idx);
-
-	os_int			GetRoomState();
-	void			SetRoomState(os_int state);
-	os_dword		GetMemberFlags();
-	void			SetMemberFlags(os_dword flags);
-};
-
-interface ICubeMember {
-	ICubeUser		GetUser();
-	ICubeRoom		GetRoom();
-	os_dword		GetUUID();
-	string			GetNick();
-	CubeMemberInfo	GetInfo();
 };

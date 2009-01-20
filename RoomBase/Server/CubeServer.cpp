@@ -8,8 +8,14 @@
 #include "../common/GameUser.inl"
 #include "../common/GameRoom.inl"
 
-#include "../CubeRoom.proto.h"
-#include "CubeRoom.h"
+#include "../Cube.proto.h"
+#include "../Cube.proto.h"
+#include "../Cube.net.proto.h"
+#include "../Cube.net.svr.hpp"
+#include "CubeServer.proto.h"
+
+#include "Cube.h"
+#include "CubeServer.h"
 
 MEMPOOL_HANDLE		user_pool = NULL;
 MEMPOOL_HANDLE		room_pool = NULL;

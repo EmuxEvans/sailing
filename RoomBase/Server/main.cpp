@@ -3,13 +3,6 @@
 
 #include <skates/skates.h>
 
-#include "../common/GameUser.h"
-#include "../common/GameRoom.h"
-#include "../common/GameUser.inl"
-#include "../common/GameRoom.inl"
-
-#include "../CubeRoom.proto.h"
-#include "CubeRoom.h"
 #include "CubeServer.h"
 
 //lua_State* L;
@@ -27,11 +20,6 @@
 int main(int argc, char* argv[])
 {
 	SOCK_ADDR sa;
-
-	if(argc!=2) {
-		printf("invalid parameter\n");
-		return -1;
-	}
 
 	sock_init();
 	fdwatch_init();

@@ -41,7 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				AdditionalIncludeDirectories="..\..\framework\inc"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -104,7 +105,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				AdditionalIncludeDirectories="..\..\framework\inc"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -179,6 +181,124 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="autogen"
+			>
+			<File
+				RelativePath="..\Cube.net.clt.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.net.clt.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.net.proto"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+						Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+						Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\Cube.net.proto.c"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.net.proto.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.net.proto.lua.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.net.proto.lua.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.net.svr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.net.svr.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.proto.c"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.proto.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.proto.lua.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\Cube.proto.lua.h"
+				>
+			</File>
+		</Filter>
+		<File
+			RelativePath="..\Cube.net"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="$(OutDir)\nprotgen.exe client $(InputPath)"
+					Outputs="&quot;$(InputPath).proto&quot;;&quot;$(InputPath).clt.hpp&quot;;&quot;$(InputPath).clt.cpp&quot;;&quot;$(InputPath).svr.hpp&quot;;&quot;$(InputPath).svr.cpp&quot;"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="$(OutDir)\nprotgen.exe client $(InputPath)"
+					Outputs="&quot;$(InputPath).proto&quot;;&quot;$(InputPath).clt.hpp&quot;;&quot;$(InputPath).clt.cpp&quot;;&quot;$(InputPath).svr.hpp&quot;;&quot;$(InputPath).svr.cpp&quot;"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath="..\Cube.proto"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
+				/>
+			</FileConfiguration>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

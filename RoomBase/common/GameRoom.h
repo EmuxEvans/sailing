@@ -18,13 +18,13 @@ public:
 #define GAMEROOM_EXCEPT				(1<<3)	// ³ýÁË×Ô¼º
 
 template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
-class CGameRoom : public IGameChannel
+class CGameRoom : public IGameChannel<TGameUser>
 {
 public:
 	CGameRoom(IGameRoomController<TGameUser, TGameRoom, TGameMember>* pController);
 	virtual ~CGameRoom();
 
-	virtual bool Join(IGameUser* pUser);
+	virtual bool Join(IGameUser<TGameUser>* pUser);
 	virtual void OnData(unsigned int nCIdx, const void* pData, int nSize);
 	virtual void Disconnect(unsigned int nCIdx);
 

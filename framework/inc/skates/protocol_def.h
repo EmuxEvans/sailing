@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #define PROTOCOL_NAME(name) __protocol_0_0_1_##name
-#define PROTOCOL_ARRAY_SIZE(name)	__array_size_##name
+#define PROTOCOL_ARRAY_SIZE(name)	name##_array_size
 
 #define PROTOCOL_TYPE_FAKEVAR		0x1000
 #define PROTOCOL_TYPE_ARRAY			0x0100

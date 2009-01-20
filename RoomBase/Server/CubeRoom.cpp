@@ -8,19 +8,14 @@
 #include "../common/GameUser.inl"
 #include "../common/GameRoom.inl"
 
-#include "../CubeRoom.proto.h"
-#include "CubeRoom.h"
+#include "../Cube.proto.h"
+#include "../Cube.proto.h"
+#include "../Cube.net.proto.h"
+#include "../Cube.net.svr.hpp"
+#include "CubeServer.proto.h"
+
+#include "Cube.h"
 #include "CubeServer.h"
-
-void* CCubeUser::operator new (size_t n)
-{
-	return mempool_alloc(user_pool);
-}
-
-void CCubeUser::operator delete(void* p)
-{
-	mempool_free(user_pool, p);
-}
 
 void* CCubeRoom::operator new (size_t n)
 {
@@ -40,26 +35,6 @@ void* CCubeMember::operator new (size_t n)
 void CCubeMember::operator delete(void* p)
 {
 	mempool_free(memb_pool, p);
-}
-
-void CCubeUserController::OnConnect(CCubeUser* pUser)
-{
-}
-
-void CCubeUserController::OnDisconnect(CCubeUser* pUser)
-{
-}
-
-void CCubeUserController::OnData(CCubeUser* pUser, const void* pData, unsigned int nSize)
-{
-}
-
-void CCubeUserController::SendData(CCubeUser* pUser, const void* pData, unsigned int nSize)
-{
-}
-
-void CCubeUserController::Disconnect()
-{
 }
 
 void CCubeRoomController::OnCreate(CCubeRoom* pRoom)
