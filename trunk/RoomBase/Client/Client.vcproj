@@ -246,7 +246,47 @@
 				RelativePath="..\Cube.proto.lua.h"
 				>
 			</File>
+			<File
+				RelativePath=".\CubeClient.proto.c"
+				>
+			</File>
+			<File
+				RelativePath=".\CubeClient.proto.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CubeClient.proto.lua.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\CubeClient.proto.lua.h"
+				>
+			</File>
 		</Filter>
+		<File
+			RelativePath=".\CubeClient.proto"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="process $(InputPath)."
+					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="process $(InputPath)."
+					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
+					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
+				/>
+			</FileConfiguration>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

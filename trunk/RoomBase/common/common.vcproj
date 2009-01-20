@@ -200,6 +200,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
+						Description="process $(InputPath)."
 						CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
 						Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
 					/>
@@ -209,6 +210,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
+						Description="process $(InputPath)."
 						CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
 						Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
 					/>
@@ -263,6 +265,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
+					Description="process $(InputPath)."
 					CommandLine="$(OutDir)\nprotgen.exe client $(InputPath)"
 					Outputs="&quot;$(InputPath).proto&quot;;&quot;$(InputPath).clt.hpp&quot;;&quot;$(InputPath).clt.cpp&quot;;&quot;$(InputPath).svr.hpp&quot;;&quot;$(InputPath).svr.cpp&quot;"
 				/>
@@ -272,6 +275,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
+					Description="process $(InputPath)."
 					CommandLine="$(OutDir)\nprotgen.exe client $(InputPath)"
 					Outputs="&quot;$(InputPath).proto&quot;;&quot;$(InputPath).clt.hpp&quot;;&quot;$(InputPath).clt.cpp&quot;;&quot;$(InputPath).svr.hpp&quot;;&quot;$(InputPath).svr.cpp&quot;"
 				/>
@@ -285,6 +289,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
+					Description="process $(InputPath)."
 					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
 					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
 				/>
@@ -294,6 +299,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
+					Description="process $(InputPath)."
 					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
 					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
 				/>

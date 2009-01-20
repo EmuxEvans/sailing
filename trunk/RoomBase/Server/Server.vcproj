@@ -299,6 +299,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
+					Description="process $(InputPath)."
 					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
 					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
 				/>
@@ -308,6 +309,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
+					Description="process $(InputPath)."
 					CommandLine="&quot;..\..\framework\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;"
 					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;;&quot;$(InputPath).lua.h&quot;;&quot;$(InputPath).lua.cc&quot;"
 				/>
