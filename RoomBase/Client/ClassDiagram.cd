@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="CCubeRoom" Collapsed="true">
+    <Position X="2.5" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAQAAAAQAAQAAAAAAAgAAAAI=</HashCode>
+      <FileName>CubeRoom.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CCubeRoomController" Collapsed="true">
+    <Position X="2.5" Y="4.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAAAAAIAAAEAACABAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>CubeRoom.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CCubeUser" Collapsed="true">
+    <Position X="2.5" Y="3.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AASAAAAIAAAAAgAAAAAAARiAAAAQAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>CubeRoom.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CGameMember&lt;TGameUser, TGameRoom, TGameMember&gt;" Collapsed="true">
+    <Position X="4.75" Y="2" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AFAgAAAAIgAICIAAAAAAAAAAAAgBAAAgAQAAABAAAAA=</HashCode>
+      <FileName>GameRoom.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CGameRoom&lt;TGameUser, TGameRoom, TGameMember, nMemberMax&gt;" Collapsed="true">
+    <Position X="4.75" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>ABQAAAAAAAAAABgAAEAAAIAAAEAAAQASQCAAAAAAAAI=</HashCode>
+      <FileName>GameRoom.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CGameUser&lt;TGameUser&gt;" Collapsed="true">
+    <Position X="4.75" Y="3.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAIAIAAAAADAAgAAAAAAEAEAQAAQAAAAgAABAA=</HashCode>
+      <FileName>GameUser.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ICubeMember" Collapsed="true">
+    <Position X="0.75" Y="2" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAABABAAAAAAAAAAAAAAAAAAAAAEAAABAAAAAAAAA=</HashCode>
+      <FileName>CubeRoom.proto.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ICubeRoom" Collapsed="true">
+    <Position X="0.75" Y="0.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAACAAAAIAAAAAAAAAIQAEAAQCAAAIAACAI=</HashCode>
+      <FileName>CubeRoom.proto.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ICubeUser" Collapsed="true">
+    <Position X="0.75" Y="3.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>CubeRoom.proto.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IGameChannel" Collapsed="true">
+    <Position X="7" Y="0.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAgAAAAAAAAAAAAAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>GameUser.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IGameRoomController&lt;TGameUser, TGameRoom, TGameMember&gt;" Collapsed="true">
+    <Position X="7" Y="4.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAAAAAIAAAEAACABAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>GameRoom.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IGameUserController&lt;TGameUser&gt;" Collapsed="true">
+    <Position X="7" Y="5.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAIAAAAAAAAAAAAAAAAAEAAAAQAAAAAAABAA=</HashCode>
+      <FileName>GameUser.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CCubeUserController" Collapsed="true">
+    <Position X="2.5" Y="5.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAIAAAAAAAAAAAAAAAAAEAAAAQAAAAAAABAA=</HashCode>
+      <FileName>CubeRoom.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CCubeMember" Collapsed="true">
+    <Position X="2.5" Y="2" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AACBABABAAAAAAAAAAAAAQAAAAAAAEAAABAAAAAAIAA=</HashCode>
+      <FileName>CubeRoom.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="IGameUser" Collapsed="true">
+    <Position X="7" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAIAAAAABAAAAAAAAAAAEAAAAQAAAAgAABAA=</HashCode>
+      <FileName>GameUser.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>
