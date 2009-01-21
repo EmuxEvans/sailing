@@ -29,8 +29,7 @@ public:
 	int GetLoginStep() { return step; }
 
 	virtual void begin(char* username);
-	virtual void session(LoginPubkey* pubkey);
-	virtual void verify(LoginProof* proof);
+	virtual void verify(LoginPubkey* pubkey, LoginProof* proof);
 private:
 	srp6a_server_t srps;
 	int step;

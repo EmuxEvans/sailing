@@ -83,6 +83,9 @@ void CCubeUser::OnData(const void* pData, unsigned int nSize)
 
 void CCubeUser::SendData(IGameChannel<CCubeUser>* pChannel, unsigned short& nUCIdx, const void* pData, unsigned int nSize)
 {
+	if(m_bTextMode) {
+	} else {
+	}
 }
 
 void CCubeUser::Disconnect()
