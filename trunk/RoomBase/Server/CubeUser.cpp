@@ -27,11 +27,30 @@ void CCubeUser::operator delete(void* p)
 	mempool_free(user_pool, p);
 }
 
+CCubeUser::CCubeUser(ICubeUserController* pController) : CGameUser<CCubeUser>(pController)
+{
+	m_pHandle = NULL;
+	GetController()->OnInit(this);
+}
+
+CCubeUser::~CCubeUser()
+{
+	GetController()->OnFinal(this);
+}
+
 void CCubeUser::OnData(const void* pData, unsigned int nSize)
 {
 	if(TCP_TEXTMODE) {
 	} else {
 	}
+}
+
+void CCubeUserController::OnInit(CCubeUser* pUser)
+{
+}
+
+void CCubeUserController::OnFinal(CCubeUser* pUser)
+{
 }
 
 void CCubeUserController::OnConnect(CCubeUser* pUser)
@@ -51,6 +70,6 @@ void CCubeUserController::SendData(CCubeUser* pUser, IGameChannel<CCubeUser>* pC
 {
 }
 
-void CCubeUserController::Disconnect()
+void CCubeUserController::Disconnect(CCubeUser* pUser)
 {
 }

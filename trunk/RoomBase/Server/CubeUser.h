@@ -7,11 +7,8 @@ public:
 	void operator delete(void* p);
 
 public:
-	CCubeUser(ICubeUserController* pController) : CGameUser<CCubeUser>(pController) {
-		m_pHandle = NULL;
-	}
-	virtual ~CCubeUser() {
-	}
+	CCubeUser(ICubeUserController* pController);
+	virtual ~CCubeUser();
 
 	void BindNetworkHandle(NETWORK_HANDLE handle) {
 		m_pHandle = handle;
@@ -37,11 +34,13 @@ public:
 
 class CCubeUserController : public ICubeUserController {
 public:
+	virtual void OnInit(CCubeUser* pUser);
+	virtual void OnFinal(CCubeUser* pUser);
 	virtual void OnConnect(CCubeUser* pUser);
 	virtual void OnDisconnect(CCubeUser* pUser);
 	virtual void OnData(CCubeUser* pUser, const void* pData, unsigned int nSize);
 	virtual void SendData(CCubeUser* pUser, IGameChannel<CCubeUser>* pChannel, const void* pData, unsigned int nSize);
-	virtual void Disconnect();
+	virtual void Disconnect(CCubeUser* pUser);
 private:
 	CServerLoginChannel m_LoginChannel;
 };

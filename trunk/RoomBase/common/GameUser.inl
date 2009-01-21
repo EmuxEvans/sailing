@@ -48,7 +48,7 @@ void CGameUser<TGameUser>::SendData(IGameChannel<TGameUser>* pChannel, const voi
 template<class TGameUser>
 void CGameUser<TGameUser>::Disconnect()
 {
-	m_pController->Disconnect();
+	m_pController->Disconnect((TGameUser*)this);
 }
 
 template<class TGameUser>
