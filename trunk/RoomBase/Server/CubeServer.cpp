@@ -57,7 +57,7 @@ void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 	CCubeUser* user;
 	NETWORK_EVENT event;
 
-	user = new CCubeUser(&CubeUserController);
+	user = new CCubeUser(&CubeUserController, TCP_TEXTMODE);
 	if(!user) {
 		sock_disconnect(sock);
 		return;

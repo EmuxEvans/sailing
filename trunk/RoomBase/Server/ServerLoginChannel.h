@@ -23,6 +23,7 @@ protected:
 protected:
 	CLoginServerHook* m_pHooks;
 	CCubeUser* m_pUser;
+	unsigned short m_nUCIdx;
 
 public:
 	int GetLoginStep() { return step; }

@@ -36,7 +36,7 @@ CServerLoginChannel::~CServerLoginChannel()
 bool CServerLoginChannel::Join(CCubeUser* pUser)
 {
 	step = LOGINSTEP_PUBKEY;
-	pUser->BindChannel(this, 0);
+	pUser->BindChannel(this, 0, m_nUCIdx);
 	m_pUser = pUser;
 	return true;
 }
@@ -51,7 +51,7 @@ void CServerLoginChannel::OnData(CCubeUser* pUser, unsigned int nCIdx, const voi
 
 void CServerLoginChannel::Disconnect(CCubeUser* pUser, unsigned int nCIdx)
 {
-	pUser->UnbindChannel(this, 0);
+	pUser->UnbindChannel(this, 0, m_nUCIdx);
 	m_pUser = NULL;
 }
 

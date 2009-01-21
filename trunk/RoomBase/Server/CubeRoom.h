@@ -28,7 +28,7 @@ public:
 	void operator delete(void* p);
 
 public:
-	CCubeMember(CCubeUser* pUser, CCubeRoom* pRoom, unsigned int nCIdx) : CGameMember<CCubeUser, CCubeRoom, CCubeMember>(pUser, pRoom, nCIdx) {
+	CCubeMember(CCubeUser* pUser, CCubeRoom* pRoom, unsigned int nRIdx) : CGameMember<CCubeUser, CCubeRoom, CCubeMember>(pUser, pRoom, nRIdx) {
 	}
 	virtual ~CCubeMember() {
 	}

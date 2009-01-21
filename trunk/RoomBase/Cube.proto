@@ -2,7 +2,7 @@
 const os_int TCP_TEXTMODE = 1;
 const os_int LOGIN_USERNAME_MAXLEN = 20;
 const os_int LOGIN_SALT_MAXLEN = 40;
-const os_int LOGIN_PUBKEY_MAXLEN = 40;
+const os_int LOGIN_PUBKEY_MAXLEN = 4000;
 const os_int LOGIN_SESSION_MAXLEN = 40;
 const os_int LOGIN_PROOF_MAXLEN = 40;
 

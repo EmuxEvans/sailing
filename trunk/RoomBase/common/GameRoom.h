@@ -50,7 +50,7 @@ template<class TGameUser, class TGameRoom, class TGameMember>
 class CGameMember
 {
 public:
-	CGameMember(TGameUser* pUser, TGameRoom* pRoom, unsigned int nCIdx);
+	CGameMember(TGameUser* pUser, TGameRoom* pRoom, unsigned int nRIdx);
 	virtual ~CGameMember();
 
 	TGameUser* GetGameUser();
@@ -66,7 +66,8 @@ public:
 
 private:
 	TGameRoom*		m_pRoom;
-	unsigned int	m_nCIdx;
+	unsigned int	m_nRIdx;
 	unsigned int	m_nMask;
 	TGameUser*		m_pUser;
+	unsigned short	m_nUCIdx;
 };
