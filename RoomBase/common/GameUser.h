@@ -48,11 +48,13 @@ template<class TGameUser>
 class IGameUserController
 {
 public:
+	virtual void OnInit(TGameUser* pUser) = NULL;
+	virtual void OnFinal(TGameUser* pUser) = NULL;
 	virtual void OnConnect(TGameUser* pUser) = NULL;
 	virtual void OnDisconnect(TGameUser* pUser) = NULL;
 	virtual void OnData(TGameUser* pUser, const void* pData, unsigned int nSize) = NULL;
 	virtual void SendData(TGameUser* pUser, IGameChannel<TGameUser>* pChannel, const void* pData, unsigned int nSize) = NULL;
-	virtual void Disconnect() = NULL;
+	virtual void Disconnect(TGameUser* pUser) = NULL;
 };
 
 template<class TGameUser>
@@ -69,6 +71,8 @@ public:
 	virtual void Disconnect();
 	virtual bool BindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx);
 	virtual bool UnbindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx);
+
+	IGameUserController<TGameUser>* GetController() { return m_pController; }
 
 private:
 	struct {
