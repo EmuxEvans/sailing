@@ -48,11 +48,14 @@ public:
 		NETWORK_DOWNBUF* downbufs[10];
 		unsigned int count;
 		int ret;
+		const char* prefix = "Login.";
 
-		count = network_downbufs_alloc(downbufs, sizeof(downbufs)/sizeof(downbufs[0]), 2 + nSendBufSize);
+		count = network_downbufs_alloc(downbufs, sizeof(downbufs)/sizeof(downbufs[0]), 2 + strlen(prefix) + nSendBufSize);
 		ret = network_downbufs_fill(downbufs, count, 0, (const void*)&nSendBufSize, 2);
 		assert(ret==ERR_NOERROR);
-		ret = network_downbufs_fill(downbufs, count, 2, pSendBuf, nSendBufSize);
+		ret = network_downbufs_fill(downbufs, count, 2, prefix, strlen(prefix));
+		assert(ret==ERR_NOERROR);
+		ret = network_downbufs_fill(downbufs, count, 2 + strlen(prefix), pSendBuf, nSendBufSize);
 		assert(ret==ERR_NOERROR);
 		ret = network_send(m_hHandle, downbufs, count);
 		assert(ret==ERR_NOERROR);

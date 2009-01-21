@@ -16,6 +16,7 @@ template<class TGameUser, class TGameRoom, class TGameMember, int nMemberMax>
 bool CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Join(IGameUser<TGameUser>* pUser)
 {
 	unsigned int nIndex, nCIdx;
+	unsigned short nUCIdx;
 	TGameMember* pMember;
 
 	for(nIndex=0; nIndex<sizeof(m_pMemberList)/sizeof(m_pMemberList[0]); nIndex++) {
@@ -28,7 +29,7 @@ bool CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Join(IGameUser<TG
 	}
 
 	nCIdx = (GenChannelSeq()<<16|nIndex);
-	if(!pUser->BindChannel(this, nCIdx)) {
+	if(!pUser->BindChannel(this, nCIdx, nUCIdx)) {
 		return false;
 	}
 
@@ -191,12 +192,14 @@ void CGameRoom<TGameUser, TGameRoom, TGameMember, nMemberMax>::Send(TGameMember*
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>
-CGameMember<TGameUser, TGameRoom, TGameMember>::CGameMember(TGameUser* pUser, TGameRoom* pRoom, unsigned int nCIdx)
+CGameMember<TGameUser, TGameRoom, TGameMember>::CGameMember(TGameUser* pUser, TGameRoom* pRoom, unsigned int nRIdx)
 {
 	m_pUser = pUser;
 	m_pRoom = pRoom;
-	m_nCIdx = nCIdx;
+	m_nRIdx = nRIdx;
 	m_nMask = 0;
+	m_pUser = NULL;
+	m_nUCIdx = 0;
 
 	pRoom->MemberAttach((TGameMember*)this);
 }
@@ -236,7 +239,7 @@ TGameRoom* CGameMember<TGameUser, TGameRoom, TGameMember>::GetGameRoom()
 template<class TGameUser, class TGameRoom, class TGameMember>
 unsigned int CGameMember<TGameUser, TGameRoom, TGameMember>::GetRIdx()
 {
-	return m_nCIdx;
+	return m_nRIdx;
 }
 
 template<class TGameUser, class TGameRoom, class TGameMember>

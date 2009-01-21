@@ -15,10 +15,10 @@ public:
 	virtual void OnConnect() = NULL;
 	virtual void OnDisconnect() = NULL;
 	virtual void OnData(const void* pData, unsigned int nSize) = NULL;
-	virtual void SendData(IGameChannel<TGameUser>* pChannel, const void* pData, unsigned int nSize) = NULL;
+	virtual void SendData(IGameChannel<TGameUser>* pChannel, unsigned short& nUCIdx, const void* pData, unsigned int nSize) = NULL;
 	virtual void Disconnect() = NULL;
-	virtual bool BindChannel(IGameChannel<TGameUser>* pRoom, unsigned int nCIdx) = NULL;
-	virtual bool UnbindChannel(IGameChannel<TGameUser>* pRoom, unsigned int nCIdx) = NULL;
+	virtual bool BindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx, unsigned short& nUCIdx) = NULL;
+	virtual bool UnbindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx, unsigned short nUCIdx) = NULL;
 };
 
 template<class TGameUser>
@@ -53,7 +53,7 @@ public:
 	virtual void OnConnect(TGameUser* pUser) = NULL;
 	virtual void OnDisconnect(TGameUser* pUser) = NULL;
 	virtual void OnData(TGameUser* pUser, const void* pData, unsigned int nSize) = NULL;
-	virtual void SendData(TGameUser* pUser, IGameChannel<TGameUser>* pChannel, const void* pData, unsigned int nSize) = NULL;
+	virtual void SendData(TGameUser* pUser, IGameChannel<TGameUser>* pChannel, unsigned short nUCIdx, const void* pData, unsigned int nSize) = NULL;
 	virtual void Disconnect(TGameUser* pUser) = NULL;
 };
 
@@ -67,23 +67,28 @@ public:
 	virtual void OnConnect();
 	virtual void OnDisconnect();
 //	virtual void OnData(const void* pData, unsigned int nSize);
-	virtual void SendData(IGameChannel<TGameUser>* pChannel, const void* pData, unsigned int nSize);
+//	virtual void SendData(IGameChannel<TGameUser>* pChannel, unsigned short& nUCIdx, const void* pData, unsigned int nSize);
 	virtual void Disconnect();
-	virtual bool BindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx);
-	virtual bool UnbindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx);
+	virtual bool BindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx, unsigned short& nUCIdx);
+	virtual bool UnbindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx, unsigned short nUCIdx);
 
 	IGameUserController<TGameUser>* GetController() { return m_pController; }
+
+	IGameChannel<TGameUser>* GetChannel(const char* pName, unsigned int& nCIdx);
+	IGameChannel<TGameUser>* GetChannel(unsigned short nUCIdx, unsigned int& nCIdx);
 
 private:
 	struct {
 		char						szName[20];
 		IGameChannel<TGameUser>*	pChannel;
 		unsigned int				nCIdx;
+		unsigned short				nUCIdx;
 	}								m_DynChannel[20];
 	struct {
 		char						szName[20];
 		IGameChannel<TGameUser>*	pChannel;
 		unsigned int				nCIdx;
+		unsigned short				nUCIdx;
 	}								m_StaChannel[20];
 	IGameUserController<TGameUser>*	m_pController;
 };
