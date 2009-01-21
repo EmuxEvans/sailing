@@ -64,22 +64,15 @@ public:
 	{
 		LoginPubkey _pubkey;
 		LoginSession _session;
+		LoginProof _proof;
 		int ret;
 
 		ret = srp6a_client_gen_pub(&srpc, _pubkey.data, &_pubkey.data_array_size);
 		_session.data_array_size = sizeof(_session.data);
 		ret = srp6a_client_comput_key(&srpc, pubkey->data, pubkey->data_array_size, _session.data, &_session.data_array_size);
-		m_pClient->GetLogin()->session(&_pubkey);
-	}
-
-	virtual void session_callback(LoginSession* session)
-	{
-		LoginProof _proof;
-
 		_proof.data_array_size = sizeof(_proof.data);
 		srp6a_client_respond(&srpc, _proof.data, &_proof.data_array_size);
-
-		m_pClient->GetLogin()->verify(&_proof);
+		m_pClient->GetLogin()->verify(&_pubkey, &_proof);
 	}
 
 	virtual void verify_callback(LoginProof* proof)

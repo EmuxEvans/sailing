@@ -65,6 +65,7 @@ char* CServerLoginChannel::GetSendBuf(unsigned int& nSendBufSize)
 
 void CServerLoginChannel::SendBuf(const char* pSendBuf, unsigned int nSendBufSize)
 {
+	m_pUser->SendData(this, m_nUCIdx, pSendBuf, nSendBufSize);
 }
 
 #include <skates/srp6a_key.inc>
@@ -93,37 +94,24 @@ void CServerLoginChannel::begin(char* username)
 	ret = srp6a_server_set_param(&srps, (const unsigned char*)srp6a_keys[0].modulus, srp6a_keys[0].bits, (const unsigned char*)srp6a_keys[0].generator, 1, _salt.data, _salt.data_array_size);
 	_pubkey.data_array_size = sizeof(_pubkey.data);
 	ret = srp6a_server_gen_pub(&srps, _pubkey.data, &_pubkey.data_array_size);
-	begin_callback(&_salt, &_pubkey);
+	pubkey_callback(&_salt, &_pubkey);
 
 	step = LOGINSTEP_SESSION;
 }
 
-void CServerLoginChannel::session(LoginPubkey* pubkey)
+void CServerLoginChannel::verify(LoginPubkey* pubkey, LoginProof* proof)
 {
 	int ret;
 	LoginSession _session;
-
-	if(step!=LOGINSTEP_PUBKEY) {
-		m_pUser->Disconnect();
-		return;
-	}
-
-	_session.data_array_size = sizeof(_session.data);
-	ret = srp6a_server_comput_key(&srps, pubkey->data, pubkey->data_array_size, _session.data, &_session.data_array_size);
-	session_callback(&_session);
-
-	step = LOGINSTEP_PROOF;
-}
-
-void CServerLoginChannel::verify(LoginProof* proof)
-{
-	int ret;
 	LoginProof _proof;
 
 	if(step!=LOGINSTEP_PROOF) {
 		m_pUser->Disconnect();
 		return;
 	}
+
+	_session.data_array_size = sizeof(_session.data);
+	ret = srp6a_server_comput_key(&srps, pubkey->data, pubkey->data_array_size, _session.data, &_session.data_array_size);
 
 	ret = srp6a_server_verify(&srps, proof->data, proof->data_array_size);
 	_proof.data_array_size = sizeof(_proof.data);

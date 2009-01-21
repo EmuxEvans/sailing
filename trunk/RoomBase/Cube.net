@@ -3,10 +3,8 @@ include Cube.proto;
 
 module Login {
 	server begin(string<LOGIN_USERNAME_MAXLEN> username);
-	client begin_callback(LoginSalt salt, LoginPubkey pubkey);
-	server session(LoginPubkey pubkey);
-	client session_callback(LoginSession session);
-	server verify(LoginProof proof);
+	client pubkey_callback(LoginSalt salt, LoginPubkey pubkey);
+	server verify(LoginPubkey pubkey, LoginProof proof);
 	client verify_callback(LoginProof proof);
 
 	client on_error(os_int code);
