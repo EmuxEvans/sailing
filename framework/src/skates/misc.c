@@ -15,7 +15,8 @@ void randbytes(unsigned char* buf, int buflen)
 	int l;
 
 	if(random_seed==0) {
-		srand((unsigned int)time(NULL));
+//		srand((unsigned int)time(NULL));
+		srand(0);
 		random_seed = 1;
 	}
 
