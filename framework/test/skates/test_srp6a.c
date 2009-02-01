@@ -10,7 +10,7 @@
 #include <skates/srp6a.h>
 #include <skates/dymempool.h>
 
-static const char* username = "user";
+static const char* username = "username";
 static const char* password = "password";
 static unsigned char modulus[10000];
 static int modlen;
@@ -35,7 +35,6 @@ void dotest()
 	// step 1:
 	srp6a_client_set_username(&srpc, username);
 	// printf("[client] send username\n");
-	srp6a_client_set_password(&srpc, password);
 
 	// step 2:
 	srp6a_server_set_username(&srps, username);
@@ -48,6 +47,7 @@ void dotest()
 
 	// step 3:
 	srp6a_client_set_param(&srpc, modulus, modlen, generator, genlen, salt, saltlen);
+	srp6a_client_set_password(&srpc, password);
 	cbuf_len = sizeof(cbuf);
 	srp6a_client_gen_pub(&srpc, cbuf, &cbuf_len); // A => cbuf
 	// printf("[client] send A\n");

@@ -12,6 +12,8 @@ extern "C" {
 #	include <stdio.h>
 #endif
 
+ZION_API void randbytes(unsigned char* buf, int buflen);
+
 // string
 ZION_API char* strtrim(char* str);
 ZION_API char* strltrim(char* str);

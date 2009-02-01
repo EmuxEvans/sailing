@@ -2,10 +2,27 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <time.h>
 
 #include "../../inc/skates/errcode.h"
 #include "../../inc/skates/os.h"
 #include "../../inc/skates/misc.h"
+
+static int random_seed = 0;
+
+void randbytes(unsigned char* buf, int buflen)
+{
+	int l;
+
+	if(random_seed==0) {
+		srand((unsigned int)time(NULL));
+		random_seed = 1;
+	}
+
+	for(l=0; l<buflen; l++) {
+		buf[l] = rand() % 0xff;
+	}
+}
 
 char* strtrim(char* str)
 {
