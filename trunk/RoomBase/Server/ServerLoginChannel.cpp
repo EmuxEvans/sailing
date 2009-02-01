@@ -87,11 +87,14 @@ void CServerLoginChannel::begin(char* username)
 		return;
 	}
 
-	memcpy(_salt.data, "kajsdljfalkjfkadjfkajklfjakljfaklsfjkljadfasfasdfaskdjfaklsjfklasjdfkljklfj", sizeof(_salt.data));
+	randbytes(_salt.data, sizeof(_salt.data));
 	_salt.data_array_size = sizeof(_salt.data);
 	ret = srp6a_server_set_username(&srps, _username);
-	ret = srp6a_server_set_password(&srps, _password);
+	assert(ret==0);
 	ret = srp6a_server_set_param(&srps, (const unsigned char*)srp6a_keys[0].modulus, srp6a_keys[0].bits, (const unsigned char*)srp6a_keys[0].generator, 1, _salt.data, _salt.data_array_size);
+	assert(ret==0);
+	ret = srp6a_server_set_password(&srps, _password);
+	assert(ret==0);
 	_pubkey.data_array_size = sizeof(_pubkey.data);
 	ret = srp6a_server_gen_pub(&srps, _pubkey.data, &_pubkey.data_array_size);
 	pubkey_callback(&_salt, &_pubkey);
@@ -112,8 +115,10 @@ void CServerLoginChannel::verify(LoginPubkey* pubkey, LoginProof* proof)
 
 	_session.data_array_size = sizeof(_session.data);
 	ret = srp6a_server_comput_key(&srps, pubkey->data, pubkey->data_array_size, _session.data, &_session.data_array_size);
+	assert(ret==0);
 
 	ret = srp6a_server_verify(&srps, proof->data, proof->data_array_size);
+	assert(ret==0);
 	_proof.data_array_size = sizeof(_proof.data);
 	srp6a_server_respond(&srps, _proof.data, &_proof.data_array_size);
 	verify_callback(&_proof);

@@ -58,7 +58,7 @@ public:
 		srp6a_client_clear(&srpc);
 		srp6a_client_init(&srpc);
 		ret = srp6a_client_set_username(&srpc, username);
-		ret = srp6a_client_set_password(&srpc, password);
+		assert(ret==0);
 		m_pClient->GetLogin()->begin((char*)username);
 		strcpy(m_Password, password);
 	}
@@ -71,10 +71,15 @@ public:
 		int ret;
 
 		ret = srp6a_client_set_param(&srpc, (const unsigned char*)srp6a_keys[0].modulus, srp6a_keys[0].bits, (const unsigned char*)srp6a_keys[0].generator, 1, salt->data, salt->data_array_size);
+		assert(ret==0);
+		ret = srp6a_client_set_password(&srpc, "password");
+		assert(ret==0);
 		_pubkey.data_array_size = sizeof(_pubkey.data);
 		ret = srp6a_client_gen_pub(&srpc, _pubkey.data, &_pubkey.data_array_size);
+		assert(ret==0);
 		_session.data_array_size = sizeof(_session.data);
 		ret = srp6a_client_comput_key(&srpc, pubkey->data, pubkey->data_array_size, _session.data, &_session.data_array_size);
+		assert(ret==0);
 		_proof.data_array_size = sizeof(_proof.data);
 		srp6a_client_respond(&srpc, _proof.data, &_proof.data_array_size);
 		m_pClient->GetLogin()->verify(&_pubkey, &_proof);
@@ -85,6 +90,8 @@ public:
 		int ret;
 
 		ret = srp6a_client_verify(&srpc, proof->data, proof->data_array_size);
+		assert(ret==0);
+		printf("done\n");
 	}
 
 	virtual void on_error(os_int code)

@@ -5,6 +5,7 @@
 #include "../../inc/skates/bignum.h"
 #include "../../inc/skates/sha1.h"
 #include "../../inc/skates/srp6a.h"
+#include "../../inc/skates/misc.h"
 
 static void t_mgf1(unsigned char * mask, unsigned masklen, const unsigned char * seed, unsigned seedlen);
 
@@ -228,7 +229,7 @@ int srp6a_client_gen_pub(srp6a_client_t* srp, unsigned char* pkey, int* pkeylen)
 
 	if(slen>*pkeylen) return -1;
 
-	memset(pkey, 0xee, (size_t)slen);  // = t_random(data, slen);
+	randbytes(pkey, slen); // memset(pkey, 0xee, (size_t)slen);  // = t_random(data, slen);
 	bignum_from_bin(&srp->secret, pkey, slen);
 
 	/* Force g^a mod n to "wrap around" by adding log[2](n) to "a". */
@@ -281,7 +282,7 @@ int srp6a_server_gen_pub(srp6a_server_t* srp, unsigned char* pkey, int* pkeylen)
 	//
 	slen = (SRP_SECRET_BITS(bignum_bitlen(&srp->modulus)) + 7) / 8;
 
-	memset(pkey, 0xee, (size_t)slen);  // = t_random(data, slen);
+	randbytes(pkey, slen); // memset(pkey, 0xee, (size_t)slen);  // = t_random(data, slen);
 	bignum_from_bin(&srp->secret, pkey, slen);
 	bignum_from_int(&srp->pubkey, 0);
 
