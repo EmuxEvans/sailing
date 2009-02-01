@@ -61,11 +61,36 @@ void CCubeClient::OnConnect(NETWORK_HANDLE handle)
 	m_hHandle = handle;
 }
 
-void CCubeClient::OnData()
+void CCubeClient::OnData(const void* pData, unsigned int nSize)
 {
+	const void* pUserData;
+	unsigned int nUserDataSize;
+
 	if(TCP_TEXTMODE) {
+		const char* at;
+		char name[100];
+		at = strchr((const char*)pData, '.');
+		if(!at) {
+			assert(0);
+			return;
+		}
+		memcpy(name, pData, at-(const char*)pData);
+		name[at-(const char*)pData] = '\0';
+		strtrim(strltrim(name));
+
+		pUserData = at + 1;
+		nUserDataSize = nSize - (at - (const char*)pData) - 1;
 	} else {
+		if(nSize<2) {
+			assert(0);
+			return;
+		}
+
+		pUserData = (const char*)pData + sizeof(unsigned short);
+		nUserDataSize = nSize - sizeof(unsigned short);
 	}
+
+	m_Login.Dispatch(pUserData, nUserDataSize);
 }
 
 void CCubeClient::OnDiconnect()
@@ -80,7 +105,27 @@ void _on_connect(NETWORK_HANDLE handle, void* userptr)
 
 void _on_data(NETWORK_HANDLE handle, void* userptr)
 {
-	((CCubeClient*)userptr)->OnData();
+	while(1) {
+		unsigned short len;
+		char pkg_buf[1000];
+		const void* buf;
+
+		if(network_recvbuf_len(handle)<sizeof(len)) break;
+		network_recvbuf_get(handle, &len, 0, sizeof(len));
+
+		buf = network_recvbuf_ptr(handle, sizeof(len), len);
+		if(!buf) {
+			if(network_recvbuf_get(handle, pkg_buf, sizeof(len), len)!=ERR_NOERROR) {
+				break;
+			}
+			buf = pkg_buf;
+		}
+
+		((CCubeClient*)userptr)->OnData(buf, (unsigned int)len);
+
+		network_recvbuf_commit(handle, sizeof(len)+len);
+	}
+
 }
 
 void _on_disconnect(NETWORK_HANDLE handle, void* userptr)

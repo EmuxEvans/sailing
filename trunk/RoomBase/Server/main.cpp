@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 	rpcfun_init();
 	sock_str2addr("127.0.0.1:0", &sa);
 	rpcnet_bind(&sa);
-	dymempool_init(30, 1024);
+	dymempool_init(1024, 10*1024);
 	protocol_lua_init();
 
 	cubeserver_init();

@@ -96,7 +96,7 @@ void CServerLoginChannel::begin(char* username)
 	ret = srp6a_server_gen_pub(&srps, _pubkey.data, &_pubkey.data_array_size);
 	pubkey_callback(&_salt, &_pubkey);
 
-	step = LOGINSTEP_SESSION;
+	step = LOGINSTEP_PROOF;
 }
 
 void CServerLoginChannel::verify(LoginPubkey* pubkey, LoginProof* proof)

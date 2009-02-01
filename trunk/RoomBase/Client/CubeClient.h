@@ -19,7 +19,7 @@ public:
 	CCubeClient* GetClient() { return m_pClient; }
 private:
 	CCubeClient* m_pClient;
-	TClientHook* m_pHooks[100];
+	TClientHook* m_pHooks[5];
 };
 
 class CCubeClient : public ICubeClient
@@ -34,7 +34,7 @@ public:
 	virtual ILoginServer* GetLogin() { return &m_Login; }
 
 	void OnConnect(NETWORK_HANDLE handle);
-	void OnData();
+	void OnData(const void* pData, unsigned int nSize);
 	void OnDiconnect();
 
 public:
@@ -49,9 +49,11 @@ public:
 		unsigned int count;
 		int ret;
 		const char* prefix = "Login.";
+		unsigned int len;
 
 		count = network_downbufs_alloc(downbufs, sizeof(downbufs)/sizeof(downbufs[0]), 2 + strlen(prefix) + nSendBufSize);
-		ret = network_downbufs_fill(downbufs, count, 0, (const void*)&nSendBufSize, 2);
+		len = strlen(prefix) + nSendBufSize;
+		ret = network_downbufs_fill(downbufs, count, 0, (const void*)&len, 2);
 		assert(ret==ERR_NOERROR);
 		ret = network_downbufs_fill(downbufs, count, 2, prefix, strlen(prefix));
 		assert(ret==ERR_NOERROR);
@@ -66,8 +68,8 @@ public:
 	}
 private:
 	NETWORK_HANDLE m_hHandle;
-	char m_SendBuf[1024];
-	char m_RecvBuf[1024];
+	char m_SendBuf[1024*50];
+	char m_RecvBuf[1024*50];
 };
 
 template<class TClientBase, class TClientHook>
