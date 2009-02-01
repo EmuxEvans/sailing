@@ -24,9 +24,11 @@ int main(int argc, char* argv[])
 	fdwatch_init();
 	threadpool_init(1);
 	network_init(1000);
+	dymempool_init(1024, 12*1024);
 
 	do_test();
 
+	dymempool_final();
 	network_final();
 	threadpool_final();
 	fdwatch_final();
@@ -44,6 +46,7 @@ public:
 	CLoginClientProcess(CCubeClient* pClient) : CLoginClientHook("LoginClientProcess") {
 		m_pClient = pClient;
 		srp6a_client_init(&srpc);
+		m_pClient->m_Login.SetHook(this);
 	}
 	~CLoginClientProcess() {
 		m_pClient = NULL;
@@ -60,13 +63,15 @@ public:
 		strcpy(m_Password, password);
 	}
 
-	virtual void begin_callback(LoginSalt* salt, LoginPubkey* pubkey)
+	virtual void pubkey_callback(LoginSalt* salt, LoginPubkey* pubkey)
 	{
 		LoginPubkey _pubkey;
 		LoginSession _session;
 		LoginProof _proof;
 		int ret;
 
+		ret = srp6a_client_set_param(&srpc, (const unsigned char*)srp6a_keys[0].modulus, srp6a_keys[0].bits, (const unsigned char*)srp6a_keys[0].generator, 1, salt->data, salt->data_array_size);
+		_pubkey.data_array_size = sizeof(_pubkey.data);
 		ret = srp6a_client_gen_pub(&srpc, _pubkey.data, &_pubkey.data_array_size);
 		_session.data_array_size = sizeof(_session.data);
 		ret = srp6a_client_comput_key(&srpc, pubkey->data, pubkey->data_array_size, _session.data, &_session.data_array_size);

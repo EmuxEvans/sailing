@@ -102,6 +102,18 @@ bool CGameUser<TGameUser>::UnbindChannel(IGameChannel<TGameUser>* pChannel, unsi
 }
 
 template<class TGameUser>
+int CGameUser<TGameUser>::GetChannelIndex(unsigned short nUCIdx)
+{
+	if(nUCIdx&0x8000) {
+		if((nUCIdx&0xff)>=sizeof(m_DynChannel)/sizeof(m_DynChannel[0]))
+			return -1;
+		if(m_DynChannel[nUCIdx&0xff].pChannel==NULL || m_DynChannel[nUCIdx&0xff].nUCIdx!=nUCIdx)
+			return -1;
+	} else {
+	}
+}
+
+template<class TGameUser>
 IGameChannel<TGameUser>* CGameUser<TGameUser>::GetChannel(const char* pName, unsigned int& nCIdx)
 {
 	const char* at;

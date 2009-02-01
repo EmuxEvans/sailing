@@ -285,13 +285,16 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, const char* buf)
 	for(;;) {
 
 		if(buf!=tbuf) {
-			tbuf = get_token_char(tbuf, ',');
-			if(tbuf==NULL) return NULL;
+			buf = get_token_char(tbuf, '}');
+			if(buf!=NULL) break;
+
+			buf = get_token_char(tbuf, ',');
+			if(buf==NULL) return NULL;
+		} else {
+			buf = get_token_char(tbuf, '}');
+			if(buf!=NULL) break;
 			buf = tbuf;
 		}
-
-		tbuf = get_token_char(buf, '}');
-		if(tbuf!=NULL) break;
 
 		tbuf = get_token_char(buf, '{');
 		if(tbuf) {
@@ -318,7 +321,7 @@ const char* parse_array_item(PROTOCOL_CALLBACK* callback, const char* buf)
 
 	callback->new_end(callback);
 
-	return tbuf;
+	return buf;
 }
 
 #define READ_BUFFER(addr, size)	\
@@ -538,7 +541,7 @@ int protocol_text_write(PROTOCOL_TYPE* type, const char* name, const void* buf, 
 	if(ret!=ERR_NOERROR) return ret;
 	write_len += len;
 	data[write_len] = '\0';
-	*data_len = write_len + 1;
+	*data_len = write_len;
 	return ERR_NOERROR;
 }
 
@@ -658,6 +661,7 @@ void proto_new_array(PROTOCOL_CALLBACK* callback, const char* name)
 	parse->stack[parse->stack_count].buf = (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].obj_type->var_list[i].offset;
 	parse->stack[parse->stack_count].max = 0;
 	parse->stack[parse->stack_count].count = 0;
+	*((os_int*)(parse->stack[parse->stack_count].buf) - 1) = 0;
 }
 
 void proto_new_begin(PROTOCOL_CALLBACK* callback)
@@ -695,10 +699,11 @@ void proto_new_item(PROTOCOL_CALLBACK* callback, const char* value)
 		return;
 	}
 
-	if(protocol_convert(value, (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].prelen * parse->stack[parse->stack_count-1].count, parse->stack[parse->stack_count-1].type, parse->stack[parse->stack_count-1].prelen)!=ERR_NOERROR) {
+	if(protocol_convert(value, (char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].prelen * parse->stack[parse->stack_count-1].count, parse->stack[parse->stack_count-1].type&0xf, parse->stack[parse->stack_count-1].prelen)!=ERR_NOERROR) {
 		protocol_break(callback);
 		return;
 	}
+	parse->stack[parse->stack_count-1].count++;
 	//memset(
 	//	(char*)parse->stack[parse->stack_count-1].buf + parse->stack[parse->stack_count-1].prelen * parse->stack[parse->stack_count-1].count,
 	//	0x33, parse->stack[parse->stack_count-1].prelen);

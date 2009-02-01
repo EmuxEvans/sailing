@@ -528,7 +528,9 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_text_write(&PROTOCOL_NAME(%s), \"%s=\", %s, pSendBuf+m_nlen, (unsigned int*)&____len);\n", nparams[p].type, nparams[p].name, nparams[p].name);
 					snprintf(src+strlen(src), src_len-strlen(src), "			assert(____ret==ERR_NOERROR);\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			if(____ret!=ERR_NOERROR) return;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			m_nlen += ____len;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			if(m_nlen+____len>=nSendBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			pSendBuf[m_nlen+____len] = ';';\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			m_nlen += ____len + 1;\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "		}\n");
 					break;
 				}
@@ -891,7 +893,10 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_text_write(&PROTOCOL_NAME(%s), \"%s=\", %s, pSendBuf+m_nlen, (unsigned int*)&____len);\n", nparams[p].type, nparams[p].name, nparams[p].name);
 					snprintf(src+strlen(src), src_len-strlen(src), "			assert(____ret==ERR_NOERROR);\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			if(____ret!=ERR_NOERROR) return;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			m_nlen += ____len;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			if(m_nlen+____len>=nSendBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			pSendBuf[m_nlen+____len] = ';';\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			m_nlen += ____len + 1;\n");
+
 					snprintf(src+strlen(src), src_len-strlen(src), "		}\n");
 					break;
 				}

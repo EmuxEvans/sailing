@@ -81,10 +81,37 @@ void CCubeUser::OnData(const void* pData, unsigned int nSize)
 	pChannel->OnData(this, nCIdx, pUserData, nUserDataSize);
 }
 
-void CCubeUser::SendData(IGameChannel<CCubeUser>* pChannel, unsigned short& nUCIdx, const void* pData, unsigned int nSize)
+void CCubeUser::SendData(IGameChannel<CCubeUser>* pChannel, unsigned short nUCIdx, const void* pData, unsigned int nSize)
 {
+	char buf[100];
+	unsigned int buf_size;
+	int ret;
+
 	if(m_bTextMode) {
+		if(nUCIdx&0x8000) {
+			buf_size = 2 + sprintf(buf+2, "%s:%04x.", pChannel->GetName(), nUCIdx);
+		} else {
+			buf_size = 2 + sprintf(buf+2, "%s.", pChannel->GetName());
+		}
 	} else {
+		*((unsigned short*)(buf+sizeof(unsigned short))) = nUCIdx;
+		buf_size = sizeof(unsigned short) + sizeof(unsigned short);
+	}
+	*((unsigned short*)buf) = buf_size - 2 + nSize;
+
+	NETWORK_DOWNBUF* downbufs[10];
+	unsigned int count;
+
+	count = network_downbufs_alloc(downbufs, sizeof(downbufs)/sizeof(downbufs[0]), buf_size + nSize);
+	ret = network_downbufs_fill(downbufs, count, 0, buf, buf_size);
+	assert(ret==ERR_NOERROR);
+	ret = network_downbufs_fill(downbufs, count, buf_size, pData, nSize);
+	assert(ret==ERR_NOERROR);
+	ret = network_send(m_pHandle, downbufs, count);
+	assert(ret==ERR_NOERROR);
+	if(ret!=ERR_NOERROR) {
+		network_downbufs_free(downbufs, count);
+		return;
 	}
 }
 

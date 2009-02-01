@@ -15,7 +15,7 @@ public:
 	}
 
 	virtual void OnData(const void* pData, unsigned int nSize);
-	virtual void SendData(IGameChannel<CCubeUser>* pChannel, unsigned short& nUCIdx, const void* pData, unsigned int nSize);
+	virtual void SendData(IGameChannel<CCubeUser>* pChannel, unsigned short nUCIdx, const void* pData, unsigned int nSize);
 	virtual void Disconnect();
 
 	virtual ICubeRoom* GetCubeRoom() {

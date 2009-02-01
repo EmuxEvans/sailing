@@ -15,7 +15,7 @@ public:
 	virtual void OnConnect() = NULL;
 	virtual void OnDisconnect() = NULL;
 	virtual void OnData(const void* pData, unsigned int nSize) = NULL;
-	virtual void SendData(IGameChannel<TGameUser>* pChannel, unsigned short& nUCIdx, const void* pData, unsigned int nSize) = NULL;
+	virtual void SendData(IGameChannel<TGameUser>* pChannel, unsigned short nUCIdx, const void* pData, unsigned int nSize) = NULL;
 	virtual void Disconnect() = NULL;
 	virtual bool BindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx, unsigned short& nUCIdx) = NULL;
 	virtual bool UnbindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx, unsigned short nUCIdx) = NULL;
@@ -73,6 +73,8 @@ public:
 	virtual bool UnbindChannel(IGameChannel<TGameUser>* pChannel, unsigned int nCIdx, unsigned short nUCIdx);
 
 	IGameUserController<TGameUser>* GetController() { return m_pController; }
+
+	int GetChannelIndex(unsigned short nUCIdx);
 
 	IGameChannel<TGameUser>* GetChannel(const char* pName, unsigned int& nCIdx);
 	IGameChannel<TGameUser>* GetChannel(unsigned short nUCIdx, unsigned int& nCIdx);
