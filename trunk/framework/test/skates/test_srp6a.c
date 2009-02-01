@@ -93,6 +93,7 @@ int main(int argc, char* argv[])
 
 	for(i=0; i<sizeof(srp6a_keys)/sizeof(srp6a_keys[0]); i++) {
 		if(i==8) continue;
+
 		memcpy(modulus, srp6a_keys[i].modulus, srp6a_keys[i].bits);
 		modlen = srp6a_keys[i].bits;
 		memcpy(generator, srp6a_keys[i].generator, 1);
@@ -102,6 +103,8 @@ int main(int argc, char* argv[])
 		for(j=0; j<100; j++) {
 			dotest();
 		}
+
+		break;
 	}
 
 	dymempool_final();

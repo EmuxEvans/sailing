@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "../../inc/skates/errcode.h"
 #include "../../inc/skates/os.h"
@@ -229,7 +230,13 @@ int srp6a_client_gen_pub(srp6a_client_t* srp, unsigned char* pkey, int* pkeylen)
 
 	if(slen>*pkeylen) return -1;
 
-	randbytes(pkey, slen); // memset(pkey, 0xee, (size_t)slen);  // = t_random(data, slen);
+	randbytes(pkey, slen);
+	// memset(pkey, 0xee, (size_t)slen);  // = t_random(data, slen);
+	{
+		char v[6000];
+		bin2hex(pkey, slen, v);
+		printf("client %s\n", v);
+	}
 	bignum_from_bin(&srp->secret, pkey, slen);
 
 	/* Force g^a mod n to "wrap around" by adding log[2](n) to "a". */
@@ -282,7 +289,14 @@ int srp6a_server_gen_pub(srp6a_server_t* srp, unsigned char* pkey, int* pkeylen)
 	//
 	slen = (SRP_SECRET_BITS(bignum_bitlen(&srp->modulus)) + 7) / 8;
 
-	randbytes(pkey, slen); // memset(pkey, 0xee, (size_t)slen);  // = t_random(data, slen);
+	randbytes(pkey, slen);
+	//memset(pkey, 0xee, (size_t)slen);  // = t_random(data, slen);
+	{
+		char v[6000];
+		bin2hex(pkey, slen, v);
+		printf("server %s\n", v);
+	}
+
 	bignum_from_bin(&srp->secret, pkey, slen);
 	bignum_from_int(&srp->pubkey, 0);
 
@@ -307,11 +321,12 @@ int srp6a_client_comput_key(srp6a_client_t* srp, const unsigned char * key, int 
 	SHA1_CTXT ctxt;
 	unsigned char dig[SHA_DIGESTSIZE];
 	unsigned char* modulus;
-	int modlen, genlen;
+	int alen, modlen, genlen;
 	bignum_t gb, e;
 
 	modlen = bignum_bytelen(&srp->modulus);
-	modulus = (unsigned char*)alloca(modlen);
+	alen = modlen /2 + modlen;
+	modulus = (unsigned char*)alloca(alen);
 	if(modulus==NULL)
 		return -1;
 	bignum_to_bin(&srp->modulus, modulus, &modlen);
@@ -377,6 +392,7 @@ int srp6a_client_comput_key(srp6a_client_t* srp, const unsigned char * key, int 
 	bignum_modexp(&srp->key, &gb, &e, &srp->modulus);
 
 	/* convert srp->key into a session key, update hash states */
+	modlen = alen;
 	bignum_to_bin(&srp->key, modulus, &modlen);
 	t_mgf1(srp->k, RFC2945_KEY_LEN, modulus, modlen); /* Interleaved hash */
 
