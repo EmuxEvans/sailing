@@ -9,6 +9,7 @@
 #include "../../inc/skates/misc.h"
 
 static void t_mgf1(unsigned char * mask, unsigned masklen, const unsigned char * seed, unsigned seedlen);
+static void aupdate(const char* name, SHA1_CTXT* ctx, const unsigned char *, size_t);
 
 void srp6a_client_init(srp6a_client_t* srp)
 {
@@ -157,17 +158,20 @@ int srp6a_client_set_param(srp6a_client_t* srp,
 	buf1[i] ^= buf2[i];		/* buf1 = H(modulus) xor H(generator) */
 
 	/* hash: H(N) xor H(g) */
-	SHA1Update(&srp->hash, buf1, sizeof(buf1));
+	aupdate("client_param1", &srp->hash, buf1, sizeof(buf1));
+	// SHA1Update(&srp->hash, buf1, sizeof(buf1));
 
 	SHA1Init(&ctxt);
 	SHA1Update(&ctxt, (const unsigned char*)srp->username, srp->username_len);
 	SHA1Final(buf1, &ctxt);	/* buf1 = H(user) */
 
 	/* hash: (H(N) xor H(g)) | H(U) */
-	SHA1Update(&srp->hash, buf1, sizeof(buf1));
+	aupdate("client_param2", &srp->hash, buf1, sizeof(buf1));
+	//SHA1Update(&srp->hash, buf1, sizeof(buf1));
 
 	/* hash: (H(N) xor H(g)) | H(U) | s */
-	SHA1Update(&srp->hash, salt, saltlen);
+	aupdate("client_param3", &srp->hash, salt, saltlen);
+	//SHA1Update(&srp->hash, salt, saltlen);
 
 	return 0;
 }
@@ -209,17 +213,20 @@ int srp6a_server_set_param(srp6a_server_t* srp,
 	buf1[i] ^= buf2[i];		/* buf1 = H(modulus) XOR H(generator) */
 
 	/* ckhash: H(N) xor H(g) */
-	SHA1Update(&srp->ckhash, buf1, sizeof(buf1));
+	aupdate("server_param1", &srp->ckhash, buf1, sizeof(buf1));
+	//SHA1Update(&srp->ckhash, buf1, sizeof(buf1));
 
 	SHA1Init(&ctxt);
 	SHA1Update(&ctxt, (const unsigned char*)srp->username, srp->username_len);
 	SHA1Final(buf1, &ctxt);	/* buf1 = H(user) */
 
 	/* ckhash: (H(N) xor H(g)) | H(U) */
-	SHA1Update(&srp->ckhash, buf1, sizeof(buf1));
+	aupdate("server_param2", &srp->ckhash, buf1, sizeof(buf1));
+	//SHA1Update(&srp->ckhash, buf1, sizeof(buf1));
 
 	/* ckhash: (H(N) xor H(g)) | H(U) | s */
-	SHA1Update(&srp->ckhash, salt, saltlen);
+	aupdate("server_param3", &srp->ckhash, salt, saltlen);
+	//SHA1Update(&srp->ckhash, salt, saltlen);
 
 	return 0;
 }
@@ -246,7 +253,8 @@ int srp6a_client_gen_pub(srp6a_client_t* srp, unsigned char* pkey, int* pkeylen)
 	bignum_modexp(&srp->pubkey, &srp->generator, &srp->secret, &srp->modulus);
 	bignum_to_bin(&srp->pubkey, pkey, pkeylen);
 	/* hash: (H(N) xor H(g)) | H(U) | s | A */
-	SHA1Update(&srp->hash, pkey, *pkeylen);
+	aupdate("client_pub", &srp->hash, pkey, *pkeylen);
+	// SHA1Update(&srp->hash, pkey, *pkeylen);
 	/* ckhash: A */
 	SHA1Update(&srp->ckhash, pkey, *pkeylen);
 
@@ -367,7 +375,8 @@ int srp6a_client_comput_key(srp6a_client_t* srp, const unsigned char * key, int 
 	bignum_from_bin(&srp->u, dig, SHA_DIGESTSIZE);
 
 	/* hash: (H(N) xor H(g)) | H(U) | s | A | B */
-	SHA1Update(&srp->hash, key, keylen);
+	aupdate("client_key", &srp->hash, key, keylen);
+	// SHA1Update(&srp->hash, key, keylen);
 
 	bignum_from_bin(&gb, key, keylen);
 	/* reject B == 0, B >= modulus */
@@ -397,7 +406,8 @@ int srp6a_client_comput_key(srp6a_client_t* srp, const unsigned char * key, int 
 	t_mgf1(srp->k, RFC2945_KEY_LEN, modulus, modlen); /* Interleaved hash */
 
 	/* hash: (H(N) xor H(g)) | H(U) | s | A | B | K */
-	SHA1Update(&srp->hash, srp->k, RFC2945_KEY_LEN);
+	aupdate("client_key", &srp->hash, srp->k, RFC2945_KEY_LEN);
+	// SHA1Update(&srp->hash, srp->k, RFC2945_KEY_LEN);
 	/* hash: (H(N) xor H(g)) | H(U) | s | A | B | K | ex_data */
 
 	memcpy(res, srp->k, RFC2945_KEY_LEN);
@@ -423,7 +433,8 @@ int srp6a_server_comput_key(srp6a_server_t* srp, const unsigned char * pubkey, i
 		return -1;
 
 	/* ckhash: (H(N) xor H(g)) | H(U) | s | A */
-	SHA1Update(&srp->ckhash, pubkey, pubkeylen);
+	aupdate("server_key1", &srp->ckhash, pubkey, pubkeylen);
+	// SHA1Update(&srp->ckhash, pubkey, pubkeylen);
 
 	slen = mlen = bignum_bytelen(&srp->pubkey) + 10;
 	s = (unsigned char*)alloca(slen);
@@ -431,7 +442,8 @@ int srp6a_server_comput_key(srp6a_server_t* srp, const unsigned char * pubkey, i
 	/* get encoding of B */
 
 	/* ckhash: (H(N) xor H(g)) | H(U) | s | A | B */
-	SHA1Update(&srp->ckhash, s, slen);
+	aupdate("server_key2", &srp->ckhash, s, slen);
+	// SHA1Update(&srp->ckhash, s, slen);
 
 	/* hash: A */
 	SHA1Update(&srp->hash, pubkey, pubkeylen);
@@ -593,4 +605,13 @@ void *XCALLOC(size_t n, size_t s)
 void XFREE(void *p)
 {
 	dymempool_free(p);
+}
+
+char v[2000];
+
+void aupdate(const char* name, SHA1_CTXT* ctx, const unsigned char* buf, size_t size)
+{
+	bin2hex(buf, size, v);
+	printf("%s:%s\n", name, v);
+	SHA1Update(ctx, buf, size);
 }
