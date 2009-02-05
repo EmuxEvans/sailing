@@ -37,7 +37,7 @@ int app_init()
 	sock_init();
 	fdwatch_init();
 	mempool_init();
-	threadpool_init(10);
+	threadpool_init(1);
 	network_init(1024);
 	streamserver_init();
 

@@ -358,6 +358,8 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 				}
 			}
 			snprintf(src+strlen(src), src_len-strlen(src), "	} v_params;\n");
+
+			if(nfunctions[f].p_count>0) {
 			snprintf(src+strlen(src), src_len-strlen(src), "	static PROTOCOL_VARIABLE v_list[] = {\n");
 			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
 				char stype[100], obj_type[100], prelen[100];
@@ -378,6 +380,10 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 			}
 			snprintf(src+strlen(src), src_len-strlen(src), "	};\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	static PROTOCOL_TYPE v_type = {\"%s.%s\", v_list, %d, sizeof(%s), {\"\", PROTOCOL_TYPE_FAKEVAR|PROTOCOL_TYPE_STRUCT, &v_type, sizeof(\"v_params\"), 0, 0}};\n", nmodules[c].name, nfunctions[f].name, count, "v_params");
+			} else {
+			snprintf(src+strlen(src), src_len-strlen(src), "	static PROTOCOL_TYPE v_type = {\"%s.%s\", NULL, %d, sizeof(%s), {\"\", PROTOCOL_TYPE_FAKEVAR|PROTOCOL_TYPE_STRUCT, &v_type, sizeof(\"v_params\"), 0, 0}};\n", nmodules[c].name, nfunctions[f].name, count, "v_params");
+			}
+
 
 			snprintf(src+strlen(src), src_len-strlen(src), "\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	data_len = nSize;\n");
@@ -528,7 +534,7 @@ int generate_ccltfile(const char* name, char* src, unsigned int src_len)
 					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_text_write(&PROTOCOL_NAME(%s), \"%s=\", %s, pSendBuf+m_nlen, (unsigned int*)&____len);\n", nparams[p].type, nparams[p].name, nparams[p].name);
 					snprintf(src+strlen(src), src_len-strlen(src), "			assert(____ret==ERR_NOERROR);\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			if(____ret!=ERR_NOERROR) return;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			if(m_nlen+____len>=nSendBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			if(m_nlen+(unsigned int)____len>=nSendBufSize) return;\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			pSendBuf[m_nlen+____len] = ';';\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			m_nlen += ____len + 1;\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "		}\n");
@@ -723,6 +729,8 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 				}
 			}
 			snprintf(src+strlen(src), src_len-strlen(src), "	} v_params;\n");
+
+			if(nfunctions[f].p_count>0) {
 			snprintf(src+strlen(src), src_len-strlen(src), "	static PROTOCOL_VARIABLE v_list[] = {\n");
 			for(p=nfunctions[f].p_start; p<nfunctions[f].p_start+nfunctions[f].p_count; p++) {
 				char stype[100], obj_type[100], prelen[100];
@@ -743,6 +751,9 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 			}
 			snprintf(src+strlen(src), src_len-strlen(src), "	};\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	static PROTOCOL_TYPE v_type = {\"%s.%s\", v_list, %d, sizeof(%s), {\"\", PROTOCOL_TYPE_FAKEVAR|PROTOCOL_TYPE_STRUCT, &v_type, sizeof(\"v_params\"), 0, 0}};\n", nmodules[c].name, nfunctions[f].name, count, "v_params");
+			} else {
+			snprintf(src+strlen(src), src_len-strlen(src), "	static PROTOCOL_TYPE v_type = {\"%s.%s\", NULL, %d, sizeof(%s), {\"\", PROTOCOL_TYPE_FAKEVAR|PROTOCOL_TYPE_STRUCT, &v_type, sizeof(\"v_params\"), 0, 0}};\n", nmodules[c].name, nfunctions[f].name, count, "v_params");
+			}
 
 			snprintf(src+strlen(src), src_len-strlen(src), "\n");
 			snprintf(src+strlen(src), src_len-strlen(src), "	data_len = nSize;\n");
@@ -893,7 +904,7 @@ int generate_csvrfile(const char* name, char* src, unsigned int src_len)
 					snprintf(src+strlen(src), src_len-strlen(src), "			____ret = protocol_text_write(&PROTOCOL_NAME(%s), \"%s=\", %s, pSendBuf+m_nlen, (unsigned int*)&____len);\n", nparams[p].type, nparams[p].name, nparams[p].name);
 					snprintf(src+strlen(src), src_len-strlen(src), "			assert(____ret==ERR_NOERROR);\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			if(____ret!=ERR_NOERROR) return;\n");
-					snprintf(src+strlen(src), src_len-strlen(src), "			if(m_nlen+____len>=nSendBufSize) return;\n");
+					snprintf(src+strlen(src), src_len-strlen(src), "			if(m_nlen+(unsigned int)____len>=nSendBufSize) return;\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			pSendBuf[m_nlen+____len] = ';';\n");
 					snprintf(src+strlen(src), src_len-strlen(src), "			m_nlen += ____len + 1;\n");
 

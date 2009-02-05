@@ -101,6 +101,7 @@ int main(int argc, char* argv[])
 
 		printf("do test %d\n", i);
 		for(j=0; j<100; j++) {
+			printf("%d+++++++++++++++++++++++++++++++++\n", j);
 			dotest();
 		}
 

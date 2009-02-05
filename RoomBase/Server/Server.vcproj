@@ -193,6 +193,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ServerLobbyChannel.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ServerLoginChannel.cpp"
 				>
 			</File>
@@ -216,6 +220,10 @@
 			</File>
 			<File
 				RelativePath=".\CubeUser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ServerLobbyChannel.h"
 				>
 			</File>
 			<File

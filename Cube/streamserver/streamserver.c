@@ -65,9 +65,6 @@ void streamserver_final()
 	hashmap_destroy(room_map);
 }
 
-ZION_API int network_tcp_register(SOCK_ADDR* sa, NETWORK_ONACCEPT OnAccept, void* userptr);
-ZION_API int network_tcp_unregister(const SOCK_ADDR* sa);
-
 int streamserver_start(SOCK_ADDR* sa)
 {
 	return network_tcp_register(sa, onaccept, NULL);
@@ -100,6 +97,7 @@ void onaccept(void* userptr, SOCK_HANDLE sock, const SOCK_ADDR* pname)
 
 	user->state = STREAM_USERSTATE_OPEN;
 	user->handle = network_add(sock, &event, user);
+	user->room = NULL;
 }
 
 void onconnect(NETWORK_HANDLE handle, void* userptr)
@@ -118,14 +116,18 @@ void ondata(NETWORK_HANDLE handle, void* userptr)
 		if(network_recvbuf_len(handle)<sizeof(len)) break;
 		network_recvbuf_get(handle, &len, 0, sizeof(len));
 
-		buf = network_recvbuf_ptr(handle, sizeof(len), len);
-		if(!buf) {
-			if(network_recvbuf_get(handle, pkg_buf, sizeof(len), len)!=ERR_NOERROR) {
-				network_disconnect(handle);
-				user->state = STREAM_USERSTATE_DISCONNECT;
-				return;
+		if(len&0x8000) {
+			buf = NULL;
+		} else {
+			buf = network_recvbuf_ptr(handle, sizeof(len), len&0x7fff);
+			if(!buf) {
+				if(network_recvbuf_get(handle, pkg_buf, sizeof(len), len&0x7fff)!=ERR_NOERROR) {
+					network_disconnect(handle);
+					user->state = STREAM_USERSTATE_DISCONNECT;
+					return;
+				}
+				buf = pkg_buf;
 			}
-			buf = pkg_buf;
 		}
 
 		switch(user->state) {
@@ -155,8 +157,13 @@ void ondata(NETWORK_HANDLE handle, void* userptr)
 			break;
 		case STREAM_USERSTATE_ROOM:
 			if(len&0x8000) {
-				user->enable = 1;
-				user->nosend = 0;
+				if(len==0x8000) {
+					user->enable = 1;
+					user->nosend = 0;
+				} else {
+					assert(user->nosend>=(len&0x7fff));
+					user->nosend -= len&0x7fff;
+				}
 			} else {
 				RLIST_ITEM* item;
 				for(item=rlist_front(&user->room->userlist); !rlist_is_head(&user->room->userlist, item); item=rlist_next(item)) {
@@ -197,7 +204,11 @@ void ondata(NETWORK_HANDLE handle, void* userptr)
 			return;
 		}
 
-		network_recvbuf_commit(handle, sizeof(len)+(len&0x7fff));
+		if(len&0x8000) {
+			network_recvbuf_commit(handle, sizeof(len));
+		} else {
+			network_recvbuf_commit(handle, sizeof(len)+len);
+		}
 	}
 
 }

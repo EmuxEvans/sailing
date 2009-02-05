@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CubeLuaGen", "CubeLuaGen\Cu
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "streamserver", "streamserver\streamserver.vcproj", "{23230729-394B-4FEB-BB31-B82855117C46}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "streamclient", "streamclient\streamclient.vcproj", "{5DB4E88F-14A7-4C32-9DDA-01C28AABD260}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -43,6 +45,10 @@ Global
 		{23230729-394B-4FEB-BB31-B82855117C46}.Debug|Win32.Build.0 = Debug|Win32
 		{23230729-394B-4FEB-BB31-B82855117C46}.Release|Win32.ActiveCfg = Release|Win32
 		{23230729-394B-4FEB-BB31-B82855117C46}.Release|Win32.Build.0 = Release|Win32
+		{5DB4E88F-14A7-4C32-9DDA-01C28AABD260}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5DB4E88F-14A7-4C32-9DDA-01C28AABD260}.Debug|Win32.Build.0 = Debug|Win32
+		{5DB4E88F-14A7-4C32-9DDA-01C28AABD260}.Release|Win32.ActiveCfg = Release|Win32
+		{5DB4E88F-14A7-4C32-9DDA-01C28AABD260}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

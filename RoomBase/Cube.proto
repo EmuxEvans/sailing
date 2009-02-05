@@ -1,22 +1,29 @@
 
 const os_int TCP_TEXTMODE = 1;
-const os_int LOGIN_USERNAME_MAXLEN = 20;
-const os_int LOGIN_SALT_MAXLEN = 10;
-const os_int LOGIN_PUBKEY_MAXLEN = 4000;
-const os_int LOGIN_SESSION_MAXLEN = 40;
-const os_int LOGIN_PROOF_MAXLEN = 40;
+const os_int USERNAME_MAXLEN = 20;
+const os_int PASSWORD_MAXLEN = 20;
+const os_int NICKNAME_MAXLEN = 20;
+const os_int WAREHOUSE_MAXCOUNT = 100;
+const os_int ROOMNAME_MAXLEN = 20;
+const os_int ROOMLIST_MAXCOUNT = 10;
 
-struct LoginSalt {
-	os_byte data[LOGIN_SALT_MAXLEN];
+struct RoomListItem {
+	os_dword				id;
+	string<ROOMNAME_MAXLEN>	name;	
 };
-struct LoginPubkey {
-	os_byte data[LOGIN_PUBKEY_MAXLEN];
+
+struct RoomList {
+	RoomListItem			items[ROOMLIST_MAXCOUNT];
 };
-struct LoginSession {
-	os_byte data[LOGIN_SESSION_MAXLEN];
+
+struct WarehouseItem {
+	os_dword	item_id;
+	os_dword	count;
+	os_dword	expiredtime;
 };
-struct LoginProof {
-	os_byte data[LOGIN_PROOF_MAXLEN];
+
+struct Warehouse {
+	WarehouseItem items[WAREHOUSE_MAXCOUNT];
 };
 
 struct MicrophoneInfo {

@@ -27,8 +27,9 @@ protected:
 public:
 	int GetLoginStep() { return step; }
 
-	virtual void begin(char* username);
-	virtual void verify(LoginPubkey* pubkey, LoginProof* proof);
+	virtual void Login(char* username, char* password) = 0;
+	virtual void Create(char* nickname) = 0;
+
 private:
 	srp6a_server_t srps;
 	int step;

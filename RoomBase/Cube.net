@@ -2,23 +2,25 @@
 include Cube.proto;
 
 module Login {
-	server begin(string<LOGIN_USERNAME_MAXLEN> username);
-	client pubkey_callback(LoginSalt salt, LoginPubkey pubkey);
-	server verify(LoginPubkey pubkey, LoginProof proof);
-	client verify_callback(LoginProof proof);
-
-	client on_error(os_int code);
+	client SeedCallback(os_dword seed);
+	server Login(string<USERNAME_MAXLEN> username, string<PASSWORD_MAXLEN> password);
+	client Login_Callback(os_int code);
+	server Create(string<NICKNAME_MAXLEN> nickname);
+	client Create_Callback(os_int code);
 };
 
-module Guild {
-	server Login(
-		os_int a,
-		string<100> s1,
-		MicrophoneInfo m
-	);
-	client LoginCallback(
-		os_int ret,
-		string<100> s1,
-		MicrophoneInfo m
-	);
+module Lobby {
+	server GetList();
+	client GetList_Callback(RoomList list);
+	server Join(os_int index);
+	client Join_Callback(os_int code);
+};
+
+module RoleInfo {
+	server GetRoleInfo();
+	client GetRoleInfo_Callback();
+
+	server GetWarehouse();
+	client GetWarehouse_Callback(Warehouse wh);
+	server WarehouseDrop(os_int index);
 };
