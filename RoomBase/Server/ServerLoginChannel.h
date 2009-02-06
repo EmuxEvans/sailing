@@ -1,12 +1,6 @@
 #pragma once
 
-#define LOGINSTEP_START		0
-#define LOGINSTEP_PUBKEY	1
-#define LOGINSTEP_PROOF		3
-#define LOGINSTEP_DONE		4
-#define LOGINSTEP_ERROR		-1
-
-class CServerLoginChannel : public CLoginServerBase, public CLoginServerHook, public ICubeChannel
+class CServerLoginChannel : public ILoginServer, public ICubeChannel
 {
 public:
 	CServerLoginChannel();
@@ -16,21 +10,12 @@ public:
 	virtual void OnData(CCubeUser* pUser, unsigned int nCIdx, const void* pData, unsigned int nSize);
 	virtual void Disconnect(CCubeUser* pUser, unsigned int nCIdx);
 
-protected:
-	virtual char* GetSendBuf(unsigned int& nSendBufSize);
-	virtual void SendBuf(const char* pSendBuf, unsigned int nSendBufSize);
-protected:
-	CLoginServerHook* m_pHooks;
-	CCubeUser* m_pUser;
-	unsigned short m_nUCIdx;
-
-public:
-	int GetLoginStep() { return step; }
-
-	virtual void Login(char* username, char* password) = 0;
-	virtual void Create(char* nickname) = 0;
+	virtual void Login(char* username, char* password);
+	virtual void Create(char* nickname);
 
 private:
-	srp6a_server_t srps;
-	int step;
+	CCubeUser* m_pUser;
+	unsigned short m_nUCIdx;
+	ILoginServer* m_pHooks;
+	char m_szUserName[USERNAME_MAXLEN+1];
 };
