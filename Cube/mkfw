@@ -14,9 +14,11 @@ mkdir debug
 mkdir debug/modules
 mkdir release
 mkdir release/modules
+cp ../framework/debug/appbox.a debug/
 cp ../framework/debug/appbox.so debug/
 cp ../framework/debug/appbox_main debug/
 cp ../framework/debug/pdl_cc debug/
+cp ../framework/release/appbox.a release/
 cp ../framework/release/appbox.so release/
 cp ../framework/release/appbox_main release/
 cp ../framework/release/pdl_cc release/
