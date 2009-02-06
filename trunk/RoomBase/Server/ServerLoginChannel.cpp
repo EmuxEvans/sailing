@@ -2,6 +2,7 @@
 #include <assert.h>
 
 #include <skates/skates.h>
+#include <sailing/proto_net.hpp>
 
 #include "../common/GameUser.h"
 #include "../common/GameRoom.h"
@@ -20,22 +21,18 @@
 const char* _username = "username";
 const char* _password = "password";
 
-CServerLoginChannel::CServerLoginChannel() : CLoginServerBase(TCP_TEXTMODE, &m_pHooks, 1), CLoginServerHook("LoginServerHook")
+CServerLoginChannel::CServerLoginChannel()
 {
 	m_pHooks = this;
 	SetChannel("Login", 0, false);
-	srp6a_server_init(&srps);
-	step = LOGINSTEP_START;
 }
 
 CServerLoginChannel::~CServerLoginChannel()
 {
-	srp6a_server_clear(&srps);
 }
 
 bool CServerLoginChannel::Join(CCubeUser* pUser)
 {
-	step = LOGINSTEP_PUBKEY;
 	pUser->BindChannel(this, 0, m_nUCIdx);
 	m_pUser = pUser;
 	return true;

@@ -2,6 +2,7 @@
 #include <list>
 
 #include <skates/skates.h>
+#include <sailing/proto_net.hpp>
 
 #include "../common/GameUser.h"
 #include "../common/GameRoom.h"

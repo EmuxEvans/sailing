@@ -178,6 +178,7 @@ int generate_hfile(const char* name, char* inc, unsigned int inc_len)
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "class %s : %s {\n", data_class[i].name, data_class[i].root);
 		}
 		snprintf(inc+strlen(inc), inc_len-strlen(inc), "public:\n");
+		snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual ~%s() {}\n", data_class[i].name);
 		for(j=data_class[i].function_start; j<data_class[i].function_start+data_class[i].function_count; j++) {
 			snprintf(inc+strlen(inc), inc_len-strlen(inc), "	virtual %s %s(", get_ctype(data_function[j].return_type), data_function[j].name);
 			for(k=data_function[j].parameter_start; k<data_function[j].parameter_start+data_function[j].parameter_count; k++) {
