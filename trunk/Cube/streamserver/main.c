@@ -10,7 +10,7 @@
 
 static SOCK_ADDR listen_ep;
 char log_path[200];
-LOG_HANDLE log = NULL;
+LOG_HANDLE log_h = NULL;
 
 static int app_init();
 static int app_final();
@@ -45,9 +45,10 @@ int app_init()
 		return ERR_INVALID_PARAMETER;
 
 	strcpy(log_path, appbox_args_get("log", "file://single@streamserver.log"));
-	log = log_open(log_path);
-	if(log==NULL) {
+	log_h = log_open(log_path);
+	if(log_h==NULL) {
 		printf("can't open log file");
+		return ERR_UNKNOWN;
 	}
 
 	return ERR_NOERROR;
@@ -55,9 +56,9 @@ int app_init()
 
 int app_final()
 {
-	if(log) {
-		log_close(log);
-		log = NULL;
+	if(log_h) {
+		log_close(log_h);
+		log_h = NULL;
 	}
 
 	streamserver_final();
@@ -93,8 +94,8 @@ int app_usage()
 
 int app_monitor(CONSOLE_CONNECTION* conn, const char* name, const char* line)
 {
-	if(log) {
-		log_write(log, LOG_INFO, "%15s=>%s", console_peername_str(conn), line);
+	if(log_h) {
+		log_write(log_h, LOG_INFO, "%15s=>%s", console_peername_str(conn), line);
 	}
 
 	return ERR_NOERROR;
