@@ -21,9 +21,9 @@
 const char* _username = "username";
 const char* _password = "password";
 
-CServerLoginChannel::CServerLoginChannel()
+CServerLoginChannel::CServerLoginChannel() : m_Stub(NULL), m_Parser(NULL, &m_pHook, 1)
 {
-	m_pHooks = this;
+	m_pHook = this;
 	SetChannel("Login", 0, false);
 }
 
@@ -35,12 +35,16 @@ bool CServerLoginChannel::Join(CCubeUser* pUser)
 {
 	pUser->BindChannel(this, 0, m_nUCIdx);
 	m_pUser = pUser;
+
+	m_Stub.SeedCallback(0);
+
 	return true;
 }
 
 void CServerLoginChannel::OnData(CCubeUser* pUser, unsigned int nCIdx, const void* pData, unsigned int nSize)
 {
-	if(!Dispatch(pData, nSize)) {
+
+	if(!m_Parser.Dispatch(pData, nSize)) {
 		assert(0);
 		pUser->Disconnect();
 	}
@@ -52,73 +56,13 @@ void CServerLoginChannel::Disconnect(CCubeUser* pUser, unsigned int nCIdx)
 	m_pUser = NULL;
 }
 
-char g_SendBuf[1000];
-
-char* CServerLoginChannel::GetSendBuf(unsigned int& nSendBufSize)
+void CServerLoginChannel::Login(char* username, char* password)
 {
-	nSendBufSize = sizeof(g_SendBuf);
-	return g_SendBuf;
+	strcpy(m_szUserName, username);
+	m_Stub.Login_Callback(0);
 }
 
-void CServerLoginChannel::SendBuf(const char* pSendBuf, unsigned int nSendBufSize)
+void CServerLoginChannel::Create(char* nickname)
 {
-	m_pUser->SendData(this, m_nUCIdx, pSendBuf, nSendBufSize);
-}
-
-#include <skates/srp6a_key.inc>
-
-void CServerLoginChannel::begin(char* username)
-{
-	int ret;
-	LoginSalt _salt;
-	LoginPubkey _pubkey;
-
-	if(step!=LOGINSTEP_PUBKEY) {
-		m_pUser->Disconnect();
-		return;
-	}
-
-	if(strcmp(username, _username)!=0) {
-		on_error(-1);
-		step = LOGINSTEP_ERROR;
-		return;
-	}
-
-	randbytes(_salt.data, sizeof(_salt.data));
-	_salt.data_array_size = sizeof(_salt.data);
-	ret = srp6a_server_set_username(&srps, _username);
-	assert(ret==0);
-	ret = srp6a_server_set_param(&srps, (const unsigned char*)srp6a_keys[0].modulus, srp6a_keys[0].bits, (const unsigned char*)srp6a_keys[0].generator, 1, _salt.data, _salt.data_array_size);
-	assert(ret==0);
-	ret = srp6a_server_set_password(&srps, _password);
-	assert(ret==0);
-	_pubkey.data_array_size = sizeof(_pubkey.data);
-	ret = srp6a_server_gen_pub(&srps, _pubkey.data, &_pubkey.data_array_size);
-	pubkey_callback(&_salt, &_pubkey);
-
-	step = LOGINSTEP_PROOF;
-}
-
-void CServerLoginChannel::verify(LoginPubkey* pubkey, LoginProof* proof)
-{
-	int ret;
-	LoginSession _session;
-	LoginProof _proof;
-
-	if(step!=LOGINSTEP_PROOF) {
-		m_pUser->Disconnect();
-		return;
-	}
-
-	_session.data_array_size = sizeof(_session.data);
-	ret = srp6a_server_comput_key(&srps, pubkey->data, pubkey->data_array_size, _session.data, &_session.data_array_size);
-	assert(ret==0);
-
-	ret = srp6a_server_verify(&srps, proof->data, proof->data_array_size);
-	assert(ret==0);
-	_proof.data_array_size = sizeof(_proof.data);
-	srp6a_server_respond(&srps, _proof.data, &_proof.data_array_size);
-	verify_callback(&_proof);
-
-	step = LOGINSTEP_DONE;
+	m_Stub.Create_Callback(0);
 }

@@ -18,4 +18,8 @@ private:
 	unsigned short m_nUCIdx;
 	ILoginServer* m_pHooks;
 	char m_szUserName[USERNAME_MAXLEN+1];
+
+	CLoginServerStub	m_Stub;
+	CLoginServerParser	m_Parser;
+	ILoginServer*		m_pHook;
 };
