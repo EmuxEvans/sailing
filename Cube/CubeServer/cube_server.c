@@ -299,7 +299,8 @@ void cube_room_check(CUBE_ROOM* room)
 
 		return;
 	}
-	if(count==loaded && count==p2p+1 && room->state==CUBE_ROOM_STATE_LOADING) {
+//	if(count==loaded && count==p2p+1 && room->state==CUBE_ROOM_STATE_LOADING) {
+	if(count==loaded && room->state==CUBE_ROOM_STATE_LOADING) {
 		room->state = CUBE_ROOM_STATE_GAMING;
 		for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 			SVR_USER_CTX ctx;
@@ -387,7 +388,8 @@ void cube_room_tick(CUBE_ROOM* room)
 	for(idx=0; idx<sizeof(room->members)/sizeof(room->members[0]); idx++) {
 		if(room->members[idx].conn==NULL) continue;
 		if(singer==idx) continue;
-		if(!room->members[idx].p2p_status) continue;
+		if(room->members[idx].loaded) continue;
+//		if(!room->members[idx].p2p_status) continue;
 		ctx.conn = room->members[idx].conn;
 		cube_room_leave(room, room->members[idx].conn, 0);
 		lobby_room_join_owner(&ctx, ctx.conn->nick);
