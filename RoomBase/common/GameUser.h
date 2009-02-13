@@ -8,6 +8,47 @@ class IGameUser;
 template<class TGameUser>
 class IGameChannel;
 
+
+
+class ISwitchController {
+public:
+	virtual ~ISwitchController() {}
+
+}:
+class ISwitch {
+public:
+	virtual ~ISwitch() {}
+
+	Q
+};
+class IChannel {
+public:
+	virtual ~IChannel() {}
+
+	virtual void OnAttach(IStream* pStream) = 0;
+	virtual void OnDetach(IStream* pStream) = 0;
+	virtual void OnData(IStream* pStream) = 0;
+};
+
+class CUserSwitchController : public ISwitchController {
+public:
+};
+class CUserSwitch : public ISwitch {
+public:
+};
+
+class CRemoteSwitchController : public ISwitchController {
+};
+class CRemoteSwitch : public ISwitch {
+};
+
+class I
+
+
+
+
+
+
 template<class TGameUser>
 class IGameUser
 {
