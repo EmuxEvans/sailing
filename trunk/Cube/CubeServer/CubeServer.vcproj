@@ -242,7 +242,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="del /Q $(ProjectDir)$(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(ProjectDir)$(InputName).$(ProjectName).c&#x0D;&#x0A;cd &quot;$(InputDir)&quot;&#x0D;&#x0A;copy $(InputName).pdl $(InputName).$(ProjectName).pdl&#x0D;&#x0A;..\framework\$(ConfigurationName)-$(PlatformName)\pdl_cc CMD_SVR SVR $(InputName).$(ProjectName).pdl&#x0D;&#x0A;copy $(InputName).$(ProjectName).h $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).c $(ProjectDir)&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).pdl&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).c"
+					CommandLine="del /Q $(ProjectDir)$(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(ProjectDir)$(InputName).$(ProjectName).c&#x0D;&#x0A;cd &quot;$(InputDir)&quot;&#x0D;&#x0A;copy $(InputName).pdl $(InputName).$(ProjectName).pdl&#x0D;&#x0A;..\framework\$(ConfigurationName)-$(PlatformName)\pdl_cc CMD_SVR SVR $(InputName).$(ProjectName).pdl&#x0D;&#x0A;copy $(InputName).$(ProjectName).h $(ProjectDir)&#x0D;&#x0A;copy $(InputName).$(ProjectName).c $(ProjectDir)&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).pdl&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).h&#x0D;&#x0A;del /Q $(InputName).$(ProjectName).c&#x0D;&#x0A;"
 					Outputs="$(InputName).$(ProjectName).h;$(InputName).$(ProjectName).c"
 				/>
 			</FileConfiguration>

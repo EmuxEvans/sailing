@@ -21,7 +21,7 @@ struct STEAM_USER {
 	STREAM_ROOM*	room;		// 房间的指针
 
 	NETWORK_HANDLE	handle;
-	char			recvbuf[50*1024];
+	char			recvbuf[100*1024];
 
 	int				state;		// 连接的状态
 	int				delay;		// 网络延时
@@ -122,9 +122,7 @@ void ondata(NETWORK_HANDLE handle, void* userptr)
 			buf = network_recvbuf_ptr(handle, sizeof(len), len&0x7fff);
 			if(!buf) {
 				if(network_recvbuf_get(handle, pkg_buf, sizeof(len), len&0x7fff)!=ERR_NOERROR) {
-					network_disconnect(handle);
-					user->state = STREAM_USERSTATE_DISCONNECT;
-					return;
+					break;
 				}
 				buf = pkg_buf;
 			}
@@ -133,7 +131,6 @@ void ondata(NETWORK_HANDLE handle, void* userptr)
 		switch(user->state) {
 		case STREAM_USERSTATE_OPEN:
 			if((len&0x8000)!=0 || len==0 || len>100 || *((char*)buf+len-1)!='\0') {
-				user->state = STREAM_USERSTATE_DISCONNECT;
 				network_disconnect(handle);
 				user->state = STREAM_USERSTATE_DISCONNECT;
 				return;
@@ -152,7 +149,7 @@ void ondata(NETWORK_HANDLE handle, void* userptr)
 			user->enable = 1;
 			user->delay = 0;
 			user->nosend = 0;
-			user->nosend_max = 20*1024;
+			user->nosend_max = 100*1024;
 			user->state = STREAM_USERSTATE_ROOM;
 			break;
 		case STREAM_USERSTATE_ROOM:
@@ -167,11 +164,11 @@ void ondata(NETWORK_HANDLE handle, void* userptr)
 			} else {
 				RLIST_ITEM* item;
 				for(item=rlist_front(&user->room->userlist); !rlist_is_head(&user->room->userlist, item); item=rlist_next(item)) {
-					NETWORK_DOWNBUF* bufs[10];
+					NETWORK_DOWNBUF* bufs[100];
 					unsigned int bufs_count;
 
-					if((STREAM_USER*)item==user) continue;
-					if(((STREAM_USER*)item)->enable) continue;
+//					if((STREAM_USER*)item==user) continue;
+					if(!((STREAM_USER*)item)->enable) continue;
 
 					((STREAM_USER*)item)->nosend += sizeof(len) + len;
 					if(((STREAM_USER*)item)->nosend > ((STREAM_USER*)item)->nosend_max) {
@@ -189,7 +186,7 @@ void ondata(NETWORK_HANDLE handle, void* userptr)
 						bufs_count = network_downbufs_alloc(bufs, sizeof(bufs)/sizeof(bufs[0]), sizeof(len) + len);
 						if(bufs_count==0) continue;
 						network_downbufs_fill(bufs, bufs_count, 0, &len, sizeof(len));
-						network_downbufs_fill(bufs, bufs_count, sizeof(len), pkg_buf, len);
+						network_downbufs_fill(bufs, bufs_count, sizeof(len), buf, len);
 
 						if(network_send(((STREAM_USER*)item)->handle, bufs, bufs_count)!=ERR_NOERROR) {
 							network_downbufs_free(bufs, bufs_count);

@@ -70,6 +70,8 @@ int app_final()
 	return ERR_NOERROR;
 }
 
+static char vdata[32*1024] = {'0'};
+
 int app_start()
 {
 	return streamserver_start(&listen_ep);
