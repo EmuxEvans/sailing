@@ -73,7 +73,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib lua.lib"
+				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\framework\$(ConfigurationName)-$(PlatformName)"
 				GenerateDebugInformation="true"
@@ -159,7 +159,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib lua.lib"
+				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\framework\$(ConfigurationName)-$(PlatformName)"
 				GenerateDebugInformation="true"
