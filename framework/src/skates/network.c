@@ -308,10 +308,10 @@ int network_downbufs_fill(NETWORK_DOWNBUF* downbufs[], unsigned int count, unsig
 		unsigned int bs_s, bs_l, be_l, l;
 		bs_s = start % downbuf_size;
 		bs_l = downbuf_size - bs_s;
-		be_l = (start+downbuf_size-1)%downbuf_size + 1;
+		be_l = (data_len-bs_l-1)%downbuf_size + 1;
 		memcpy(downbufs[bs]->buf+bs_s, data, bs_l);
 		for(l=bs+1; l<be; l++) {
-		memcpy(downbufs[l]->buf, (char*)data + bs_l + downbuf_size*(l-bs), downbuf_size);
+		memcpy(downbufs[l]->buf,  (char*)data + bs_l + downbuf_size*(l-bs-1), downbuf_size);
 		}
 		memcpy(downbufs[be]->buf, (char*)data + bs_l + downbuf_size*(be-bs-1), be_l);
 	}
