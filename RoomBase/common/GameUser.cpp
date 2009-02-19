@@ -2,9 +2,7 @@
 #include <assert.h>
 
 #include "GameUser.h"
-#include "GameRoom.h"
 #include "GameUser.inl"
-#include "GameRoom.inl"
 
 static unsigned int g_nGameSeq = 0x1980;
 
