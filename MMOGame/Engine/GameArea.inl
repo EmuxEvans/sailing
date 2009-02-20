@@ -1,3 +1,5 @@
+#pragma once
+
 template<class TArea, class TAreaActor>
 CArea<TArea, TAreaActor>::CArea(float fCellWidth, float fCellHeight, CAreaCell<TArea, TAreaActor>* pCells, int nColMax, int nRowMax)
 {
@@ -68,12 +70,12 @@ TAreaActor* CArea<TArea, TAreaActor>::GetActor(unsigned int nActorId)
 }
 
 template<class TArea, class TAreaActor>
-void CArea<TArea, TAreaActor>::Notify(const FAreaVector& vecPos, float fRange, const void* pData)
+void CArea<TArea, TAreaActor>::Notify(const FAreaVector& vecPos, float fRange, const FMsgBlock* pData)
 {
 }
 
 template<class TArea, class TAreaActor>
-void CArea<TArea, TAreaActor>::Notify(const void* pData)
+void CArea<TArea, TAreaActor>::Notify(const FMsgBlock* pData)
 {
 	for(int x=0; x<m_nColMax; x++) {
 		for(int y=0; y<m_nRowMax; y++) {
@@ -138,7 +140,7 @@ TAreaActor* CAreaCell<TArea, TAreaActor>::GetActor(unsigned int nActorId)
 }
 
 template<class TArea, class TAreaActor>
-void CAreaCell<TArea, TAreaActor>::Notify(const FAreaVector& vecPos, float fRange, const void* pData)
+void CAreaCell<TArea, TAreaActor>::Notify(const FAreaVector& vecPos, float fRange, const FMsgBlock* pData)
 {
 	std::list<TAreaActor*>::iterator i;
 	for(i=m_Actor.begin(); i!=m_Actor.end(); i++) {
@@ -150,7 +152,7 @@ void CAreaCell<TArea, TAreaActor>::Notify(const FAreaVector& vecPos, float fRang
 }
 
 template<class TArea, class TAreaActor>
-void CAreaCell<TArea, TAreaActor>::Notify(const void* pData)
+void CAreaCell<TArea, TAreaActor>::Notify(const FMsgBlock* pData)
 {
 	std::list<TAreaActor*>::iterator i;
 	for(i=m_Actor.begin(); i!=m_Actor.end(); i++) {

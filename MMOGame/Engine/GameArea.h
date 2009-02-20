@@ -6,6 +6,11 @@ typedef struct FAreaVector {
 	float		z;
 } FAreaVector;
 
+typedef struct FMsgBlock {
+	int nCmd;
+	char* pData;
+} FMsgBlock;
+
 float AreaVectorDistance(const FAreaVector& vecA, const FAreaVector& vecB);
 
 template<class TArea, class TAreaActor>
@@ -32,8 +37,8 @@ public:
 	TAreaActor* GetActor(const FAreaVector& vecPos, float fRange, unsigned int nActorId);
 	TAreaActor* GetActor(unsigned int nActorId);
 
-	void Notify(const FAreaVector& vecPos, float fRange, const void* pData);
-	void Notify(const void* pData);
+	void Notify(const FAreaVector& vecPos, float fRange, const FMsgBlock* pData);
+	void Notify(const FMsgBlock* pData);
 	
 private:
 	float				m_fCellWidth, m_fCellHeight;
@@ -56,8 +61,8 @@ public:
 	TAreaActor* GetActor(const FAreaVector& vecPos, float fRange, unsigned int nActorId);
 	TAreaActor* GetActor(unsigned int nActorId);
 
-	void Notify(const FAreaVector& vecPos, float fRange, const void* pData);
-	void Notify(const void* pData);
+	void Notify(const FAreaVector& vecPos, float fRange, const FMsgBlock* pData);
+	void Notify(const FMsgBlock* pData);
 
 protected:
 	void InsertActor(TAreaActor* pActor);
@@ -88,13 +93,40 @@ public:
 	void SetTarget(TAreaActor* pTarget);
 	TAreaActor* GetTarget();
 
-	virtual void OnNotify(TAreaActor* pWho, const void* pData) { }
-	virtual void OnAction(const void* pData) { }
-	virtual void OnPassive(TAreaActor* pWho, const void* pData) { }
+	virtual void OnNotify(TAreaActor* pWho, const FMsgBlock* pData) = 0;
+	virtual void OnAction(const FMsgBlock* pData) = 0;
+	virtual void OnPassive(TAreaActor* pWho, const FMsgBlock* pData) = 0;
 
 private:
 	unsigned int m_nActorId;
 	TArea*							m_pArea;
 	CAreaCell<TArea, TAreaActor>*	m_pAreaCell;
 	FAreaVector						m_vecPosition, m_vecDirection;
+};
+
+typedef struct ItemSData {
+	os_dword	nItemId;
+	os_byte		nType;
+	os_int		nClassId;
+	os_char		bUniqueId;
+	os_char		bCanEquip;
+	os_char		bUsable;
+	os_byte		aData[100];
+} ItemSData;
+
+typedef struct ItemUData {
+	os_dword	nItemId;
+	os_qword	nUniqueId;
+	os_byte		aData[100];
+} ItemUData;
+
+template<class TAreaActor>
+class IItemLogic
+{
+public:
+	virtual ~IItemLogic() { }
+
+	virtual void Equip(TAreaActor* pActor, int nSolt, ItemUData* pUData, int nItemIndex) = 0;
+	virtual void Use(TAreaActor* pActor, ItemUData* pUData, int nItemIndex) = 0;
+	virtual void Drop(TAreaActor* pActor, ItemUData* pUData, int nItemIndex) = 0;
 };
