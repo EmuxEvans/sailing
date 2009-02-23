@@ -197,6 +197,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Math.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PropertySet.cpp"
 				>
 			</File>
@@ -209,15 +213,46 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SGAreaActor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SGBuff.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\SGItem.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\SGSkill.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\VarCmd.cpp"
 				>
 			</File>
 		</Filter>
@@ -263,6 +298,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Math.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PropertySet.h"
 				>
 			</File>
@@ -279,6 +318,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SGAreaActor.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SGBuff.h"
 				>
 			</File>
@@ -288,6 +331,10 @@
 			</File>
 			<File
 				RelativePath=".\SGSkill.h"
+				>
+			</File>
+			<File
+				RelativePath=".\VarCmd.h"
 				>
 			</File>
 		</Filter>

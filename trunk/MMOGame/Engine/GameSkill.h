@@ -17,9 +17,6 @@ class ISkillLogic
 public:
 	virtual ~ISkillLogic() { }
 
-	virtual IPropertySet* GetUDataPropertySet() = 0;
-	virtual IPropertySet* GetSDataPropertySet() = 0;
-
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta) = 0;
 	virtual void Action(TAreaActor* pActor, SkillUData* pData) = 0;
 };

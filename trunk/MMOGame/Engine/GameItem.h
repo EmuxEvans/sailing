@@ -23,7 +23,7 @@ public:
 	virtual ~IItemLogic() { }
 
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta) = 0;
-	virtual void Equip(TAreaActor* pActor, int nSolt, ItemUData* pUData, int nItemIndex) = 0;
-	virtual void Use(TAreaActor* pActor, ItemUData* pUData, int nItemIndex) = 0;
-	virtual void Drop(TAreaActor* pActor, ItemUData* pUData, int nItemIndex) = 0;
+	virtual bool Equip(TAreaActor* pActor, int nSolt, ItemUData* pUData, int nItemIndex) = 0;
+	virtual bool Use(TAreaActor* pActor, ItemUData* pUData, int nItemIndex) = 0;
+	virtual bool Drop(TAreaActor* pActor, ItemUData* pUData, int nItemIndex) = 0;
 };
