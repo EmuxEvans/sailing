@@ -84,6 +84,15 @@ void CArea<TArea, TAreaActor>::Notify(const FMsgBlock* pData)
 	}
 }
 
+void CArea<TArea, TAreaActor>::Tick(unsigned int nCurTime, unsigned int nDelta)
+{
+	for(int x=0; x<m_nColMax; x++) {
+		for(int y=0; y<m_nRowMax; y++) {
+			m_pCells[y*m_nColMax+x].Tick(nCurTime, nDelta);
+		}
+	}
+}
+
 template<class TArea, class TAreaActor>
 CAreaCell<TArea, TAreaActor>::CAreaCell()
 {
@@ -157,6 +166,15 @@ void CAreaCell<TArea, TAreaActor>::Notify(const FMsgBlock* pData)
 	std::list<TAreaActor*>::iterator i;
 	for(i=m_Actor.begin(); i!=m_Actor.end(); i++) {
 		(*i)->OnNotify(pData);
+	}
+}
+
+template<class TArea, class TAreaActor>
+void CAreaCell<TArea, TAreaActor>::Tick(unsigned int nCurTime, unsigned int nDelta)
+{
+	std::list<TAreaActor*>::iterator i;
+	for(i=m_Actor.begin(); i!=m_Actor.end(); i++) {
+		(*i)->Tick(nCurTime, nDelta);
 	}
 }
 

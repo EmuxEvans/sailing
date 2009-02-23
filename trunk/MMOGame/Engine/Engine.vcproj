@@ -177,6 +177,18 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameBuff.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameItem.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameSkill.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameUser.cpp"
 				>
 			</File>
@@ -185,7 +197,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropertySet.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SG.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SGArea.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SGBuff.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SGItem.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SGSkill.cpp"
 				>
 			</File>
 		</Filter>
@@ -195,11 +227,27 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\Game.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GameArea.h"
 				>
 			</File>
 			<File
 				RelativePath=".\GameArea.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\GameBuff.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameItem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameSkill.h"
 				>
 			</File>
 			<File
@@ -215,7 +263,31 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropertySet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertySet.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\SG.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SGArea.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SGBuff.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SGItem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SGSkill.h"
 				>
 			</File>
 		</Filter>

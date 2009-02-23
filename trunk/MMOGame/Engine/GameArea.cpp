@@ -4,5 +4,3 @@
 #include <skates/os.h>
 
 #include "GameArea.h"
-
-
