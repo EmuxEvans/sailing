@@ -1,18 +1,17 @@
 #pragma once
 
-class CSGAreaActor;
 class CSGArea;
+class CSGAreaActor;
 
-#define SGWAREHOUSE_COUNT		10
-#define SGEQUIPTMENT_COUNT		10
-
-class CSGItemLogic : public IItemLogic<CSGArea>
+class CSGArea : public CArea<CSGArea, CSGAreaActor>
 {
 public:
-};
+	CSGArea() {
+	}
+	virtual ~CSGArea() {
+	}
 
-ItemSData* SGGetItemSData(os_dword nItemId);
-CSGItemLogic* SGGetItemLogic(os_dword nClassId);
+};
 
 class CSGAreaActor : public CAreaActor<CSGArea, CSGAreaActor>
 {
@@ -60,45 +59,3 @@ public:
 	ItemUData	m_Warehouse[SGWAREHOUSE_COUNT];
 };
 
-class CSGArea : public CArea<CSGArea, CSGAreaActor>
-{
-public:
-	CSGArea() {
-	}
-	virtual ~CSGArea() {
-	}
-
-};
-
-class CSGItemLogic_Weapon : public CSGItemLogic
-{
-public:
-	CSGItemLogic_Weapon();
-	virtual ~CSGItemLogic_Weapon();
-
-	virtual void Equip(CSGArea* pActor, int nSolt, ItemUData* pData, int nItemIndex);
-	virtual void Use(CSGArea* pActor, ItemUData* pData, int nItemIndex);
-	virtual void Drop(CSGArea* pActor, ItemUData* pData, int nItemIndex);
-};
-
-class CSGItemLogic_Armor : public CSGItemLogic
-{
-public:
-	CSGItemLogic_Armor();
-	virtual ~CSGItemLogic_Armor();
-
-	virtual void Equip(CSGArea* pActor, int nSolt, ItemUData* pData, int nItemIndex);
-	virtual void Use(CSGArea* pActor, ItemUData* pData, int nItemIndex);
-	virtual void Drop(CSGArea* pActor, ItemUData* pData, int nItemIndex);
-};
-
-class CSGItemLogic_Pet : public CSGItemLogic
-{
-public:
-	CSGItemLogic_Pet();
-	virtual ~CSGItemLogic_Pet();
-
-	virtual void Equip(CSGArea* pActor, int nSolt, ItemUData* pData, int nItemIndex);
-	virtual void Use(CSGArea* pActor, ItemUData* pData, int nItemIndex);
-	virtual void Drop(CSGArea* pActor, ItemUData* pData, int nItemIndex);
-};

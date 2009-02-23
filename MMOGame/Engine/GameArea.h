@@ -39,7 +39,9 @@ public:
 
 	void Notify(const FAreaVector& vecPos, float fRange, const FMsgBlock* pData);
 	void Notify(const FMsgBlock* pData);
-	
+
+	virtual void Tick(unsigned int nCurTime, unsigned int nDelta);
+
 private:
 	float				m_fCellWidth, m_fCellHeight;
 	TAreaActor*			m_pCells;
@@ -63,6 +65,8 @@ public:
 
 	void Notify(const FAreaVector& vecPos, float fRange, const FMsgBlock* pData);
 	void Notify(const FMsgBlock* pData);
+
+	void Tick(unsigned int nCurTime, unsigned int nDelta);
 
 protected:
 	void InsertActor(TAreaActor* pActor);
@@ -96,37 +100,11 @@ public:
 	virtual void OnNotify(TAreaActor* pWho, const FMsgBlock* pData) = 0;
 	virtual void OnAction(const FMsgBlock* pData) = 0;
 	virtual void OnPassive(TAreaActor* pWho, const FMsgBlock* pData) = 0;
+	virtual void Tick(unsigned int nCurTime, unsigned int nDelta) = 0;
 
 private:
 	unsigned int m_nActorId;
 	TArea*							m_pArea;
 	CAreaCell<TArea, TAreaActor>*	m_pAreaCell;
 	FAreaVector						m_vecPosition, m_vecDirection;
-};
-
-typedef struct ItemSData {
-	os_dword	nItemId;
-	os_byte		nType;
-	os_int		nClassId;
-	os_char		bUniqueId;
-	os_char		bCanEquip;
-	os_char		bUsable;
-	os_byte		aData[100];
-} ItemSData;
-
-typedef struct ItemUData {
-	os_dword	nItemId;
-	os_qword	nUniqueId;
-	os_byte		aData[100];
-} ItemUData;
-
-template<class TAreaActor>
-class IItemLogic
-{
-public:
-	virtual ~IItemLogic() { }
-
-	virtual void Equip(TAreaActor* pActor, int nSolt, ItemUData* pUData, int nItemIndex) = 0;
-	virtual void Use(TAreaActor* pActor, ItemUData* pUData, int nItemIndex) = 0;
-	virtual void Drop(TAreaActor* pActor, ItemUData* pUData, int nItemIndex) = 0;
 };
