@@ -17,8 +17,5 @@ class IBuffLogic
 public:
 	virtual ~IBuffLogic() { }
 
-	virtual IPropertySet* GetUDataPropertySet() = 0;
-	virtual IPropertySet* GetSDataPropertySet() = 0;
-
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta) = 0;
 };

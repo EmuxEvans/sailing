@@ -1,6 +1,6 @@
 #pragma once
 
-typedef IItemLogic<CSGArea> CSGItemLogic;
+typedef IItemLogic<CSGAreaActor> CSGItemLogic;
 
 ItemSData* SGGetItemSData(os_dword nItemId);
 CSGItemLogic* SGGetItemLogic(os_dword nClassId);
