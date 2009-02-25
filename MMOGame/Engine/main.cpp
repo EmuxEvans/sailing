@@ -1,5 +1,6 @@
 #include <assert.h>
-#include <list>
+#include <stdio.h>
+#include <map>
 
 #include "Game.h"
 #include "Math.h"
@@ -38,8 +39,10 @@ int main(int argc, char* argv[])
 
 
 	unsigned int nTime = 0;
-	for(int i=0; i<1000; i++) {
+	for(int i=0; i<100; i++) {
+		printf("==begin== %d\n", nTime);
 		g_Area.Tick(nTime, 100);
+		printf("==end  == %d\n", nTime);
 		nTime += 100;
 	}
 

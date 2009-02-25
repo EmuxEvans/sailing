@@ -185,6 +185,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameLoop.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameSkill.cpp"
 				>
 			</File>
@@ -279,6 +283,10 @@
 			</File>
 			<File
 				RelativePath=".\GameItem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameLoop.h"
 				>
 			</File>
 			<File
