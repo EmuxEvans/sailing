@@ -26,6 +26,7 @@ public:
 	bool Equip(int nIndex, int nSolt);
 
 	virtual void OnMove(const Vector& vecDestination);
+	virtual void Process(const CmdData* pCmdData);
 
 protected:
 	ItemUData	m_Equip[SGEQUIPMENT_COUNT];

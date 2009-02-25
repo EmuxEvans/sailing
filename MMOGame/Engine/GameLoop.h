@@ -1,39 +1,89 @@
 #pragma once
 
-typedef struct CLIENT_FESEP_DATA {
-} CLIENT_FESEP_DATA;
-
-typedef struct CLIENT_FESEP {
-	unsigned int i;
-} CLIENT_FESEP;
-
-class CGameFES;
-class CGameLoop;
-
 class CGameFES
 {
 public:
-	CGameFES();
-	virtual ~CGameFES();
+	static bool Init();
+	static bool Final();
+	static CGameFES* Get(unsigned int nIp, unsigned int short nPort);
 
+public:
+	CGameFES() {}
+	virtual ~CGameFES() {}
 
+	virtual bool SendData(unsigned int nUserId, const void* pData, unsigned int nSize) = 0;
+	virtual bool Disconnect(unsigned int nUserId) = 0;
 };
 
-class CGameLoop
+class CGameClient
 {
-public:
-	CGameLoop();
-	virtual ~CGameLoop();
-
-	bool PushMsg(unsigned int nCmd, unsigned int nSource, unsigned int nTarget, const void* pData);
-	void Run(unsigned int nMinTime);
-
 protected:
-	virtual void Process(const CmdData* pCmdData);
+	CGameClient(unsigned int nUserId, CGameFES* pFES) {
+		m_nUserId = nUserId;
+		m_pFES = pFES;
+	}
+	virtual ~CGameClient() {
+	}
 
-	virtual void OnStart();
-	virtual void OnShutdown();
+public:
+	bool SendData(unsigned int nUserId, const void* pData, unsigned int nSize) {
+		return m_pFES->SendData(nUserId, pData, nSize);
+	}
+	bool Disconnect(unsigned int nUserId) {
+		return m_pFES->Disconnect(m_nUserId);
+	}
+
+	unsigned int GetUserId() const {
+		return m_nUserId;
+	}
+	CGameFES* GetFES() {
+		return m_pFES;
+	}
 
 private:
-	std::vector<CmdData>					m_MsgQ[2];
+	unsigned int m_nUserId;
+	CGameFES* m_pFES;
 };
+
+// Async Procedure Call
+class CGameAPC
+{
+public:
+	static bool Init();
+	static bool Final();
+	static bool QueueWorkItem(CGameAPC* pAPC);
+
+protected:
+	CGameAPC() { }
+	virtual ~CGameAPC() { }
+
+public:
+	virtual void Execute() = 0;
+};
+
+// Game Loop
+class IGameLoopCallback
+{
+public:
+	virtual ~IGameLoopCallback() {}
+
+	virtual void Process(const CmdData* pCmdData) = 0;
+	virtual void Tick(unsigned int nCurrent, unsigned int nDelta) = 0;
+
+	virtual void OnStart() = 0;
+	virtual void OnShutdown() = 0;
+};
+
+class IGameLoop
+{
+public:
+	virtual bool Start(unsigned int nMinTime) = 0;
+	virtual bool Stop() = 0;
+	virtual void Wait() = 0;
+	virtual bool PushMsg(unsigned int nCmd, unsigned int nWho, const void* pData, unsigned int nSize) = 0;
+};
+
+bool GameLoop_Init();
+bool GameLoop_Final();
+IGameLoop* GameLoop_Create(IGameLoopCallback* pCallback);
+void GameLoop_Destroy(IGameLoop* pLoop);

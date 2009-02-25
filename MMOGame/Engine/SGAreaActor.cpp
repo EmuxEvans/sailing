@@ -3,7 +3,7 @@
 
 #include "Game.h"
 #include "Math.h"
-#include "VarCmd.h"
+#include "CmdData.h"
 
 #include "GameArea.h"
 #include "GameArea.inl"
@@ -80,4 +80,8 @@ void CSGPlayer::OnMove(const Vector& vecDestination)
 		GetPosition().x, GetPosition().y, GetPosition().z, 
 		vecDestination.x, vecDestination.y, vecDestination.z
 		);
+}
+
+void CSGPlayer::Process(const CmdData* pCmdData)
+{
 }
