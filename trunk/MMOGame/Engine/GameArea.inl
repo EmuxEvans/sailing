@@ -64,12 +64,6 @@ CAreaCell<TArea, TAreaActor>* CArea<TArea, TAreaActor>::GetCell(const Vector& ve
 }
 
 template<class TArea, class TAreaActor>
-TAreaActor* CArea<TArea, TAreaActor>::GetActor(const Vector& vecPos, float fRange, unsigned int nActorId)
-{
-	return NULL;
-}
-
-template<class TArea, class TAreaActor>
 TAreaActor* CArea<TArea, TAreaActor>::GetActor(unsigned int nActorId)
 {
 	TAreaActor* pActor;
@@ -82,12 +76,12 @@ TAreaActor* CArea<TArea, TAreaActor>::GetActor(unsigned int nActorId)
 }
 
 template<class TArea, class TAreaActor>
-void CArea<TArea, TAreaActor>::Notify(const Vector& vecPos, float fRange, const FMsgBlock* pData)
+void CArea<TArea, TAreaActor>::Notify(const Vector& vecPos, float fRange, const CmdData* pCmdData)
 {
 }
 
 template<class TArea, class TAreaActor>
-void CArea<TArea, TAreaActor>::Notify(const FMsgBlock* pData)
+void CArea<TArea, TAreaActor>::Notify(const CmdData* pCmdData)
 {
 	for(int x=0; x<m_nColCount; x++) {
 		for(int y=0; y<m_nRowCount; y++) {
@@ -97,12 +91,33 @@ void CArea<TArea, TAreaActor>::Notify(const FMsgBlock* pData)
 }
 
 template<class TArea, class TAreaActor>
+bool CArea<TArea, TAreaActor>::InsertActor(TAreaActor* pActor)
+{
+	std::map<unsigned int, TAreaActor*>::iterator i;
+	i = m_mapActors.find(pActor->GetActorId());
+	assert(i==m_mapActors.end());
+	if(i!=m_mapActors.end()) return false;
+	m_mapActors[pActor->GetActorId()] = pActor;
+	return true;
+}
+
+template<class TArea, class TAreaActor>
+bool CArea<TArea, TAreaActor>::RemoveActor(TAreaActor* pActor)
+{
+	std::map<unsigned int, TAreaActor*>::iterator i;
+	i = m_mapActors.find(pActor->GetActorId());
+	assert(i!=m_mapActors.end());
+	if(i==m_mapActors.end()) return false;
+	m_mapActors.erase(i);
+	return true;
+}
+
+template<class TArea, class TAreaActor>
 void CArea<TArea, TAreaActor>::Tick(unsigned int nCurTime, unsigned int nDelta)
 {
-	for(int x=0; x<m_nColCount; x++) {
-		for(int y=0; y<m_nRowCount; y++) {
-			m_pCells[y*m_nColCount+x].Tick(nCurTime, nDelta);
-		}
+	std::map<unsigned int, TAreaActor*>::iterator i;
+	for(i=m_mapActors.begin(); i!=m_mapActors.end(); i++) {
+		(i->second)->Tick(nCurTime, nDelta);
 	}
 }
 
@@ -143,29 +158,7 @@ int CAreaCell<TArea, TAreaActor>::GetAreaRow()
 }
 
 template<class TArea, class TAreaActor>
-TAreaActor* CAreaCell<TArea, TAreaActor>::GetActor(const Vector& vecPos, float fRange, unsigned int nActorId)
-{
-	std::list<TAreaActor*>::iterator i;
-	for(i=m_Actor.begin(); i!=m_Actor.end(); i++) {
-		float fDistance = AreaVectorDistance((*i)->GetPosition(), vecPos);
-		if(fDistance<fRange) {
-			return (*i);
-		}
-	}
-	return NULL;
-}
-
-template<class TArea, class TAreaActor>
-TAreaActor* CAreaCell<TArea, TAreaActor>::GetActor(unsigned int nActorId)
-{
-	std::list<TAreaActor*>::iterator i;
-	i = m_Actors.find(nActorId);
-	if(i==m_Actors.end()) return NULL;
-	return *i;
-}
-
-template<class TArea, class TAreaActor>
-void CAreaCell<TArea, TAreaActor>::Notify(const Vector& vecPos, float fRange, const FMsgBlock* pData)
+void CAreaCell<TArea, TAreaActor>::Notify(const Vector& vecPos, float fRange, const CmdData* pCmdData)
 {
 	std::list<TAreaActor*>::iterator i;
 	for(i=m_Actor.begin(); i!=m_Actor.end(); i++) {
@@ -177,7 +170,7 @@ void CAreaCell<TArea, TAreaActor>::Notify(const Vector& vecPos, float fRange, co
 }
 
 template<class TArea, class TAreaActor>
-void CAreaCell<TArea, TAreaActor>::Notify(const FMsgBlock* pData)
+void CAreaCell<TArea, TAreaActor>::Notify(const CmdData* pCmdData)
 {
 	std::list<TAreaActor*>::iterator i;
 	for(i=m_Actor.begin(); i!=m_Actor.end(); i++) {
@@ -186,55 +179,29 @@ void CAreaCell<TArea, TAreaActor>::Notify(const FMsgBlock* pData)
 }
 
 template<class TArea, class TAreaActor>
-void CAreaCell<TArea, TAreaActor>::Tick(unsigned int nCurTime, unsigned int nDelta)
+bool CAreaCell<TArea, TAreaActor>::InsertActor(TAreaActor* pActor)
 {
-	std::list<TAreaActor*>::iterator i;
-	for(i=m_Actors.begin(); i!=m_Actors.end(); i++) {
-		(*i)->Tick(nCurTime, nDelta);
+	unsigned int i;
+	for(i=0; i<sizeof(m_Actors)/sizeof(m_Actors[0]); i++) {
+		if(m_Actors[i]) continue;
+		m_Actors[i] = pActor;
+		return true;
 	}
+	assert(0);
+	return false;
 }
 
 template<class TArea, class TAreaActor>
-void CAreaCell<TArea, TAreaActor>::InsertActor(TAreaActor* pActor)
+bool CAreaCell<TArea, TAreaActor>::RemoveActor(TAreaActor* pActor)
 {
-	CAreaCell<TArea, TAreaActor>* pCell;
-	std::list<TAreaActor*>::iterator i;
-
-	for(int x=m_nAreaCol-1; x<=m_nAreaCol+1; x++) {
-		for(int y=m_nAreaRow-1; y<=m_nAreaRow+1; y++) {
-			pCell = m_pArea->GetCell(x, y);
-			if(pCell==this && x!=m_nAreaCol && y!=m_nAreaRow) continue;
-
-			for(i=pCell->m_Actors.begin(); i!=pCell->m_Actors.end(); i++) {
-				(*i)->OnEnterCell(pActor, this);
-			}
-		}
+	unsigned int i;
+	for(i=0; i<sizeof(m_Actors)/sizeof(m_Actors[0]); i++) {
+		if(m_Actors[i]!=pActor) continue;
+		m_Actors[i] = NULL;
+		return true;
 	}
-
-	m_Actors.push_back(pActor);
-}
-
-template<class TArea, class TAreaActor>
-void CAreaCell<TArea, TAreaActor>::RemoveActor(TAreaActor* pActor)
-{
-	CAreaCell<TArea, TAreaActor>* pCell;
-	std::list<TAreaActor*>::iterator i;
-
-	for(i=m_Actors.begin(); (*i)!=pActor && i!=m_Actors.end(); i++);
-	assert(i!=m_Actors.end());
-	if(i==m_Actors.end()) return;
-	m_Actors.erase(i);
-
-	for(int x=m_nAreaCol-1; x<=m_nAreaCol+1; x++) {
-		for(int y=m_nAreaRow-1; y<=m_nAreaRow+1; y++) {
-			pCell = m_pArea->GetCell(x, y);
-			if(pCell==this && x!=m_nAreaCol && y!=m_nAreaRow) continue;
-
-			for(i=pCell->m_Actors.begin(); i!=pCell->m_Actors.end(); i++) {
-				(*i)->OnLeaveCell(pActor, this);
-			}
-		}
-	}
+	assert(0);
+	return false;
 }
 
 template<class TArea, class TAreaActor>
@@ -269,8 +236,14 @@ CAreaCell<TArea, TAreaActor>* CAreaActor<TArea, TAreaActor>::GetAreaCell()
 template<class TArea, class TAreaActor>
 void CAreaActor<TArea, TAreaActor>::SetArea(TArea* pArea)
 {
+	if(m_pArea) {
+		m_pArea->RemoveActor((TAreaActor*)this);
+	}
 	m_pArea = pArea;
 	m_pAreaCell = NULL;
+	if(m_pArea) {
+		m_pArea->InsertActor((TAreaActor*)this);
+	}
 }
 
 template<class TArea, class TAreaActor>
@@ -284,13 +257,19 @@ void CAreaActor<TArea, TAreaActor>::SetPosition(const Vector& vecPosition, float
 
 	if(m_pAreaCell) {
 		if(m_pAreaCell!=pCell) {
+			CAreaCell<TArea, TAreaActor>* pOrign;
+
+			pOrign = m_pAreaCell;
 			m_pAreaCell->RemoveActor((TAreaActor*)this);
 			m_pAreaCell = pCell;
 			m_pAreaCell->InsertActor((TAreaActor*)this);
+
+			OnCellChange(pOrign, pCell);
 		}
 	} else {
 		m_pAreaCell = pCell;
 		m_pAreaCell->InsertActor((TAreaActor*)this);
+		OnCellChange(NULL, pCell);
 	}
 }
 
@@ -331,6 +310,16 @@ template<class TArea, class TAreaActor>
 TAreaActor* CAreaActor<TArea, TAreaActor>::GetTarget()
 {
 	return m_pTarget;
+}
+
+template<class TArea, class TAreaActor>
+void CAreaActor<TArea, TAreaActor>::SendNotify(const CmdData* pCmdData, unsigned int nRange)
+{
+}
+
+template<class TArea, class TAreaActor>
+void CAreaActor<TArea, TAreaActor>::SendNotify(const CmdData* pCmdData, float fRange)
+{
 }
 
 template<class TArea, class TAreaActor>

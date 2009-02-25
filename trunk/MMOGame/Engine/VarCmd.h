@@ -1,6 +1,8 @@
 #pragma once
 
-typedef struct FMsgBlock {
-	int nCmd;
-	char* pData;
-} FMsgBlock;
+typedef struct CmdData {
+	unsigned int nCmd;
+	unsigned int nSource;
+	unsigned int nTarget;
+	const void* pData;
+} CmdData;

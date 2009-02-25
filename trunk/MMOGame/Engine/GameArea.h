@@ -10,6 +10,7 @@ class CAreaActor;
 template<class TArea, class TAreaActor>
 class CArea
 {
+	friend class CAreaActor<TArea, TAreaActor>;
 public:
 	CArea(float fCellWidth, float fCellHeight, CAreaCell<TArea, TAreaActor>* pCells, int nColMax, int nRowMax);
 	virtual ~CArea();
@@ -21,18 +22,21 @@ public:
 	CAreaCell<TArea, TAreaActor>* GetCell(int nCol, int nRow);
 	CAreaCell<TArea, TAreaActor>* GetCell(const Vector& vecPos);
 
-	TAreaActor* GetActor(const Vector& vecPos, float fRange, unsigned int nActorId);
 	TAreaActor* GetActor(unsigned int nActorId);
 
-	void Notify(const Vector& vecPos, float fRange, const FMsgBlock* pData);
-	void Notify(const FMsgBlock* pData);
+	void Notify(const Vector& vecPos, float fRange, const CmdData* pCmdData);
+	void Notify(const CmdData* pCmdData);
 
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta);
 
+protected:
+	bool InsertActor(TAreaActor* pActor);
+	bool RemoveActor(TAreaActor* pActor);
 private:
 	float m_fCellWidth, m_fCellHeight;
 	int m_nColCount, m_nRowCount;
 	CAreaCell<TArea, TAreaActor>* m_pCells;
+	std::map<unsigned int, TAreaActor*> m_mapActors;
 };
 
 template<class TArea, class TAreaActor>
@@ -48,21 +52,16 @@ public:
 	int GetAreaCol();
 	int GetAreaRow();
 
-	TAreaActor* GetActor(const Vector& vecPos, float fRange, unsigned int nActorId);
-	TAreaActor* GetActor(unsigned int nActorId);
-
-	void Notify(const Vector& vecPos, float fRange, const FMsgBlock* pData);
-	void Notify(const FMsgBlock* pData);
-
-	void Tick(unsigned int nCurTime, unsigned int nDelta);
+	void Notify(const Vector& vecPos, float fRange, const CmdData* pCmdData);
+	void Notify(const CmdData* pCmdData);
 
 protected:
-	void InsertActor(TAreaActor* pActor);
-	void RemoveActor(TAreaActor* pActor);
+	bool InsertActor(TAreaActor* pActor);
+	bool RemoveActor(TAreaActor* pActor);
 private:
 	TArea* m_pArea;
 	int m_nAreaCol, m_nAreaRow;
-	std::list<TAreaActor*> m_Actors;
+	TAreaActor* m_Actors[100];
 };
 
 template<class TArea, class TAreaActor>
@@ -87,22 +86,24 @@ public:
 	void SetTarget(TAreaActor* pTarget);
 	TAreaActor* GetTarget();
 
-	virtual void OnMove(const Vector& vecDestination) {}
-	virtual void OnEnterCell(TAreaActor* pWho, CAreaCell<TArea, TAreaActor>* pCell) {}
-	virtual void OnLeaveCell(TAreaActor* pWho, CAreaCell<TArea, TAreaActor>* pCell) {}
+	void SendNotify(const CmdData* pCmdData, unsigned int nRange);
+	void SendNotify(const CmdData* pCmdData, float fRange);
 
-	virtual void OnNotify(TAreaActor* pWho, const FMsgBlock* pData) {}
-	virtual void OnAction(const FMsgBlock* pData) {}
-	virtual void OnPassive(TAreaActor* pWho, const FMsgBlock* pData) {}
+	virtual void OnMove(const Vector& vecDestination) {}
+	virtual void OnCellChange(CAreaCell<TArea, TAreaActor>* pFrom, CAreaCell<TArea, TAreaActor>* pTo) {}
+
+	virtual void OnNotify(TAreaActor* pWho, const CmdData* pCmdData) {}
+	virtual void OnAction(const CmdData* pCmdData) {}
+	virtual void OnPassive(TAreaActor* pWho, const CmdData* pCmdData) {}
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta);
 
 private:
 	unsigned int m_nActorId;
 	TArea*							m_pArea;
 	CAreaCell<TArea, TAreaActor>*	m_pAreaCell;
-	Vector						m_vecPosition;
+	Vector							m_vecPosition;
 	float							m_fDirection;
-	Vector						m_vecDestination;
+	Vector							m_vecDestination;
 	float							m_fVelocity;
 	unsigned int					m_nWalkTime;
 
