@@ -7,7 +7,7 @@ class CSGPlayer;
 class CSGAreaActor : public CAreaActor<CSGArea, CSGAreaActor>
 {
 public:
-	CSGAreaActor(int nActorType, unsigned int nActorId);
+	CSGAreaActor(int nActorType);
 	virtual ~CSGAreaActor();
 
 	int GetActorType() const { return m_nActorType; }
@@ -19,7 +19,7 @@ private:
 class CSGPlayer : public CSGAreaActor
 {
 public:
-	CSGPlayer(unsigned int nActorId);
+	CSGPlayer(unsigned int nUserId);
 	virtual ~CSGPlayer();
 
 	bool DropItem(int nIndex);
@@ -29,6 +29,7 @@ public:
 	virtual void Process(const CmdData* pCmdData);
 
 protected:
+	unsigned int m_nUserId;
 	ItemUData	m_Equip[SGEQUIPMENT_COUNT];
 	ItemUData	m_Bag[SGBAG_MAXCOUNT];
 	ItemUData	m_Warehouse[SGWAREHOUSE_COUNT];

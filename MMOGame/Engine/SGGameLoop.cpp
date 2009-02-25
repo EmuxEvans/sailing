@@ -21,6 +21,56 @@
 #include "SGSkill.h"
 
 static std::map<unsigned int, CSGPlayer*> g_mapPlayers;
+static CSGGameLoopCallback* g_pLoopCallback = NULL;
+static CSGAreaActor* g_mapActors[2000] = { NULL };
+
+CSGGameLoopCallback* CSGGameLoopCallback::GetSingleton()
+{
+	if(!g_pLoopCallback)
+		g_pLoopCallback = new CSGGameLoopCallback();
+	return g_pLoopCallback;
+}
+
+void CSGGameLoopCallback::Cleanup()
+{
+	if(g_pLoopCallback) {
+		delete g_pLoopCallback;
+	}
+}
+
+unsigned int CSGGameLoopCallback::AllocActorId(CSGAreaActor* pActor)
+{
+	unsigned int i;
+	for(i=0; i<sizeof(g_mapActors)/sizeof(g_mapActors[0]); i++) {
+		if(!g_mapActors[i]) {
+			g_mapActors[i] = pActor;
+			return i;
+		}
+	}
+	return 0xffffffff;
+}
+
+void CSGGameLoopCallback::FreeActorId(CSGAreaActor* pActor, unsigned int nActorId)
+{
+	assert(nActorId<sizeof(g_mapActors)/sizeof(g_mapActors[0]));
+	if(nActorId>=sizeof(g_mapActors)/sizeof(g_mapActors[0])) return;
+	assert(g_mapActors[nActorId]==pActor);
+	g_mapActors[nActorId] = NULL;
+}
+
+CSGPlayer* CSGGameLoopCallback::GetPlayer(unsigned int nUserId)
+{
+	std::map<unsigned int, CSGPlayer*>::iterator i;
+	i = g_mapPlayers.find(nUserId);
+	return i==g_mapPlayers.end()?i->second:NULL;
+}
+
+CSGAreaActor* CSGGameLoopCallback::GetActor(unsigned int nActorId)
+{
+	assert(nActorId<sizeof(g_mapActors)/sizeof(g_mapActors[0]));
+	if(nActorId>=sizeof(g_mapActors)/sizeof(g_mapActors[0])) return NULL;
+	return g_mapActors[nActorId];
+}
 
 CSGGameLoopCallback::CSGGameLoopCallback()
 {
@@ -42,8 +92,8 @@ void CSGGameLoopCallback::Process(const CmdData* pCmdData)
 			// send disconnect
 		}
 		CSGPlayer* pPlayer;
-		pPlayer = new CSGPlayer(pCmdData->nCmd);
-		g_mapPlayers[pCmdData->nCmd] = pPlayer;
+		pPlayer = new CSGPlayer(pCmdData->nWho);
+		g_mapPlayers[pCmdData->nWho] = pPlayer;
 		pPlayer->Process(pCmdData);
 		return;
 	}

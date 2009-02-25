@@ -166,6 +166,8 @@ bool CGameAPC::QueueWorkItem(CGameAPC* pAPC)
 }
 
 // GameLoop
+static void gameloop_thread_proc(void* arg);
+
 class CWinGameLoop : public IGameLoop
 {
 public:
@@ -181,6 +183,8 @@ public:
 
 	virtual bool Start(unsigned int nMinTime) {
 		m_nMinTime = nMinTime;
+		_beginthread(gameloop_thread_proc, 0, this);
+		while(!m_hThread) SwitchToThread();
 		return true;
 	}
 
@@ -189,7 +193,8 @@ public:
 	}
 
 	virtual void Wait() {
-		WaitForSingleObject(m_hThread, INFINITE);
+		Sleep(1000);
+		// WaitForSingleObject(m_hThread, INFINITE);
 	}
 
 	virtual bool PushMsg(unsigned int nCmd, unsigned int nWho, const void* pData, unsigned int nSize) {
@@ -205,13 +210,16 @@ public:
 	void Run() {
 		unsigned int nMsgQ;
 		unsigned int nTime1, nTime2;
+		bool bQuit = false;
+
+		m_hThread = GetCurrentThread();
 
 		m_pCallback->OnStart();
 
-		nTime2 = GetTickCount();
+		nTime1 = GetTickCount();
+		nTime2 = nTime1;
 		for(;;) {
-			nTime1 = GetTickCount();
-			m_pCallback->Tick(nTime1, nTime2-nTime1);
+			m_pCallback->Tick(nTime1, nTime1-nTime2);
 
 			EnterCriticalSection(&m_csMsgQ);
 			nMsgQ = m_nMsgQ;
@@ -219,18 +227,25 @@ public:
 			LeaveCriticalSection(&m_csMsgQ);
 
 			while(!m_MsgQ[nMsgQ?1:0].empty()) {
+				if(m_MsgQ[nMsgQ?1:0].front().nCmd==0) {
+					bQuit = true;
+					break;
+				}
+
 				m_pCallback->Process(&m_MsgQ[nMsgQ?1:0].front());
 				if(m_MsgQ[nMsgQ?1:0].front().pData) {
 					free((void*)(m_MsgQ[nMsgQ?1:0].front().pData));
 				}
 				m_MsgQ[nMsgQ?1:0].pop();
 			}
+			if(bQuit) break;
 
-			nTime2 = GetTickCount();
+			nTime2 = nTime1;
+			nTime1 = GetTickCount();
 
-			if(nTime2-nTime1<m_nMinTime) {
-				Sleep(m_nMinTime-(nTime2-nTime1));
-				nTime2 = GetTickCount();
+			if(nTime1-nTime2<m_nMinTime) {
+				Sleep(m_nMinTime-(nTime1-nTime2));
+				nTime1 = GetTickCount();
 			}
 		}
 
@@ -264,4 +279,10 @@ IGameLoop* GameLoop_Create(IGameLoopCallback* pCallback)
 void GameLoop_Destroy(IGameLoop* pLoop)
 {
 	delete pLoop;
+}
+
+static void gameloop_thread_proc(void* arg)
+{
+	CWinGameLoop* pGameLoop = (CWinGameLoop*)arg;
+	pGameLoop->Run();
 }

@@ -10,6 +10,7 @@
 #include "GameBuff.h"
 #include "GameItem.h"
 #include "GameSkill.h"
+#include "GameLoop.h"
 
 #include "SG.h"
 #include "SGArea.h"
@@ -17,17 +18,17 @@
 #include "SGBuff.h"
 #include "SGItem.h"
 #include "SGSkill.h"
+#include "SGGameLoop.h"
 
-CSGAreaActor::CSGAreaActor(int nActorType, unsigned int nActorId) : CAreaActor<CSGArea, CSGAreaActor>(nActorId)
+CSGAreaActor::CSGAreaActor(int nActorType) : CAreaActor<CSGArea, CSGAreaActor>(CSGGameLoopCallback::AllocActorId(this)), m_nActorType(nActorType)
 {
-	m_nActorType = nActorType;
 }
 
 CSGAreaActor::~CSGAreaActor()
 {
 }
 
-CSGPlayer::CSGPlayer(unsigned int nActorId) : CSGAreaActor(SGACTORTYPE_PLAYER, nActorId)
+CSGPlayer::CSGPlayer(unsigned int nUserId) : CSGAreaActor(SGACTORTYPE_PLAYER), m_nUserId(nUserId)
 {
 }
 
@@ -84,4 +85,5 @@ void CSGPlayer::OnMove(const Vector& vecDestination)
 
 void CSGPlayer::Process(const CmdData* pCmdData)
 {
+	printf("Player(%d) Cmd=%d\n", pCmdData->nWho, pCmdData->nCmd);
 }

@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 	{
 		IGameLoopCallback* pCallback;
 
-		pCallback = new CSGGameLoopCallback();
+		pCallback = CSGGameLoopCallback::GetSingleton();
 		pLoop = GameLoop_Create(pCallback);
 		pLoop->Start(100);
 
@@ -38,7 +38,8 @@ int main(int argc, char* argv[])
 
 		pLoop->Stop();
 		pLoop->Wait();
-		delete pCallback;
+		GameLoop_Destroy(pLoop);
+		CSGGameLoopCallback::Cleanup();
 	}
 
 	GameLoop_Final();
@@ -82,6 +83,44 @@ public:
 	}
 	void OnData(DWORD nSize, LPVOID pData) {
 		if(!m_bActive) return;
+
+		if(sizeof(m_DataBuf)-m_dwDataBufSize<nSize) {
+			EnterCriticalSection(&m_csClients);
+			Disconnect();
+			LeaveCriticalSection(&m_csClients);
+			return;
+		}
+
+		memcpy(m_DataBuf+m_dwDataBufSize, pData, nSize);
+		m_dwDataBufSize += nSize;
+
+		for(;;) {
+			WORD len;
+			if(m_dwDataBufSize<sizeof(len)) break;
+			len = *((WORD*)m_DataBuf);
+			if(m_dwDataBufSize<sizeof(len)+len) break;
+
+			if(m_nUserId) {
+				if(len>0) {
+					void* pData;
+					pData = malloc(len);
+					memcpy(pData, &m_DataBuf[sizeof(len)], len);
+					pLoop->PushMsg(SGCMD_USERDATA, m_nUserId, pData, len);
+				} else {
+					pLoop->PushMsg(SGCMD_USERDATA, m_nUserId, NULL, 0);
+				}
+			} else {
+				unsigned int nUserId;
+				nUserId = *((unsigned int*)&m_DataBuf[sizeof(len)]);
+				assert(nUserId!=0);
+				if(nUserId) {
+					SetAuthUser(nUserId);
+				}
+			}
+
+			memmove(m_DataBuf, &m_DataBuf[len], m_dwDataBufSize-len);
+			m_dwDataBufSize -= sizeof(len) + len;
+		}
 	}
 	void OnDisconnect() {
 		m_bActive = FALSE;
@@ -118,6 +157,7 @@ public:
 			}
 			g_mapClients[nUserId] = this;
 			m_nUserId = nUserId;
+			pLoop->PushMsg(SGCMD_CONNECT, m_nUserId, NULL, 0);
 		}
 		LeaveCriticalSection(&m_csClients);
 	}
@@ -133,6 +173,8 @@ private:
 
 BOOL InitTCPServer(unsigned short nPort)
 {
+	InitializeCriticalSection(&m_csClients);
+
 	mem_pool = AllocIoBufferPool(MAX_UP_LEN, 2048, MAX_DOWN_LEN, 1024);
 	if(!mem_pool) {
 		return(FALSE);
@@ -155,6 +197,7 @@ BOOL InitTCPServer(unsigned short nPort)
 	tcpopt.keep_alive = TRUE;
 	tcpopt.nodelay = TRUE;
 	end_point = RegisterTcpEndPoint(&sain, &conn_handler, &tcpopt, mem_pool, NULL);
+
 	return(end_point!=NULL);
 }
 
@@ -166,6 +209,8 @@ BOOL FinalTCPServer()
 	if(mem_pool) {
 		FreeIoBufferPool(mem_pool);
 	}
+
+	DeleteCriticalSection(&m_csClients);
 	return true;
 }
 
