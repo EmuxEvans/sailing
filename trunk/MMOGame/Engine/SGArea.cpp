@@ -3,7 +3,7 @@
 
 #include "Game.h"
 #include "Math.h"
-#include "VarCmd.h"
+#include "CmdData.h"
 
 #include "GameArea.h"
 #include "GameArea.inl"

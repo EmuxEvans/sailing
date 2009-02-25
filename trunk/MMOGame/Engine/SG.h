@@ -1,5 +1,9 @@
 #pragma once
 
+#define SGCMD_CONNECT			10
+#define SGCMD_USERDATA			11
+#define SGCMD_DISCONNECT		12
+
 #define SGWAREHOUSE_COUNT		80
 #define SGEQUIPMENT_COUNT		7
 #define SGBAG_MAXCOUNT			20

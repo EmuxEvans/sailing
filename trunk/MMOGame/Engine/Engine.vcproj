@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,6 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="rpcrt4.lib ws2_32.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -116,7 +117,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -134,6 +135,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="rpcrt4.lib ws2_32.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -172,6 +174,14 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\asockio.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CmdData.cpp"
+				>
+			</File>
 			<File
 				RelativePath=".\GameArea.cpp"
 				>
@@ -233,6 +243,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\SGGameLoop.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SGItem.cpp"
 				>
 				<FileConfiguration
@@ -255,16 +269,20 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\VarCmd.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="includes"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\asockio.h"
+				>
+			</File>
+			<File
+				RelativePath=".\CmdData.h"
+				>
+			</File>
 			<File
 				RelativePath=".\Game.h"
 				>
@@ -334,15 +352,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SGGameLoop.h"
+				>
+			</File>
+			<File
 				RelativePath=".\SGItem.h"
 				>
 			</File>
 			<File
 				RelativePath=".\SGSkill.h"
-				>
-			</File>
-			<File
-				RelativePath=".\VarCmd.h"
 				>
 			</File>
 		</Filter>
