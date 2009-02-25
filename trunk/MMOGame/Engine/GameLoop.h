@@ -1,49 +1,18 @@
 #pragma once
 
-class CGameFES
+// Game FES
+class IGameFES
 {
 public:
-	static bool Init();
-	static bool Final();
-	static CGameFES* Get(unsigned int nIp, unsigned int short nPort);
-
-public:
-	CGameFES() {}
-	virtual ~CGameFES() {}
+	virtual ~IGameFES() {}
 
 	virtual bool SendData(unsigned int nUserId, const void* pData, unsigned int nSize) = 0;
 	virtual bool Disconnect(unsigned int nUserId) = 0;
 };
 
-class CGameClient
-{
-protected:
-	CGameClient(unsigned int nUserId, CGameFES* pFES) {
-		m_nUserId = nUserId;
-		m_pFES = pFES;
-	}
-	virtual ~CGameClient() {
-	}
-
-public:
-	bool SendData(unsigned int nUserId, const void* pData, unsigned int nSize) {
-		return m_pFES->SendData(nUserId, pData, nSize);
-	}
-	bool Disconnect(unsigned int nUserId) {
-		return m_pFES->Disconnect(m_nUserId);
-	}
-
-	unsigned int GetUserId() const {
-		return m_nUserId;
-	}
-	CGameFES* GetFES() {
-		return m_pFES;
-	}
-
-private:
-	unsigned int m_nUserId;
-	CGameFES* m_pFES;
-};
+bool GameFES_Init();
+bool GameFES_Final();
+IGameFES* GameFES_Get(unsigned int nIp, unsigned int short nPort);
 
 // Async Procedure Call
 class CGameAPC
@@ -87,3 +56,54 @@ bool GameLoop_Init();
 bool GameLoop_Final();
 IGameLoop* GameLoop_Create(IGameLoopCallback* pCallback);
 void GameLoop_Destroy(IGameLoop* pLoop);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class CGameClient
+{
+protected:
+	CGameClient(unsigned int nUserId, IGameFES* pFES) {
+		m_nUserId = nUserId;
+		m_pFES = pFES;
+	}
+	virtual ~CGameClient() {
+	}
+
+public:
+	bool SendData(unsigned int nUserId, const void* pData, unsigned int nSize) {
+		return m_pFES->SendData(nUserId, pData, nSize);
+	}
+	bool Disconnect(unsigned int nUserId) {
+		return m_pFES->Disconnect(m_nUserId);
+	}
+
+	unsigned int GetUserId() const {
+		return m_nUserId;
+	}
+	IGameFES* GetFES() {
+		return m_pFES;
+	}
+
+private:
+	unsigned int m_nUserId;
+	IGameFES* m_pFES;
+};
