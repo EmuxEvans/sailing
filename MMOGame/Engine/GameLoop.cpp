@@ -24,7 +24,7 @@ typedef struct SendBuf {
 	char aData[1];
 } SendBuf;
 
-class CWinGameFES : public CGameFES
+class CWinGameFES : public IGameFES
 {
 public:
 	CWinGameFES(unsigned int nIndex, unsigned int nIp, unsigned short nPort) {
@@ -114,19 +114,19 @@ static void output_thread_proc(void* arg)
 	((CWinGameFES*)arg)->Loop();
 }
 
-bool CGameFES::Init()
+bool GameFES_Init()
 {
 	return true;
 }
 
-bool CGameFES::Final()
+bool GameFES_Final()
 {
 	return true;
 }
 
-CGameFES* CGameFES::Get(unsigned int nIp, unsigned int short nPort)
+IGameFES* GameFES_Get(unsigned int nIp, unsigned int short nPort)
 {
-	CGameFES* pFES = NULL;
+	IGameFES* pFES = NULL;
 	EnterCriticalSection(&epmap_cs);
 	for(unsigned int i=0; i<sizeof(epmap)/sizeof(epmap[0]); i++) {
 		if(epmap[i]->GetIP()==nIp && epmap[i]->GetPort()==nPort)

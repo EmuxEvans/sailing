@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 	//WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ASockIOInit();
 
-	CGameFES::Init();
+	GameFES_Init();
 	CGameAPC::Init();
 	GameLoop_Init();
 
@@ -44,7 +44,7 @@ int main(int argc, char* argv[])
 
 	GameLoop_Final();
 	CGameAPC::Final();
-	CGameFES::Final();
+	GameFES_Final();
 
 	ASockIOFini();
 	//WSACleanup();
