@@ -7,11 +7,15 @@ typedef struct CLIENT_FESEP {
 	unsigned int i;
 } CLIENT_FESEP;
 
+class CGameFES;
+class CGameLoop;
+
 class CGameFES
 {
 public:
 	CGameFES();
 	virtual ~CGameFES();
+
 
 };
 
