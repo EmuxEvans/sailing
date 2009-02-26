@@ -199,6 +199,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GameQuest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameSkill.cpp"
 				>
 			</File>
@@ -303,6 +307,10 @@
 			</File>
 			<File
 				RelativePath=".\GameLoop.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GameQuest.h"
 				>
 			</File>
 			<File

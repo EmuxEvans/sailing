@@ -12,6 +12,7 @@
 #include "GameBuff.h"
 #include "GameItem.h"
 #include "GameSkill.h"
+#include "GameQuest.h"
 
 #include "SG.h"
 #include "SGArea.h"
@@ -23,6 +24,7 @@
 static std::map<unsigned int, CSGPlayer*> g_mapPlayers;
 static CSGGameLoopCallback* g_pLoopCallback = NULL;
 static CSGAreaActor* g_mapActors[2000] = { NULL };
+static CSGArea g_GlobalArea;
 
 CSGGameLoopCallback* CSGGameLoopCallback::GetSingleton()
 {
@@ -70,6 +72,11 @@ CSGAreaActor* CSGGameLoopCallback::GetActor(unsigned int nActorId)
 	assert(nActorId<sizeof(g_mapActors)/sizeof(g_mapActors[0]));
 	if(nActorId>=sizeof(g_mapActors)/sizeof(g_mapActors[0])) return NULL;
 	return g_mapActors[nActorId];
+}
+
+CSGArea* CSGGameLoopCallback::GetArea(unsigned int nAreaId)
+{
+	return &g_GlobalArea;
 }
 
 CSGGameLoopCallback::CSGGameLoopCallback()

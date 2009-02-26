@@ -25,8 +25,13 @@ public:
 	bool DropItem(int nIndex);
 	bool Equip(int nIndex, int nSolt);
 
-	virtual void OnMove(const Vector& vecDestination);
-	virtual void Process(const CmdData* pCmdData);
+	virtual void OnMove(const Vector& vecPosition, CAreaCell<CSGArea, CSGAreaActor>* pFrom, CAreaCell<CSGArea, CSGAreaActor>* pTo);
+
+	virtual void OnNotify(const CmdData* pCmdData);
+	virtual void OnAction(const CmdData* pCmdData);
+	virtual void OnPassive(CSGAreaActor* pWho, const CmdData* pCmdData);
+
+	void Process(const CmdData* pCmdData);
 
 protected:
 	unsigned int m_nUserId;
