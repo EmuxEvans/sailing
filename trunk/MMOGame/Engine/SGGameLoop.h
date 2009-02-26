@@ -2,6 +2,7 @@
 
 class CSGAreaActor;
 class CSGPlayer;
+class CSGArea;
 
 class CSGGameLoopCallback : public IGameLoopCallback
 {
@@ -14,6 +15,7 @@ public:
 
 	static CSGPlayer* GetPlayer(unsigned int nUserId);
 	static CSGAreaActor* GetActor(unsigned int nActorId);
+	static CSGArea* GetArea(unsigned int nAreaId);
 
 protected:
 	CSGGameLoopCallback();

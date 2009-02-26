@@ -17,14 +17,15 @@ public:
 
 	float CellWidth();
 	float CellHeight();
-	int AreaColMax();
-	int AreaRowMax();
+	int AreaColCount();
+	int AreaRowCount();
 	CAreaCell<TArea, TAreaActor>* GetCell(int nCol, int nRow);
 	CAreaCell<TArea, TAreaActor>* GetCell(const Vector& vecPos);
 
 	TAreaActor* GetActor(unsigned int nActorId);
 
 	void Notify(const Vector& vecPos, float fRange, const CmdData* pCmdData);
+	void Notify(int nCellX, int nCellY, int nRange, const CmdData* pCmdData);
 	void Notify(const CmdData* pCmdData);
 
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta);
@@ -89,10 +90,9 @@ public:
 	void SendNotify(const CmdData* pCmdData, unsigned int nRange);
 	void SendNotify(const CmdData* pCmdData, float fRange);
 
-	virtual void OnMove(const Vector& vecDestination) {}
-	virtual void OnCellChange(CAreaCell<TArea, TAreaActor>* pFrom, CAreaCell<TArea, TAreaActor>* pTo) {}
+	virtual void OnMove(const Vector& vecPosition, CAreaCell<TArea, TAreaActor>* pFrom, CAreaCell<TArea, TAreaActor>* pTo) {}
 
-	virtual void OnNotify(TAreaActor* pWho, const CmdData* pCmdData) {}
+	virtual void OnNotify(const CmdData* pCmdData) {}
 	virtual void OnAction(const CmdData* pCmdData) {}
 	virtual void OnPassive(TAreaActor* pWho, const CmdData* pCmdData) {}
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta);
