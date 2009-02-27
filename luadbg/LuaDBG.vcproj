@@ -73,9 +73,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib"
+				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib SciLexer-$(ConfigurationName)-$(PlatformName).lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\framework\$(ConfigurationName)-$(PlatformName)"
+				AdditionalLibraryDirectories="&quot;..\framework\$(ConfigurationName)-$(PlatformName)&quot;;&quot;$(ProjectDir)scintilla\bin&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -159,9 +159,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib"
+				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib SciLexer-$(ConfigurationName)-$(PlatformName).lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\framework\$(ConfigurationName)-$(PlatformName)"
+				AdditionalLibraryDirectories="&quot;..\framework\$(ConfigurationName)-$(PlatformName)&quot;;&quot;$(ProjectDir)scintilla\bin&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
