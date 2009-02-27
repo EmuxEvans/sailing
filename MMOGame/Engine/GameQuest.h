@@ -27,8 +27,9 @@ class IQuestLogic
 public:
 	virtual ~IQuestLogic() { }
 
-	virtual bool Acceptable(TAreaActor* pActor, QuestSData* pSData) = 0;
-	virtual bool IsCompleted(TAreaActor* pActor, QuestUData* pUData) = 0;
-	virtual bool Finish(TAreaActor* pActor, QuestUData* pUData) = 0;
-	virtual void Tick(unsigned int nCurTime, unsigned int nDelta) = 0;
+	virtual bool Visible(TAreaActor* pActor, const QuestSData* pSData) = 0;
+	virtual bool Acceptable(TAreaActor* pActor, const QuestSData* pSData) = 0;
+	virtual bool IsCompleted(TAreaActor* pActor, const QuestSData* pSData, QuestUData* pUData) = 0;
+	virtual bool Finish(TAreaActor* pActor, const QuestSData* pSData, QuestUData* pUData) = 0;
+	virtual void Tick(unsigned int nCurTime, unsigned int nDelta, TAreaActor* pActor, const QuestSData* pSData, QuestUData* pUData) = 0;
 };

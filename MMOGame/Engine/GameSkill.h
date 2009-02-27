@@ -17,6 +17,6 @@ class ISkillLogic
 public:
 	virtual ~ISkillLogic() { }
 
-	virtual void Tick(unsigned int nCurTime, unsigned int nDelta) = 0;
-	virtual void Action(TAreaActor* pActor, SkillUData* pData) = 0;
+	virtual void Tick(unsigned int nCurTime, unsigned int nDelta, TAreaActor* pActor, const SkillSData* pSData, SkillUData* pUData) = 0;
+	virtual void Action(TAreaActor* pActor, const SkillSData* pSData, SkillUData* pUData) = 0;
 };
