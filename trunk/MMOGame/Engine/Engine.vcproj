@@ -20,7 +20,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="0"
 			>
 			<Tool
@@ -60,18 +60,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="rpcrt4.lib ws2_32.lib"
-				LinkIncremental="2"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -81,9 +73,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -211,65 +200,12 @@
 				>
 			</File>
 			<File
-				RelativePath=".\main.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\Math.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\PropertySet.cpp"
 				>
-			</File>
-			<File
-				RelativePath=".\SG.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGArea.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGAreaActor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGBuff.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\SGGameLoop.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGItem.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\SGSkill.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -326,10 +262,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\main.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Math.h"
 				>
 			</File>
@@ -339,34 +271,6 @@
 			</File>
 			<File
 				RelativePath=".\PropertySet.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\SG.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGArea.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGAreaActor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGBuff.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGGameLoop.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGItem.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGSkill.h"
 				>
 			</File>
 		</Filter>

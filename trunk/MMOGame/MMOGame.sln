@@ -17,6 +17,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaDBG", "..\luadbg\LuaDBG.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SciLexer", "..\luadbg\scintilla\vcbuild\SciLexer.vcproj", "{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SGGame", "SGGame\SGGame.vcproj", "{C6371335-04C3-42DF-9265-0EAA6F321DAF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C51FE2F7-AFAB-429E-A25E-A8AA39DB3661} = {C51FE2F7-AFAB-429E-A25E-A8AA39DB3661}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xpdl", "xpdl\xpdl.vcproj", "{FE966E93-5FE9-4731-9795-2CE707069711}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -51,6 +58,14 @@ Global
 		{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}.Debug|Win32.Build.0 = Debug|Win32
 		{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}.Release|Win32.ActiveCfg = Release|Win32
 		{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}.Release|Win32.Build.0 = Release|Win32
+		{C6371335-04C3-42DF-9265-0EAA6F321DAF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C6371335-04C3-42DF-9265-0EAA6F321DAF}.Debug|Win32.Build.0 = Debug|Win32
+		{C6371335-04C3-42DF-9265-0EAA6F321DAF}.Release|Win32.ActiveCfg = Release|Win32
+		{C6371335-04C3-42DF-9265-0EAA6F321DAF}.Release|Win32.Build.0 = Release|Win32
+		{FE966E93-5FE9-4731-9795-2CE707069711}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FE966E93-5FE9-4731-9795-2CE707069711}.Debug|Win32.Build.0 = Debug|Win32
+		{FE966E93-5FE9-4731-9795-2CE707069711}.Release|Win32.ActiveCfg = Release|Win32
+		{FE966E93-5FE9-4731-9795-2CE707069711}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
