@@ -16,6 +16,15 @@ private:
 	int m_nActorType;
 };
 
+class CSGRole : public CSGAreaActor
+{
+public:
+	CSGRole(int nActorType);
+	virtual ~CSGRole();
+
+
+};
+
 class CSGPlayer : public CSGAreaActor
 {
 public:

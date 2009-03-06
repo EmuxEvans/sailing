@@ -86,7 +86,13 @@ public:
 		}
 	}
 	void Quit() {
+		HANDLE hThread;
+		hThread = OpenThread(SYNCHRONIZE, FALSE, m_nThreadId);
 		while(!::PostThreadMessage(m_nThreadId, WM_QUIT, 0, 0)) SwitchToThread();
+		if(hThread) {
+			WaitForSingleObject(hThread, INFINITE);
+			CloseHandle(hThread);
+		}
 	}
 
 	DWORD GetThreadId() {
@@ -121,6 +127,11 @@ bool GameFES_Init()
 
 bool GameFES_Final()
 {
+	for(int i=0; i<sizeof(epmap)/sizeof(epmap[0]); i++) {
+		if(!epmap[i]) continue;
+		epmap[i]->Quit();
+		delete epmap[i];
+	}
 	return true;
 }
 
