@@ -1,15 +1,7 @@
 #include <assert.h>
 #include <map>
 
-#include "Game.h"
-#include "Math.h"
-#include "CmdData.h"
-
-#include "GameArea.h"
-#include "GameArea.inl"
-#include "GameBuff.h"
-#include "GameItem.h"
-#include "GameSkill.h"
+#include "..\Engine\Game.h"
 
 #include "SG.h"
 #include "SGArea.h"
