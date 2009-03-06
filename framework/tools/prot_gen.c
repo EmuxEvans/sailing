@@ -20,52 +20,56 @@ int main(int argc, char* argv[])
 	int ret;
 	char file[200];
 
-	if(argc<2) {
+	if(argc<3) {
 		printf("invalid parameter\n");
 		return 0;
 	}
 
-	ret = parse_file(argv[1]);
+	ret = parse_file(argv[2]);
 	if(ret!=ERR_NOERROR) {
 		printf("error: parse!\n");
 		return 0;
 	}
 
-	memset(txt, 0, sizeof(txt));
-	ret = generate_hfile(argv[1], txt, sizeof(txt));
-	if(ret!=ERR_NOERROR) {
-		printf("error: parse!\n");
-		return 0;
-	}
-	sprintf(file, "%s.h", argv[1]);
-	save_textfile(file, txt, 0);
+	if(strchr(argv[1], 'C')) {
+		memset(txt, 0, sizeof(txt));
+		ret = generate_hfile(argv[2], txt, sizeof(txt));
+		if(ret!=ERR_NOERROR) {
+			printf("error: parse!\n");
+			return 0;
+		}
+		sprintf(file, "%s.h", argv[2]);
+		save_textfile(file, txt, 0);
 
-	memset(txt, 0, sizeof(txt));
-	ret = generate_cfile(argv[1], txt, sizeof(txt));
-	if(ret!=ERR_NOERROR) {
-		printf("error: parse!\n");
-		return 0;
+		memset(txt, 0, sizeof(txt));
+		ret = generate_cfile(argv[2], txt, sizeof(txt));
+		if(ret!=ERR_NOERROR) {
+			printf("error: parse!\n");
+			return 0;
+		}
+		sprintf(file, "%s.c", argv[2]);
+		save_textfile(file, txt, 0);
 	}
-	sprintf(file, "%s.c", argv[1]);
-	save_textfile(file, txt, 0);
 
-	memset(txt, 0, sizeof(txt));
-	ret = generate_hlua(argv[1], txt, sizeof(txt));
-	if(ret!=ERR_NOERROR) {
-		printf("error: parse!\n");
-		return 0;
-	}
-	sprintf(file, "%s.lua.h", argv[1]);
-	save_textfile(file, txt, 0);
+	if(strchr(argv[1], 'L')) {
+		memset(txt, 0, sizeof(txt));
+		ret = generate_hlua(argv[2], txt, sizeof(txt));
+		if(ret!=ERR_NOERROR) {
+			printf("error: parse!\n");
+			return 0;
+		}
+		sprintf(file, "%s.lua.h", argv[2]);
+		save_textfile(file, txt, 0);
 
-	memset(txt, 0, sizeof(txt));
-	ret = generate_clua(argv[1], txt, sizeof(txt));
-	if(ret!=ERR_NOERROR) {
-		printf("error: parse!\n");
-		return 0;
+		memset(txt, 0, sizeof(txt));
+		ret = generate_clua(argv[2], txt, sizeof(txt));
+		if(ret!=ERR_NOERROR) {
+			printf("error: parse!\n");
+			return 0;
+		}
+		sprintf(file, "%s.lua.cc", argv[2]);
+		save_textfile(file, txt, 0);
 	}
-	sprintf(file, "%s.lua.cc", argv[1]);
-	save_textfile(file, txt, 0);
 
 	return 0;
 }

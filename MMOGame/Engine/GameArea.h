@@ -1,5 +1,11 @@
 #pragma once
 
+#define AREA_ACTION_NOTIFY_RANGE		1
+
+#define CMDCODE_MOVE			1001
+#define CMDCODE_MOVE_JOIN		1002
+#define CMDCODE_MOVE_LEAVE		1003
+
 template<class TArea, class TAreaActor>
 class CArea;
 template<class TArea, class TAreaActor>
@@ -24,8 +30,8 @@ public:
 
 	TAreaActor* GetActor(unsigned int nActorId);
 
-	void Notify(const Vector& vecPos, float fRange, const CmdData* pCmdData);
-	void Notify(int nCellX, int nCellY, int nRange, const CmdData* pCmdData);
+	void Notify(const CmdData* pCmdData, const Vector& vecPos, float fRange);
+	void Notify(const CmdData* pCmdData, int nCellX, int nCellY, int nRange=AREA_ACTION_NOTIFY_RANGE);
 	void Notify(const CmdData* pCmdData);
 
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta);
@@ -89,8 +95,6 @@ public:
 
 	void SendNotify(const CmdData* pCmdData, unsigned int nRange);
 	void SendNotify(const CmdData* pCmdData, float fRange);
-
-	virtual void OnMove(const Vector& vecPosition, CAreaCell<TArea, TAreaActor>* pFrom, CAreaCell<TArea, TAreaActor>* pTo) {}
 
 	virtual void OnNotify(const CmdData* pCmdData) {}
 	virtual void OnAction(const CmdData* pCmdData) {}

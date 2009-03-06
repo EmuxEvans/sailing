@@ -7,100 +7,154 @@ typedef struct CmdData {
 	unsigned int nSize;
 } CmdData;
 
-class CCmdDataReader {
+class CDataReader {
 public:
-	CCmdDataReader(const CmdData* pCmdData) {
-		m_pCmdData = pCmdData;
-		Reset();
-	}
+	CDataReader(const char* pBuf, unsigned int nSize);
 
-	void Reset() {
-		m_nCurrent = 0;
-	}
+	void Reset();
 
-	unsigned int CmdCode() {
-		return m_pCmdData->nCmd;
-	}
-	unsigned int CmdWho() {
-		return m_pCmdData->nWho;
-	}
+	template<class T>
+	bool GetValue(T& Value, T Min=0, T Max=0);
+	template<class T>
+	T GetValue();
+	bool GetString(const char*& pValue, unsigned int nMaxLen=0);
+	const char* GetString(unsigned int nMaxLen=0);
+	template<class T>
+	bool GetArray(T*& Array, unsigned int* Count=NULL, unsigned int Max=0xffff);
+	template<class T>
+	bool GetArray(T*& Array, unsigned int Count);
+	template<class T>
+	T* GetArray(T*& Array, unsigned int* Count=NULL);
 
-	bool GetFloat(float& fValue, float fMin=0.0f, float fMax=0.0f) {
-		if(m_nCurrent+sizeof(float)>m_pCmdData->nSize) return false;
-		fValue = *((const float*)((const char*)m_pCmdData->pData + m_nCurrent));
-		if((fMin!=0 || fMax!=0) && (fValue<fMin || fValue>fMax)) return false;
-		m_nCurrent += sizeof(float);
-		return true;		
-	}
-	bool GetInteger(int& nValue, int nMin=0, int nMax=0) {
-		if(m_nCurrent+sizeof(int)>m_pCmdData->nSize) return false;
-		nValue = *((const int*)((const char*)m_pCmdData->pData + m_nCurrent));
-		if((nMin!=0 || nMax!=0) && (nValue<nMin || nValue>nMax)) return false;
-		m_nCurrent += sizeof(int);
-		return true;		
-	}
-	bool GetString(const char*& pValue, unsigned int nMaxLen) {
-		unsigned int n;
-		for(n=0; n<=nMaxLen && m_nCurrent+n<m_pCmdData->nSize; n++) {
-			if(*((const char*)m_pCmdData->pData + m_nCurrent)=='\0') {
-				pValue = (const char*)m_pCmdData->pData + m_nCurrent;
-				m_nCurrent += n;
-				return true;
-			}
-		}
-		return false;
-	}
+private:
+	const char* m_pBuf;
+	unsigned int m_nCurrent, m_nSize;
+};
+
+class CDataWriter {
+public:
+	CDataWriter(char* pBuf, unsigned int nSize);
+
+	void Reset();
+	unsigned int GetLength();
+
+	template<class T>
+	bool PutValue(T Value);
+	bool PutString(const char* pValue);
+	template<class T>
+	bool PutArray(T* Array, unsigned int Count);
+
+private:
+	char* m_pBuf;
+	unsigned int m_nCurrent, m_nSize;
+};
+
+class CCmdDataReader : public CDataReader {
+public:
+	CCmdDataReader(const CmdData* pCmdData);
+
+	unsigned int CmdCode();
+	unsigned int CmdWho();
 
 private:
 	const CmdData* m_pCmdData;
-	unsigned int m_nCurrent;
 };
 
-class CCmdDataWriter {
+template<unsigned int nSize>
+class CDataBuffer : public CDataWriter {
 public:
-	CCmdDataWriter(CmdData* pCmdData) {
-		m_pCmdData = pCmdData;
-		Reset();
+	CDataBuffer() : CDataWriter(m_szBuf, sizeof(m_szBuf)) {
 	}
 
-	void Reset() {
-		m_nCurrent = 0;
-		m_nSize = m_pCmdData->nSize;
-	}
-
-	void CmdCode(unsigned int nCmd) {
-		m_pCmdData->nCmd = nCmd;
-	}
-	void CmdWho(unsigned int nWho) {
-		m_pCmdData->nWho = nWho;
-	}
-
-	bool PutFloat(float fValue) {
-		if(m_nCurrent+sizeof(float)>m_nSize) return false;
-		*((float*)((char*)m_pCmdData->pData + m_nCurrent)) = fValue;
-		m_nCurrent += sizeof(float);
-		return true;		
-	}
-	bool PutInteger(int nValue) {
-		if(m_nCurrent+sizeof(int)>m_nSize) return false;
-		*((int*)((char*)m_pCmdData->pData + m_nCurrent)) = nValue;
-		m_nCurrent += sizeof(int);
-		return true;		
-	}
-	bool PutString(const char* pValue) {
-		unsigned int n = 0;
-		if(m_nCurrent+n+1<m_nSize) return false;
-		memcpy((char*)m_pCmdData->pData+m_nCurrent, pValue, n+1);
-		m_nCurrent += n + 1;
-		return true;
-	}
-
-	unsigned int Size() {
-		return m_nSize;
+	void* GetBuffer() {
+		return m_szBuf;
 	}
 
 private:
-	CmdData* m_pCmdData;
-	unsigned int m_nCurrent;
-	unsigned int m_nSize;
+	char m_szBuf[nSize];
 };
+
+template<unsigned int nSize>
+class CCmdDataWriter : public CDataBuffer<nSize> {
+public:
+	CCmdDataWriter(unsigned int nCmd, unsigned int nWho);
+
+	void Reset(unsigned int nCmd, unsigned int nWho);
+	const CmdData* GetCmdData();
+
+private:
+	CmdData m_CmdData;
+};
+
+template<class T>
+bool CDataReader::GetValue(T& Value, T Min, T Max)
+{
+	if(m_nCurrent+sizeof(T)>m_nSize) return false;
+	Value = *((const T*)((const char*)m_pCmdData->pData + m_nCurrent));
+	if((Min!=0 || Max!=0) && (Value<Min || Value>Max)) return false;
+	m_nCurrent += sizeof(T);
+	return true;
+}
+
+template<class T>
+T CDataReader::GetValue() {
+	T Value;
+	if(m_nCurrent+sizeof(T)>m_nSize) return 0;
+	Value = *((const T*)(m_pBuf + m_nCurrent));
+	m_nCurrent += sizeof(T);
+	return Value;
+}
+
+template<class T>
+bool CDataReader::GetArray(T*& Array, unsigned int* Count, unsigned int Max)
+{
+	return true;
+}
+
+template<class T>
+bool CDataReader::GetArray(T*& Array, unsigned int Count)
+{
+	return true;
+}
+
+template<class T>
+T* CDataReader::GetArray(T*& Array, unsigned int* Count)
+{
+	return NULL;
+}
+
+template<unsigned int nSize>
+CCmdDataWriter<nSize>::CCmdDataWriter(unsigned int nCmd, unsigned int nWho) : CDataBuffer()
+{
+	Reset(nCmd, nWho);
+}
+
+template<unsigned int nSize>
+void CCmdDataWriter<nSize>::Reset(unsigned int nCmd, unsigned int nWho)
+{
+	m_CmdData.nCmd = nCmd;
+	m_CmdData.nWho = nWho;
+	CDataBuffer::Reset();
+}
+
+template<unsigned int nSize>
+const CmdData* CCmdDataWriter<nSize>::GetCmdData()
+{
+	m_CmdData.nSize = GetCurrent();
+	return m_CmdData;
+}
+
+template<class T>
+bool CDataWriter::PutValue(T Value)
+{
+	if(m_nCurrent+sizeof(T)>m_nSize) return false;
+	*((T*)(m_pBuf + m_nCurrent)) = Value;
+	m_nCurrent += sizeof(T);
+	return true;
+}
+
+template<class T>
+bool CDataWriter::PutArray(T* Array, unsigned int Count)
+{
+	return true;
+}
