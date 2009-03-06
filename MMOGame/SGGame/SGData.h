@@ -1,17 +1,8 @@
 #pragma once
 
-#define SGCMD_CONNECT			10
-#define SGCMD_USERDATA			11
-#define SGCMD_DISCONNECT		12
-#define SGCMD_USERLOADED		13
-
-#define SGCMD_PLAYER_MOVE		0X1001
-#define SGCMD_PLAYER_JOIN		0X1002
-#define SGCMD_PLAYER_LEAVE		0X1003
-
-#define SGWAREHOUSE_COUNT		80
 #define SGEQUIPMENT_COUNT		7
-#define SGBAG_MAXCOUNT			20
+#define SGBAG_MAX				20
+#define SGWAREHOUSE_MAX			80
 
 #define SGEQUIPMENT_HEAD		0
 #define SGEQUIPMENT_HAND		1
@@ -34,15 +25,14 @@
 
 #define SGACTORTYPE_NPC			0
 #define SGACTORTYPE_PLAYER		1
-#define SGACTORTYPE_PROPS		2
+#define SGACTORTYPE_PROPS		3
 
 #define SGACTIONMASK_QUEST		0x0001
 #define SGACTIONMASK_TALK		0x0002
 #define SGACTIONMASK_TRADE		0x0004
 #define SGACTIONMASK_OPERATE	0x0008
 
-typedef struct SGCMD_PLAYER_MOVE_T {
-	float fFromX, fFromY, fFromZ;
-	float fToX, fToY, fToZ;
-	unsigned int nTime;
-} SGCMD_PLAYER_MOVE_T;
+typedef struct SGROLE_VIEWDATA {
+	char name[100];
+	// ...
+} SGROLE_VIEWDATA;

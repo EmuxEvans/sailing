@@ -1,25 +1,16 @@
 #include <map>
 #include <assert.h>
 
-#include "CmdData.h"
-#include "GameLoop.h"
-#include "SGGameLoop.h"
-
-#include "Game.h"
-#include "Math.h"
-#include "GameArea.h"
-#include "GameArea.inl"
-#include "GameBuff.h"
-#include "GameItem.h"
-#include "GameSkill.h"
-#include "GameQuest.h"
+#include "..\Engine\Game.h"
 
 #include "SG.h"
 #include "SGArea.h"
 #include "SGAreaActor.h"
+#include "SGPlayer.h"
 #include "SGBuff.h"
 #include "SGItem.h"
 #include "SGSkill.h"
+#include "SGGameLoop.h"
 
 static std::map<unsigned int, CSGPlayer*> g_mapPlayers;
 static CSGGameLoopCallback* g_pLoopCallback = NULL;
@@ -89,12 +80,12 @@ CSGGameLoopCallback::~CSGGameLoopCallback()
 
 void CSGGameLoopCallback::Process(const CmdData* pCmdData)
 {
-	if(pCmdData->nCmd==SGCMD_CONNECT) {
+	if(pCmdData->nCmd==SGCMDCODE_CONNECT) {
 		assert(pCmdData->nWho!=0);
 		std::map<unsigned int, CSGPlayer*>::iterator i;
 		i = g_mapPlayers.find(pCmdData->nWho);
 		if(i!=g_mapPlayers.end()) {
-			CmdData CmdData = { SGCMD_DISCONNECT, pCmdData->nWho, NULL, 0 };
+			CmdData CmdData = { SGCMDCODE_DISCONNECT, pCmdData->nWho, NULL, 0 };
 			i->second->Process(&CmdData);
 			// send disconnect
 		}
@@ -104,7 +95,7 @@ void CSGGameLoopCallback::Process(const CmdData* pCmdData)
 		pPlayer->Process(pCmdData);
 		return;
 	}
-	if(pCmdData->nCmd==SGCMD_USERDATA) {
+	if(pCmdData->nCmd==SGCMDCODE_USERDATA) {
 		assert(pCmdData->nWho!=0);
 		std::map<unsigned int, CSGPlayer*>::iterator i;
 		i = g_mapPlayers.find(pCmdData->nWho);
@@ -116,7 +107,7 @@ void CSGGameLoopCallback::Process(const CmdData* pCmdData)
 		}
 		return;
 	}
-	if(pCmdData->nCmd==SGCMD_DISCONNECT) {
+	if(pCmdData->nCmd==SGCMDCODE_DISCONNECT) {
 		assert(pCmdData->nWho!=0);
 		std::map<unsigned int, CSGPlayer*>::iterator i;
 		i = g_mapPlayers.find(pCmdData->nWho);

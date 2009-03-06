@@ -1,0 +1,28 @@
+#pragma once
+
+// cmdcode for user connection
+#define SGCMDCODE_CONNECT			10
+#define SGCMDCODE_USERDATA			11
+#define SGCMDCODE_DISCONNECT		12
+#define SGCMDCODE_USERLOADED		13
+
+// cmdcode for login
+#define SGCMDCODE_LOGIN_SEED		10001
+#define SGCMDCODE_LOGIN_DO			10002
+#define SGCMDCODE_LOGIN_RETURN		10003
+#define SGCMDCODE_LOGIN_REPORT		10004
+#define SGCMDCODE_LOGIN_SELECT		10005
+
+// cmdcode for player move
+#define SGCMDCODE_MOVE				10010
+#define SGCMDCODE_MOVE_JOIN			10011
+#define SGCMDCODE_MOVE_LEAVE		10012
+#define SGCMDCODE_MOVE_CHANGE		10013
+
+// cmdcode for target
+#define SGCMDCODE_TARGET_SET		10014
+#define SGCMDCODE_TARGET_CHANGE		10015
+
+// cmdcode for mapchat
+#define SGCMDCODE_MAPCHAT_SAY		10020
+#define SGCMDCODE_MAPCHAT_MSAY		10021

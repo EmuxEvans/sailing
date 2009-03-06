@@ -3,10 +3,8 @@
 #include <winsock2.h>
 #include <map>
 
-#include "asockio.h"
-
-#include "CmdData.h"
-#include "GameLoop.h"
+#include "..\Engine\asockio.h"
+#include "..\Engine\Game.h"
 
 #include "SG.h"
 #include "SGGameLoop.h"
@@ -105,9 +103,9 @@ public:
 					void* pData;
 					pData = malloc(len);
 					memcpy(pData, &m_DataBuf[sizeof(len)], len);
-					pLoop->PushMsg(SGCMD_USERDATA, m_nUserId, pData, len);
+					pLoop->PushMsg(SGCMDCODE_USERDATA, m_nUserId, pData, len);
 				} else {
-					pLoop->PushMsg(SGCMD_USERDATA, m_nUserId, NULL, 0);
+					pLoop->PushMsg(SGCMDCODE_USERDATA, m_nUserId, NULL, 0);
 				}
 			} else {
 				unsigned int nUserId;
@@ -134,7 +132,7 @@ public:
 			std::map<unsigned int, CTCPClient*>::iterator i;
 			i = g_mapClients.find(m_nUserId);
 			if(i!=g_mapClients.end() && i->second==this) {
-				pLoop->PushMsg(SGCMD_DISCONNECT, m_nUserId, NULL, 0);
+				pLoop->PushMsg(SGCMDCODE_DISCONNECT, m_nUserId, NULL, 0);
 				g_mapClients.erase(m_nUserId);
 			}
 			m_nUserId = 0;
@@ -157,7 +155,7 @@ public:
 			}
 			g_mapClients[nUserId] = this;
 			m_nUserId = nUserId;
-			pLoop->PushMsg(SGCMD_CONNECT, m_nUserId, NULL, 0);
+			pLoop->PushMsg(SGCMDCODE_CONNECT, m_nUserId, NULL, 0);
 		}
 		LeaveCriticalSection(&m_csClients);
 	}
