@@ -2,11 +2,13 @@
 
 typedef struct PDL_ARG {
 	std::string name;
+	bool isarray;
 	std::string type;
 	std::string range;
 } PDL_ARG;
 
 typedef struct PDL_CMD {
+	std::string mode;
 	std::string code;
 	std::string name;
 	int type;

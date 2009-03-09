@@ -1,5 +1,17 @@
 #pragma once
 
+typedef struct FESClientData {
+	unsigned int nSeq;
+	unsigned int nIP;
+	unsigned short nPort;
+} FESClientData;
+
+class IGameFES;
+class CGameAPC;
+class CGameAsyncDB;
+class IGameLoopCallback;
+class IGameLoop;
+
 // Game FES
 class IGameFES
 {
@@ -8,26 +20,6 @@ public:
 
 	virtual bool SendData(unsigned int nUserId, const void* pData, unsigned int nSize) = 0;
 	virtual bool Disconnect(unsigned int nUserId) = 0;
-};
-
-bool GameFES_Init();
-bool GameFES_Final();
-IGameFES* GameFES_Get(unsigned int nIp, unsigned int short nPort);
-
-// Async Procedure Call
-class CGameAPC
-{
-public:
-	static bool Init();
-	static bool Final();
-	static bool QueueWorkItem(CGameAPC* pAPC);
-
-protected:
-	CGameAPC() { }
-	virtual ~CGameAPC() { }
-
-public:
-	virtual void Execute() = 0;
 };
 
 // Game Loop
@@ -56,54 +48,38 @@ bool GameLoop_Init();
 bool GameLoop_Final();
 IGameLoop* GameLoop_Create(IGameLoopCallback* pCallback);
 void GameLoop_Destroy(IGameLoop* pLoop);
+IGameFES* GameLoop_GetFES(unsigned int nIp, unsigned int short nPort);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class CGameClient
+// Async Procedure Call
+class CGameAPC
 {
 protected:
-	CGameClient(unsigned int nUserId, IGameFES* pFES) {
-		m_nUserId = nUserId;
-		m_pFES = pFES;
-	}
-	virtual ~CGameClient() {
-	}
+	CGameAPC(IGameLoop* pGameLoop);
+	virtual ~CGameAPC();
 
 public:
-	bool SendData(unsigned int nUserId, const void* pData, unsigned int nSize) {
-		return m_pFES->SendData(nUserId, pData, nSize);
-	}
-	bool Disconnect(unsigned int nUserId) {
-		return m_pFES->Disconnect(m_nUserId);
-	}
+	bool Queue();
+	virtual void Execute() = 0;
 
-	unsigned int GetUserId() const {
-		return m_nUserId;
-	}
-	IGameFES* GetFES() {
-		return m_pFES;
+private:
+	IGameLoop* m_pGameLoop;
+};
+
+// Async Database Write OR Read
+class CGameAsyncDB
+{
+protected:
+	CGameAsyncDB(IGameLoop* pGameLoop);
+	virtual ~CGameAsyncDB();
+
+public:
+	bool Queue();
+	virtual void Execute() = 0;
+
+	IGameLoop* GetGameLoop() {
+		return m_pGameLoop;
 	}
 
 private:
-	unsigned int m_nUserId;
-	IGameFES* m_pFES;
+	IGameLoop* m_pGameLoop;
 };

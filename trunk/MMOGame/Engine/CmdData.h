@@ -18,13 +18,13 @@ public:
 	template<class T>
 	T GetValue();
 	bool GetString(const char*& pValue, unsigned int nMaxLen=0);
+	template<class T>
+	bool GetStruct(const T*& Value);
 	const char* GetString(unsigned int nMaxLen=0);
 	template<class T>
-	bool GetArray(T*& Array, unsigned int* Count=NULL, unsigned int Max=0xffff);
+	bool GetArray(const T*& Array, unsigned int* Count, unsigned int Max=0xffff);
 	template<class T>
-	bool GetArray(T*& Array, unsigned int Count);
-	template<class T>
-	T* GetArray(T*& Array, unsigned int* Count=NULL);
+	bool GetArray(const T*& Array, unsigned int Count);
 
 private:
 	const char* m_pBuf;
@@ -41,6 +41,8 @@ public:
 	template<class T>
 	bool PutValue(T Value);
 	bool PutString(const char* pValue);
+	template<class T>
+	bool PutStruct(const T* pValue);
 	template<class T>
 	bool PutArray(T* Array, unsigned int Count);
 
@@ -90,7 +92,7 @@ template<class T>
 bool CDataReader::GetValue(T& Value, T Min, T Max)
 {
 	if(m_nCurrent+sizeof(T)>m_nSize) return false;
-	Value = *((const T*)((const char*)m_pCmdData->pData + m_nCurrent));
+	Value = *((const T*)(m_pBuf + m_nCurrent));
 	if((Min!=0 || Max!=0) && (Value<Min || Value>Max)) return false;
 	m_nCurrent += sizeof(T);
 	return true;
@@ -106,21 +108,35 @@ T CDataReader::GetValue() {
 }
 
 template<class T>
-bool CDataReader::GetArray(T*& Array, unsigned int* Count, unsigned int Max)
+bool CDataReader::GetStruct(const T*& Value)
 {
+	if(m_nCurrent+sizeof(T)>m_nSize) return 0;
+	Value = (const T*)(m_pBuf + m_nCurrent);
+	m_nCurrent += sizeof(T);
+	return Value;
+}
+
+template<class T>
+bool CDataReader::GetArray(const T*& Array, unsigned int* Count, unsigned int Max)
+{
+	if(m_nCurrent+sizeof(unsigned short)>m_nSize) return false;
+	*Count = *((unsigned short*)(m_pBuf+m_nCurrent));
+	if(Max!=0x10000 && *Count>Max) return false;
+	if(m_nCurrent+sizeof(unsigned short)+sizeof(T)*(*Count)>m_nSize) return false;
+	Array = (T*)(m_pBuf+m_nCurrent+sizeof(unsigned short));
+	m_nCurrent += sizeof(unsigned short) + sizeof(T)*(*Count);	
 	return true;
 }
 
 template<class T>
-bool CDataReader::GetArray(T*& Array, unsigned int Count)
+bool CDataReader::GetArray(const T*& Array, unsigned int Count)
 {
+	if(m_nCurrent+sizeof(unsigned short)>m_nSize) return false;
+	if((unsigned int)(*((unsigned short*)(m_pBuf+m_nCurrent)))!=Count) return false;
+	if(m_nCurrent+sizeof(unsigned short)+sizeof(T)*(ACount)>m_nSize) return false;
+	Array = (T*)(m_pBuf+m_nCurrent+sizeof(unsigned short));
+	m_nCurrent += sizeof(unsigned short) + sizeof(T)*Count;
 	return true;
-}
-
-template<class T>
-T* CDataReader::GetArray(T*& Array, unsigned int* Count)
-{
-	return NULL;
 }
 
 template<unsigned int nSize>
@@ -154,7 +170,21 @@ bool CDataWriter::PutValue(T Value)
 }
 
 template<class T>
+bool CDataWriter::PutStruct(const T* pValue)
+{
+	if(m_nCurrent+sizeof(T)>m_nSize) return false;
+	memcpy(m_pBuf + m_nCurrent, pValue);
+	m_nCurrent += sizeof(T);
+	return true;
+}
+
+template<class T>
 bool CDataWriter::PutArray(T* Array, unsigned int Count)
 {
+	if(m_nCurrent+sizeof(unsigned short)+sizeof(T)*Count>m_nSize) return false;
+	if(Count>0xffff) return false;
+	memcpy(m_pBuf+m_nCurrent, &Count, sizeof(unsigned short));
+	memcpy(m_pBuf+m_nCurrent+sizeof(unsigned short), Array, sizeof(T)*Count);
+	m_nCurrent += sizeof(unsigned short) + sizeof(T)*Count;
 	return true;
 }

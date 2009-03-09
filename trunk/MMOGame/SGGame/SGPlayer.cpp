@@ -13,8 +13,12 @@
 #include "SGSkill.h"
 #include "SGGameLoop.h"
 
-CSGPlayer::CSGPlayer(unsigned int nUserId) : CSGRole(SGACTORTYPE_PLAYER), m_nUserId(nUserId)
+void UserSendData(unsigned int nSeq, const void* pData, unsigned int nSize);
+void UserDisconnect(unsigned int nSeq);
+
+CSGPlayer::CSGPlayer(IGameFES* pFES, unsigned int nUserId, FESClientData& ClientData) : CSGRole(SGACTORTYPE_PLAYER), m_pFES(pFES), m_nUserId(nUserId)
 {
+	memcpy(&m_ClientData, &ClientData, sizeof(ClientData));
 }
 
 CSGPlayer::~CSGPlayer()

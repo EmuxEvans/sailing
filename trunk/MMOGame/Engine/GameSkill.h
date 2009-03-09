@@ -1,14 +1,14 @@
 #pragma once
 
 typedef struct SkillSData {
-	os_dword nSkillId;
-	os_dword nClassId;
-	os_byte aData[100];
+	unsigned int	nSkillId;
+	unsigned int	nClassId;
+	unsigned char	aData[100];
 } SkillSData;
 
 typedef struct SkillUData {
-	os_dword nSkillId;
-	os_byte aData[100];
+	unsigned int nSkillId;
+	unsigned char aData[100];
 } SkillUData;
 
 template<class TAreaActor>

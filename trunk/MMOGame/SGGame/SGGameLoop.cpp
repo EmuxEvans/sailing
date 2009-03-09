@@ -78,6 +78,8 @@ CSGGameLoopCallback::~CSGGameLoopCallback()
 {
 }
 
+void UserDisconnect(unsigned int nSeq);
+
 void CSGGameLoopCallback::Process(const CmdData* pCmdData)
 {
 	if(pCmdData->nCmd==SGCMDCODE_CONNECT) {
@@ -85,12 +87,13 @@ void CSGGameLoopCallback::Process(const CmdData* pCmdData)
 		std::map<unsigned int, CSGPlayer*>::iterator i;
 		i = g_mapPlayers.find(pCmdData->nWho);
 		if(i!=g_mapPlayers.end()) {
+			unsigned int nSeq = i->second->GetFESClientData().nSeq;
 			CmdData CmdData = { SGCMDCODE_DISCONNECT, pCmdData->nWho, NULL, 0 };
 			i->second->Process(&CmdData);
-			// send disconnect
+			UserDisconnect(nSeq);
 		}
 		CSGPlayer* pPlayer;
-		pPlayer = new CSGPlayer(pCmdData->nWho);
+		pPlayer = new CSGPlayer(NULL, pCmdData->nWho, *((FESClientData*)(pCmdData->pData)));
 		g_mapPlayers[pCmdData->nWho] = pPlayer;
 		pPlayer->Process(pCmdData);
 		return;

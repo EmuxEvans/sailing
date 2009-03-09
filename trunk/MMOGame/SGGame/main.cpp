@@ -18,9 +18,6 @@ int main(int argc, char* argv[])
 	//WSAData wsaData;
 	//WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ASockIOInit();
-
-	GameFES_Init();
-	CGameAPC::Init();
 	GameLoop_Init();
 
 	{
@@ -41,8 +38,6 @@ int main(int argc, char* argv[])
 	}
 
 	GameLoop_Final();
-	CGameAPC::Final();
-	GameFES_Final();
 
 	ASockIOFini();
 	//WSACleanup();
@@ -60,32 +55,50 @@ static VOID CALLBACK OnUserDisconnect(HCONNECT hConn , LPVOID pKey);
 static VOID CALLBACK OnUserData(HCONNECT hConn, DWORD nLen, LPBYTE pBuf, LPVOID pKey);
 static HEP end_point = NULL;
 static HPOOL mem_pool = NULL;
-static std::map<unsigned int, CTCPClient*> g_mapClients;
-static CRITICAL_SECTION m_csClients;
+static CTCPClient* g_mapClients[1000];
+static CRITICAL_SECTION g_csClients[1000];
+static unsigned int g_nClientSeq = 1980;
 
 class CTCPClient
 {
 public:
-	CTCPClient(HCONNECT hConnect) {
+	CTCPClient(HCONNECT hConnect, unsigned int nSeq) {
 		m_hConnect = hConnect;
-		m_dwDataBufSize = 0;
+		m_nSeq = nSeq;
 		m_nUserId = 0;
-		InitializeCriticalSection(&m_csI);
+		m_bActive = FALSE;
+		m_dwDataBufSize = 0;
+		assert(g_mapClients[nSeq&0xffff]==NULL);
+		g_mapClients[nSeq&0xffff] = this;
 	}
 	~CTCPClient() {
-		DeleteCriticalSection(&m_csI);
+		assert(g_mapClients[m_nSeq&0xffff]==this);		
+		g_mapClients[m_nSeq&0xffff] = NULL;		
 	}
 
-	void OnConnect() {
+	unsigned int GetUserId() {
+		return m_nUserId;
+	}
+	unsigned int GetSeq() {
+		return m_nSeq;
+	}
+
+	void OnConnect(unsigned int nIP, unsigned short nPort) {
 		m_bActive = TRUE;
+		m_nIP = nIP;
+		m_nPort = nPort;
+		CDataBuffer<100> buf;
+		unsigned char aSalt[10];
+		buf.PutValue<unsigned short>(SGCMDCODE_LOGIN_SEED);
+		memset(aSalt, 0xf3, sizeof(aSalt));
+		buf.PutArray(aSalt, sizeof(aSalt));
+		SendData(buf.GetBuffer(), buf.GetLength());
 	}
 	void OnData(DWORD nSize, LPVOID pData) {
 		if(!m_bActive) return;
 
 		if(sizeof(m_DataBuf)-m_dwDataBufSize<nSize) {
-			EnterCriticalSection(&m_csClients);
 			Disconnect();
-			LeaveCriticalSection(&m_csClients);
 			return;
 		}
 
@@ -98,22 +111,50 @@ public:
 			len = *((WORD*)m_DataBuf);
 			if(m_dwDataBufSize<sizeof(len)+len) break;
 
-			if(m_nUserId) {
-				if(len>0) {
+			WORD code;
+			if(sizeof(code)>len) {
+				Disconnect();
+				return;
+			}
+			code = *((WORD*)(m_DataBuf+sizeof(len)));
+
+			switch(code) {
+			case SGCMDCODE_LOGIN_DO:
+				if(m_nUserId) {
+					Disconnect();
+					return;
+				}
+
+				{
+					unsigned int nUserId;
+					const char* pPassword;
+					CDataReader buf(m_DataBuf+sizeof(len)+sizeof(code), len-sizeof(code));
+					buf.GetValue(nUserId);
+					buf.GetString(pPassword);
+					int ret = -1;
+					if(strcmp(pPassword, "password")==0) {
+						ret = 0;
+						SetAuthUser(nUserId);
+					}
+					CDataBuffer<100> sbuf;
+					sbuf.PutValue<unsigned short>(SGCMDCODE_LOGIN_RETURN);
+					sbuf.PutValue(ret);
+					SendData(sbuf.GetBuffer(), sbuf.GetLength());
+				}
+				break;
+			default:
+				if(!m_nUserId) {
+					Disconnect();
+					return;
+				}
+
+				{
 					void* pData;
 					pData = malloc(len);
 					memcpy(pData, &m_DataBuf[sizeof(len)], len);
 					pLoop->PushMsg(SGCMDCODE_USERDATA, m_nUserId, pData, len);
-				} else {
-					pLoop->PushMsg(SGCMDCODE_USERDATA, m_nUserId, NULL, 0);
 				}
-			} else {
-				unsigned int nUserId;
-				nUserId = *((unsigned int*)&m_DataBuf[sizeof(len)]);
-				assert(nUserId!=0);
-				if(nUserId) {
-					SetAuthUser(nUserId);
-				}
+				break;
 			}
 
 			memmove(m_DataBuf, &m_DataBuf[len], m_dwDataBufSize-len);
@@ -122,56 +163,51 @@ public:
 	}
 	void OnDisconnect() {
 		m_bActive = FALSE;
-		EnterCriticalSection(&m_csClients);
-		Disconnect();
-		LeaveCriticalSection(&m_csClients);
 	}
 
 	void Disconnect() {
-		if(m_nUserId!=0) {
-			std::map<unsigned int, CTCPClient*>::iterator i;
-			i = g_mapClients.find(m_nUserId);
-			if(i!=g_mapClients.end() && i->second==this) {
-				pLoop->PushMsg(SGCMDCODE_DISCONNECT, m_nUserId, NULL, 0);
-				g_mapClients.erase(m_nUserId);
-			}
-			m_nUserId = 0;
-		}
-
 		if(m_bActive) {
 			m_bActive = FALSE;
 			::Disconnect(m_hConnect);
 		}
 	}
+	void SendData(const void* pData, unsigned int nSize) {
+		if(m_bActive) {
+			LPBYTE pBuf = LockOutputBuffer(mem_pool);
+			*((WORD*)pBuf) = (WORD)nSize;
+			memcpy(pBuf+sizeof(WORD), pData, nSize);
+			::SendData(m_hConnect, sizeof(WORD)+nSize, pBuf);
+		}
+	}
 
 	void SetAuthUser(unsigned int nUserId) {
-		EnterCriticalSection(&m_csClients);
 		assert(m_nUserId==0);
 		if(m_nUserId==0) {
-			std::map<unsigned int, CTCPClient*>::iterator i;
-			i = g_mapClients.find(m_nUserId);
-			if(i!=g_mapClients.end()) {
-				i->second->Disconnect();
-			}
-			g_mapClients[nUserId] = this;
 			m_nUserId = nUserId;
-			pLoop->PushMsg(SGCMDCODE_CONNECT, m_nUserId, NULL, 0);
+			FESClientData data;
+			data.nSeq = m_nSeq;
+			data.nIP = m_nIP;
+			data.nPort = m_nPort;
+			pLoop->PushMsg(SGCMDCODE_CONNECT, m_nUserId, &data, sizeof(data));
 		}
-		LeaveCriticalSection(&m_csClients);
 	}
 
 private:
+	HCONNECT m_hConnect;
+	unsigned int m_nSeq;
 	unsigned int m_nUserId;
 	BOOL m_bActive;
+	unsigned int m_nIP;
+	unsigned short m_nPort;
 	char m_DataBuf[10*1024];
 	DWORD m_dwDataBufSize;
-	HCONNECT m_hConnect;
-	CRITICAL_SECTION m_csI;
 };
 
 BOOL InitTCPServer(unsigned short nPort)
 {
-	InitializeCriticalSection(&m_csClients);
+	for(int i=0; i<sizeof(g_csClients)/sizeof(g_csClients[0]); i++) {
+		InitializeCriticalSectionAndSpinCount(&g_csClients[i], 0x80000400);
+	}
 
 	mem_pool = AllocIoBufferPool(MAX_UP_LEN, 2048, MAX_DOWN_LEN, 1024);
 	if(!mem_pool) {
@@ -204,20 +240,43 @@ BOOL FinalTCPServer()
 	if(end_point) {
 		UnregisterEndPoint(end_point);
 	}
+	for(;;) {
+		unsigned int count = 0;
+		for(int i=0; i<sizeof(g_csClients)/sizeof(g_csClients[0]); i++) {
+			EnterCriticalSection(&g_csClients[i]);
+			if(g_mapClients[i]) {
+				g_mapClients[i]->Disconnect();
+				count++;
+			}
+			LeaveCriticalSection(&g_csClients[i]);
+		}
+		if(count==0) break;
+		Sleep(10);
+	}
 	if(mem_pool) {
 		FreeIoBufferPool(mem_pool);
 	}
-
-	DeleteCriticalSection(&m_csClients);
+	for(int i=0; i<sizeof(g_csClients)/sizeof(g_csClients[0]); i++) {
+		DeleteCriticalSection(&g_csClients[i]);
+	}
 	return true;
 }
 
 BOOL CALLBACK OnUserConnect(HCONNECT hconn, PSOCKADDR_IN, PSOCKADDR_IN psainRemote, LPVOID)
 {
-	CTCPClient* pClient;
-	pClient = new CTCPClient(hconn);
-	SetConnectionKey(hconn, pClient);
-	pClient->OnConnect();
+	for(unsigned int i=0; i<sizeof(g_csClients)/sizeof(g_csClients[0]); i++) {
+		if(g_mapClients[i]==NULL) {
+			EnterCriticalSection(&g_csClients[i]);
+			if(g_mapClients[i]==NULL) {
+				g_mapClients[i] = new CTCPClient(hconn, i | ((g_nClientSeq++)&0xffff)<<16);
+				SetConnectionKey(hconn, g_mapClients[i]);
+				g_mapClients[i]->OnConnect(psainRemote->sin_addr.S_un.S_addr, psainRemote->sin_port);
+				LeaveCriticalSection(&g_csClients[i]);
+				return TRUE;
+			}
+			LeaveCriticalSection(&g_csClients[i]);
+		}
+	}
 	return TRUE;
 }
 
@@ -225,13 +284,45 @@ VOID CALLBACK OnUserDisconnect(HCONNECT hConn , LPVOID pKey)
 {
 	CTCPClient* pClient;
 	pClient = (CTCPClient*)pKey;
-	pClient->OnDisconnect();
-	delete pClient;
+	if(pClient) {
+		unsigned int nIndex = pClient->GetSeq() & 0xffff;
+		EnterCriticalSection(&g_csClients[nIndex]);
+		pClient->OnDisconnect();
+		delete pClient;
+		LeaveCriticalSection(&g_csClients[nIndex]);
+	}
 }
 
 VOID CALLBACK OnUserData(HCONNECT hConn, DWORD nLen, LPBYTE pBuf, LPVOID pKey)
 {
 	CTCPClient* pClient;
 	pClient = (CTCPClient*)pKey;
-	pClient->OnData(nLen, pBuf);
+	if(pClient) {
+		unsigned int nIndex = pClient->GetSeq() & 0xffff;
+		EnterCriticalSection(&g_csClients[nIndex]);
+		pClient->OnData(nLen, pBuf);
+		LeaveCriticalSection(&g_csClients[nIndex]);
+	}
+}
+
+void UserSendData(unsigned int nSeq, const void* pData, unsigned int nSize)
+{
+	unsigned int nIndex = nSeq & 0xffff;
+	if(nIndex>=sizeof(g_csClients)/sizeof(g_csClients[0])) return;
+	EnterCriticalSection(&g_csClients[nIndex]);
+	if(g_mapClients[nIndex]!=NULL && g_mapClients[nIndex]->GetSeq()==nSeq) {
+		g_mapClients[nIndex]->SendData(pData, nSize);
+	}
+	LeaveCriticalSection(&g_csClients[nIndex]);
+}
+
+void UserDisconnect(unsigned int nSeq)
+{
+	unsigned int nIndex = nSeq & 0xffff;
+	if(nIndex>=sizeof(g_csClients)/sizeof(g_csClients[0])) return;
+	EnterCriticalSection(&g_csClients[nIndex]);
+	if(g_mapClients[nIndex]!=NULL && g_mapClients[nIndex]->GetSeq()==nSeq) {
+		g_mapClients[nIndex]->Disconnect();
+	}
+	LeaveCriticalSection(&g_csClients[nIndex]);
 }

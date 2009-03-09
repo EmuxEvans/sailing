@@ -10,12 +10,12 @@
 #include "SGItem.h"
 #include "SGSkill.h"
 
-ItemSData* SGGetItemSData(os_dword nItemId)
+ItemSData* SGGetItemSData(unsigned int  nItemId)
 {
 	return NULL;
 }
 
-CSGItemLogic* SGGetItemLogic(os_dword nClassId)
+CSGItemLogic* SGGetItemLogic(unsigned int  nClassId)
 {
 	return NULL;
 }

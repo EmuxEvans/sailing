@@ -1,24 +1,24 @@
 #pragma once
 
 typedef struct QuestStep {
-	os_byte aData[100];
+	unsigned char aData[100];
 } QuestStep;
 
 typedef struct QuestSData {
-	os_dword nQuestId;
-	os_dword nClassId;
-	char sTitle[100];
-	char sBody[100];
-	os_byte aAcceptable[100];
-	os_byte aAward[100];
-	os_dword nStepCount;
-	QuestStep aStep[5];
+	unsigned int	nQuestId;
+	unsigned int	nClassId;
+	char			sTitle[100];
+	char			sBody[100];
+	unsigned char	aAcceptable[100];
+	unsigned char	aAward[100];
+	unsigned int	nStepCount;
+	QuestStep		aStep[5];
 } QuestSData;
 
 typedef struct QuestUData {
-	os_dword nQuestId;
-	os_dword nStep;
-	os_byte aData[100];
+	unsigned int nQuestId;
+	unsigned int nStep;
+	unsigned char aData[100];
 } QuestUData;
 
 template<class TAreaActor>
