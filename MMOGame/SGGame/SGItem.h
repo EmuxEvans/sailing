@@ -2,8 +2,8 @@
 
 typedef IItemLogic<CSGAreaActor> CSGItemLogic;
 
-ItemSData* SGGetItemSData(os_dword nItemId);
-CSGItemLogic* SGGetItemLogic(os_dword nClassId);
+ItemSData* SGGetItemSData(unsigned int  nItemId);
+CSGItemLogic* SGGetItemLogic(unsigned int  nClassId);
 
 // Weapon
 typedef struct SGItemSData_Weapon {

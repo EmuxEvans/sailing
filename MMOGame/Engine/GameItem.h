@@ -1,19 +1,19 @@
 #pragma once
 
 typedef struct ItemSData {
-	os_dword	nItemId;
-	os_byte		nType;
-	os_int		nClassId;
-	os_char		bUniqueId;
-	os_char		bCanEquip;
-	os_char		bUsable;
-	os_byte		aData[100];
+	unsigned int	nItemId;
+	unsigned char	nType;
+	int				nClassId;
+	char			bUniqueId;
+	char			bCanEquip;
+	char			bUsable;
+	unsigned char	aData[100];
 } ItemSData;
 
 typedef struct ItemUData {
-	os_dword	nItemId;
-	os_qword	nUniqueId;
-	os_byte		aData[100];
+	unsigned int	nItemId;
+	unsigned int	nUniqueId;
+	unsigned char		aData[100];
 } ItemUData;
 
 template<class TAreaActor>
