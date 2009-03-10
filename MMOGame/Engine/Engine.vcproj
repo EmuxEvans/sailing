@@ -207,6 +207,10 @@
 				RelativePath=".\PropertySet.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\ScriptState.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="includes"
@@ -271,6 +275,10 @@
 			</File>
 			<File
 				RelativePath=".\PropertySet.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\ScriptState.h"
 				>
 			</File>
 		</Filter>
