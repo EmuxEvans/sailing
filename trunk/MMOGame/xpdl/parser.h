@@ -11,7 +11,6 @@ typedef struct PDL_CMD {
 	std::string mode;
 	std::string code;
 	std::string name;
-	int type;
 	std::vector<PDL_ARG> args;
 } PDL_CMD;
 

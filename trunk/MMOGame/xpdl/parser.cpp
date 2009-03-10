@@ -28,7 +28,7 @@ bool pdl_parser(const char* text)
 			return false;
 		}
 
-		buf = escape_blank(text);
+		buf = escape_blank(buf);
 	}
 
 	return true;
@@ -194,29 +194,25 @@ const char* parser_arg(PDL_CMD& cmd, const char* buf)
 	const char* tbuf;
 
 	if(			(tbuf=get_token_id(buf, type1, sizeof(type1)))
-			&&	(tbuf=get_token_id(buf, type2, sizeof(type2)))
-			&&	(tbuf=get_token_char(buf, '['))
-			&&	(tbuf=get_token_char(buf, ']'))
-			&&	(tbuf=get_token_id(buf, name, sizeof(name))) ) {
+			&&	(tbuf=get_token_id(tbuf, type2, sizeof(type2)))
+			&&	(tbuf=get_token_char(tbuf, '['))
+			&&	(tbuf=get_token_char(tbuf, ']'))
+			&&	(tbuf=get_token_id(tbuf, name, sizeof(name))) ) {
 		strcat(type1, type2);
 		isarray = true;
 	} else if(	(tbuf=get_token_id(buf, type1, sizeof(type1)))
-			&&	(tbuf=get_token_char(buf, '['))
-			&&	(tbuf=get_token_char(buf, ']'))
-			&&	(tbuf=get_token_id(buf, name, sizeof(name))) ) {
+			&&	(tbuf=get_token_char(tbuf, '['))
+			&&	(tbuf=get_token_char(tbuf, ']'))
+			&&	(tbuf=get_token_id(tbuf, name, sizeof(name))) ) {
 		isarray = true;
-		return tbuf;
 	} else if(	(tbuf=get_token_id(buf, type1, sizeof(type1)))
-			&&	(tbuf=get_token_id(buf, type2, sizeof(type2)))
-			&&	(tbuf=get_token_id(buf, name, sizeof(name))) ) {
+			&&	(tbuf=get_token_id(tbuf, type2, sizeof(type2)))
+			&&	(tbuf=get_token_id(tbuf, name, sizeof(name))) ) {
 		strcat(type1, type2);
-		return tbuf;
 	} else if(	(tbuf=get_token_id(buf, type1, sizeof(type1)))
-			&&	(tbuf=get_token_id(buf, name, sizeof(name))) ) {
+			&&	(tbuf=get_token_id(tbuf, name, sizeof(name))) ) {
 		isarray = false;
-		return tbuf;
 	} else {
-		isarray = false;
 		return NULL;
 	}
 
