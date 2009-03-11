@@ -12,3 +12,5 @@ public:
 private:
 	CAreaCell<CSGArea, CSGAreaActor> m_Cells[100*100];
 };
+
+typedef CAreaCell<CSGArea, CSGAreaActor> CSGAreaCell;

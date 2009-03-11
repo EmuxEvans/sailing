@@ -119,7 +119,7 @@ public:
 			code = *((WORD*)(m_DataBuf+sizeof(len)));
 
 			switch(code) {
-			case SGCMDCODE_LOGIN_DO:
+			case SGCMDCODE_LOGIN:
 				if(m_nUserId) {
 					Disconnect();
 					return;
