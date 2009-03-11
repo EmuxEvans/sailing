@@ -8,6 +8,7 @@
 #include "SGArea.h"
 #include "SGAreaActor.h"
 #include "SGPlayer.h"
+#include "SGPet.h"
 #include "SGBuff.h"
 #include "SGItem.h"
 #include "SGSkill.h"
@@ -102,6 +103,7 @@ CSGPlayer::CSGPlayer(IGameFES* pFES, unsigned int nPlayerId, FESClientData& Clie
 	memcpy(&m_ClientData, &ClientData, sizeof(ClientData));
 	m_pBattleField = NULL;
 	m_pPlayerTeam = NULL;
+	m_pPet = NULL;
 	memset(m_Equip, 0, sizeof(m_Equip));
 	memset(m_Bag, 0, sizeof(m_Bag));
 	memset(m_Warehouse, 0, sizeof(m_Warehouse));
@@ -111,6 +113,12 @@ CSGPlayer::~CSGPlayer()
 {
 	assert(!m_pBattleField);
 	assert(!m_pPlayerTeam);
+	assert(!m_pPet);
+}
+
+bool CSGPlayer::GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData)
+{
+	return false;
 }
 
 bool CSGPlayer::DropItem(int nIndex)
@@ -184,6 +192,13 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 				buf.PutValue(viewdata);
 				break;
 			 }
+		case SGACTORTYPE_PET:
+			{
+				SGPET_VIEWDATA viewdata;
+				if(!((CSGPet*)pActor)->GetViewData(this, &viewdata)) return;
+				buf.PutValue(viewdata);
+				break;
+			}
 		case SGACTORTYPE_PLAYER:
 			{
 				SGPLAYER_VIEWDATA viewdata;
