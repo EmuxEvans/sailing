@@ -191,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SGBattleField.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SGBuff.cpp"
 				>
 			</File>
@@ -235,6 +239,10 @@
 			</File>
 			<File
 				RelativePath=".\SGAreaActor.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SGBattleField.h"
 				>
 			</File>
 			<File

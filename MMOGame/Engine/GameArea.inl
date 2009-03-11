@@ -194,6 +194,19 @@ void CAreaCell<TArea, TAreaActor>::Notify(const CmdData* pCmdData)
 }
 
 template<class TArea, class TAreaActor>
+TAreaActor* CAreaCell<TArea, TAreaActor>::GetActorByIndex(int nIndex)
+{
+	if(nIndex<0 || nIndex>=sizeof(m_Actors)/sizeof(m_Actors[0])) return NULL;
+	return m_Actors[nIndex];
+}
+
+template<class TArea, class TAreaActor>
+int CAreaCell<TArea, TAreaActor>::GetActorIndexMax()
+{
+	return sizeof(m_Actors)/sizeof(m_Actors[0]);
+}
+
+template<class TArea, class TAreaActor>
 bool CAreaCell<TArea, TAreaActor>::InsertActor(TAreaActor* pActor)
 {
 	unsigned int i;
@@ -228,6 +241,8 @@ CAreaActor<TArea, TAreaActor>::CAreaActor(unsigned int nActorId)
 template<class TArea, class TAreaActor>
 CAreaActor<TArea, TAreaActor>::~CAreaActor()
 {
+	assert(!m_pArea);
+	assert(!m_pAreaCell);
 }
 
 template<class TArea, class TAreaActor>
@@ -273,59 +288,29 @@ void CAreaActor<TArea, TAreaActor>::SetPosition(const Vector& vecPosition, float
 	pCell = m_pArea->GetCell(vecPosition);
 	pOrignCell = m_pAreaCell;
 
-	if(m_pAreaCell) {
-		if(m_pAreaCell!=pCell) {
-			m_pAreaCell->RemoveActor((TAreaActor*)this);
-			m_pAreaCell = pCell;
-			m_pAreaCell->InsertActor((TAreaActor*)this);
-		}
-	} else {
-		m_pAreaCell = pCell;
-		m_pAreaCell->InsertActor((TAreaActor*)this);
-	}
-
 	if(pOrignCell!=pCell) {
-		int x, y;
-		CmdData cmdJoin = {CMDCODE_MOVE_JOIN, GetActorId(), NULL, 0};
-		CmdData cmdLeave = {CMDCODE_MOVE_LEAVE, GetActorId(), NULL, 0};
-
+		m_pAreaCell = pCell;
 		if(pOrignCell) {
-			for(x=pOrignCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE; x<=pOrignCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE; x++) {
-				if(x<0 || x>=GetArea()->AreaColCount()) continue;
-				for(y=pOrignCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE; y<=pOrignCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE; y++) {
-					if(y<0 || y>=GetArea()->AreaRowCount()) continue;
-
-					if(pCell) {
-						if(x>=pCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE && x<=pCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE) {
-						if(y>=pCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE && y<=pCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE) {
-							continue;
-						}
-						}
-					}
-
-					GetArea()->GetCell(x, y)->Notify(&cmdLeave);
-				}
-			}
+			pOrignCell->RemoveActor((TAreaActor*)this);
 		}
-
 		if(pCell) {
-			for(x=pCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE; x<=pCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE; x++) {
-				if(x<0 || x>=GetArea()->AreaColCount()) continue;
-				for(y=pCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE; y<=pCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE; y++) {
-					if(y<0 || y>=GetArea()->AreaRowCount()) continue;
-
-					if(pOrignCell) {
-						if(x>=pOrignCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE && x<=pOrignCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE) {
-						if(y>=pOrignCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE && y<=pOrignCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE) {
-							continue;
-						}
-						}
-					}
-
-					GetArea()->GetCell(x, y)->Notify(&cmdJoin);
-				}
-			}
+			pCell->InsertActor((TAreaActor*)this);
 		}
+
+		ChangeCell(pOrignCell, pCell);
+	}
+}
+
+template<class TArea, class TAreaActor>
+void CAreaActor<TArea, TAreaActor>::SetPositionNULL()
+{
+	if(m_pAreaCell) {
+		CAreaCell<TArea, TAreaActor>* pCell;
+		pCell = m_pAreaCell;
+		m_pAreaCell = NULL;
+		pCell->RemoveActor((TAreaActor*)this);
+
+		ChangeCell(pCell, NULL);
 	}
 }
 
@@ -336,12 +321,72 @@ void CAreaActor<TArea, TAreaActor>::Move(const Vector* pStart, const Vector* pEn
 
 	if(!pEnd) {
 		SetPosition(*pStart, GetDirection());
+		m_vecDestination = *pStart;
+		m_nWalkTime = 0;
 		return;
 	}
 
 	m_vecDestination = *pEnd;
 	m_fVelocity = VectorDistance(*pStart, *pEnd) / nTime;
 	m_nWalkTime = nTime;
+}
+
+template<class TArea, class TAreaActor>
+void CAreaActor<TArea, TAreaActor>::ChangeCell(CAreaCell<TArea, TAreaActor>* pOrignCell, CAreaCell<TArea, TAreaActor>* pCell)
+{
+	int x, y, l;
+	CmdData cmdJoin = { CMDCODE_MOVE_JOIN, GetActorId(), NULL, 0 };
+	CmdData cmdLeave = { CMDCODE_MOVE_LEAVE, GetActorId(), NULL, 0 };
+
+	if(pOrignCell) {
+		for(x=pOrignCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE; x<=pOrignCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE; x++) {
+			if(x<0 || x>=GetArea()->AreaColCount()) continue;
+			for(y=pOrignCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE; y<=pOrignCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE; y++) {
+				if(y<0 || y>=GetArea()->AreaRowCount()) continue;
+
+				if(pCell) {
+					if(x>=pCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE && x<=pCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE) {
+					if(y>=pCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE && y<=pCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE) {
+						continue;
+					}
+					}
+				}
+
+				GetArea()->GetCell(x, y)->Notify(&cmdLeave);
+
+				for(l=0; l<GetAreaCell()->GetActorIndexMax(); l++) {
+					if(!GetAreaCell()->GetActorByIndex(l)) continue;
+					CmdData cmd = { CMDCODE_MOVE_LEAVE, GetAreaCell()->GetActorByIndex(l)->GetActorId(), NULL, 0 };
+					OnNotify(&cmd);
+				}
+			}
+		}
+	}
+
+	if(pCell) {
+		for(x=pCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE; x<=pCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE; x++) {
+			if(x<0 || x>=GetArea()->AreaColCount()) continue;
+			for(y=pCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE; y<=pCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE; y++) {
+				if(y<0 || y>=GetArea()->AreaRowCount()) continue;
+
+				if(pOrignCell) {
+					if(x>=pOrignCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE && x<=pOrignCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE) {
+					if(y>=pOrignCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE && y<=pOrignCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE) {
+						continue;
+					}
+					}
+				}
+
+				GetArea()->GetCell(x, y)->Notify(&cmdJoin);
+
+				for(l=0; l<GetAreaCell()->GetActorIndexMax(); l++) {
+					if(!GetAreaCell()->GetActorByIndex(l)) continue;
+					CmdData cmd = { CMDCODE_MOVE_JOIN, GetAreaCell()->GetActorByIndex(l)->GetActorId(), NULL, 0 };
+					OnNotify(&cmd);
+				}
+			}
+		}
+	}
 }
 
 template<class TArea, class TAreaActor>
@@ -369,13 +414,22 @@ TAreaActor* CAreaActor<TArea, TAreaActor>::GetTarget()
 }
 
 template<class TArea, class TAreaActor>
-void CAreaActor<TArea, TAreaActor>::SendNotify(const CmdData* pCmdData, unsigned int nRange)
+void CAreaActor<TArea, TAreaActor>::SendNotify(const CmdData* pCmdData, int nRange)
 {
+	assert(m_pArea);
+	assert(m_pAreaCell);
+
+	if(m_pAreaCell) {
+		m_pArea->Notify(pCmdData, m_pAreaCell->GetAreaCol(), m_pAreaCell->GetAreaRow(), nRange);
+	}
 }
 
 template<class TArea, class TAreaActor>
 void CAreaActor<TArea, TAreaActor>::SendNotify(const CmdData* pCmdData, float fRange)
 {
+	assert(m_pArea);
+
+	m_pArea->Notify(pCmdData, m_vecPosition, fRange);
 }
 
 template<class TArea, class TAreaActor>

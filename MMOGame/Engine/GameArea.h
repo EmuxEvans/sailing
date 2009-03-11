@@ -62,6 +62,9 @@ public:
 	void Notify(const Vector& vecPos, float fRange, const CmdData* pCmdData);
 	void Notify(const CmdData* pCmdData);
 
+	TAreaActor* GetActorByIndex(int nIndex);
+	int GetActorIndexMax();
+
 protected:
 	bool InsertActor(TAreaActor* pActor);
 	bool RemoveActor(TAreaActor* pActor);
@@ -84,8 +87,9 @@ public:
 	void SetArea(TArea* pArea);
 
 	void SetPosition(const Vector& vecPosition, float fDirection);
+	void SetPositionNULL();
 	void Move(const Vector* pStart, const Vector* pEnd, unsigned int nTime);
-
+	void ChangeCell(CAreaCell<TArea, TAreaActor>* pOrignCell, CAreaCell<TArea, TAreaActor>* pCell);
 
 	const Vector& GetPosition() const;
 	float GetDirection() const;
@@ -93,7 +97,7 @@ public:
 	void SetTarget(TAreaActor* pTarget);
 	TAreaActor* GetTarget();
 
-	void SendNotify(const CmdData* pCmdData, unsigned int nRange);
+	void SendNotify(const CmdData* pCmdData, int nRange = AREA_ACTION_NOTIFY_RANGE);
 	void SendNotify(const CmdData* pCmdData, float fRange);
 
 	virtual void OnNotify(const CmdData* pCmdData) {}

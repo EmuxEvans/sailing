@@ -3,7 +3,9 @@
 class CSGArea;
 class CSGAreaActor;
 class CSGRole;
+class CSGNPC;
 class CSGPlayer;
+class CSGBattleField;
 
 class CSGAreaActor : public CAreaActor<CSGArea, CSGAreaActor>
 {
@@ -11,10 +13,8 @@ public:
 	CSGAreaActor(int nActorType);
 	virtual ~CSGAreaActor();
 
-	int GetActorType() const { return m_nActorType; }
-
-	virtual bool GetViewData(CSGPlayer* pPlayer, SGROLE_VIEWDATA* pData) {
-		return false;
+	int GetActorType() const {
+		return m_nActorType;
 	}
 
 private:
@@ -35,5 +35,9 @@ public:
 	CSGNPC() : CSGRole(SGACTORTYPE_NPC) {
 	}
 	virtual ~CSGNPC() {
+	}
+
+	virtual bool GetViewData(CSGPlayer* pPlayer, SGNPC_VIEWDATA* pData) {
+		return false;
 	}
 };
