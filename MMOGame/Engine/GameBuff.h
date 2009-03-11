@@ -17,5 +17,7 @@ class IBuffLogic
 public:
 	virtual ~IBuffLogic() { }
 
+	virtual const char* GetBuffName() = 0;
+
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta, TAreaActor* pActor, const BuffSData* pSData, BuffUData* pUData) = 0;
 };

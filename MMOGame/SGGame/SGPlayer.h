@@ -7,6 +7,7 @@ class CSGBattleField;
 
 class CSGPlayerTeam;
 class CSGPlayer;
+class CSGPet;
 
 class CSGPlayerTeam
 {
@@ -29,6 +30,7 @@ private:
 
 class CSGPlayer : public CSGRole
 {
+	friend class CSGPet;
 public:
 	CSGPlayer(IGameFES* pFES, unsigned int nPlayerId, FESClientData& ClientData);
 	virtual ~CSGPlayer();
@@ -45,9 +47,11 @@ public:
 	CSGPlayerTeam* GetPlayerTeam() {
 		return m_pPlayerTeam;
 	}
-	bool GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData) {
-		return false;
+	CSGPet* GetPet() {
+		return m_pPet;
 	}
+
+	bool GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData);
 
 	bool DropItem(int nIndex);
 	bool Equip(int nIndex, int nSolt);
@@ -58,6 +62,16 @@ public:
 
 	void Process(const CmdData* pCmdData);
 
+protected:
+	void OnPetAttach(CSGPet* pPet) {
+		assert(!m_pPet);
+		m_pPet = pPet;
+	}
+	void OnPetDetach(CSGPet* pPet) {
+		assert(m_pPet==pPet);
+		m_pPet = NULL;
+	}
+
 private:
 	IGameFES* m_pFES;
 	unsigned int m_nPlayerId;
@@ -65,6 +79,7 @@ private:
 
 	CSGBattleField* m_pBattleField;
 	CSGPlayerTeam* m_pPlayerTeam;
+	CSGPet* m_pPet;
 
 	ItemUData	m_Equip[SGEQUIPMENT_COUNT];
 	ItemUData	m_Bag[SGBAG_MAX];
