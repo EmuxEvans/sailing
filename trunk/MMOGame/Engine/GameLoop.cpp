@@ -44,17 +44,17 @@ public:
 	virtual ~CWinGameFES() {
 	}
 
-	virtual bool SendData(unsigned int nUserId, const void* pData, unsigned int nSize) {
+	virtual bool SendData(unsigned int nFESSeq, const void* pData, unsigned int nSize) {
 		SendBuf* pBuf;
 		pBuf = (SendBuf*)malloc(sizeof(SendBuf) + nSize);
 		if(!pBuf) return false;
 		pBuf->nSize = nSize;
 		memcpy(pBuf->aData, pData, nSize);
-		while(!::PostThreadMessage(m_nThreadId, WM_SG_SENDDATA, (WPARAM)nUserId, (LPARAM)pBuf)) SwitchToThread();
+		while(!::PostThreadMessage(m_nThreadId, WM_SG_SENDDATA, (WPARAM)nFESSeq, (LPARAM)pBuf)) SwitchToThread();
 		return true;
 	}
-	virtual bool Disconnect(unsigned int nUserId) {
-		while(!::PostThreadMessage(m_nThreadId, WM_SG_DISCONNECT, (WPARAM)nUserId, 0)) SwitchToThread();
+	virtual bool Disconnect(unsigned int nFESSeq) {
+		while(!::PostThreadMessage(m_nThreadId, WM_SG_DISCONNECT, (WPARAM)nFESSeq, 0)) SwitchToThread();
 		return true;
 	}
 
