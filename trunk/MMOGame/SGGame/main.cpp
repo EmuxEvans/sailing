@@ -137,6 +137,7 @@ public:
 						ret = 0;
 						SetAuthUser(nUserId);
 					}
+
 					CDataBuffer<100> sbuf;
 					sbuf.PutValue<unsigned short>(SGCMDCODE_LOGIN_RETURN);
 					sbuf.PutValue(ret);
@@ -148,13 +149,7 @@ public:
 					Disconnect();
 					return;
 				}
-
-				{
-					void* pData;
-					pData = malloc(len);
-					memcpy(pData, &m_DataBuf[sizeof(len)], len);
-					pLoop->PushMsg(SGCMDCODE_USERDATA, m_nUserId, pData, len);
-				}
+				pLoop->PushMsg(SGCMDCODE_USERDATA, m_nUserId, m_DataBuf+sizeof(len), len);
 				break;
 			}
 
@@ -163,6 +158,10 @@ public:
 		}
 	}
 	void OnDisconnect() {
+		if(m_bActive && !m_nUserId) {
+			pLoop->PushMsg(SGCMDCODE_DISCONNECT, m_nUserId, NULL, 0);
+		}
+
 		m_bActive = FALSE;
 	}
 
@@ -183,14 +182,12 @@ public:
 
 	void SetAuthUser(unsigned int nUserId) {
 		assert(m_nUserId==0);
-		if(m_nUserId==0) {
-			m_nUserId = nUserId;
-			FESClientData data;
-			data.nSeq = m_nSeq;
-			data.nIP = m_nIP;
-			data.nPort = m_nPort;
-			pLoop->PushMsg(SGCMDCODE_CONNECT, m_nUserId, &data, sizeof(data));
-		}
+		m_nUserId = nUserId;
+		CDataBuffer<100> sbuf;
+		sbuf.PutValue<unsigned int>(0);
+		sbuf.PutValue<unsigned short>(0);
+		sbuf.PutValue(nUserId);
+		pLoop->PushMsg(SGCMDCODE_CONNECT, nUserId, sbuf.GetBuffer(), sbuf.GetLength());
 	}
 
 private:

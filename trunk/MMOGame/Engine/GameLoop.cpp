@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include <stdlib.h>
+#include <string.h>
 #include <queue>
 #include <process.h>
 
@@ -181,7 +182,12 @@ public:
 	}
 
 	virtual bool PushMsg(unsigned int nCmd, unsigned int nWho, const void* pData, unsigned int nSize) {
-		CmdData Data = { nCmd, nWho, pData, nSize };
+		CmdData Data = { nCmd, nWho, NULL, nSize };
+		if(nSize) {
+			Data.pData = malloc(nSize);
+			if(!Data.pData) return false;
+			memcpy(Data.pData, pData, nSize);
+		}
 
 		EnterCriticalSection(&m_csMsgQ);
 		m_MsgQ[m_nMsgQ?1:0].push(Data);

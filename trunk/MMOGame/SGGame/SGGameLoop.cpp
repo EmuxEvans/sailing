@@ -64,7 +64,7 @@ void CSGConnection::OnData(const void* pData, unsigned int nSize)
 	CmdData cmd;
 	cmd.nCmd = (unsigned int)(*((unsigned short*)pData));
 	cmd.nWho = m_pPlayer->GetPlayerId();
-	cmd.pData = (const char*)pData + sizeof(unsigned short);
+	cmd.pData = (char*)pData + sizeof(unsigned short);
 	cmd.nSize = nSize - sizeof(unsigned short);
 	m_pPlayer->OnAction(&cmd);
 }
@@ -127,7 +127,7 @@ CSGGameLoopCallback::~CSGGameLoopCallback()
 
 CSGConnection* CSGGameLoopCallback::CreateConnection(unsigned int nUserId, IGameFES* pFES, unsigned int nFESSeq)
 {
-	return NULL;
+	return new CSGConnection(this, nUserId, pFES, nFESSeq);
 }
 
 CSGConnection* CSGGameLoopCallback::GetConnection(unsigned int nUserId)
@@ -168,9 +168,11 @@ void CSGGameLoopCallback::Process(const CmdData* pCmdData)
 			pConnection->Release();
 		}
 		CCmdDataReader cmd(pCmdData);
-		IGameFES* pFES = GameLoop_GetFES(cmd.GetValue<unsigned int>(), cmd.GetValue<unsigned short>());
+		IGameFES* pFES = NULL; /* GameLoop_GetFES(cmd.GetValue<unsigned int>(), cmd.GetValue<unsigned short>());
 		assert(pFES);
-		if(!pFES) return;
+		if(!pFES) return; */
+		cmd.GetValue<unsigned int>();
+		cmd.GetValue<unsigned short>();
 		pConnection = CreateConnection(pCmdData->nCmd, pFES, cmd.GetValue<unsigned int>());
 		assert(pConnection);
 		if(!pConnection) return;

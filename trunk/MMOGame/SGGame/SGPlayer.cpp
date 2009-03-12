@@ -194,7 +194,7 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 	}
 
 	if(pCmdData->nCmd==CMDCODE_MOVE_JOIN || pCmdData->nCmd==SGCMDCODE_MOVE_CHANGE) {
-		if(pCmdData->nWho==GetActorId() && GetAreaCell()==NULL) return;
+		if(pCmdData->nWho==GetActorId()) return;
 		CSGAreaActor* pActor = GetArea()->GetActor(pCmdData->nWho);
 		assert(pActor);
 		if(!pActor) return;
@@ -242,7 +242,7 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 		return;
 	}
 	if(pCmdData->nCmd==CMDCODE_MOVE_LEAVE) {
-		if(pCmdData->nWho==GetActorId() && GetAreaCell()==NULL) return;
+		if(pCmdData->nWho==GetActorId()) return;
 		CSGAreaActor* pActor = GetArea()->GetActor(pCmdData->nWho);
 		assert(pActor);
 		if(!pActor) return;
