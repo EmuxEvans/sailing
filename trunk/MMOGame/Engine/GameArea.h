@@ -32,7 +32,13 @@ public:
 
 	void Notify(const CmdData* pCmdData, const Vector& vecPos, float fRange);
 	void Notify(const CmdData* pCmdData, int nCellX, int nCellY, int nRange=AREA_ACTION_NOTIFY_RANGE);
+	void Notify(const CmdData* pCmdData, CAreaCell<TArea, TAreaActor>* pCell, int nRange=AREA_ACTION_NOTIFY_RANGE);
 	void Notify(const CmdData* pCmdData);
+
+	void Passive(const CmdData* pCmdData, const Vector& vecPos, float fRange);
+	void Passive(const CmdData* pCmdData, int nCellX, int nCellY, int nRange=AREA_ACTION_NOTIFY_RANGE);
+	void Passive(const CmdData* pCmdData, CAreaCell<TArea, TAreaActor>* pCell, int nRange=AREA_ACTION_NOTIFY_RANGE);
+	void Passive(const CmdData* pCmdData);
 
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta);
 
@@ -61,6 +67,9 @@ public:
 
 	void Notify(const Vector& vecPos, float fRange, const CmdData* pCmdData);
 	void Notify(const CmdData* pCmdData);
+
+	void Passive(const Vector& vecPos, float fRange, const CmdData* pCmdData);
+	void Passive(const CmdData* pCmdData);
 
 	TAreaActor* GetActorByIndex(int nIndex);
 	int GetActorIndexMax();
@@ -100,9 +109,12 @@ public:
 	void SendNotify(const CmdData* pCmdData, int nRange = AREA_ACTION_NOTIFY_RANGE);
 	void SendNotify(const CmdData* pCmdData, float fRange);
 
+	void SendPassive(const CmdData* pCmdData, int nRange = AREA_ACTION_NOTIFY_RANGE);
+	void SendPassive(const CmdData* pCmdData, float fRange);
+
 	virtual void OnNotify(const CmdData* pCmdData) {}
 	virtual void OnAction(const CmdData* pCmdData) {}
-	virtual void OnPassive(TAreaActor* pWho, const CmdData* pCmdData) {}
+	virtual void OnPassive(const CmdData* pCmdData) {}
 	virtual void Tick(unsigned int nCurTime, unsigned int nDelta);
 
 private:

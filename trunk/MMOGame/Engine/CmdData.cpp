@@ -2,9 +2,9 @@
 
 #include "CmdData.h"
 
-CDataReader::CDataReader(const char* pBuf, unsigned int nSize)
+CDataReader::CDataReader(const void* pBuf, unsigned int nSize)
 {
-	m_pBuf = pBuf;
+	m_pBuf = (const char*)pBuf;
 	m_nSize = nSize;
 	Reset();
 }

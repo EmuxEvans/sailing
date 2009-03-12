@@ -90,7 +90,12 @@ void CArea<TArea, TAreaActor>::Notify(const CmdData* pCmdData, int nCellX, int n
 			pCell->Notify(pCmdData);
 		}
 	}
-	
+}
+
+template<class TArea, class TAreaActor>
+void CArea<TArea, TAreaActor>::Notify(const CmdData* pCmdData, CAreaCell<TArea, TAreaActor>* pCell, int nRange)
+{
+	Notify(pCmdData, pCell->GetAreaCol(), pCell->GetAreaRow(), nRange);
 }
 
 template<class TArea, class TAreaActor>
@@ -99,6 +104,42 @@ void CArea<TArea, TAreaActor>::Notify(const CmdData* pCmdData)
 	for(int x=0; x<m_nColCount; x++) {
 		for(int y=0; y<m_nRowCount; y++) {
 			m_pCells[y*m_nColCount+x].Notify(pData);
+		}
+	}
+}
+
+template<class TArea, class TAreaActor>
+void CArea<TArea, TAreaActor>::Passive(const CmdData* pCmdData, const Vector& vecPos, float fRange)
+{
+}
+
+template<class TArea, class TAreaActor>
+void CArea<TArea, TAreaActor>::Passive(const CmdData* pCmdData, int nCellX, int nCellY, int nRange)
+{
+	int x, y;
+	for(x=nCellX-nRange; x<=nCellX+nRange; x++) {
+		if(x<0 || x>=m_nColCount) continue;
+		for(y=nCellY-nRange; y<=nCellY+nRange; y++) {
+			if(y<0 || y>=m_nRowCount) continue;
+			CAreaCell<TArea, TAreaActor>* pCell;
+			pCell = GetCell(x, y);
+			pCell->Passive(pCmdData);
+		}
+	}
+}
+
+template<class TArea, class TAreaActor>
+void CArea<TArea, TAreaActor>::Passive(const CmdData* pCmdData, CAreaCell<TArea, TAreaActor>* pCell, int nRange)
+{
+	Passive(pCmdData, pCell->GetAreaCol(), pCell->GetAreaRow(), nRange);
+}
+
+template<class TArea, class TAreaActor>
+void CArea<TArea, TAreaActor>::Passive(const CmdData* pCmdData)
+{
+	for(int x=0; x<m_nColCount; x++) {
+		for(int y=0; y<m_nRowCount; y++) {
+			m_pCells[y*m_nColCount+x].Passive(pData);
 		}
 	}
 }
@@ -189,6 +230,29 @@ void CAreaCell<TArea, TAreaActor>::Notify(const CmdData* pCmdData)
 	for(int i=0; i<sizeof(m_Actors)/sizeof(m_Actors[0]); i++) {
 		if(m_Actors[i] && m_Actors[i]->GetActorId()!=pCmdData->nWho) {
 			m_Actors[i]->OnNotify(pCmdData);
+		}
+	}
+}
+
+template<class TArea, class TAreaActor>
+void CAreaCell<TArea, TAreaActor>::Passive(const Vector& vecPos, float fRange, const CmdData* pCmdData)
+{
+	for(int i=0; i<sizeof(m_Actors)/sizeof(m_Actors[0]); i++) {
+		if(m_Actors[i] && m_Actors[i]->GetActorId()!=pCmdData->nWho) {
+			float fDistance = AreaVectorDistance(m_Actors[i]->GetPosition(), vecPos);
+			if(fDistance<fRange) {
+				m_Actors[i]->OnPassive(pCmdData);
+			}
+		}
+	}
+}
+
+template<class TArea, class TAreaActor>
+void CAreaCell<TArea, TAreaActor>::Passive(const CmdData* pCmdData)
+{
+	for(int i=0; i<sizeof(m_Actors)/sizeof(m_Actors[0]); i++) {
+		if(m_Actors[i] && m_Actors[i]->GetActorId()!=pCmdData->nWho) {
+			m_Actors[i]->OnPassive(pCmdData);
 		}
 	}
 }
@@ -419,8 +483,8 @@ void CAreaActor<TArea, TAreaActor>::SendNotify(const CmdData* pCmdData, int nRan
 	assert(m_pArea);
 	assert(m_pAreaCell);
 
-	if(m_pAreaCell) {
-		m_pArea->Notify(pCmdData, m_pAreaCell->GetAreaCol(), m_pAreaCell->GetAreaRow(), nRange);
+	if(m_pArea && m_pAreaCell) {
+		m_pArea->Notify(pCmdData, m_pAreaCell, nRange);
 	}
 }
 
@@ -429,7 +493,30 @@ void CAreaActor<TArea, TAreaActor>::SendNotify(const CmdData* pCmdData, float fR
 {
 	assert(m_pArea);
 
-	m_pArea->Notify(pCmdData, m_vecPosition, fRange);
+	if(m_pArea) {
+		m_pArea->Notify(pCmdData, m_vecPosition, fRange);
+	}
+}
+
+template<class TArea, class TAreaActor>
+void CAreaActor<TArea, TAreaActor>::SendPassive(const CmdData* pCmdData, int nRange)
+{
+	assert(m_pArea);
+	assert(m_pAreaCell);
+
+	if(m_pArea && m_pAreaCell) {
+		m_pArea->Passive(pCmdData, m_pAreaCell, nRange);
+	}
+}
+
+template<class TArea, class TAreaActor>
+void CAreaActor<TArea, TAreaActor>::SendPassive(const CmdData* pCmdData, float fRange)
+{
+	assert(m_pArea);
+
+	if(m_pArea) {
+		m_pArea->Passive(pCmdData, m_vecPosition, fRange);
+	}
 }
 
 template<class TArea, class TAreaActor>

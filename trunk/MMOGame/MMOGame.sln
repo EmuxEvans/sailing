@@ -24,6 +24,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SGGame", "SGGame\SGGame.vcp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "xpdl", "xpdl\xpdl.vcproj", "{FE966E93-5FE9-4731-9795-2CE707069711}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SGClient", "SGClient\SGClient.vcproj", "{920C0775-ED40-4D90-BDED-CD0C7FCFC751}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -66,6 +68,10 @@ Global
 		{FE966E93-5FE9-4731-9795-2CE707069711}.Debug|Win32.Build.0 = Debug|Win32
 		{FE966E93-5FE9-4731-9795-2CE707069711}.Release|Win32.ActiveCfg = Release|Win32
 		{FE966E93-5FE9-4731-9795-2CE707069711}.Release|Win32.Build.0 = Release|Win32
+		{920C0775-ED40-4D90-BDED-CD0C7FCFC751}.Debug|Win32.ActiveCfg = Debug|Win32
+		{920C0775-ED40-4D90-BDED-CD0C7FCFC751}.Debug|Win32.Build.0 = Debug|Win32
+		{920C0775-ED40-4D90-BDED-CD0C7FCFC751}.Release|Win32.ActiveCfg = Release|Win32
+		{920C0775-ED40-4D90-BDED-CD0C7FCFC751}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

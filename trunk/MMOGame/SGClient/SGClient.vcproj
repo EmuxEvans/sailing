@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="SGGame"
-	ProjectGUID="{C6371335-04C3-42DF-9265-0EAA6F321DAF}"
-	RootNamespace="SGGame"
+	Name="SGClient"
+	ProjectGUID="{920C0775-ED40-4D90-BDED-CD0C7FCFC751}"
+	RootNamespace="SGClient"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
-			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="0"
 			>
@@ -41,8 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -61,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib rpcrt4.lib"
+				AdditionalDependencies="ws2_32.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -91,10 +90,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
-			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
-			CharacterSet="1"
+			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -116,8 +115,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -135,7 +133,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib rpcrt4.lib"
+				AdditionalDependencies="ws2_32.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -179,52 +177,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SG.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGArea.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGAreaActor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGBattleField.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGBuff.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGGameLoop.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGItem.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGPet.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGPlayer.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AssemblerOutput="0"
-						GenerateXMLDocumentationFiles="false"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\SGSkill.cpp"
+				RelativePath=".\SGClient.cpp"
 				>
 			</File>
 		</Filter>
@@ -234,51 +187,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\SG.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGArea.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGAreaActor.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGBattleField.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGBuff.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGCmdCode.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGGameLoop.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGItem.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGPet.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGPlayer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGSkill.h"
+				RelativePath=".\SGClient.h"
 				>
 			</File>
 		</Filter>

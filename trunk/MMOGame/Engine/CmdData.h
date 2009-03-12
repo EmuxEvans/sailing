@@ -9,7 +9,7 @@ typedef struct CmdData {
 
 class CDataReader {
 public:
-	CDataReader(const char* pBuf, unsigned int nSize);
+	CDataReader(const void* pBuf, unsigned int nSize);
 
 	void Reset();
 
@@ -164,8 +164,8 @@ void CCmdDataWriter<nSize>::Reset(unsigned int nCmd, unsigned int nWho)
 template<unsigned int nSize>
 const CmdData* CCmdDataWriter<nSize>::GetCmdData()
 {
-	m_CmdData.nSize = GetCurrent();
-	return m_CmdData;
+	m_CmdData.nSize = GetLength();
+	return &m_CmdData;
 }
 
 template<class T>
