@@ -68,7 +68,7 @@ TAreaActor* CArea<TArea, TAreaActor>::GetActor(unsigned int nActorId)
 {
 	std::map<unsigned int, TAreaActor*>::iterator i;
 	i = m_mapActors.find(nActorId);
-	if(i!=m_mapActors.end()) return NULL;
+	if(i==m_mapActors.end()) return NULL;
 	return i->second;
 }
 
@@ -147,10 +147,7 @@ void CArea<TArea, TAreaActor>::Passive(const CmdData* pCmdData)
 template<class TArea, class TAreaActor>
 bool CArea<TArea, TAreaActor>::InsertActor(TAreaActor* pActor)
 {
-	std::map<unsigned int, TAreaActor*>::iterator i;
-	i = m_mapActors.find(pActor->GetActorId());
-	assert(i==m_mapActors.end());
-	if(i!=m_mapActors.end()) return false;
+	assert(m_mapActors.find(pActor->GetActorId())==m_mapActors.end());
 	m_mapActors[pActor->GetActorId()] = pActor;
 	return true;
 }
@@ -300,6 +297,17 @@ template<class TArea, class TAreaActor>
 CAreaActor<TArea, TAreaActor>::CAreaActor(unsigned int nActorId)
 {
 	m_nActorId = nActorId;
+	m_pArea = NULL;
+	m_pAreaCell = NULL;
+	m_vecPosition.x = 0.0f;
+	m_vecPosition.y = 0.0f;
+	m_vecPosition.z = 0.0f;
+	m_fDirection = 0.0f;
+	m_vecDestination.x = 0.0f;
+	m_vecDestination.y = 0.0f;
+	m_vecDestination.z = 0.0f;
+	m_fVelocity = 0;
+	m_nWalkTime = 0;
 }
 
 template<class TArea, class TAreaActor>
@@ -353,14 +361,6 @@ void CAreaActor<TArea, TAreaActor>::SetPosition(const Vector& vecPosition, float
 	pOrignCell = m_pAreaCell;
 
 	if(pOrignCell!=pCell) {
-		m_pAreaCell = pCell;
-		if(pOrignCell) {
-			pOrignCell->RemoveActor((TAreaActor*)this);
-		}
-		if(pCell) {
-			pCell->InsertActor((TAreaActor*)this);
-		}
-
 		ChangeCell(pOrignCell, pCell);
 	}
 }
@@ -369,12 +369,7 @@ template<class TArea, class TAreaActor>
 void CAreaActor<TArea, TAreaActor>::SetPositionNULL()
 {
 	if(m_pAreaCell) {
-		CAreaCell<TArea, TAreaActor>* pCell;
-		pCell = m_pAreaCell;
-		m_pAreaCell = NULL;
-		pCell->RemoveActor((TAreaActor*)this);
-
-		ChangeCell(pCell, NULL);
+		ChangeCell(m_pAreaCell, NULL);
 	}
 }
 
@@ -399,10 +394,15 @@ template<class TArea, class TAreaActor>
 void CAreaActor<TArea, TAreaActor>::ChangeCell(CAreaCell<TArea, TAreaActor>* pOrignCell, CAreaCell<TArea, TAreaActor>* pCell)
 {
 	int x, y, l;
-	CmdData cmdJoin = { CMDCODE_MOVE_JOIN, GetActorId(), NULL, 0 };
 	CmdData cmdLeave = { CMDCODE_MOVE_LEAVE, GetActorId(), NULL, 0 };
+	CmdData cmdJoin = { CMDCODE_MOVE_JOIN, GetActorId(), NULL, 0 };
+
+	m_pAreaCell = pCell;
+	if(pOrignCell) pOrignCell->RemoveActor((TAreaActor*)this);
+	if(pCell) pCell->InsertActor((TAreaActor*)this);
 
 	if(pOrignCell) {
+
 		for(x=pOrignCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE; x<=pOrignCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE; x++) {
 			if(x<0 || x>=GetArea()->AreaColCount()) continue;
 			for(y=pOrignCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE; y<=pOrignCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE; y++) {
@@ -445,6 +445,7 @@ void CAreaActor<TArea, TAreaActor>::ChangeCell(CAreaCell<TArea, TAreaActor>* pOr
 
 				for(l=0; l<GetAreaCell()->GetActorIndexMax(); l++) {
 					if(!GetAreaCell()->GetActorByIndex(l)) continue;
+					if(GetAreaCell()->GetActorByIndex(l)->GetActorId()==GetActorId()) continue;
 					CmdData cmd = { CMDCODE_MOVE_JOIN, GetAreaCell()->GetActorByIndex(l)->GetActorId(), NULL, 0 };
 					OnNotify(&cmd);
 				}

@@ -3,7 +3,7 @@
 typedef struct CmdData {
 	unsigned int nCmd;
 	unsigned int nWho;
-	const void* pData;
+	void* pData;
 	unsigned int nSize;
 } CmdData;
 
@@ -17,7 +17,7 @@ public:
 	bool GetValue(T& Value, T Min=0, T Max=0);
 	template<class T>
 	T GetValue();
-	bool GetString(const char*& pValue, unsigned int nMaxLen=0);
+	bool GetString(const char*& pValue, unsigned int nMaxLen=0xffff);
 	template<class T>
 	bool GetStruct(const T*& Value);
 	const char* GetString(unsigned int nMaxLen=0);

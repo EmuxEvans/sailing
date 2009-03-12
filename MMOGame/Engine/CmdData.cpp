@@ -1,4 +1,5 @@
 #include <string.h>
+#include <assert.h>
 
 #include "CmdData.h"
 
@@ -18,9 +19,9 @@ bool CDataReader::GetString(const char*& pValue, unsigned int nMaxLen)
 {
 	unsigned int n;
 	for(n=0; n<=nMaxLen && m_nCurrent+n<m_nSize; n++) {
-		if(*(m_pBuf + m_nCurrent)=='\0') {
+		if(*(m_pBuf + m_nCurrent + n)=='\0') {
 			pValue = m_pBuf + m_nCurrent;
-			m_nCurrent += n;
+			m_nCurrent += n + 1;
 			return true;
 		}
 	}
@@ -53,10 +54,11 @@ unsigned int CDataWriter::GetLength()
 
 bool CDataWriter::PutString(const char* pValue)
 {
-	unsigned int n = (unsigned int)strlen(pValue);
-	if(m_nCurrent+n+1<m_nSize) return false;
-	memcpy(m_pBuf+m_nCurrent, pValue, n+1);
-	m_nCurrent += n + 1;
+	unsigned int n = (unsigned int)strlen(pValue)+1;
+	assert(m_nCurrent+n<=m_nSize);
+	if(m_nCurrent+n>m_nSize) return false;
+	memcpy(m_pBuf+m_nCurrent, pValue, n);
+	m_nCurrent += n;
 	return true;
 }
 
