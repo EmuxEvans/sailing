@@ -80,6 +80,11 @@ CSGGameLoopCallback::~CSGGameLoopCallback()
 
 void UserDisconnect(unsigned int nSeq);
 
+CGameConnection* CSGGameLoopCallback::CreateConnection(unsigned int nUserId, IGameFES* pFES, unsigned int nFESSeq)
+{
+	return NULL;
+}
+
 void CSGGameLoopCallback::Process(const CmdData* pCmdData)
 {
 	if(pCmdData->nCmd==SGCMDCODE_CONNECT) {
