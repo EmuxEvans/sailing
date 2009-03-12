@@ -1,6 +1,7 @@
 #include <string.h>
 #include <assert.h>
 #include <map>
+#include <string>
 
 #include "..\Engine\Game.h"
 
@@ -79,7 +80,7 @@ bool CSGPlayerTeam::Leave(CSGPlayer* pPlayer)
 	return true;
 }
 
-void CSGPlayerTeam::OnData(const CmdData* pCmdData)
+void CSGPlayerTeam::OnData(CSGPlayer* pPlayer, const void* pData, unsigned int nSize)
 {
 }
 
@@ -96,24 +97,43 @@ void CSGPlayerTeam::SyncData()
 	buf.PutValue<unsigned int>(0);
 }
 
-CSGPlayer::CSGPlayer(IGameFES* pFES, unsigned int nPlayerId, FESClientData& ClientData) : CSGRole(SGACTORTYPE_PLAYER)
+CSGPlayer::CSGPlayer(CSGConnection* pConnection, unsigned int nPlayerId) : CSGRole(SGACTORTYPE_PLAYER)
 {
-	m_pFES = pFES;
+	m_pConnection = pConnection;
 	m_nPlayerId = nPlayerId;
-	memcpy(&m_ClientData, &ClientData, sizeof(ClientData));
+	sprintf(m_szName, "USER-%d", m_nPlayerId);
 	m_pBattleField = NULL;
 	m_pPlayerTeam = NULL;
 	m_pPet = NULL;
 	memset(m_Equip, 0, sizeof(m_Equip));
 	memset(m_Bag, 0, sizeof(m_Bag));
 	memset(m_Warehouse, 0, sizeof(m_Warehouse));
+
+	m_pConnection->GetCallback()->OnPlayerAttach(GetPlayerId(), m_szName, this);
 }
 
 CSGPlayer::~CSGPlayer()
 {
+	m_pConnection->GetCallback()->OnPlayerDetach(GetPlayerId(), m_szName, this);
+
 	assert(!m_pBattleField);
 	assert(!m_pPlayerTeam);
 	assert(!m_pPet);
+}
+
+bool CSGPlayer::InitPlayer()
+{
+	SetArea(GetConnection()->GetCallback()->GetArea(0));
+	Vector p(10.0f, 10.0f, 0.0f);
+	SetPosition(p, 0.0f);
+	return true;
+}
+
+bool CSGPlayer::QuitPlayer()
+{
+	SetPositionNULL();
+	SetArea(NULL);
+	return true;
 }
 
 bool CSGPlayer::GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData)
@@ -218,6 +238,7 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 		}
 
 		// send buf to client
+		GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
 		return;
 	}
 	if(pCmdData->nCmd==CMDCODE_MOVE_LEAVE) {
@@ -229,49 +250,54 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 		CDataBuffer<100> buf;
 		buf.PutValue<unsigned short>(SGCMDCODE_MOVE_LEAVE);
 		buf.PutValue(pCmdData->nWho);
+
 		// send buf to client
+		GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
+		return;
+	}
+
+	if(pCmdData->nCmd==SGCMDCODE_MAPCHAT_SAY || pCmdData->nCmd==SGCMDCODE_MAPCHAT_MSAY) {
+		CCmdDataReader cmd(pCmdData);
+		CDataBuffer<100> buf;
+		buf.PutValue<unsigned short>(pCmdData->nCmd);
+		buf.PutString(cmd.GetValue<const char*>());
+		buf.PutString(cmd.GetValue<const char*>());
+		// send buf to client
+		GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
 		return;
 	}
 }
 
 void CSGPlayer::OnAction(const CmdData* pCmdData)
 {
+	CCmdDataReader cmd(pCmdData);
+
 	if(pCmdData->nCmd==SGCMDCODE_MOVE) {
-		CCmdDataReader cmd(pCmdData);
 		Vector s(cmd.GetValue<float>(), cmd.GetValue<float>(), cmd.GetValue<float>());
 		Vector e(cmd.GetValue<float>(), cmd.GetValue<float>(), cmd.GetValue<float>());
 		Move(&s, &e, cmd.GetValue<unsigned int>());
 		GetArea()->Notify(pCmdData, GetAreaCell()->GetAreaCol(), GetAreaCell()->GetAreaRow());
 		return;
 	}
+	if(pCmdData->nCmd==SGCMDCODE_MAPCHAT_SAY) {
+		CCmdDataWriter<100> out(SGCMDCODE_MAPCHAT_SAY, GetActorId());
+		out.PutValue(GetName());
+		out.PutValue(cmd.GetString());
+		GetArea()->Notify(out.GetCmdData(), GetAreaCell());
+		return;
+	}
+	if(pCmdData->nCmd==SGCMDCODE_MAPCHAT_MSAY) {
+		CSGPlayer* pPlayer = GetConnection()->GetCallback()->GetPlayer(cmd.GetString());
+		CCmdDataWriter<100> out(SGCMDCODE_MAPCHAT_MSAY, GetActorId());
+		if(pPlayer) {
+			out.PutValue(GetName());
+			out.PutValue(cmd.GetString());
+			pPlayer->OnNotify(out.GetCmdData());
+		}
+		return;
+	}
 }
 
-void CSGPlayer::OnPassive(CSGAreaActor* pWho, const CmdData* pCmdData)
+void CSGPlayer::OnPassive(const CmdData* pCmdData)
 {
-}
-
-void CSGPlayer::Process(const CmdData* pCmdData)
-{
-	if(pCmdData->nCmd==SGCMDCODE_CONNECT) {
-		SetArea(CSGGameLoopCallback::GetSingleton()->GetArea(0));
-		return;
-	}
-	if(pCmdData->nCmd==SGCMDCODE_DISCONNECT) {
-		SetArea(NULL);
-		return;
-	}
-	if(pCmdData->nCmd==SGCMDCODE_USERDATA) {
-		unsigned short nEvent;
-
-		if(pCmdData->nSize<sizeof(nEvent)) return;
-		nEvent = *((unsigned short*)pCmdData->pData);
-
-		CmdData CmdData;
-		CmdData.nCmd = SGCMDCODE_MOVE;
-		CmdData.nWho = GetActorId();
-		CmdData.pData = (char*)pCmdData->pData + sizeof(nEvent);
-		CmdData.nSize = pCmdData->nSize - sizeof(nEvent);
-		OnAction(&CmdData);
-		return;
-	}
 }

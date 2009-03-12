@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <winsock2.h>
 #include <map>
+#include <string>
 
 #include "..\Engine\asockio.h"
 #include "..\Engine\Game.h"
@@ -9,8 +10,8 @@
 #include "SG.h"
 #include "SGGameLoop.h"
 
-BOOL InitTCPServer(unsigned short nPort);
-BOOL FinalTCPServer();
+static BOOL InitTCPServer(unsigned short nPort);
+static BOOL FinalTCPServer();
 static IGameLoop* pLoop = NULL;
 
 int main(int argc, char* argv[])

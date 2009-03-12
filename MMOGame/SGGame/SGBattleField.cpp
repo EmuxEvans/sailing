@@ -1,6 +1,7 @@
 #include <string.h>
 #include <assert.h>
 #include <map>
+#include <string>
 
 #include "..\Engine\Game.h"
 
@@ -36,6 +37,11 @@ public:
 	virtual CSGRole* GetRole(unsigned int nActorId);
 
 	virtual bool GetViewData(CSGPlayer* pPlayer, SGBATTLEFIELD_VIEWDATA* pData);
+
+	virtual void Notify(const CmdData* pCmdData);
+	virtual void Notify(int nTeam, const CmdData* pCmdData);
+	virtual void Passive(const CmdData* pCmdData);
+	virtual void Passive(int nTeam, const CmdData* pCmdData);
 
 private:
 	CSGRole* m_Roles[10];
@@ -87,4 +93,62 @@ CSGRole* CSGBattleFieldImpl::GetRole(unsigned int nActorId)
 bool CSGBattleFieldImpl::GetViewData(CSGPlayer* pPlayer, SGBATTLEFIELD_VIEWDATA* pData)
 {
 	return false;
+}
+
+void CSGBattleFieldImpl::Notify(const CmdData* pCmdData)
+{
+	for(int l=0; l<sizeof(m_Roles)/sizeof(m_Roles[0]); l++) {
+		if(m_Roles[l]) {
+			m_Roles[l]->OnNotify(pCmdData);
+		}
+	}
+}
+
+void CSGBattleFieldImpl::Notify(int nTeam, const CmdData* pCmdData)
+{
+	if(nTeam==SGBATTLEFIELD_TEAM_RED) {
+		for(int l=0; l<sizeof(m_Roles)/sizeof(m_Roles[0])/2; l++) {
+			if(m_Roles[l]) {
+				m_Roles[l]->OnNotify(pCmdData);
+			}
+		}
+		return;
+	}
+	if(nTeam==SGBATTLEFIELD_TEAM_BLUE) {
+		for(int l=sizeof(m_Roles)/sizeof(m_Roles[0])/2; l<sizeof(m_Roles)/sizeof(m_Roles[0]); l++) {
+			if(m_Roles[l]) {
+				m_Roles[l]->OnNotify(pCmdData);
+			}
+		}
+		return;
+	}
+}
+
+void CSGBattleFieldImpl::Passive(const CmdData* pCmdData)
+{
+	for(int l=0; l<sizeof(m_Roles)/sizeof(m_Roles[0]); l++) {
+		if(m_Roles[l]) {
+			m_Roles[l]->OnPassive(pCmdData);
+		}
+	}
+}
+
+void CSGBattleFieldImpl::Passive(int nTeam, const CmdData* pCmdData)
+{
+	if(nTeam==SGBATTLEFIELD_TEAM_RED) {
+		for(int l=0; l<sizeof(m_Roles)/sizeof(m_Roles[0])/2; l++) {
+			if(m_Roles[l]) {
+				m_Roles[l]->OnPassive(pCmdData);
+			}
+		}
+		return;
+	}
+	if(nTeam==SGBATTLEFIELD_TEAM_BLUE) {
+		for(int l=sizeof(m_Roles)/sizeof(m_Roles[0])/2; l<sizeof(m_Roles)/sizeof(m_Roles[0]); l++) {
+			if(m_Roles[l]) {
+				m_Roles[l]->OnPassive(pCmdData);
+			}
+		}
+		return;
+	}
 }

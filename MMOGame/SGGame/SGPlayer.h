@@ -8,6 +8,7 @@ class CSGBattleField;
 class CSGPlayerTeam;
 class CSGPlayer;
 class CSGPet;
+class CSGConnection;
 
 class CSGPlayerTeam
 {
@@ -20,7 +21,7 @@ public:
 	bool Join(CSGPlayer* pPlayer);
 	bool Leave(CSGPlayer* pPlayer);
 
-	void OnData(const CmdData* pCmdData);
+	void OnData(CSGPlayer* pPlayer, const void* pData, unsigned int nSize);
 	void SyncData();
 
 private:
@@ -32,14 +33,18 @@ class CSGPlayer : public CSGRole
 {
 	friend class CSGPet;
 public:
-	CSGPlayer(IGameFES* pFES, unsigned int nPlayerId, FESClientData& ClientData);
+	CSGPlayer(CSGConnection* pConnection, unsigned int nPlayerId);
 	virtual ~CSGPlayer();
+
+	CSGConnection* GetConnection() {
+		return m_pConnection;
+	}
 
 	unsigned int GetPlayerId() const {
 		return m_nPlayerId;
 	}
-	const FESClientData& GetFESClientData() const {
-		return m_ClientData;
+	const char* GetName() const {
+		return m_szName;
 	}
 	CSGBattleField* GetBattleField() {
 		return m_pBattleField;
@@ -51,6 +56,9 @@ public:
 		return m_pPet;
 	}
 
+	bool InitPlayer();
+	bool QuitPlayer();
+
 	bool GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData);
 
 	bool DropItem(int nIndex);
@@ -58,9 +66,7 @@ public:
 
 	virtual void OnNotify(const CmdData* pCmdData);
 	virtual void OnAction(const CmdData* pCmdData);
-	virtual void OnPassive(CSGAreaActor* pWho, const CmdData* pCmdData);
-
-	void Process(const CmdData* pCmdData);
+	virtual void OnPassive(const CmdData* pCmdData);
 
 protected:
 	void OnPetAttach(CSGPet* pPet) {
@@ -73,9 +79,9 @@ protected:
 	}
 
 private:
-	IGameFES* m_pFES;
+	CSGConnection* m_pConnection;
 	unsigned int m_nPlayerId;
-	FESClientData m_ClientData;
+	char m_szName[100];
 
 	CSGBattleField* m_pBattleField;
 	CSGPlayerTeam* m_pPlayerTeam;

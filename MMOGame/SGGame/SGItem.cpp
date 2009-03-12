@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <map>
+#include <string>
 
 #include "..\Engine\Game.h"
 
