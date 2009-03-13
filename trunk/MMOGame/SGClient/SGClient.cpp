@@ -53,7 +53,7 @@ void CSGClient::Release()
 
 bool CSGClient::Available()
 {
-	return true;
+	return m_hSock!=SOCK_INVALID_HANDLE;
 }
 
 bool CSGClient::Connect(const char* pAddr)
@@ -64,6 +64,8 @@ bool CSGClient::Connect(const char* pAddr)
 	if(!sock_str2addr(pAddr, &sa)) return false;
 	m_hSock = sock_connect(&sa, 0);
 	if(m_hSock==SOCK_INVALID_HANDLE) return false;
+
+	m_pCallback->OnConnect();
 
 	return true;
 }
@@ -81,6 +83,7 @@ bool CSGClient::SendData(const void* pData, unsigned int nSize)
 void CSGClient::Disconnect()
 {
 	if(m_hSock!=SOCK_INVALID_HANDLE) {
+		m_pCallback->OnDisconnect();
 		sock_disconnect(m_hSock);
 		sock_close(m_hSock);
 		m_hSock = SOCK_INVALID_HANDLE;
@@ -92,11 +95,22 @@ bool CSGClient::Wait()
 	int ret;
 	unsigned int nSize;
 	char szBuf[10*1024];
+
+	if(sock_wait_read(m_hSock, 10)==ERR_TIMEOUT) {
+		return true;
+	}
+
 	nSize = 0;
 	ret = sock_readbuf(m_hSock, &nSize, sizeof(unsigned short));
-	if(ret!=0) return false;
+	if(ret!=0) {
+		Disconnect();
+		return false;
+	}
 	ret = sock_readbuf(m_hSock, szBuf, nSize);
-	if(ret!=0) return false;
+	if(ret!=0) {
+		Disconnect();
+		return false;
+	}
 	m_pCallback->OnData(szBuf, nSize);
 	return true;
 }

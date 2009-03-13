@@ -1,65 +1,67 @@
-#include <iostream>
-#include <assert.h>
+// SGClient.cpp : main source file for SGClient.exe
+//
+
+#include "stdafx.h"
+
+#include "resource.h"
+
 #include "SGClient.h"
+#include "SGCmdBuilder.h"
+#include "MainView.h"
+#include "MainFrm.h"
 
-#include <skates/errcode.h>
-#include <skates/os.h>
-#include <skates/sock.h>
+CAppModule _Module;
 
-#include "..\Engine\CmdData.h"
-#include "..\SGGame\SGCmdCode.h"
-#include "SGClient.h"
-
-class CSGClientCallback : public ISGClientCallback
+int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 {
-public:
-	CSGClientCallback();
-	virtual ~CSGClientCallback();
+	CMessageLoop theLoop;
+	_Module.AddMessageLoop(&theLoop);
 
-	virtual void OnConnect();
-	virtual void OnData(const void* pData, unsigned int nSize);
-	virtual void OnDisconnect();
-};
+	CMainFrame wndMain;
 
-int main(int argc, char* argv[])
-{
-	CSGClientCallback SGCallback;
-	sock_init();
-	ISGClient* pClient = CreateSGClient(&SGCallback, false);
-
-	pClient->Connect("127.0.0.1:1980");
-	pClient->Wait();
+	if(wndMain.CreateEx() == NULL)
 	{
-		CDataBuffer<100> buf;
-		buf.PutValue<unsigned short>(SGCMDCODE_LOGIN);
-		buf.PutValue<unsigned int>(1999);
-		buf.PutString("password");
-		pClient->SendData(buf.GetBuffer(), buf.GetLength());
+		ATLTRACE(_T("Main window creation failed!\n"));
+		return 0;
 	}
-	pClient->Wait();
 
-	pClient->Release();
-	sock_final();
-	return 0;
+	wndMain.ShowWindow(nCmdShow);
+
+	int nRet = theLoop.Run();
+
+	_Module.RemoveMessageLoop();
+	return nRet;
 }
 
-
-CSGClientCallback::CSGClientCallback()
+int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow)
 {
+	HRESULT hRes = ::CoInitialize(NULL);
+// If you are running on NT 4.0 or higher you can use the following call instead to 
+// make the EXE free threaded. This means that calls come in on a random RPC thread.
+//	HRESULT hRes = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	ATLASSERT(SUCCEEDED(hRes));
+	WSADATA wsaData;
+	WSAStartup(MAKEWORD(2,2), &wsaData);
+
+	// this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
+	::DefWindowProc(NULL, 0, 0, 0L);
+
+	AtlInitCommonControls(ICC_COOL_CLASSES | ICC_BAR_CLASSES);	// add flags to support other controls
+
+	hRes = _Module.Init(NULL, hInstance);
+	ATLASSERT(SUCCEEDED(hRes));
+
+	int nRet = Run(lpstrCmdLine, nCmdShow);
+
+	_Module.Term();
+	WSACleanup();
+	::CoUninitialize();
+
+	return nRet;
 }
 
-CSGClientCallback::~CSGClientCallback()
-{
-}
-
-void CSGClientCallback::OnConnect()
-{
-}
-
-void CSGClientCallback::OnData(const void* pData, unsigned int nSize)
-{
-}
-
-void CSGClientCallback::OnDisconnect()
-{
-}
+#include "..\..\framework_dep\WTL\Controls\DockImpl.cpp"
+#include "..\..\framework_dep\WTL\Controls\DialogItemTemplate.cpp"
+#include "..\..\framework_dep\WTL\Controls\DialogTemplate.cpp"
+#include "..\..\framework_dep\WTL\Controls\DialogLayout.cpp"
+#include "..\..\framework_dep\WTL\Controls\Draw.cpp"

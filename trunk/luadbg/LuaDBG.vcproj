@@ -50,7 +50,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="include;..\framework_dep\wtl\include;..\framework\inc"
+				AdditionalIncludeDirectories="..\framework_dep\WTL\Controls;..\framework_dep\WTL\include;..\framework\inc"
 				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG;PLAT_WIN;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -137,7 +137,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="include;..\framework_dep\wtl\include;..\framework\inc"
+				AdditionalIncludeDirectories="..\framework_dep\WTL\Controls;..\framework_dep\WTL\include;..\framework\inc"
 				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG;PLAT_WIN;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -477,6 +477,22 @@
 			<File
 				RelativePath=".\include\Draw.cpp"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\include\Draw.h"

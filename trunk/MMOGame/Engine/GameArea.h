@@ -98,7 +98,7 @@ public:
 	void SetPosition(const Vector& vecPosition, float fDirection);
 	void SetPositionNULL();
 	void Move(const Vector* pStart, const Vector* pEnd, unsigned int nTime);
-	void ChangeCell(CAreaCell<TArea, TAreaActor>* pOrignCell, CAreaCell<TArea, TAreaActor>* pCell);
+	void ChangeCell(CAreaCell<TArea, TAreaActor>* pFromCell, CAreaCell<TArea, TAreaActor>* pToCell);
 
 	const Vector& GetPosition() const;
 	float GetDirection() const;

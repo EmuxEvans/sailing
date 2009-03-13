@@ -27,11 +27,13 @@ CSGConnection::CSGConnection(CSGGameLoopCallback* pCallback, unsigned int nUserI
 	m_pFES = pFES;
 	m_nFESSeq = nFESSeq;
 	m_pPlayer = NULL;
+	m_pCallback->OnConnectionAttach(m_nUserId, this);
 }
 
 CSGConnection::~CSGConnection()
 {
-	assert(m_pPlayer);
+	m_pCallback->OnConnectionDetach(m_nUserId, this);
+	assert(!m_pPlayer);
 }
 
 void CSGConnection::Release()
@@ -173,7 +175,7 @@ void CSGGameLoopCallback::Process(const CmdData* pCmdData)
 		if(!pFES) return; */
 		cmd.GetValue<unsigned int>();
 		cmd.GetValue<unsigned short>();
-		pConnection = CreateConnection(pCmdData->nCmd, pFES, cmd.GetValue<unsigned int>());
+		pConnection = CreateConnection(pCmdData->nWho, pFES, cmd.GetValue<unsigned int>());
 		assert(pConnection);
 		if(!pConnection) return;
 		pConnection->OnConnect();

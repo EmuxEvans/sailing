@@ -11,6 +11,7 @@ public:
 
 	BEGIN_MSG_MAP(CCommandDlg)
 		MSG_WM_INITDIALOG(OnInitDialog)
+		COMMAND_ID_HANDLER(IDOK, OnRunCommand)
 		COMMAND_ID_HANDLER(IDC_RUNCMD, OnRunCommand)
 		COMMAND_ID_HANDLER(IDC_CLRLOG, OnClearLog)
 		CHAIN_MSG_MAP(CDialogLayout<CCommandDlg>)

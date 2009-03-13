@@ -76,7 +76,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	return nRet;
 }
 
-#include "include\DockImpl.cpp"
-#include "include\DialogItemTemplate.cpp"
-#include "include\DialogTemplate.cpp"
-#include "include\DialogLayout.cpp"
+#include "..\framework_dep\WTL\Controls\DockImpl.cpp"
+#include "..\framework_dep\WTL\Controls\DialogItemTemplate.cpp"
+#include "..\framework_dep\WTL\Controls\DialogTemplate.cpp"
+#include "..\framework_dep\WTL\Controls\DialogLayout.cpp"
+#include "..\framework_dep\WTL\Controls\Draw.cpp"
