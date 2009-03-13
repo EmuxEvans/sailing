@@ -128,10 +128,12 @@ public:
 
 				{
 					unsigned int nUserId;
+					const char* pUserName;
 					const char* pPassword;
 					CDataReader buf(m_DataBuf+sizeof(len)+sizeof(code), len-sizeof(code));
-					buf.GetValue(nUserId);
+					buf.GetString(pUserName);
 					buf.GetString(pPassword);
+					nUserId = (unsigned int)atoi(pUserName);
 					int ret = -1;
 					if(strcmp(pPassword, "password")==0) {
 						ret = 0;
@@ -158,7 +160,7 @@ public:
 		}
 	}
 	void OnDisconnect() {
-		if(m_bActive && !m_nUserId) {
+		if(m_bActive && m_nUserId) {
 			pLoop->PushMsg(SGCMDCODE_DISCONNECT, m_nUserId, NULL, 0);
 		}
 

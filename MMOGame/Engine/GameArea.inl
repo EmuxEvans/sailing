@@ -175,6 +175,7 @@ void CArea<TArea, TAreaActor>::Tick(unsigned int nCurTime, unsigned int nDelta)
 template<class TArea, class TAreaActor>
 CAreaCell<TArea, TAreaActor>::CAreaCell()
 {
+	memset(m_Actors, 0, sizeof(m_Actors));
 }
 
 template<class TArea, class TAreaActor>
@@ -368,7 +369,7 @@ void CAreaActor<TArea, TAreaActor>::SetPosition(const Vector& vecPosition, float
 template<class TArea, class TAreaActor>
 void CAreaActor<TArea, TAreaActor>::SetPositionNULL()
 {
-	if(m_pAreaCell) {
+	if(m_pArea && m_pAreaCell) {
 		ChangeCell(m_pAreaCell, NULL);
 	}
 }
@@ -391,62 +392,68 @@ void CAreaActor<TArea, TAreaActor>::Move(const Vector* pStart, const Vector* pEn
 }
 
 template<class TArea, class TAreaActor>
-void CAreaActor<TArea, TAreaActor>::ChangeCell(CAreaCell<TArea, TAreaActor>* pOrignCell, CAreaCell<TArea, TAreaActor>* pCell)
+void CAreaActor<TArea, TAreaActor>::ChangeCell(CAreaCell<TArea, TAreaActor>* pFromCell, CAreaCell<TArea, TAreaActor>* pToCell)
 {
 	int x, y, l;
 	CmdData cmdLeave = { CMDCODE_MOVE_LEAVE, GetActorId(), NULL, 0 };
 	CmdData cmdJoin = { CMDCODE_MOVE_JOIN, GetActorId(), NULL, 0 };
 
-	m_pAreaCell = pCell;
-	if(pOrignCell) pOrignCell->RemoveActor((TAreaActor*)this);
-	if(pCell) pCell->InsertActor((TAreaActor*)this);
+	m_pAreaCell = pToCell;
+	if(pFromCell) pFromCell->RemoveActor((TAreaActor*)this);
+	if(pToCell) pToCell->InsertActor((TAreaActor*)this);
 
-	if(pOrignCell) {
+	if(pFromCell) {
 
-		for(x=pOrignCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE; x<=pOrignCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE; x++) {
+		for(x=pFromCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE; x<=pFromCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE; x++) {
 			if(x<0 || x>=GetArea()->AreaColCount()) continue;
-			for(y=pOrignCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE; y<=pOrignCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE; y++) {
+			for(y=pFromCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE; y<=pFromCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE; y++) {
 				if(y<0 || y>=GetArea()->AreaRowCount()) continue;
 
-				if(pCell) {
-					if(x>=pCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE && x<=pCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE) {
-					if(y>=pCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE && y<=pCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE) {
+				if(pToCell) {
+					if(x>=pToCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE && x<=pToCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE) {
+					if(y>=pToCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE && y<=pToCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE) {
 						continue;
 					}
 					}
 				}
 
-				GetArea()->GetCell(x, y)->Notify(&cmdLeave);
+				CAreaCell<TArea, TAreaActor>* pCell;
+				pCell = GetArea()->GetCell(x, y);
+				
+				pCell->Notify(&cmdLeave);
 
-				for(l=0; l<GetAreaCell()->GetActorIndexMax(); l++) {
-					if(!GetAreaCell()->GetActorByIndex(l)) continue;
-					CmdData cmd = { CMDCODE_MOVE_LEAVE, GetAreaCell()->GetActorByIndex(l)->GetActorId(), NULL, 0 };
+				for(l=0; l<pCell->GetActorIndexMax(); l++) {
+					if(!pCell->GetActorByIndex(l)) continue;
+					CmdData cmd = { CMDCODE_MOVE_LEAVE, pCell->GetActorByIndex(l)->GetActorId(), NULL, 0 };
 					OnNotify(&cmd);
 				}
 			}
 		}
 	}
 
-	if(pCell) {
-		for(x=pCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE; x<=pCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE; x++) {
+	if(pToCell) {
+		for(x=pToCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE; x<=pToCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE; x++) {
 			if(x<0 || x>=GetArea()->AreaColCount()) continue;
-			for(y=pCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE; y<=pCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE; y++) {
+			for(y=pToCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE; y<=pToCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE; y++) {
 				if(y<0 || y>=GetArea()->AreaRowCount()) continue;
 
-				if(pOrignCell) {
-					if(x>=pOrignCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE && x<=pOrignCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE) {
-					if(y>=pOrignCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE && y<=pOrignCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE) {
+				if(pFromCell) {
+					if(x>=pFromCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE && x<=pFromCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE) {
+					if(y>=pFromCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE && y<=pFromCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE) {
 						continue;
 					}
 					}
 				}
 
-				GetArea()->GetCell(x, y)->Notify(&cmdJoin);
+				CAreaCell<TArea, TAreaActor>* pCell;
+				pCell = GetArea()->GetCell(x, y);
+				
+				pCell->Notify(&cmdJoin);
 
-				for(l=0; l<GetAreaCell()->GetActorIndexMax(); l++) {
-					if(!GetAreaCell()->GetActorByIndex(l)) continue;
-					if(GetAreaCell()->GetActorByIndex(l)->GetActorId()==GetActorId()) continue;
-					CmdData cmd = { CMDCODE_MOVE_JOIN, GetAreaCell()->GetActorByIndex(l)->GetActorId(), NULL, 0 };
+				for(l=0; l<pCell->GetActorIndexMax(); l++) {
+					if(!pCell->GetActorByIndex(l)) continue;
+					if(pCell->GetActorByIndex(l)->GetActorId()==GetActorId()) continue;
+					CmdData cmd = { CMDCODE_MOVE_JOIN, pCell->GetActorByIndex(l)->GetActorId(), NULL, 0 };
 					OnNotify(&cmd);
 				}
 			}
