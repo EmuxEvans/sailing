@@ -1,26 +1,31 @@
 #include "StdAfx.h"
 #include "SGCmdBuilder.h"
+
 #include "..\Engine\CmdData.h"
+#include "..\SGGame\SGCmdCode.h"
 
-CSGCmdBuilder::CSGCmdBuilder()
-{
-}
-
-CSGCmdBuilder::~CSGCmdBuilder()
-{
-}
-
-void CSGCmdBuilder::PushCmd(const char* name, unsigned short code)
+void CSGCmdSet::PushCmd(const char* name, unsigned short code)
 {
 	m_Cmds.push_back(CmdInfo(name, code));
 }
 
-void CSGCmdBuilder::PushArg(const char* name, int type)
+void CSGCmdSet::PushArg(const char* name, int type)
 {
 	m_Cmds[m_Cmds.size()-1].m_Args.push_back(CmdArg(name, type));
 }
 
-const CmdInfo* CSGCmdBuilder::GetCmd(const char* name)
+const CmdInfo* CSGCmdSet::GetCmd(int nIndex)
+{
+	if(nIndex<0 && nIndex>=(int)m_Cmds.size()) return NULL;
+	return &m_Cmds[nIndex];
+}
+
+int CSGCmdSet::GetCmdCount()
+{
+	return m_Cmds.size();
+}
+
+const CmdInfo* CSGCmdSet::GetCmd(const char* name)
 {
 	for(size_t l=0; l<m_Cmds.size(); l++) {
 		if(m_Cmds[l].m_Name==name) {
@@ -30,15 +35,33 @@ const CmdInfo* CSGCmdBuilder::GetCmd(const char* name)
 	return NULL;
 }
 
-const CmdInfo* CSGCmdBuilder::GetCmd(int nIndex)
+CSGClientCmdSet::CSGClientCmdSet()
 {
-	if(nIndex<0 && nIndex>=(int)m_Cmds.size()) return NULL;
-	return &m_Cmds[nIndex];
+	PushCmd("login", SGCMDCODE_LOGIN);
+	PushArg("username", CMDARG_TYPE_STRING);
+	PushArg("password", CMDARG_TYPE_STRING);
+
+	PushCmd("move", SGCMDCODE_MOVE);
+	PushArg("sx", CMDARG_TYPE_FLOAT);
+	PushArg("sy", CMDARG_TYPE_FLOAT);
+	PushArg("sz", CMDARG_TYPE_FLOAT);
+	PushArg("ex", CMDARG_TYPE_FLOAT);
+	PushArg("ey", CMDARG_TYPE_FLOAT);
+	PushArg("ez", CMDARG_TYPE_FLOAT);
+	PushArg("time", CMDARG_TYPE_DWORD);
 }
 
-int CSGCmdBuilder::GetCmdCount()
+CSGServerCmdSet::CSGServerCmdSet()
 {
-	return m_Cmds.size();
+}
+
+CSGCmdBuilder::CSGCmdBuilder(CSGCmdSet* pCmdSet)
+{
+	m_pCmdSet = pCmdSet;
+}
+
+CSGCmdBuilder::~CSGCmdBuilder()
+{
 }
 
 const char* escape_blank(const char* buf)
@@ -131,13 +154,7 @@ const void* CSGCmdBuilder::ParseString(const char* pString, unsigned int& nLengt
 	pString = GetTokenIdentity(pString, szCmdName, sizeof(szCmdName));
 	if(!pString) return NULL;
 
-	const CmdInfo* pCmdInfo = NULL;
-	for(size_t l=0; l<m_Cmds.size(); l++) {
-		if(m_Cmds[l].m_Name==szCmdName) {
-			pCmdInfo = &m_Cmds[l];
-			break;
-		}
-	}
+	const CmdInfo* pCmdInfo = m_pCmdSet->GetCmd(szCmdName);
 	if(!pCmdInfo) return NULL;
 
 	CDataWriter data(m_Bufs, sizeof(m_Bufs));
@@ -154,6 +171,13 @@ const void* CSGCmdBuilder::ParseString(const char* pString, unsigned int& nLengt
 				data.PutValue<unsigned int>((unsigned int)atoi(szValue));
 				break;
 			}
+		case CMDARG_TYPE_FLOAT:
+			{
+				pString = GetTokenNumber(pString, szValue, sizeof(szValue));
+				if(!pString) return NULL;
+				data.PutValue<float>((float)atof(szValue));
+				break;
+			}
 		case CMDARG_TYPE_STRING:
 			{
 				pString = GetTokenString(pString, szValue, sizeof(szValue));
@@ -168,4 +192,18 @@ const void* CSGCmdBuilder::ParseString(const char* pString, unsigned int& nLengt
 
 	nLength = data.GetLength();
 	return m_Bufs;
+}
+
+CSGCmdParser::CSGCmdParser(CSGCmdSet* pCmdSet)
+{
+	m_pCmdSet = pCmdSet;
+}
+
+CSGCmdParser::~CSGCmdParser()
+{
+}
+
+bool CSGCmdParser::ParseData(CSGCmdResultSet& ResultSet, const void* pData, unsigned int nSize)
+{
+	return true;
 }

@@ -1,10 +1,3 @@
 #include "StdAfx.h"
+#include "SGCmdBuilder.h"
 #include "SGCmdParser.h"
-
-CSGCmdParser::CSGCmdParser()
-{
-}
-
-CSGCmdParser::~CSGCmdParser()
-{
-}

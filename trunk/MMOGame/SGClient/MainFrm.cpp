@@ -12,11 +12,10 @@
 #include "MainView.h"
 #include "MainFrm.h"
 
-#include "..\SGGame\SGCmdCode.h"
-
 static ISGClient* myClient = NULL;
 static ISGClientCallback* myCallback = NULL;
-static CSGCmdBuilder myBuilder;
+static CSGClientCmdSet myClientCmdSet;
+static CSGCmdBuilder myBuilder(&myClientCmdSet);
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
@@ -76,9 +75,6 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	pLoop->AddIdleHandler(this);
 
 	myCallback = &m_view;
-	myBuilder.PushCmd("login", SGCMDCODE_LOGIN);
-	myBuilder.PushArg("username", CMDARG_TYPE_STRING);
-	myBuilder.PushArg("password", CMDARG_TYPE_STRING);
 
 	return 0;
 }

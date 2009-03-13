@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "resource.h"
 
-#include "SciLexerEdit.h"
 #include "LuaEditView.h"
 
 CLuaEditView::CLuaEditView()

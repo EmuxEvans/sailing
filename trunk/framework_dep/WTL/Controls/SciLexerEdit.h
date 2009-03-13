@@ -333,6 +333,13 @@ public:
 		else
 			SendMessage(SCI_SETMARGINWIDTHN, 2, 0);
 	}
+	void SetWrapMode(int nMode)
+	{
+		SendMessage(SCI_SETWRAPMODE, (WPARAM)nMode, 0);
+	}
+	int GetWrapMode() {
+		return SendMessage(SCI_GETWRAPMODE, 0, 0);
+	}
 	void Init()
 	{
 		// clear all text styles

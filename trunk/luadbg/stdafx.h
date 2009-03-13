@@ -42,11 +42,11 @@ extern CAppModule _Module;
   #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
 
-#include "scintilla\include\scintilla.h"
-#include "scintilla\include\SciLexer.h"
-#include "scintilla\include\Accessor.h"
-#include "scintilla\include\Propset.h"
-#include "scintilla\include\keywords.h"
+#include "scintilla.h"
+#include "SciLexer.h"
+#include "Accessor.h"
+#include "Propset.h"
+#include "keywords.h"
 
 #include <DWAutoHide.h>
 #include <ExtDockingWindow.h>
@@ -55,3 +55,4 @@ extern CAppModule _Module;
 #include <stgreg.h>
 #include <MenuXP.h>
 #include <DialogLayout.h>
+#include <SciLexerEdit.h>

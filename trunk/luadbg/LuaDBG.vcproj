@@ -50,7 +50,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\framework_dep\WTL\Controls;..\framework_dep\WTL\include;..\framework\inc"
+				AdditionalIncludeDirectories="..\framework_dep\WTL\Controls;..\framework_dep\WTL\include;..\framework\inc;..\framework_dep\scintilla\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG;PLAT_WIN;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -75,7 +75,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib SciLexer-$(ConfigurationName)-$(PlatformName).lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;..\framework\$(ConfigurationName)-$(PlatformName)&quot;;&quot;$(ProjectDir)scintilla\bin&quot;"
+				AdditionalLibraryDirectories="&quot;..\framework\$(ConfigurationName)-$(PlatformName)&quot;;..\framework_dep\scintilla\bin"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -137,7 +137,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="..\framework_dep\WTL\Controls;..\framework_dep\WTL\include;..\framework\inc"
+				AdditionalIncludeDirectories="..\framework_dep\WTL\Controls;..\framework_dep\WTL\include;..\framework\inc;..\framework_dep\scintilla\include"
 				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG;PLAT_WIN;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -161,7 +161,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="imm32.lib ws2_32.lib appbox_lib.lib SciLexer-$(ConfigurationName)-$(PlatformName).lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;..\framework\$(ConfigurationName)-$(PlatformName)&quot;;&quot;$(ProjectDir)scintilla\bin&quot;"
+				AdditionalLibraryDirectories="&quot;..\framework\$(ConfigurationName)-$(PlatformName)&quot;;..\framework_dep\scintilla\bin"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -230,10 +230,6 @@
 			</File>
 			<File
 				RelativePath=".\MainFrm.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SciLexerEdit.cpp"
 				>
 			</File>
 			<File
@@ -306,10 +302,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SciLexerEdit.h"
-				>
-			</File>
-			<File
 				RelativePath=".\stdafx.h"
 				>
 			</File>
@@ -352,206 +344,6 @@
 			</File>
 			<File
 				RelativePath=".\res\toolbar.bmp"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="ExtControls"
-			>
-			<File
-				RelativePath=".\include\dbstate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\DDTracker.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\DialogItemTemplate.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\include\DialogItemTemplate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\DialogLayout.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\include\DialogLayout.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\DialogTemplate.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\include\DialogTemplate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\DockImpl.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\include\DockingBox.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\DockingFrame.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\DockingWindow.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\DockMisc.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\Draw.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\include\Draw.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\DWAutoHide.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\dwstate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\ExtDockingWindow.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\FlyingTabs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\MenuXP.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\PackageWindow.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\SimpleSplitterBar.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\ssec.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\sstate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\stg.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\stgreg.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\stgxml.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\TabDockingBox.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\WndFrmPkg.h"
 				>
 			</File>
 		</Filter>
