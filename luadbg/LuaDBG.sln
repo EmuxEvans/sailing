@@ -6,7 +6,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LuaDBG", "LuaDBG.vcproj", "
 		{4EC3B086-755E-4F7B-BD8C-60E88A5DD222} = {4EC3B086-755E-4F7B-BD8C-60E88A5DD222}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SciLexer", "scintilla\vcbuild\SciLexer.vcproj", "{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SciLexer", "..\framework_dep\scintilla\vcbuild\SciLexer.vcproj", "{4EC3B086-755E-4F7B-BD8C-60E88A5DD222}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "appbox_lib", "..\framework\win32\appbox_lib.vcproj", "{3AEE38B9-C643-48E5-A58B-7488C259500B}"
 EndProject
