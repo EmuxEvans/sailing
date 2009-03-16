@@ -1,6 +1,10 @@
 #ifndef __PROT_PARSER_INCLUDE__
 #define __PROT_PARSER_INCLUDE__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct DATA_INCLUDE {
 	char file[100];
 } DATA_INCLUDE;
@@ -87,5 +91,9 @@ extern void make_define_filename(const char* file, char* out);
 extern void make_include_filename(const char* file, char* out);
 extern int check_vailid_dtype(const char* type);
 extern int check_vailid_otype(const char* type);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -12,7 +12,12 @@ LUA_INC=	lapi.h lauxlib.h lcode.h ldebug.h ldo.h lfunc.h lgc.h llex.h llimits.h 
 			lopcodes.h lparser.h lstate.h lstring.h ltable.h ltm.h lua.h luaconf.h lualib.h lundump.h\
 			lvm.h lzio.h
 
+TOLUAPP_SRC=tolua_event.c tolua_is.c tolua_map.c tolua_push.c tolua_to.c
+
+TOLUAPP_INC=tolua++.h tolua_event.h
+
 LUA_OBJ= $(subst .c,.o,$(LUA_SRC))
+TOLUAPP_OBJ= $(subst .c,.o,$(TOLUAPP_SRC))
 
 LUA_LIB= lua$(STA_LIB_PREFIX)
 
@@ -22,8 +27,8 @@ LUA_LIB= lua$(STA_LIB_PREFIX)
 all: $(LUA_LIB)
 
 clean:
-	rm -rf $(LUA_LIB) $(LUA_OBJ)
+	rm -rf $(LUA_LIB) $(LUA_OBJ) $(TOLUAPP_OBJ)
 
-$(LUA_LIB): $(LUA_OBJ)
+$(LUA_LIB): $(LUA_OBJ) $(TOLUAPP_OBJ)
 	ar rcs $@ $^
 

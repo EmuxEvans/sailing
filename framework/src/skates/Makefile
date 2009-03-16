@@ -22,8 +22,13 @@ LUA_SRC=    lapi.c lauxlib.c lbaselib.c lcode.c ldblib.c ldebug.c ldo.c ldump.c 
 LUA_INC=    lapi.h lauxlib.h lcode.h ldebug.h ldo.h lfunc.h lgc.h llex.h llimits.h lmem.h lobject.h\
             lopcodes.h lparser.h lstate.h lstring.h ltable.h ltm.h lua.h luaconf.h lualib.h lundump.h\
             lvm.h lzio.h
-LUA_FULL_INC=$(foreach inc,$(LUA_INC),lua/$(inc))
-LUA_FULL_SRC=$(foreach src,$(LUA_SRC),lua/$(src))
+
+TOLUAPP_SRC=tolua_event.c tolua_is.c tolua_map.c tolua_push.c tolua_to.c
+
+TOLUAPP_INC=tolua++.h tolua_event.h
+
+LUA_FULL_INC=$(foreach inc,$(LUA_INC),lua/$(inc)) $(foreach inc,$(TOLUAPP_INC),lua/$(inc)) 
+LUA_FULL_SRC=$(foreach src,$(LUA_SRC),lua/$(src)) $(foreach src,$(TOLUAPP_SRC),lua/$(src))
 LUA_FULL_OBJ=$(subst .c,.o,$(LUA_FULL_SRC))
 LUA_FULL_LIB=lua/lua$(STA_LIB_PREFIX)
 LUA_RPC_FILE=protocol_lua.h protocol_lua.clt.c protocol_lua.svr.c

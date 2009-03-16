@@ -297,7 +297,7 @@ int LuaDebugHostRpc_GetCallStack_impl(RPCNET_GROUP* group, os_dword sid, LUADEBU
 
 	if(host!=group || !state->dbgL) return ERR_OPT_FORBIDDEN;
 
-	for(i=1; i<*depth; i++) {
+	for(i=0; i<*depth; i++) {
 		memset(&ar, 0, sizeof(ar));
 		if(!lua_getstack(state->dbgL, i, &ar)) break;
 		if(!lua_getinfo(state->dbgL, "flnSu", &ar)) {
@@ -305,18 +305,18 @@ int LuaDebugHostRpc_GetCallStack_impl(RPCNET_GROUP* group, os_dword sid, LUADEBU
 			break;
 		}
 
-		if(ar.name) strcpy(stacks[i-1].name, ar.name);				else strcpy(stacks[i-1].name, "");
-		if(ar.namewhat) strcpy(stacks[i-1].namewhat, ar.namewhat);	else strcpy(stacks[i-1].namewhat, "");
-		if(ar.what) strcpy(stacks[i-1].what, ar.what);				else strcpy(stacks[i-1].what, "");
-		if(ar.source) strcpy(stacks[i-1].source, ar.source);		else strcpy(stacks[i-1].source, "");
-		stacks[i-1].currentline = ar.currentline;
-		stacks[i-1].nups = ar.nups;
-		stacks[i-1].linedefined = ar.linedefined;
-		stacks[i-1].lastlinedefined = ar.lastlinedefined;
-		strcpy(stacks[i-1].short_src, ar.short_src);
+		if(ar.name) strcpy(stacks[i].name, ar.name);				else strcpy(stacks[i].name, "");
+		if(ar.namewhat) strcpy(stacks[i].namewhat, ar.namewhat);	else strcpy(stacks[i].namewhat, "");
+		if(ar.what) strcpy(stacks[i].what, ar.what);				else strcpy(stacks[i].what, "");
+		if(ar.source) strcpy(stacks[i].source, ar.source);		else strcpy(stacks[i].source, "");
+		stacks[i].currentline = ar.currentline;
+		stacks[i].nups = ar.nups;
+		stacks[i].linedefined = ar.linedefined;
+		stacks[i].lastlinedefined = ar.lastlinedefined;
+		strcpy(stacks[i].short_src, ar.short_src);
 	}
 
-	*depth = i - 1;
+	*depth = i;
 	return ERR_NOERROR;
 }
 
