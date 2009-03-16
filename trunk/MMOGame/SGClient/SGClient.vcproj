@@ -306,10 +306,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\bitmap1.bmp"
-				>
-			</File>
-			<File
 				RelativePath=".\res\SGClient.ico"
 				>
 			</File>

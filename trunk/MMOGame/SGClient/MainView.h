@@ -30,6 +30,7 @@ public:
 //	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
 
 	CEdit m_Console;
+	CComboBox m_Command;
 
 	CMainView();
 	~CMainView();

@@ -100,6 +100,11 @@ CMainView::CMainView()
 	lua_pushcfunction(L, lua_output);
 	lua_rawset(L, LUA_GLOBALSINDEX);
 
+	char szTxt[10000];
+	if(load_textfile("SGClient.lua", szTxt, sizeof(szTxt))>=0) {
+		lua_script = szTxt;
+	}
+
 	if(luaL_dostring(L, lua_script)!=0) {
 		::MessageBox(NULL, lua_tostring(L, -1), "failed to load script", MB_OK);
 	}
@@ -125,6 +130,7 @@ BOOL CMainView::OnInitDialog(HWND, LPARAM)
 {
 	SetMsgHandled(FALSE);
 	m_Console.m_hWnd = GetDlgItem(IDC_CONSOLE);
+	m_Command.m_hWnd = GetDlgItem(IDC_COMMAND);
 
 	CRect rctDlg, rctCtl;
 	GetClientRect(&rctDlg);
@@ -298,6 +304,9 @@ LRESULT CMainView::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& 
 
 	if(luaL_dostring(L, szText)==0) {
 		::SetWindowText(GetDlgItem(IDC_COMMAND), "");
+		if(m_Command.FindString(-1, szText)==-1) {
+			m_Command.AddString(szText);
+		}
 	} else {
 		m_Console.AppendText(lua_tostring(L, -1));
 		m_Console.AppendText("\n");
@@ -451,7 +460,17 @@ int CMainView::LuaCallback()
 
 	if(strcmp(ar.name, "connect")==0) {
 		if(GetClient()->Available()) GetClient()->Disconnect();
-		lua_pushboolean(L, GetClient()->Connect("127.0.0.1:1980")?1:0);
+		char address[100] = "127.0.0.1:1980";
+		if(lua_isstring(L, -1)) {
+			strcpy(address, lua_tostring(L, -1));
+		} else {
+			lua_getglobal(L, "default_server");
+			if(lua_isstring(L, -1)) {
+				strcpy(address, lua_tostring(L, -1));
+			}
+			lua_pop(L, -1);
+		}
+		lua_pushboolean(L, GetClient()->Connect(address)?1:0);
 		return 1;
 	}
 	if(strcmp(ar.name, "disconnect")==0) {
