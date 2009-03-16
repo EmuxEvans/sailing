@@ -18,6 +18,9 @@ extern "C" {
 #include <skates/lua/lualib.h>
 #include <skates/lua/tolua++.h>
 };
+#include <skates/errcode.h>
+#include <skates/os.h>
+#include <skates/misc.h>
 
 #include "SGClientCmdSet.h"
 #include "SGServerCmdSet.h"
@@ -55,6 +58,10 @@ inline std::string& trim(std::string &st)
 {
 	lTrim(rTrim(st));
 	return st;
+}
+
+static int lua_wait(lua_State* L)
+{
 }
 
 static int lua_oncall(lua_State* L)
@@ -98,6 +105,9 @@ CMainView::CMainView()
 	}
 
 	g_pMainView = this;
+	m_bCommandMode = TRUE;
+	m_szFileName[0] = '\0';
+	GetCurrentDirectory(sizeof(m_szFileName), m_szFileName);
 }
 
 CMainView::~CMainView()
@@ -115,26 +125,179 @@ BOOL CMainView::OnInitDialog(HWND, LPARAM)
 {
 	SetMsgHandled(FALSE);
 	m_Console.m_hWnd = GetDlgItem(IDC_CONSOLE);
-	m_Command.m_hWnd = GetDlgItem(IDC_COMMAND);
+
+	CRect rctDlg, rctCtl;
+	GetClientRect(&rctDlg);
+
+	CPoint LT(0, 0);
+	::ClientToScreen(m_hWnd, &LT);
+
+	::GetWindowRect(GetDlgItem(IDC_CONSOLE), &rctCtl);
+	rctCtl -= LT;
+	m_nConsoleWidth = rctDlg.right - rctCtl.Width();
+	m_nConsoleHeight = rctDlg.bottom - rctCtl.Height();
+
+	::GetWindowRect(GetDlgItem(IDC_SCRIPT), &rctCtl);
+	rctCtl -= LT;
+	m_nScriptTop = rctDlg.bottom - rctCtl.top;
+	m_nScriptWidth = rctDlg.right - rctCtl.Width();
+
+	::GetWindowRect(GetDlgItem(IDC_COMMAND), &rctCtl);
+	rctCtl -= LT;
+	m_nBottomTop = rctDlg.bottom - rctCtl.top;
+	m_nCommandWidth = rctDlg.right - rctCtl.Width();
+
+	::GetWindowRect(GetDlgItem(IDC_RUNCMD), &rctCtl);
+	rctCtl -= LT;
+	m_nRunCmdRight = rctDlg.right - rctCtl.left;
+	::GetWindowRect(GetDlgItem(IDC_CLRLOG), &rctCtl);
+	rctCtl -= LT;
+	m_nClrLogRight = rctDlg.right - rctCtl.left;
+	::GetWindowRect(GetDlgItem(IDC_MODCHG), &rctCtl);
+	rctCtl -= LT;
+	m_nModChgRight = rctDlg.right - rctCtl.left;
+
 	return TRUE;
+}
+
+LRESULT CMainView::OnSize(UINT, WPARAM, LPARAM , BOOL& bHandled)
+{
+	CRect rctDlg, rctCtl;
+	CPoint LT(0, 0);
+
+	GetClientRect(&rctDlg);
+	::ClientToScreen(m_hWnd, &LT);
+
+	if(m_bCommandMode) {
+		::GetWindowRect(GetDlgItem(IDC_CONSOLE), &rctCtl);
+		rctCtl -= LT;
+		::SetWindowPos(GetDlgItem(IDC_CONSOLE), NULL,
+			0, 0,
+			rctDlg.Width() - m_nConsoleWidth, rctDlg.Height() - m_nConsoleHeight + (m_nScriptTop - m_nBottomTop),
+			SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
+
+
+		::GetWindowRect(GetDlgItem(IDC_SCRIPT), &rctCtl);
+		rctCtl -= LT;
+		::SetWindowPos(GetDlgItem(IDC_SCRIPT), NULL, rctCtl.left, 0, 100, rctCtl.Height(), SWP_NOACTIVATE | SWP_NOZORDER);
+		::ShowWindow(GetDlgItem(IDC_SCRIPT), SW_HIDE);
+
+		::GetWindowRect(GetDlgItem(IDC_LOADTXT), &rctCtl);
+		rctCtl -= LT;
+		::SetWindowPos(GetDlgItem(IDC_LOADTXT), NULL,
+			rctCtl.left, rctDlg.bottom - m_nBottomTop,
+			0, 0,
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+		::ShowWindow(GetDlgItem(IDC_LOADTXT), SW_HIDE);
+
+		::GetWindowRect(GetDlgItem(IDC_SAVETXT), &rctCtl);
+		rctCtl -= LT;
+		::SetWindowPos(GetDlgItem(IDC_SAVETXT), NULL,
+			rctCtl.left, rctDlg.bottom - m_nBottomTop,
+			0, 0,
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+		::ShowWindow(GetDlgItem(IDC_SAVETXT), SW_HIDE);
+
+		::GetWindowRect(GetDlgItem(IDC_COMMAND), &rctCtl);
+		rctCtl -= LT;
+		::SetWindowPos(GetDlgItem(IDC_COMMAND), NULL,
+			rctCtl.left, rctDlg.bottom - m_nBottomTop,
+			rctDlg.right - m_nCommandWidth, rctCtl.Height(),
+			SWP_NOACTIVATE | SWP_NOZORDER);
+		::ShowWindow(GetDlgItem(IDC_COMMAND), SW_SHOWNOACTIVATE);
+
+		::SetWindowPos(GetDlgItem(IDC_RUNCMD), NULL,
+			rctDlg.right - m_nRunCmdRight, rctDlg.bottom - m_nBottomTop,
+			0, 0,
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+		::SetWindowPos(GetDlgItem(IDC_CLRLOG), NULL,
+			rctDlg.right - m_nClrLogRight, rctDlg.bottom - m_nBottomTop,
+			0, 0,
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+
+		::SetWindowText(GetDlgItem(IDC_MODCHG), "<<");
+		::SetWindowPos(GetDlgItem(IDC_MODCHG), NULL,
+			rctDlg.right - m_nModChgRight, rctDlg.bottom - m_nBottomTop,
+			0, 0,
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+	} else {
+		::GetWindowRect(GetDlgItem(IDC_CONSOLE), &rctCtl);
+		rctCtl -= LT;
+		::SetWindowPos(GetDlgItem(IDC_CONSOLE), NULL,
+			0, 0,
+			rctDlg.Width() - m_nConsoleWidth, rctDlg.Height() - m_nConsoleHeight,
+			SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
+
+		::GetWindowRect(GetDlgItem(IDC_SCRIPT), &rctCtl);
+		rctCtl -= LT;
+		::SetWindowPos(GetDlgItem(IDC_SCRIPT), NULL,
+			rctCtl.left, rctDlg.bottom - m_nScriptTop,
+			rctDlg.right - m_nScriptWidth, rctCtl.Height(),
+			SWP_NOACTIVATE | SWP_NOZORDER);
+		::ShowWindow(GetDlgItem(IDC_SCRIPT), SW_SHOWNOACTIVATE);
+
+		::GetWindowRect(GetDlgItem(IDC_LOADTXT), &rctCtl);
+		rctCtl -= LT;
+		::SetWindowPos(GetDlgItem(IDC_LOADTXT), NULL,
+			rctCtl.left, rctDlg.bottom - m_nBottomTop,
+			0, 0,
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+		::ShowWindow(GetDlgItem(IDC_LOADTXT), SW_SHOWNOACTIVATE);
+
+		::GetWindowRect(GetDlgItem(IDC_SAVETXT), &rctCtl);
+		rctCtl -= LT;
+		::SetWindowPos(GetDlgItem(IDC_SAVETXT), NULL,
+			rctCtl.left, rctDlg.bottom - m_nBottomTop,
+			0, 0,
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+		::ShowWindow(GetDlgItem(IDC_SAVETXT), SW_SHOWNOACTIVATE);
+
+		::GetWindowRect(GetDlgItem(IDC_COMMAND), &rctCtl);
+		rctCtl -= LT;
+		::SetWindowPos(GetDlgItem(IDC_COMMAND), NULL,
+			rctCtl.left, rctDlg.bottom - m_nBottomTop,
+			rctDlg.right - m_nCommandWidth, rctCtl.Height(),
+			SWP_NOACTIVATE | SWP_NOZORDER);
+		::ShowWindow(GetDlgItem(IDC_COMMAND), SW_HIDE);
+
+		::SetWindowPos(GetDlgItem(IDC_RUNCMD), NULL,
+			rctDlg.right - m_nRunCmdRight, rctDlg.bottom - m_nBottomTop,
+			0, 0,
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+		::SetWindowPos(GetDlgItem(IDC_CLRLOG), NULL,
+			rctDlg.right - m_nClrLogRight, rctDlg.bottom - m_nBottomTop,
+			0, 0,
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+
+		::SetWindowText(GetDlgItem(IDC_MODCHG), ">>");
+		::SetWindowPos(GetDlgItem(IDC_MODCHG), NULL,
+			rctDlg.right - m_nModChgRight, rctDlg.bottom - m_nBottomTop,
+			0, 0,
+			SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+	}
+
+	bHandled = FALSE;
+	return 0;
 }
 
 LRESULT CMainView::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
 {
-	char szText[1000];
-	m_Command.GetWindowText(szText, sizeof(szText));
+	char szText[10000];
 
-	{
-		std::string Text = szText;
-		Text = trim(Text);
-		if(Text.size()==0) {
-			m_Command.SetWindowText("");
-			return 0L;
-		}
+	if(m_bCommandMode) {
+		::GetWindowText(GetDlgItem(IDC_COMMAND), szText, sizeof(szText));
+	} else {
+		::GetWindowText(GetDlgItem(IDC_SCRIPT), szText, sizeof(szText));
+	}
+
+	std::string Text = szText;
+	if(trim(Text).size()==0) {
+		::SetWindowText(GetDlgItem(IDC_COMMAND), "");
+		return 0L;
 	}
 
 	if(luaL_dostring(L, szText)==0) {
-		m_Command.SetWindowText("");
+		::SetWindowText(GetDlgItem(IDC_COMMAND), "");
 	} else {
 		m_Console.AppendText(lua_tostring(L, -1));
 		m_Console.AppendText("\n");
@@ -147,6 +310,47 @@ LRESULT CMainView::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& 
 LRESULT CMainView::OnClearLog(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
 {
 	m_Console.SetWindowText("");
+	return 0L;
+}
+
+LRESULT CMainView::OnModeChange(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
+{
+	m_bCommandMode = !m_bCommandMode;
+	BOOL bHandled = FALSE;
+	OnSize(0, 0, 0, bHandled);
+	return 0L;
+}
+
+LRESULT CMainView::OnLoadText(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
+{
+	CFileDialog a(TRUE, _T("*.lua"), NULL, OFN_FILEMUSTEXIST, _T("Lua Source File (*.lua)\0*.lua\0"));
+	if(a.DoModal()!=IDOK) return 0;
+
+	char szText[100000];
+
+	if(load_textfile(a.m_szFileName, szText, sizeof(szText))<0) {
+		MessageBox(a.m_szFileName, "failed to load file");
+		return 0L;
+	}
+
+	strcpy(m_szFileName, a.m_szFileName);
+	::SetWindowText(GetDlgItem(IDC_SCRIPT), szText);
+	return 0L;
+}
+
+LRESULT CMainView::OnSaveText(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
+{
+	CFileDialog a(FALSE, _T("*.lua"), m_szFileName, 0, _T("Lua Source File (*.lua)\0*.lua\0"));
+	if(a.DoModal()!=IDOK) return 0;
+
+	char szText[100000];
+	::GetWindowText(GetDlgItem(IDC_SCRIPT), szText, sizeof(szText));
+
+	strcpy(m_szFileName, a.m_szFileName);
+	if(save_textfile(a.m_szFileName, szText, strlen(szText))<0) {
+		MessageBox(a.m_szFileName, "failed to save file");
+	}
+
 	return 0L;
 }
 

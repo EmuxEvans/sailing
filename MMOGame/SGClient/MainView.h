@@ -4,7 +4,7 @@
 
 #pragma once
 
-class CMainView : public CDialogImpl<CMainView>, public CDialogLayout<CMainView>, public ISGClientCallback
+class CMainView : public CDialogImpl<CMainView>, public ISGClientCallback
 {
 public:
 	enum { IDD = IDD_MAINVIEW };
@@ -13,21 +13,16 @@ public:
 
 	BEGIN_MSG_MAP(CMainView)
 		MSG_WM_INITDIALOG(OnInitDialog)
+		MESSAGE_HANDLER(WM_SIZE, OnSize)
 		COMMAND_ID_HANDLER(IDOK, OnRunCommand)
 		COMMAND_ID_HANDLER(IDC_RUNCMD, OnRunCommand)
 		COMMAND_ID_HANDLER(IDC_CLRLOG, OnClearLog)
-		
-		CHAIN_MSG_MAP(CDialogLayout<CMainView>)
-	END_MSG_MAP()
+		COMMAND_ID_HANDLER(IDC_MODCHG, OnModeChange)
 
-	BEGIN_LAYOUT_MAP()
-//		LAYOUT_CONTROL(IDC_SCRIPT, LAYOUT_ANCHOR_HORIZONTAL | LAYOUT_ANCHOR_BOTTOM)
-		LAYOUT_CONTROL(IDC_COMMAND, LAYOUT_ANCHOR_HORIZONTAL | LAYOUT_ANCHOR_BOTTOM)
-		LAYOUT_CONTROL(IDC_RUNCMD, LAYOUT_ANCHOR_RIGHT | LAYOUT_ANCHOR_BOTTOM)
-		LAYOUT_CONTROL(IDC_CLRLOG, LAYOUT_ANCHOR_RIGHT | LAYOUT_ANCHOR_BOTTOM)
-//		LAYOUT_CONTROL(IDC_MODECHANGE, LAYOUT_ANCHOR_RIGHT | LAYOUT_ANCHOR_BOTTOM)
-		LAYOUT_CONTROL(IDC_CONSOLE, LAYOUT_ANCHOR_ALL)
-	END_LAYOUT_MAP()
+		COMMAND_ID_HANDLER(IDC_LOADTXT, OnLoadText)
+		COMMAND_ID_HANDLER(IDC_SAVETXT, OnSaveText)
+
+	END_MSG_MAP()
 
 // Handler prototypes (uncomment arguments if needed):
 //	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -35,14 +30,17 @@ public:
 //	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
 
 	CEdit m_Console;
-	CEdit m_Command;
 
 	CMainView();
 	~CMainView();
 
 	BOOL OnInitDialog(HWND, LPARAM);
+	LRESULT OnSize(UINT, WPARAM, LPARAM lParam, BOOL& bHandled);
 	LRESULT OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/);
 	LRESULT OnClearLog(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/);
+	LRESULT OnModeChange(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/);
+	LRESULT OnLoadText(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/);
+	LRESULT OnSaveText(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/);
 
 	virtual void OnConnect();
 	virtual void OnData(const void* pData, unsigned int nSize);
@@ -50,5 +48,14 @@ public:
 
 	int LuaCallback();
 	void Output(const char* pLine);
+
+private:
+	BOOL m_bCommandMode;
+	char m_szFileName[MAX_PATH];
+	int m_nConsoleWidth, m_nConsoleHeight;
+	int m_nScriptTop, m_nScriptWidth;
+	int m_nBottomTop;
+	int m_nCommandWidth;
+	int m_nModChgRight, m_nClrLogRight, m_nRunCmdRight;
 
 };
