@@ -655,6 +655,110 @@
 		<Filter
 			Name="lua"
 			>
+			<File
+				RelativePath="..\src\skates\lua\tolua_event.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarnAsError="false"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarnAsError="false"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\tolua_event.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\tolua_is.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarnAsError="false"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarnAsError="false"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\tolua_map.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarnAsError="false"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarnAsError="false"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\tolua_push.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarnAsError="false"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarnAsError="false"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\src\skates\lua\tolua_to.c"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarnAsError="false"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						WarnAsError="false"
+					/>
+				</FileConfiguration>
+			</File>
 			<Filter
 				Name="include"
 				>
@@ -757,602 +861,122 @@
 				<File
 					RelativePath="..\src\skates\lua\lapi.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lauxlib.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lbaselib.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lcode.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\ldblib.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\ldebug.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\ldo.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\ldump.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lfunc.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lgc.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\linit.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\liolib.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\llex.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lmathlib.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lmem.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\loadlib.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lobject.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lopcodes.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\loslib.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lparser.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lstate.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lstring.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lstrlib.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\ltable.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\ltablib.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\ltm.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lundump.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lvm.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\lzio.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\src\skates\lua\print.c"
 					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							PreprocessorDefinitions="LUA_BUILD_AS_DLL"
-						/>
-					</FileConfiguration>
 				</File>
 			</Filter>
 		</Filter>
