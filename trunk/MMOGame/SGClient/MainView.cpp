@@ -9,7 +9,6 @@
 #include "..\SGGame\SGCmdCode.h"
 
 #include "SGClient.h"
-#include "SGCmdBuilder.h"
 #include "MainView.h"
 #include "MainFrm.h"
 
@@ -20,11 +19,24 @@ extern "C" {
 #include <skates/lua/tolua++.h>
 };
 
+#include "SGClientCmdSet.h"
+#include "SGServerCmdSet.h"
+
 static lua_State* L = NULL;
 static CMainView* g_pMainView = NULL;
 static CSGClientCmdSet myClientCmdSet;
 static CSGServerCmdSet myServerCmdSet;
-
+static const char* lua_script = 
+"function onconnect()" "\n"
+"	output(\"OnConnect\")" "\n"
+"end" "\n"
+"function ondisconnect()" "\n"
+"	output(\"OnDisconnect\")" "\n"
+"end" "\n"
+"function ondata(args)" "\n"
+"	output(\"OnData \" .. args.CmdName)" "\n"
+"end" "\n"
+;
 inline std::string& lTrim(std::string &ss)  
 {
 	std::string::iterator p=std::find_if(ss.begin(), ss.end(), std::not1(std::ptr_fun(isspace)));
@@ -45,9 +57,19 @@ inline std::string& trim(std::string &st)
 	return st;
 }
 
-static int on_luacall(lua_State* L)
+static int lua_oncall(lua_State* L)
 {
 	return g_pMainView->LuaCallback();
+}
+
+static int lua_output(lua_State* L)
+{
+	if(!lua_isstring(L, -1)) {
+		tolua_error(L, "output invalid parameter", NULL);
+		return 0;		
+	}
+	g_pMainView->Output(lua_tostring(L, -1));
+	return 0;
 }
 
 CMainView::CMainView()
@@ -55,17 +77,26 @@ CMainView::CMainView()
 	L = lua_open();
 
 	lua_pushstring(L, "connect");
-	lua_pushcfunction(L, on_luacall);
+	lua_pushcfunction(L, lua_oncall);
 	lua_rawset(L, LUA_GLOBALSINDEX);
 	lua_pushstring(L, "disconnect");
-	lua_pushcfunction(L, on_luacall);
+	lua_pushcfunction(L, lua_oncall);
 	lua_rawset(L, LUA_GLOBALSINDEX);
 
 	for(int l=0; l<myClientCmdSet.GetCmdCount(); l++) {
 		lua_pushstring(L, myClientCmdSet.GetCmd(l)->m_Name.c_str());
-		lua_pushcfunction(L, on_luacall);
+		lua_pushcfunction(L, lua_oncall);
 		lua_rawset(L, LUA_GLOBALSINDEX);
 	}
+
+	lua_pushstring(L, "output");
+	lua_pushcfunction(L, lua_output);
+	lua_rawset(L, LUA_GLOBALSINDEX);
+
+	if(luaL_dostring(L, lua_script)!=0) {
+		::MessageBox(NULL, lua_tostring(L, -1), "failed to load script", MB_OK);
+	}
+
 	g_pMainView = this;
 }
 
@@ -121,12 +152,12 @@ LRESULT CMainView::OnClearLog(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*
 
 void CMainView::OnConnect()
 {
-	m_Console.AppendText("Connected!\n");
+	lua_getglobal(L, "onconnect");
+	lua_pcall(L, 0, 0, 0);
 }
 
 void CMainView::OnData(const void* pData, unsigned int nSize)
 {
-	m_Console.AppendText("OnData\n");
 	CDataReader data(pData, nSize);
 	const CmdInfo* pCmdInfo = myServerCmdSet.GetCmd(data.GetValue<unsigned short>());
 	if(!pCmdInfo) {
@@ -134,32 +165,74 @@ void CMainView::OnData(const void* pData, unsigned int nSize)
 		return;
 	}
 
-	lua_newtable(L);
-	for(int l=0; l<(int)pCmdInfo->m_Args.size(); l++) {
-		if(pCmdInfo->m_Args[l].m_Type&CMDARG_TYPE_ARRAY) {
-		}
+	lua_getglobal(L, "ondata");
 
-		lua_pushstring(L, pCmdInfo->m_Name.c_str());
-		switch(pCmdInfo->m_Args[l].m_Type) {
-		case CMDARG_TYPE_BYTE:
-			lua_pushinteger(L, (lua_Integer)data.GetValue<unsigned char>());
-			break;
-		case CMDARG_TYPE_DWORD:
-			lua_pushinteger(L, (lua_Integer)data.GetValue<unsigned int>());
-			break;
-		case CMDARG_TYPE_FLOAT:
-			lua_pushnumber(L, (lua_Number)data.GetValue<float>());
-			break;
-		case CMDARG_TYPE_STRING:
-			lua_pushstring(L, data.GetString());
-			break;
+	lua_newtable(L);
+
+	lua_pushstring(L, "CmdName");
+	lua_pushstring(L, pCmdInfo->m_Name.c_str());
+	lua_rawset(L, -3);
+	lua_pushstring(L, "CmdCode");
+	lua_pushinteger(L, (lua_Integer)pCmdInfo->m_Code);
+	lua_rawset(L, -3);
+
+	for(int l=0; l<(int)pCmdInfo->m_Args.size(); l++) {
+		lua_pushstring(L, pCmdInfo->m_Args[l].m_Name.c_str());
+
+		if(pCmdInfo->m_Args[l].m_Type&CMDARG_TYPE_ARRAY) {
+			unsigned short nCount = data.GetValue<unsigned short>();
+			lua_newtable(L);
+			for(int n=0; n<(int)nCount; n++) {
+				lua_pushinteger(L, (lua_Integer)n);
+				switch(pCmdInfo->m_Args[l].m_Type) {
+				case CMDARG_TYPE_BYTE|CMDARG_TYPE_ARRAY:
+					lua_pushinteger(L, (lua_Integer)data.GetValue<unsigned char>());
+					break;
+				case CMDARG_TYPE_DWORD|CMDARG_TYPE_ARRAY:
+					lua_pushinteger(L, (lua_Integer)data.GetValue<unsigned int>());
+					break;
+				case CMDARG_TYPE_FLOAT|CMDARG_TYPE_ARRAY:
+					lua_pushnumber(L, (lua_Number)data.GetValue<float>());
+					break;
+				default:
+					assert(0);
+					return;
+				}
+				lua_rawset(L, -3);
+			}
+		} else {
+			switch(pCmdInfo->m_Args[l].m_Type) {
+			case CMDARG_TYPE_BYTE:
+				lua_pushinteger(L, (lua_Integer)data.GetValue<unsigned char>());
+				break;
+			case CMDARG_TYPE_DWORD:
+				lua_pushinteger(L, (lua_Integer)data.GetValue<unsigned int>());
+				break;
+			case CMDARG_TYPE_FLOAT:
+				lua_pushnumber(L, (lua_Number)data.GetValue<float>());
+				break;
+			case CMDARG_TYPE_STRING:
+				lua_pushstring(L, data.GetString());
+				break;
+			default:
+				assert(0);
+				return;
+			}
 		}
+		lua_rawset(L, -3);
+	}
+
+	if(lua_pcall(L, 1, 0, 0)!=0) {
+		m_Console.AppendText(lua_tostring(L, -1));
+		m_Console.AppendText("\n");
+		lua_pop(L, 1);
 	}
 }
 
 void CMainView::OnDisconnect()
 {
-	m_Console.AppendText("Disconnect!\n");
+	lua_getglobal(L, "ondisconnect");
+	lua_pcall(L, 0, 0, 0);
 }
 
 int CMainView::LuaCallback()
@@ -174,10 +247,8 @@ int CMainView::LuaCallback()
 
 	if(strcmp(ar.name, "connect")==0) {
 		if(GetClient()->Available()) GetClient()->Disconnect();
-		if(!GetClient()->Connect("127.0.0.1:1980")) {
-			tolua_error(L, "failed to connect", NULL);
-		}
-		return 0;
+		lua_pushboolean(L, GetClient()->Connect("127.0.0.1:1980")?1:0);
+		return 1;
 	}
 	if(strcmp(ar.name, "disconnect")==0) {
 		if(GetClient()->Available()) GetClient()->Disconnect();
@@ -263,4 +334,10 @@ int CMainView::LuaCallback()
 	GetClient()->SendData(data.GetBuffer(), data.GetLength());	
 
 	return 0;
+}
+
+void CMainView::Output(const char* pLine)
+{
+	m_Console.AppendText(pLine);
+	m_Console.AppendText("\n");
 }

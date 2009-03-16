@@ -232,11 +232,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\SGCmdBuilder.cpp"
+				RelativePath=".\SGClientCmdSet.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\SGCmdParser.cpp"
+				RelativePath=".\SGServerCmdSet.cpp"
 				>
 			</File>
 			<File
@@ -285,11 +285,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SGCmdBuilder.h"
+				RelativePath=".\SGClientCmdSet.h"
 				>
 			</File>
 			<File
-				RelativePath=".\SGCmdParser.h"
+				RelativePath=".\SGServerCmdSet.h"
 				>
 			</File>
 			<File

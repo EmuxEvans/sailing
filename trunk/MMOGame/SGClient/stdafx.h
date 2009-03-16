@@ -51,3 +51,6 @@ extern CAppModule _Module;
 #include <DialogLayout.h>
 
 #include <stdio.h>
+
+#include <string>
+#include <vector>

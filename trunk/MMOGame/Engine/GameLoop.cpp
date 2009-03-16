@@ -4,8 +4,10 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <queue>
 #include <process.h>
+#include <string>
+#include <vector>
+#include <queue>
 
 #include "CmdData.h"
 #include "GameLoop.h"

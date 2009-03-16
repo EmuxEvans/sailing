@@ -1,5 +1,7 @@
 #include <string.h>
 #include <assert.h>
+#include <string>
+#include <vector>
 
 #include "CmdData.h"
 
