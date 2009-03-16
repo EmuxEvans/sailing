@@ -1,5 +1,90 @@
 #pragma once
 
+enum {
+	CMDARG_TYPE_CHAR	= 0x0001,
+	CMDARG_TYPE_SHORT	= 0x0002,
+	CMDARG_TYPE_INT		= 0x0003,
+
+	CMDARG_TYPE_BYTE	= 0x0011,
+	CMDARG_TYPE_WORD	= 0x0012,
+	CMDARG_TYPE_DWORD	= 0x0013,
+
+	CMDARG_TYPE_FLOAT	= 0x0101,
+	CMDARG_TYPE_STRING	= 0x0102,
+	CMDARG_TYPE_STRUCT	= 0x0103,
+	CMDARG_TYPE_ARRAY	= 0x0100,
+};
+
+class CmdArg
+{
+public:
+	CmdArg(const char* name, unsigned int type, const char* struct_name=NULL, unsigned int struct_size=0) {
+		m_Name = name;
+		m_Type = type;
+		m_StructName = struct_name?struct_name:"";
+		m_StructSize = struct_size;
+	}
+
+	std::string m_Name;
+	unsigned int m_Type;
+	std::string m_StructName;
+	unsigned int m_StructSize;
+};
+
+class CmdInfo
+{
+public:
+	CmdInfo(const char* name, unsigned short code) {
+		m_Name = name;
+		m_Code = code;
+	}
+
+	std::string m_Name;
+	unsigned short m_Code;
+	std::vector<CmdArg> m_Args;
+};
+
+class CCmdSet
+{
+public:
+	CCmdSet() {}
+	~CCmdSet() {}
+
+	void PushCmd(const char* name, unsigned short code) {
+		m_Cmds.push_back(CmdInfo(name, code));
+	}
+	void PushArg(const char* name, int type) {
+		m_Cmds[m_Cmds.size()-1].m_Args.push_back(CmdArg(name, type));
+	}
+
+	int GetCmdCount() {
+		return m_Cmds.size();
+	}
+	const CmdInfo* GetCmd(int nIndex) {
+		if(nIndex<0 && nIndex>=(int)m_Cmds.size()) return NULL;
+		return &m_Cmds[nIndex];
+	}
+	const CmdInfo* GetCmd(const char* name) {
+		for(size_t l=0; l<m_Cmds.size(); l++) {
+			if(m_Cmds[l].m_Name==name) {
+				return &m_Cmds[l];
+			}
+		}
+		return NULL;
+	}
+	const CmdInfo* GetCmd(unsigned short nCmd) {
+		for(size_t l=0; l<m_Cmds.size(); l++) {
+			if(m_Cmds[l].m_Code==nCmd) {
+				return &m_Cmds[l];
+			}
+		}
+		return NULL;
+	}
+
+private:
+	std::vector<CmdInfo> m_Cmds;
+};
+
 typedef struct CmdData {
 	unsigned int nCmd;
 	unsigned int nWho;

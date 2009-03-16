@@ -6,8 +6,6 @@
 #include "resource.h"
 
 #include "SGClient.h"
-#include "SGCmdBuilder.h"
-
 #include "AboutDlg.h"
 #include "MainView.h"
 #include "MainFrm.h"

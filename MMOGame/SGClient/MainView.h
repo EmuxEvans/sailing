@@ -49,5 +49,6 @@ public:
 	virtual void OnDisconnect();
 
 	int LuaCallback();
+	void Output(const char* pLine);
 
 };

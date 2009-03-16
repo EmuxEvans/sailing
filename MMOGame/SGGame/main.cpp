@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <winsock2.h>
 #include <map>
+#include <vector>
 #include <string>
 
 #include "..\Engine\asockio.h"

@@ -5,8 +5,9 @@
 
 #include "resource.h"
 
+#include "..\Engine\CmdData.h"
+
 #include "SGClient.h"
-#include "SGCmdBuilder.h"
 #include "MainView.h"
 #include "MainFrm.h"
 
