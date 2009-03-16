@@ -12,6 +12,28 @@ int main(int argc, char* argv[])
 	WSAStartup(MAKEWORD(2,2), &wsaData);
 	CTCPConnection::Init();
 
+	CTCPConnection a;
+	a.Connect("127.0.0.1:1980");
+	unsigned short len = 4;
+	int nUserId = 100;
+	a.Send(&len, sizeof(len));
+	a.Send(&nUserId, sizeof(nUserId));
+	len = 0;
+	a.Send(&len, sizeof(len));
+	a.Wait();
+
+	CTCPConnection::Final();
+	WSACleanup();
+	return 0;
+}
+
+/*
+int main(int argc, char* argv[])
+{
+	WSADATA wsaData;
+	WSAStartup(MAKEWORD(2,2), &wsaData);
+	CTCPConnection::Init();
+
 	COOKTCPConnection a, b, c, d;
 
 	a.Connect("127.0.0.1:2008");
@@ -63,3 +85,4 @@ int main(int argc, char* argv[])
 	WSACleanup();
 	return 0;
 }
+*/

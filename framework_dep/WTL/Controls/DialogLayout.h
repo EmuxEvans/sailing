@@ -300,6 +300,11 @@ protected:
 		delete m_pRootContainer;
 	}
 
+	void DoLayout(const CRect& rcLayout)
+	{
+		DoLayout(m_pRootContainer, rcLayout);
+
+	}
 
 	void DoLayout(CLayoutContainer* pContainer, const CRect& rcLayout)
 	{

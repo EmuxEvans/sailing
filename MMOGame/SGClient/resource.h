@@ -13,6 +13,7 @@
 #define IDC_CONSOLE                     1002
 #define IDC_CLEARLOG                    1003
 #define IDC_CLRLOG                      1003
+#define IDC_MODECHANGE                  1004
 
 // Next default values for new objects
 // 
@@ -20,7 +21,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
 #define _APS_NEXT_COMMAND_VALUE         32775
-#define _APS_NEXT_CONTROL_VALUE         1003
+#define _APS_NEXT_CONTROL_VALUE         1006
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

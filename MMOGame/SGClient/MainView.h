@@ -21,9 +21,11 @@ public:
 	END_MSG_MAP()
 
 	BEGIN_LAYOUT_MAP()
+//		LAYOUT_CONTROL(IDC_SCRIPT, LAYOUT_ANCHOR_HORIZONTAL | LAYOUT_ANCHOR_BOTTOM)
 		LAYOUT_CONTROL(IDC_COMMAND, LAYOUT_ANCHOR_HORIZONTAL | LAYOUT_ANCHOR_BOTTOM)
 		LAYOUT_CONTROL(IDC_RUNCMD, LAYOUT_ANCHOR_RIGHT | LAYOUT_ANCHOR_BOTTOM)
 		LAYOUT_CONTROL(IDC_CLRLOG, LAYOUT_ANCHOR_RIGHT | LAYOUT_ANCHOR_BOTTOM)
+//		LAYOUT_CONTROL(IDC_MODECHANGE, LAYOUT_ANCHOR_RIGHT | LAYOUT_ANCHOR_BOTTOM)
 		LAYOUT_CONTROL(IDC_CONSOLE, LAYOUT_ANCHOR_ALL)
 	END_LAYOUT_MAP()
 
@@ -35,6 +37,9 @@ public:
 	CEdit m_Console;
 	CEdit m_Command;
 
+	CMainView();
+	~CMainView();
+
 	BOOL OnInitDialog(HWND, LPARAM);
 	LRESULT OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/);
 	LRESULT OnClearLog(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/);
@@ -42,5 +47,7 @@ public:
 	virtual void OnConnect();
 	virtual void OnData(const void* pData, unsigned int nSize);
 	virtual void OnDisconnect();
+
+	int LuaCallback();
 
 };

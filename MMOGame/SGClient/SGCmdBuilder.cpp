@@ -14,21 +14,31 @@ void CSGCmdSet::PushArg(const char* name, int type)
 	m_Cmds[m_Cmds.size()-1].m_Args.push_back(CmdArg(name, type));
 }
 
+int CSGCmdSet::GetCmdCount()
+{
+	return m_Cmds.size();
+}
+
 const CmdInfo* CSGCmdSet::GetCmd(int nIndex)
 {
 	if(nIndex<0 && nIndex>=(int)m_Cmds.size()) return NULL;
 	return &m_Cmds[nIndex];
 }
 
-int CSGCmdSet::GetCmdCount()
-{
-	return m_Cmds.size();
-}
-
 const CmdInfo* CSGCmdSet::GetCmd(const char* name)
 {
 	for(size_t l=0; l<m_Cmds.size(); l++) {
 		if(m_Cmds[l].m_Name==name) {
+			return &m_Cmds[l];
+		}
+	}
+	return NULL;
+}
+
+const CmdInfo* CSGCmdSet::GetCmd(unsigned short nCmd)
+{
+	for(size_t l=0; l<m_Cmds.size(); l++) {
+		if(m_Cmds[l].m_Code==nCmd) {
 			return &m_Cmds[l];
 		}
 	}
@@ -53,6 +63,8 @@ CSGClientCmdSet::CSGClientCmdSet()
 
 CSGServerCmdSet::CSGServerCmdSet()
 {
+	PushCmd("login_seed", SGCMDCODE_LOGIN_SEED);
+	PushArg("salt", CMDARG_TYPE_BYTE|CMDARG_TYPE_ARRAY);
 }
 
 CSGCmdBuilder::CSGCmdBuilder(CSGCmdSet* pCmdSet)

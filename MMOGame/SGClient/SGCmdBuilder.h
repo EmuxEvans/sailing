@@ -1,17 +1,24 @@
 #pragma once
 
 enum {
-	CMDARG_TYPE_DWORD	= 0x0001,
-	CMDARG_TYPE_FLOAT	= 0x0002,
-	CMDARG_TYPE_STRING	= 0x0003,
-	CMDARG_TYPE_STRUCT	= 0x0004,
+	CMDARG_TYPE_CHAR	= 0x0001,
+	CMDARG_TYPE_SHORT	= 0x0002,
+	CMDARG_TYPE_INT		= 0x0003,
+
+	CMDARG_TYPE_BYTE	= 0x0011,
+	CMDARG_TYPE_WORD	= 0x0012,
+	CMDARG_TYPE_DWORD	= 0x0013,
+
+	CMDARG_TYPE_FLOAT	= 0x0101,
+	CMDARG_TYPE_STRING	= 0x0102,
+	CMDARG_TYPE_STRUCT	= 0x0103,
 	CMDARG_TYPE_ARRAY	= 0x0100,
 };
 
 class CmdArg
 {
 public:
-	CmdArg(const char* name, int type, const char* struct_name=NULL, unsigned int struct_size=0) {
+	CmdArg(const char* name, unsigned int type, const char* struct_name=NULL, unsigned int struct_size=0) {
 		m_Name = name;
 		m_Type = type;
 		m_StructName = struct_name?struct_name:"";
@@ -19,7 +26,7 @@ public:
 	}
 
 	std::string m_Name;
-	int m_Type;
+	unsigned int m_Type;
 	std::string m_StructName;
 	unsigned int m_StructSize;
 };
@@ -46,9 +53,10 @@ public:
 	void PushCmd(const char* name, unsigned short code);
 	void PushArg(const char* name, int type);
 
-	const CmdInfo* GetCmd(int nIndex);
 	int GetCmdCount();
+	const CmdInfo* GetCmd(int nIndex);
 	const CmdInfo* GetCmd(const char* name);
+	const CmdInfo* GetCmd(unsigned short nCmd);
 
 private:
 	std::vector<CmdInfo> m_Cmds;
