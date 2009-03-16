@@ -14,8 +14,6 @@
 
 static ISGClient* myClient = NULL;
 static ISGClientCallback* myCallback = NULL;
-static CSGClientCmdSet myClientCmdSet;
-static CSGCmdBuilder myBuilder(&myClientCmdSet);
 
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
@@ -141,9 +139,4 @@ ISGClient* GetClient()
 {
 	if(!myClient) myClient = CreateSGClient(myCallback, false);
 	return myClient;
-}
-
-CSGCmdBuilder& GetCmdBuilder()
-{
-	return myBuilder;
 }

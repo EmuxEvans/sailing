@@ -50,4 +50,3 @@ public:
 };
 
 ISGClient* GetClient();
-CSGCmdBuilder& GetCmdBuilder();

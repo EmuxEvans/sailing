@@ -49,3 +49,5 @@ extern CAppModule _Module;
 #include <stgreg.h>
 #include <MenuXP.h>
 #include <DialogLayout.h>
+
+#include <stdio.h>
