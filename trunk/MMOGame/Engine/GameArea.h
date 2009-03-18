@@ -101,6 +101,8 @@ public:
 	void ChangeCell(CAreaCell<TArea, TAreaActor>* pFromCell, CAreaCell<TArea, TAreaActor>* pToCell);
 
 	const Vector& GetPosition() const;
+	const Vector& GetDestination() const;
+	const unsigned int GetWalkTime() const;
 	float GetDirection() const;
 
 	void SetTarget(TAreaActor* pTarget);

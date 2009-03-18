@@ -18,4 +18,14 @@ CSGClientCmdSet::CSGClientCmdSet()
 	PushArg("ey", CMDARG_TYPE_FLOAT);
 	PushArg("ez", CMDARG_TYPE_FLOAT);
 	PushArg("time", CMDARG_TYPE_DWORD);
+
+	PushCmd("mapsay", SGCMDCODE_MAPCHAT_SAY);
+	PushArg("body", CMDARG_TYPE_STRING);
+
+	PushCmd("mapmsay", SGCMDCODE_MAPCHAT_MSAY);
+	PushArg("who", CMDARG_TYPE_STRING);
+	PushArg("body", CMDARG_TYPE_STRING);
+
+	PushCmd("target_set", SGCMDCODE_TARGET_SET);
+	PushArg("targetid", CMDARG_TYPE_DWORD);
 }

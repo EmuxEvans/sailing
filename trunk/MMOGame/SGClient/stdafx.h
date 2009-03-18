@@ -54,3 +54,4 @@ extern CAppModule _Module;
 
 #include <string>
 #include <vector>
+#include <list>

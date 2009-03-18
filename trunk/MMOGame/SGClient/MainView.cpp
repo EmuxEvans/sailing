@@ -79,9 +79,19 @@ static int lua_output(lua_State* L)
 	return 0;
 }
 
+static std::list<std::string> m_Commandlist;
+
 CMainView::CMainView()
 {
 	L = lua_open();
+	luaopen_string(L);
+	luaopen_base(L);
+	luaopen_table(L);
+	//luaopen_io(L);
+	//luaopen_os(L);
+	//luaopen_math(L);
+	//luaopen_debug(L);
+	//luaopen_package(L);
 
 	lua_pushstring(L, "connect");
 	lua_pushcfunction(L, lua_oncall);
@@ -113,12 +123,41 @@ CMainView::CMainView()
 	m_bCommandMode = TRUE;
 	m_szFileName[0] = '\0';
 	GetCurrentDirectory(sizeof(m_szFileName), m_szFileName);
+
+	FILE* fp = fopen("SGClient.History.txt", "rt");
+	if(fp) {
+		char szLine[1000];
+		for(;;) {
+			if(fgets(szLine, sizeof(szLine), fp)==NULL) break;
+			for(int i=0; i<sizeof(szLine); i++) {
+				if(szLine[i]<' ' && szLine[i]!='\0') {
+					memmove(szLine+i, szLine+i+1, strlen(szLine+i+1)+1);
+				}
+				if(szLine[i]=='\0') break;
+			}
+			if(szLine[0]=='\0') continue;
+
+			m_Commandlist.push_back(szLine);
+		}
+		m_Commandlist.sort();
+		fclose(fp);
+	}
 }
 
 CMainView::~CMainView()
 {
 	g_pMainView = NULL;
 	lua_close(L);
+
+	FILE* fp = fopen("SGClient.History.txt", "wt");
+	if(fp) {
+		std::list<std::string>::iterator i;
+		for(i=m_Commandlist.begin(); i!=m_Commandlist.end(); i++) {
+			fprintf(fp, "%s\n", (*i).c_str());
+		}
+		fclose(fp);
+	}
+
 }
 
 BOOL CMainView::PreTranslateMessage(MSG* pMsg)
@@ -162,6 +201,11 @@ BOOL CMainView::OnInitDialog(HWND, LPARAM)
 	::GetWindowRect(GetDlgItem(IDC_MODCHG), &rctCtl);
 	rctCtl -= LT;
 	m_nModChgRight = rctDlg.right - rctCtl.left;
+
+	std::list<std::string>::iterator i;
+	for(i=m_Commandlist.begin(); i!=m_Commandlist.end(); i++) {
+		m_Command.AddString((*i).c_str());
+	}
 
 	return TRUE;
 }
@@ -292,6 +336,12 @@ LRESULT CMainView::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& 
 
 	if(m_bCommandMode) {
 		::GetWindowText(GetDlgItem(IDC_COMMAND), szText, sizeof(szText));
+		for(int i=0; i<sizeof(szText); i++) {
+			if(szText[i]<' ' && szText[i]!='\0') {
+				memmove(szText+i, szText+i+1, strlen(szText+i+1)+1);
+			}
+			if(szText[i]=='\0') break;
+		}
 	} else {
 		::GetWindowText(GetDlgItem(IDC_SCRIPT), szText, sizeof(szText));
 	}
@@ -303,9 +353,12 @@ LRESULT CMainView::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& 
 	}
 
 	if(luaL_dostring(L, szText)==0) {
-		::SetWindowText(GetDlgItem(IDC_COMMAND), "");
-		if(m_Command.FindString(-1, szText)==-1) {
-			m_Command.AddString(szText);
+		if(m_bCommandMode) {
+			::SetWindowText(GetDlgItem(IDC_COMMAND), "");
+			if(m_Command.FindString(-1, szText)==-1) {
+				m_Command.AddString(szText);
+				m_Commandlist.push_back(szText);
+			}
 		}
 	} else {
 		m_Console.AppendText(lua_tostring(L, -1));
@@ -431,6 +484,9 @@ void CMainView::OnData(const void* pData, unsigned int nSize)
 			case CMDARG_TYPE_STRING:
 				lua_pushstring(L, data.GetString());
 				break;
+			case CMDARG_TYPE_STRUCT:
+				lua_pushstring(L, "this is a struct");
+				break;
 			default:
 				assert(0);
 				return;
@@ -514,46 +570,46 @@ int CMainView::LuaCallback()
 		switch(pCmdInfo->m_Args[l].m_Type) {
 		case CMDARG_TYPE_BYTE:
 			{
-				if(!lua_isnumber(L, -(l+1))) {
+				if(!lua_isnumber(L, (((int)pCmdInfo->m_Args.size())*(-1) + l))) {
 					char szTxt[1000];
 					sprintf(szTxt, "invalid parameter type in %s(%d)@%s, BYTE\n", pCmdInfo->m_Args[l].m_Name, l+1, pCmdInfo->m_Name);
 					tolua_error(L, szTxt, NULL);
 					return 0;
 				}
-				data.PutValue<unsigned char>((unsigned char)lua_tointeger(L, -(l+1)));
+				data.PutValue<unsigned char>((unsigned char)lua_tointeger(L, (((int)pCmdInfo->m_Args.size())*(-1) + l)));
 				break;
 			}
 		case CMDARG_TYPE_DWORD:
 			{
-				if(!lua_isnumber(L, -(l+1))) {
+				if(!lua_isnumber(L, (((int)pCmdInfo->m_Args.size())*(-1) + l))) {
 					char szTxt[1000];
 					sprintf(szTxt, "invalid parameter type in %s(%d)@%s, DWORD\n", pCmdInfo->m_Args[l].m_Name, l+1, pCmdInfo->m_Name);
 					tolua_error(L, szTxt, NULL);
 					return 0;
 				}
-				data.PutValue<unsigned int>((unsigned int)lua_tointeger(L, -(l+1)));
+				data.PutValue<unsigned int>((unsigned int)lua_tointeger(L, (((int)pCmdInfo->m_Args.size())*(-1) + l)));
 				break;
 			}
 		case CMDARG_TYPE_FLOAT:
 			{
-				if(!lua_isnumber(L, -(l+1))) {
+				if(!lua_isnumber(L, (((int)pCmdInfo->m_Args.size())*(-1) + l))) {
 					char szTxt[1000];
 					sprintf(szTxt, "invalid parameter type in %s(%d)@%s, FLOAT\n", pCmdInfo->m_Args[l].m_Name, l+1, pCmdInfo->m_Name);
 					tolua_error(L, szTxt, NULL);
 					return 0;
 				}
-				data.PutValue<float>((float)lua_tointeger(L, -(l+1)));
+				data.PutValue<float>((float)lua_tointeger(L, (((int)pCmdInfo->m_Args.size())*(-1) + l)));
 				break;
 			}
 		case CMDARG_TYPE_STRING:
 			{
-				if(!lua_isstring(L, -(l+1))) {
+				if(!lua_isstring(L, (((int)pCmdInfo->m_Args.size())*(-1) + l))) {
 					char szTxt[1000];
 					sprintf(szTxt, "invalid parameter type in %s(%d)@%s, STRING\n", pCmdInfo->m_Args[l].m_Name, l+1, pCmdInfo->m_Name);
 					tolua_error(L, szTxt, NULL);
 					return 0;
 				}
-				data.PutString(lua_tostring(L, -(l+1)));
+				data.PutString(lua_tostring(L, (((int)pCmdInfo->m_Args.size())*(-1) + l)));
 				break;
 			}
 		default:
@@ -570,5 +626,4 @@ int CMainView::LuaCallback()
 void CMainView::Output(const char* pLine)
 {
 	m_Console.AppendText(pLine);
-	m_Console.AppendText("\n");
 }
