@@ -37,13 +37,13 @@
 #define SGBATTLEFIELD_TEAM_RED		0
 #define SGBATTLEFIELD_TEAM_BLUE		1
 
-typedef struct SGNPC_VIEWDATA {
-	char name[100];
-} SGNPC_VIEWDATA;
-
 typedef struct SGPLAYER_VIEWDATA {
 	char name[100];
 } SGPLAYER_VIEWDATA;
+
+typedef struct SGNPC_VIEWDATA {
+	char name[100];
+} SGNPC_VIEWDATA;
 
 typedef struct SGPET_VIEWDATA {
 	unsigned int m_nOwner;

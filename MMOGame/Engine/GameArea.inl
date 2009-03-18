@@ -226,6 +226,7 @@ template<class TArea, class TAreaActor>
 void CAreaCell<TArea, TAreaActor>::Notify(const CmdData* pCmdData)
 {
 	for(int i=0; i<sizeof(m_Actors)/sizeof(m_Actors[0]); i++) {
+//		if(m_Actors[i]) {
 		if(m_Actors[i] && m_Actors[i]->GetActorId()!=pCmdData->nWho) {
 			m_Actors[i]->OnNotify(pCmdData);
 		}
@@ -403,7 +404,6 @@ void CAreaActor<TArea, TAreaActor>::ChangeCell(CAreaCell<TArea, TAreaActor>* pFr
 	if(pToCell) pToCell->InsertActor((TAreaActor*)this);
 
 	if(pFromCell) {
-
 		for(x=pFromCell->GetAreaCol()-AREA_ACTION_NOTIFY_RANGE; x<=pFromCell->GetAreaCol()+AREA_ACTION_NOTIFY_RANGE; x++) {
 			if(x<0 || x>=GetArea()->AreaColCount()) continue;
 			for(y=pFromCell->GetAreaRow()-AREA_ACTION_NOTIFY_RANGE; y<=pFromCell->GetAreaRow()+AREA_ACTION_NOTIFY_RANGE; y++) {
@@ -465,6 +465,18 @@ template<class TArea, class TAreaActor>
 const Vector& CAreaActor<TArea, TAreaActor>::GetPosition() const
 {
 	return m_vecPosition;
+}
+
+template<class TArea, class TAreaActor>
+const Vector& CAreaActor<TArea, TAreaActor>::GetDestination() const
+{
+	return m_vecDestination;
+}
+
+template<class TArea, class TAreaActor>
+const unsigned int CAreaActor<TArea, TAreaActor>::GetWalkTime() const
+{
+	return m_nWalkTime;
 }
 
 template<class TArea, class TAreaActor>

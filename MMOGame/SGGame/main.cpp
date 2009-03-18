@@ -189,7 +189,7 @@ public:
 		CDataBuffer<100> sbuf;
 		sbuf.PutValue<unsigned int>(0);
 		sbuf.PutValue<unsigned short>(0);
-		sbuf.PutValue(nUserId);
+		sbuf.PutValue(m_nSeq);
 		pLoop->PushMsg(SGCMDCODE_CONNECT, nUserId, sbuf.GetBuffer(), sbuf.GetLength());
 	}
 

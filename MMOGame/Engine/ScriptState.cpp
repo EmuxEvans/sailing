@@ -23,7 +23,7 @@ public:
 	virtual bool LoadScript(const char* filename);
 
 	virtual bool Call(const char* funcname);
-	virtual bool Call(const char* funcname);
+	virtual bool Call(const char* funcname, void* obj, const char* obj_type, unsigned int cmd, unsigned int who, void* data, const char* data_type);
 
 protected:
 	void SetErrorMsg(int index);

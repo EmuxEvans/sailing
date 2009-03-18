@@ -12,7 +12,7 @@ enum {
 	CMDARG_TYPE_FLOAT	= 0x0101,
 	CMDARG_TYPE_STRING	= 0x0102,
 	CMDARG_TYPE_STRUCT	= 0x0103,
-	CMDARG_TYPE_ARRAY	= 0x0100,
+	CMDARG_TYPE_ARRAY	= 0x1000,
 };
 
 class CmdArg
@@ -53,8 +53,8 @@ public:
 	void PushCmd(const char* name, unsigned short code) {
 		m_Cmds.push_back(CmdInfo(name, code));
 	}
-	void PushArg(const char* name, int type) {
-		m_Cmds[m_Cmds.size()-1].m_Args.push_back(CmdArg(name, type));
+	void PushArg(const char* name, int type, const char* struct_name=NULL, unsigned int struct_size=0) {
+		m_Cmds[m_Cmds.size()-1].m_Args.push_back(CmdArg(name, type, struct_name, struct_size));
 	}
 
 	int GetCmdCount() {
@@ -105,7 +105,7 @@ public:
 	bool GetString(const char*& pValue, unsigned int nMaxLen=0xffff);
 	template<class T>
 	bool GetStruct(const T*& Value);
-	const char* GetString(unsigned int nMaxLen=0);
+	const char* GetString(unsigned int nMaxLen=0xffff);
 	template<class T>
 	bool GetArray(const T*& Array, unsigned int* Count, unsigned int Max=0xffff);
 	template<class T>
@@ -249,6 +249,7 @@ void CCmdDataWriter<nSize>::Reset(unsigned int nCmd, unsigned int nWho)
 template<unsigned int nSize>
 const CmdData* CCmdDataWriter<nSize>::GetCmdData()
 {
+	m_CmdData.pData = GetBuffer();
 	m_CmdData.nSize = GetLength();
 	return &m_CmdData;
 }

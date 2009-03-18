@@ -139,7 +139,8 @@ bool CSGPlayer::QuitPlayer()
 
 bool CSGPlayer::GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData)
 {
-	return false;
+	memset(pData, 0, sizeof(*pData));
+	return true;
 }
 
 bool CSGPlayer::DropItem(int nIndex)
@@ -179,6 +180,7 @@ bool CSGPlayer::Equip(int nIndex, int nSolt)
 }
 
 void CSGPlayer::OnNotify(const CmdData* pCmdData)
+
 {
 	if(pCmdData->nCmd==SGCMDCODE_BATTLEFIELD_JOIN) {
 		assert(!m_pBattleField);
@@ -195,19 +197,26 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 	}
 
 	if(pCmdData->nCmd==CMDCODE_MOVE_JOIN || pCmdData->nCmd==SGCMDCODE_MOVE_CHANGE) {
-		if(pCmdData->nWho==GetActorId()) return;
 		CSGAreaActor* pActor = GetArea()->GetActor(pCmdData->nWho);
 		assert(pActor);
 		if(!pActor) return;
 
-		CDataBuffer<100> buf;
-		buf.PutValue<unsigned short>(pCmdData->nCmd==CMDCODE_MOVE_JOIN?SGCMDCODE_MOVE_JOIN:pCmdData->nCmd);
-		buf.PutValue(pActor->GetActorId());
-		buf.PutValue(pActor->GetActorType());
+		CDataBuffer<1000> buf;
 
 		switch(pActor->GetActorType()) {
+		case SGACTORTYPE_PLAYER:
+			{
+				buf.PutValue<unsigned short>(pCmdData->nCmd==CMDCODE_MOVE_JOIN?SGCMDCODE_MOVE_JOIN_PLAYER:SGCMDCODE_MOVE_CHANGE_PLAYER);
+				buf.PutValue(pActor->GetActorId());
+				SGPLAYER_VIEWDATA viewdata;
+				if(!((CSGPlayer*)pActor)->GetViewData(this, &viewdata)) return;
+				buf.PutValue(viewdata);
+				break;
+			}
 		case SGACTORTYPE_NPC:
 			{
+				buf.PutValue<unsigned short>(pCmdData->nCmd==CMDCODE_MOVE_JOIN?SGCMDCODE_MOVE_JOIN_NPC:SGCMDCODE_MOVE_CHANGE_NPC);
+				buf.PutValue(pActor->GetActorId());
 				SGNPC_VIEWDATA viewdata;
 				if(!((CSGNPC*)pActor)->GetViewData(this, &viewdata)) return;
 				buf.PutValue(viewdata);
@@ -215,20 +224,17 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 			 }
 		case SGACTORTYPE_PET:
 			{
+				buf.PutValue<unsigned short>(pCmdData->nCmd==CMDCODE_MOVE_JOIN?SGCMDCODE_MOVE_JOIN_PET:SGCMDCODE_MOVE_CHANGE_PET);
+				buf.PutValue(pActor->GetActorId());
 				SGPET_VIEWDATA viewdata;
 				if(!((CSGPet*)pActor)->GetViewData(this, &viewdata)) return;
 				buf.PutValue(viewdata);
 				break;
 			}
-		case SGACTORTYPE_PLAYER:
-			{
-				SGPLAYER_VIEWDATA viewdata;
-				if(!((CSGPlayer*)pActor)->GetViewData(this, &viewdata)) return;
-				buf.PutValue(viewdata);
-				break;
-			}
 		case SGACTORTYPE_BATTLEFIELD:
 			{
+				buf.PutValue<unsigned short>(pCmdData->nCmd==CMDCODE_MOVE_JOIN?SGCMDCODE_MOVE_JOIN_BATTLE:SGCMDCODE_MOVE_CHANGE_BATTLE);
+				buf.PutValue(pActor->GetActorId());
 				SGBATTLEFIELD_VIEWDATA viewdata;
 				if(!((CSGBattleField*)pActor)->GetViewData(this, &viewdata)) return;
 				buf.PutValue(viewdata);
@@ -236,14 +242,25 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 			}
 		default:
 			assert(0);
+			return;
 		}
 
+		buf.PutValue(pActor->GetPosition().x);
+		buf.PutValue(pActor->GetPosition().y);
+		buf.PutValue(pActor->GetPosition().z);
+		buf.PutValue(pActor->GetDestination().x);
+		buf.PutValue(pActor->GetDestination().y);
+		buf.PutValue(pActor->GetDestination().z);
+		buf.PutValue(pActor->GetWalkTime());
+		buf.PutValue(pActor->GetDirection());
+
 		// send buf to client
-		GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
+		if(buf.GetLength()) {
+			GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
+		}
 		return;
 	}
 	if(pCmdData->nCmd==CMDCODE_MOVE_LEAVE) {
-		if(pCmdData->nWho==GetActorId()) return;
 		CSGAreaActor* pActor = GetArea()->GetActor(pCmdData->nWho);
 		assert(pActor);
 		if(!pActor) return;
