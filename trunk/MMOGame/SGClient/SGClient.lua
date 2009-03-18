@@ -7,7 +7,7 @@ function ondisconnect()
 	output("--OnDisconnect--\n")
 end
 
-function serialize (o)
+function serialize(o)
 	if type(o) == "number" then
 		output(o)
 	elseif type(o) == "string" then

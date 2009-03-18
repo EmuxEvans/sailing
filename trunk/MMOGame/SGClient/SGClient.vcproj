@@ -143,7 +143,7 @@
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
-				DebugInformationFormat="0"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -232,12 +232,24 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\SGClientCmdSet.cpp"
+				RelativePath="..\SGGame\SGCmdSet.cpp"
 				>
-			</File>
-			<File
-				RelativePath=".\SGServerCmdSet.cpp"
-				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\stdafx.cpp"
@@ -285,11 +297,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SGClientCmdSet.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGServerCmdSet.h"
+				RelativePath="..\SGGame\SGCmdSet.h"
 				>
 			</File>
 			<File
