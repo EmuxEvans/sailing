@@ -50,8 +50,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\framework_dep\WTL\Controls;..\..\framework_dep\wtl\include;..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\framework_dep\WTL\Controls;..\..\framework_dep\wtl\include;..\..\framework\inc;..\..\framework_dep\scintilla\include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;_DEBUG;_CRT_SECURE_NO_WARNINGS;PLAT_WIN"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -73,7 +73,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="appbox_lib.lib ws2_32.lib"
+				AdditionalDependencies="appbox_lib.lib ws2_32.lib imm32.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\framework\$(ConfigurationName)-$(PlatformName)"
 				IgnoreDefaultLibraryNames=""
@@ -137,8 +137,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\framework_dep\WTL\Controls;..\..\framework_dep\wtl\include;..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\framework_dep\WTL\Controls;..\..\framework_dep\wtl\include;..\..\framework\inc;..\..\framework_dep\scintilla\include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;STRICT;NDEBUG;_CRT_SECURE_NO_WARNINGS;PLAT_WIN"
 				ExceptionHandling="0"
 				RuntimeLibrary="3"
 				UsePrecompiledHeader="2"
@@ -159,7 +159,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="appbox_lib.lib ws2_32.lib"
+				AdditionalDependencies="appbox_lib.lib ws2_32.lib imm32.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\framework\$(ConfigurationName)-$(PlatformName)"
 				SubSystem="2"

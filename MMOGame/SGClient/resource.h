@@ -14,6 +14,7 @@
 #define IDC_MODCHG                      1005
 #define IDC_LOADTXT                     1006
 #define IDC_SAVETXT                     1007
+#define IDC_CUSTOM3                     1010
 #define ID_CONN_00                      32780
 #define ID_CONN_01                      32781
 #define ID_CONN_02                      32782
@@ -31,7 +32,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
 #define _APS_NEXT_COMMAND_VALUE         32800
-#define _APS_NEXT_CONTROL_VALUE         1008
+#define _APS_NEXT_CONTROL_VALUE         1011
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

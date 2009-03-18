@@ -171,6 +171,7 @@ BOOL CMainView::OnInitDialog(HWND, LPARAM)
 	SetMsgHandled(FALSE);
 	m_Console.m_hWnd = GetDlgItem(IDC_CONSOLE);
 	m_Command.m_hWnd = GetDlgItem(IDC_COMMAND);
+	m_Script.m_hWnd = GetDlgItem(IDC_SCRIPT);
 
 	CRect rctDlg, rctCtl;
 	GetClientRect(&rctDlg);
@@ -208,6 +209,15 @@ BOOL CMainView::OnInitDialog(HWND, LPARAM)
 		m_Command.AddString((*i).c_str());
 	}
 	m_CommandList.sort();
+
+	m_Script.Init();
+	m_Script.SetFontname(STYLE_DEFAULT, "Lucida Console");
+	m_Script.SetFontheight(STYLE_DEFAULT, 9);
+	m_Script.SetLexer(SCLEX_LUA);
+	m_Script.SetKeyWords(0, "break do end else elseif function if local nil not or repeat return then until while");
+	m_Script.SetDisplayLinenumbers(FALSE);
+	//m_Script.SetDisplayFolding(FALSE);
+	
 
 	return TRUE;
 }
@@ -345,7 +355,7 @@ LRESULT CMainView::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& 
 			if(szText[i]=='\0') break;
 		}
 	} else {
-		::GetWindowText(GetDlgItem(IDC_SCRIPT), szText, sizeof(szText));
+		strcpy(szText, m_Script.GetText());
 	}
 
 	std::string Text = szText;
@@ -398,7 +408,7 @@ LRESULT CMainView::OnLoadText(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*
 	}
 
 	strcpy(m_szFileName, a.m_szFileName);
-	::SetWindowText(GetDlgItem(IDC_SCRIPT), szText);
+	m_Script.SetText(szText);
 	return 0L;
 }
 
@@ -407,11 +417,8 @@ LRESULT CMainView::OnSaveText(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*
 	CFileDialog a(FALSE, _T("*.lua"), m_szFileName, 0, _T("Lua Source File (*.lua)\0*.lua\0"));
 	if(a.DoModal()!=IDOK) return 0;
 
-	char szText[100000];
-	::GetWindowText(GetDlgItem(IDC_SCRIPT), szText, sizeof(szText));
-
 	strcpy(m_szFileName, a.m_szFileName);
-	if(save_textfile(a.m_szFileName, szText, strlen(szText))<0) {
+	if(save_textfile(a.m_szFileName, m_Script.GetText(), strlen(m_Script.GetText()))<0) {
 		MessageBox(a.m_szFileName, "failed to save file");
 	}
 
