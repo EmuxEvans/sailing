@@ -169,8 +169,8 @@ BOOL CMainView::PreTranslateMessage(MSG* pMsg)
 BOOL CMainView::OnInitDialog(HWND, LPARAM)
 {
 	SetMsgHandled(FALSE);
-	m_Console.m_hWnd = GetDlgItem(IDC_CONSOLE);
 	m_Command.m_hWnd = GetDlgItem(IDC_COMMAND);
+	m_Console.m_hWnd = GetDlgItem(IDC_CONSOLE);
 	m_Script.m_hWnd = GetDlgItem(IDC_SCRIPT);
 
 	CRect rctDlg, rctCtl;
@@ -210,6 +210,15 @@ BOOL CMainView::OnInitDialog(HWND, LPARAM)
 	}
 	m_CommandList.sort();
 
+	m_Console.Init();
+	m_Console.SetFontname(STYLE_DEFAULT, "Lucida Console");
+	m_Console.SetFontheight(STYLE_DEFAULT, 9);
+	m_Console.SetLexer(SCLEX_CPP);
+	m_Console.SetKeyWords(0, "OnConnect OnData OnDisconnect");
+	m_Console.SetDisplayLinenumbers(FALSE);
+	m_Console.SetDisplayFolding(FALSE);
+	m_Console.SendMessage(SCI_SETINDENTATIONGUIDES, TRUE, 0);
+
 	m_Script.Init();
 	m_Script.SetFontname(STYLE_DEFAULT, "Lucida Console");
 	m_Script.SetFontheight(STYLE_DEFAULT, 9);
@@ -217,7 +226,7 @@ BOOL CMainView::OnInitDialog(HWND, LPARAM)
 	m_Script.SetKeyWords(0, "break do end else elseif function if local nil not or repeat return then until while");
 	m_Script.SetDisplayLinenumbers(FALSE);
 	//m_Script.SetDisplayFolding(FALSE);
-	
+
 
 	return TRUE;
 }
@@ -373,8 +382,8 @@ LRESULT CMainView::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& 
 			}
 		}
 	} else {
-		m_Console.AppendText(lua_tostring(L, -1));
-		m_Console.AppendText("\n");
+		Output(lua_tostring(L, -1));
+		Output("\n");
 		lua_pop(L, 1);
 	}
 
@@ -383,7 +392,7 @@ LRESULT CMainView::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& 
 
 LRESULT CMainView::OnClearLog(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/)
 {
-	m_Console.SetWindowText("");
+	m_Console.SetText("");
 	return 0L;
 }
 
@@ -429,8 +438,8 @@ void CMainView::OnConnect()
 {
 	lua_getglobal(L, "onconnect");
 	if(lua_pcall(L, 0, 0, 0)!=0) {
-		m_Console.AppendText(lua_tostring(L, -1));
-		m_Console.AppendText("\n");
+		Output(lua_tostring(L, -1));
+		Output("\n");
 		lua_pop(L, 1);
 	}
 }
@@ -505,8 +514,8 @@ void CMainView::OnData(const void* pData, unsigned int nSize)
 	}
 
 	if(lua_pcall(L, 1, 0, 0)!=0) {
-		m_Console.AppendText(lua_tostring(L, -1));
-		m_Console.AppendText("\n");
+		Output(lua_tostring(L, -1));
+		Output("\n");
 		lua_pop(L, 1);
 	}
 }
@@ -515,8 +524,8 @@ void CMainView::OnDisconnect()
 {
 	lua_getglobal(L, "ondisconnect");
 	if(lua_pcall(L, 0, 0, 0)!=0) {
-		m_Console.AppendText(lua_tostring(L, -1));
-		m_Console.AppendText("\n");
+		Output(lua_tostring(L, -1));
+		Output("\n");
 		lua_pop(L, 1);
 	}
 }
@@ -634,5 +643,11 @@ int CMainView::LuaCallback()
 
 void CMainView::Output(const char* pLine)
 {
-	m_Console.AppendText(pLine);
+	bool bEndOfText = m_Console.GetFirstVisableLine()>=m_Console.GetLineCount() - m_Console.LinesOnScreen() - 1;
+	m_Console.AppendText(pLine, strlen(pLine));
+	if(bEndOfText) {
+		int p = m_Console.GetLineCount() - m_Console.LinesOnScreen();
+		if(p<0) p = 0;
+		m_Console.LineScroll(p-m_Console.GetCurrentLine(), 0);
+	}
 }

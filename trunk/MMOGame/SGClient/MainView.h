@@ -29,9 +29,9 @@ public:
 //	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 //	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
 
-	CEdit m_Console;
 	CComboBox m_Command;
 	CSciLexerEdit m_Script;
+	CSciLexerEdit m_Console;
 
 	CMainView();
 	~CMainView();
