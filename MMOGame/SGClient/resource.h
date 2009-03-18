@@ -14,13 +14,23 @@
 #define IDC_MODCHG                      1005
 #define IDC_LOADTXT                     1006
 #define IDC_SAVETXT                     1007
+#define ID_CONN_00                      32780
+#define ID_CONN_01                      32781
+#define ID_CONN_02                      32782
+#define ID_CONN_03                      32783
+#define ID_CONN_04                      32784
+#define ID_CONN_05                      32785
+#define ID_CONN_06                      32786
+#define ID_CONN_07                      32787
+#define ID_CONN_08                      32788
+#define ID_CONN_09                      32789
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
-#define _APS_NEXT_COMMAND_VALUE         32775
+#define _APS_NEXT_COMMAND_VALUE         32800
 #define _APS_NEXT_CONTROL_VALUE         1008
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

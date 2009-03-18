@@ -30,16 +30,17 @@ static CMainView* g_pMainView = NULL;
 static CSGClientCmdSet myClientCmdSet;
 static CSGServerCmdSet myServerCmdSet;
 static const char* lua_script = 
-"function onconnect()" "\n"
-"	output(\"OnConnect\")" "\n"
-"end" "\n"
-"function ondisconnect()" "\n"
-"	output(\"OnDisconnect\")" "\n"
-"end" "\n"
-"function ondata(args)" "\n"
-"	output(\"OnData \" .. args.CmdName)" "\n"
-"end" "\n"
+	"function onconnect()" "\n"
+	"	output(\"OnConnect\\n\")" "\n"
+	"end" "\n"
+	"function ondisconnect()" "\n"
+	"	output(\"OnDisconnect\\n\")" "\n"
+	"end" "\n"
+	"function ondata(args)" "\n"
+	"	output(\"OnData \" .. args.CmdName .. \"\\n\")" "\n"
+	"end" "\n"
 ;
+
 inline std::string& lTrim(std::string &ss)  
 {
 	std::string::iterator p=std::find_if(ss.begin(), ss.end(), std::not1(std::ptr_fun(isspace)));
@@ -79,7 +80,7 @@ static int lua_output(lua_State* L)
 	return 0;
 }
 
-static std::list<std::string> m_Commandlist;
+static std::list<std::string> m_CommandList;
 
 CMainView::CMainView()
 {
@@ -137,9 +138,9 @@ CMainView::CMainView()
 			}
 			if(szLine[0]=='\0') continue;
 
-			m_Commandlist.push_back(szLine);
+			m_CommandList.push_back(szLine);
 		}
-		m_Commandlist.sort();
+		m_CommandList.sort();
 		fclose(fp);
 	}
 }
@@ -152,7 +153,7 @@ CMainView::~CMainView()
 	FILE* fp = fopen("SGClient.History.txt", "wt");
 	if(fp) {
 		std::list<std::string>::iterator i;
-		for(i=m_Commandlist.begin(); i!=m_Commandlist.end(); i++) {
+		for(i=m_CommandList.begin(); i!=m_CommandList.end(); i++) {
 			fprintf(fp, "%s\n", (*i).c_str());
 		}
 		fclose(fp);
@@ -203,9 +204,10 @@ BOOL CMainView::OnInitDialog(HWND, LPARAM)
 	m_nModChgRight = rctDlg.right - rctCtl.left;
 
 	std::list<std::string>::iterator i;
-	for(i=m_Commandlist.begin(); i!=m_Commandlist.end(); i++) {
+	for(i=m_CommandList.begin(); i!=m_CommandList.end(); i++) {
 		m_Command.AddString((*i).c_str());
 	}
+	m_CommandList.sort();
 
 	return TRUE;
 }
@@ -357,7 +359,7 @@ LRESULT CMainView::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& 
 			::SetWindowText(GetDlgItem(IDC_COMMAND), "");
 			if(m_Command.FindString(-1, szText)==-1) {
 				m_Command.AddString(szText);
-				m_Commandlist.push_back(szText);
+				m_CommandList.push_back(szText);
 			}
 		}
 	} else {

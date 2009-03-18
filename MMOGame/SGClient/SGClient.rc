@@ -89,6 +89,17 @@ BEGIN
     SEPARATOR
     BUTTON      ID_FILE_PRINT
     BUTTON      ID_APP_ABOUT
+    SEPARATOR
+    BUTTON      ID_CONN_00
+    BUTTON      ID_CONN_01
+    BUTTON      ID_CONN_02
+    BUTTON      ID_CONN_03
+    BUTTON      ID_CONN_04
+    BUTTON      ID_CONN_05
+    BUTTON      ID_CONN_06
+    BUTTON      ID_CONN_07
+    BUTTON      ID_CONN_08
+    BUTTON      ID_CONN_09
 END
 
 
@@ -204,12 +215,22 @@ END
 
 IDR_MAINFRAME ACCELERATORS 
 BEGIN
-    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL
-    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL
-    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL
-    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL
-    VK_F6,          ID_NEXT_PANE,           VIRTKEY 
-    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
+    VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
+    "0",            ID_CONN_00,             VIRTKEY, CONTROL, NOINVERT
+    "1",            ID_CONN_01,             VIRTKEY, CONTROL, NOINVERT
+    "2",            ID_CONN_02,             VIRTKEY, CONTROL, NOINVERT
+    "3",            ID_CONN_03,             VIRTKEY, CONTROL, NOINVERT
+    "4",            ID_CONN_04,             VIRTKEY, CONTROL, NOINVERT
+    "5",            ID_CONN_05,             VIRTKEY, CONTROL, NOINVERT
+    "6",            ID_CONN_06,             VIRTKEY, CONTROL, NOINVERT
+    "7",            ID_CONN_07,             VIRTKEY, CONTROL, NOINVERT
+    "8",            ID_CONN_08,             VIRTKEY, CONTROL, NOINVERT
+    "9",            ID_CONN_09,             VIRTKEY, CONTROL, NOINVERT
 END
 
 
