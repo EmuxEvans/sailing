@@ -13,6 +13,15 @@
 static ISGClient* myClient = NULL;
 static ISGClientCallback* myCallback = NULL;
 
+CMainFrame::CMainFrame()
+{
+	m_nConnection = 0;
+}
+
+CMainFrame::~CMainFrame()
+{
+}
+
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg)
 {
 	if(CFrameWindowImpl<CMainFrame>::PreTranslateMessage(pMsg))
@@ -37,6 +46,19 @@ BOOL CMainFrame::OnIdle()
 	}
 
 	return FALSE;
+}
+
+void CMainFrame::SetConnection(int nNumber)
+{
+	for(int i=0; i<10; i++) {
+		UISetCheck(ID_CONN_00+i, i==nNumber?TRUE:FALSE);
+	}
+	m_nConnection = nNumber;
+}
+
+int CMainFrame::GetConnection()
+{
+	return m_nConnection;
 }
 
 LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
@@ -72,6 +94,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 
 	myCallback = &m_view;
 
+	SetConnection(m_nConnection);
 	return 0;
 }
 
@@ -130,6 +153,11 @@ LRESULT CMainFrame::OnAppAbout(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 {
 	CAboutDlg dlg;
 	dlg.DoModal();
+	return 0;
+}
+
+LRESULT CMainFrame::OnConnClick(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
+{
 	return 0;
 }
 
