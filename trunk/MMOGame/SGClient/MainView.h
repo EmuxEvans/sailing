@@ -31,6 +31,7 @@ public:
 
 	CEdit m_Console;
 	CComboBox m_Command;
+	CSciLexerEdit m_Script;
 
 	CMainView();
 	~CMainView();

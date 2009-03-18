@@ -7,8 +7,6 @@
 class CLuaEditView : public CWindowImpl<CLuaEditView, CSciLexerEdit>
 {
 public:
-	DECLARE_WND_SUPERCLASS(NULL, CSciLexerEdit::GetWndClassName())
-
 	CLuaEditView();
 	~CLuaEditView();
 

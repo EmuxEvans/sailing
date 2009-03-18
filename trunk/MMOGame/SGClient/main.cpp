@@ -43,6 +43,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	ATLASSERT(SUCCEEDED(hRes));
 	WSADATA wsaData;
 	WSAStartup(MAKEWORD(2,2), &wsaData);
+	Scintilla_RegisterClasses(hInstance);
 
 	// this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
 	::DefWindowProc(NULL, 0, 0, 0L);
@@ -55,6 +56,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	int nRet = Run(lpstrCmdLine, nCmdShow);
 
 	_Module.Term();
+	Scintilla_ReleaseResources();
 	WSACleanup();
 	::CoUninitialize();
 

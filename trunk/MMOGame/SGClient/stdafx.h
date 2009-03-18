@@ -50,6 +50,13 @@ extern CAppModule _Module;
 #include <MenuXP.h>
 #include <DialogLayout.h>
 
+#include <Scintilla.h>
+#include <SciLexer.h>
+#include <Accessor.h>
+#include <Propset.h>
+#include <keywords.h>
+#include <SciLexerEdit.h>
+
 #include <stdio.h>
 
 #include <string>
