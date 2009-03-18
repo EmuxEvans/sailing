@@ -366,7 +366,11 @@ LRESULT CMainView::OnSaveText(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*
 void CMainView::OnConnect()
 {
 	lua_getglobal(L, "onconnect");
-	lua_pcall(L, 0, 0, 0);
+	if(lua_pcall(L, 0, 0, 0)!=0) {
+		m_Console.AppendText(lua_tostring(L, -1));
+		m_Console.AppendText("\n");
+		lua_pop(L, 1);
+	}
 }
 
 void CMainView::OnData(const void* pData, unsigned int nSize)
@@ -445,7 +449,11 @@ void CMainView::OnData(const void* pData, unsigned int nSize)
 void CMainView::OnDisconnect()
 {
 	lua_getglobal(L, "ondisconnect");
-	lua_pcall(L, 0, 0, 0);
+	if(lua_pcall(L, 0, 0, 0)!=0) {
+		m_Console.AppendText(lua_tostring(L, -1));
+		m_Console.AppendText("\n");
+		lua_pop(L, 1);
+	}
 }
 
 int CMainView::LuaCallback()
