@@ -58,6 +58,15 @@ public:
 		}
 		return NULL;
 	}
+	int GetLength() {
+		return SendMessage(SCI_GETLENGTH, 0, 0);
+	}
+	void AppendText(LPCSTR pText, int nLength)
+	{
+		SendMessage(SCI_APPENDTEXT, (WPARAM)nLength, (LPARAM)pText);
+	}
+
+
 	BOOL LoadFile (
 		LPCSTR szPath) //@parm filename of to load
 	{
@@ -252,6 +261,14 @@ public:
 	{
 		return SendMessage(SCI_CANPASTE, 0, 0) != 0;
 	}
+	void SetReadOnly(BOOL bReadOnly)
+	{
+		SendMessage(SCI_SETREADONLY, (WPARAM)bReadOnly, 0);
+	}
+	BOOL GetReadOnly()
+	{
+		return (BOOL)SendMessage(SCI_GETREADONLY, 0, 0);
+	}
 	long GetLineCount()
 	{
 		return SendMessage(SCI_GETLINECOUNT, 0, 0);
@@ -265,6 +282,10 @@ public:
 	{
 		long lPos = SendMessage(SCI_GETCURRENTPOS, 0, 0);
 		return SendMessage(SCI_GETCOLUMN, lPos, 0) + 1;
+	}
+	void SetCurrentPosition(int nPos)
+	{
+		SendMessage(SCI_SETCURRENTPOS, (WPARAM)nPos, 0);
 	}
 	long GetCurrentPosition()
 	{
@@ -337,8 +358,21 @@ public:
 	{
 		SendMessage(SCI_SETWRAPMODE, (WPARAM)nMode, 0);
 	}
-	int GetWrapMode() {
+	int GetWrapMode()
+	{
 		return SendMessage(SCI_GETWRAPMODE, 0, 0);
+	}
+	void LineScroll(int nLine, int nChars)
+	{
+		SendMessage(SCI_LINESCROLL, (WPARAM)nChars, (LPARAM)nLine);
+	}
+	int LinesOnScreen()
+	{
+		return (int)SendMessage(SCI_LINESONSCREEN, 0, 0);
+	}
+	int GetFirstVisableLine()
+	{
+		return SendMessage(SCI_GETFIRSTVISIBLELINE, 0, 0);
 	}
 	void Init()
 	{

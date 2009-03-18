@@ -199,6 +199,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SGCmdSet.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SGGameLoop.cpp"
 				>
 			</File>
@@ -255,6 +259,10 @@
 			</File>
 			<File
 				RelativePath=".\SGCmdCode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SGCmdSet.h"
 				>
 			</File>
 			<File

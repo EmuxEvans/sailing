@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="appbox_lib.lib lua.lib ws2_32.lib"
+				AdditionalDependencies="appbox_lib.lib ws2_32.lib"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\$(ConfigurationName)-$(PlatformName)"
 				GenerateDebugInformation="true"

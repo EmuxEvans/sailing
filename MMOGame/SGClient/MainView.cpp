@@ -7,6 +7,7 @@
 
 #include "..\Engine\CmdData.h"
 #include "..\SGGame\SGCmdCode.h"
+#include "..\SGGame\SGCmdSet.h"
 
 #include "SGClient.h"
 #include "MainView.h"
@@ -22,13 +23,9 @@ extern "C" {
 #include <skates/os.h>
 #include <skates/misc.h>
 
-#include "SGClientCmdSet.h"
-#include "SGServerCmdSet.h"
-
 static lua_State* L = NULL;
 static CMainView* g_pMainView = NULL;
-static CSGClientCmdSet myClientCmdSet;
-static CSGServerCmdSet myServerCmdSet;
+static CSGCmdSetManage myCmdSet;
 static const char* lua_script = 
 	"function onconnect()" "\n"
 	"	output(\"OnConnect\\n\")" "\n"
@@ -101,8 +98,8 @@ CMainView::CMainView()
 	lua_pushcfunction(L, lua_oncall);
 	lua_rawset(L, LUA_GLOBALSINDEX);
 
-	for(int l=0; l<myClientCmdSet.GetCmdCount(); l++) {
-		lua_pushstring(L, myClientCmdSet.GetCmd(l)->m_Name.c_str());
+	for(int l=0; l<myCmdSet.GetClientCmdSet().GetCmdCount(); l++) {
+		lua_pushstring(L, myCmdSet.GetClientCmdSet().GetCmd(l)->m_Name);
 		lua_pushcfunction(L, lua_oncall);
 		lua_rawset(L, LUA_GLOBALSINDEX);
 	}
@@ -447,7 +444,7 @@ void CMainView::OnConnect()
 void CMainView::OnData(const void* pData, unsigned int nSize)
 {
 	CDataReader data(pData, nSize);
-	const CmdInfo* pCmdInfo = myServerCmdSet.GetCmd(data.GetValue<unsigned short>());
+	const CmdInfo* pCmdInfo = myCmdSet.GetServerCmdSet().GetCmd(data.GetValue<unsigned short>());
 	if(!pCmdInfo) {
 		MessageBox("invalid data");
 		return;
@@ -458,14 +455,14 @@ void CMainView::OnData(const void* pData, unsigned int nSize)
 	lua_newtable(L);
 
 	lua_pushstring(L, "CmdName");
-	lua_pushstring(L, pCmdInfo->m_Name.c_str());
+	lua_pushstring(L, pCmdInfo->m_Name);
 	lua_rawset(L, -3);
 	lua_pushstring(L, "CmdCode");
 	lua_pushinteger(L, (lua_Integer)pCmdInfo->m_Code);
 	lua_rawset(L, -3);
 
 	for(int l=0; l<(int)pCmdInfo->m_Args.size(); l++) {
-		lua_pushstring(L, pCmdInfo->m_Args[l].m_Name.c_str());
+		lua_pushstring(L, pCmdInfo->m_Args[l].m_Name);
 
 		if(pCmdInfo->m_Args[l].m_Type&CMDARG_TYPE_ARRAY) {
 			unsigned short nCount = data.GetValue<unsigned short>();
@@ -565,7 +562,7 @@ int CMainView::LuaCallback()
 		return 0;
 	}
 
-	const CmdInfo* pCmdInfo = myClientCmdSet.GetCmd(ar.name);
+	const CmdInfo* pCmdInfo = myCmdSet.GetClientCmdSet().GetCmd(ar.name);
 	assert(pCmdInfo);
 	if(!pCmdInfo) {
 		char szTxt[1000];

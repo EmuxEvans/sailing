@@ -25,9 +25,9 @@ public:
 		m_StructSize = struct_size;
 	}
 
-	std::string m_Name;
+	const char* m_Name;
 	unsigned int m_Type;
-	std::string m_StructName;
+	const char* m_StructName;
 	unsigned int m_StructSize;
 };
 
@@ -39,7 +39,7 @@ public:
 		m_Code = code;
 	}
 
-	std::string m_Name;
+	const char* m_Name;
 	unsigned short m_Code;
 	std::vector<CmdArg> m_Args;
 };
@@ -66,7 +66,7 @@ public:
 	}
 	const CmdInfo* GetCmd(const char* name) {
 		for(size_t l=0; l<m_Cmds.size(); l++) {
-			if(m_Cmds[l].m_Name==name) {
+			if(strcmp(m_Cmds[l].m_Name, name)==0) {
 				return &m_Cmds[l];
 			}
 		}
