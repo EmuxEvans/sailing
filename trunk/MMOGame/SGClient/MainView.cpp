@@ -86,6 +86,76 @@ static int lua_clear(lua_State* L)
 	return 0;
 }
 
+static int lua_connect(lua_State* L)
+{
+	int nConn = GetClient()->GetIndex();
+	char address[100] = "";
+	switch(lua_gettop(L)) {
+	case 0:
+		break;
+	case 1:
+		if(lua_isnumber(L, -1)) {
+			nConn = lua_tointeger(L, -1);
+		} else if(lua_isstring(L, -1)) {
+			strcpy(address, lua_tostring(L, -1));
+		} else {
+			tolua_error(L, "", NULL);
+			return 0;
+		}
+		break;
+	case 2:
+		if(!lua_isnumber(L, -2)) {
+			tolua_error(L, "invalid parameter", NULL);
+			return 0;
+		}
+		if(!lua_isstring(L, -1)) {
+			tolua_error(L, "invalid parameter", NULL);
+			return 0;
+		}
+		nConn = lua_tointeger(L, -2);
+		strcpy(address, lua_tostring(L, -1));
+		break;
+	default:
+		tolua_error(L, "invalid parameter", NULL);
+		return 0;
+	}
+	if(address[0]=='\0') {
+		lua_getglobal(L, "default_server");
+		if(lua_isstring(L, -1)) {
+			strcpy(address, lua_tostring(L, -1));
+		} else {
+			strcpy(address, "127.0.0.1:1980");
+		}
+		lua_pop(L, -1);
+	}
+	if(myClients[nConn]->Available()) myClients[nConn]->Disconnect();
+	lua_pushboolean(L, myClients[nConn]->Connect(address)?1:0);
+	return 1;
+}
+
+static int lua_disconnect(lua_State* L)
+{
+	int nConn = GetClient()->GetIndex();
+	char address[100] = "";
+	switch(lua_gettop(L)) {
+	case 0:
+		break;
+	case 1:
+		if(lua_isnumber(L, -1)) {
+			nConn = lua_tointeger(L, -1);
+		} else {
+			tolua_error(L, "", NULL);
+			return 0;
+		}
+		break;
+	default:
+		tolua_error(L, "invalid parameter", NULL);
+		return 0;
+	}
+	myClients[nConn]->Disconnect();
+	return 0;
+}
+
 static int lua_wait(lua_State* L)
 {
 	return 0;
@@ -128,10 +198,10 @@ CMainView::CMainView()
 	lua_pushcfunction(L, lua_clear);
 	lua_rawset(L, LUA_GLOBALSINDEX);
 	lua_pushstring(L, "connect");
-	lua_pushcfunction(L, lua_oncall);
+	lua_pushcfunction(L, lua_connect);
 	lua_rawset(L, LUA_GLOBALSINDEX);
 	lua_pushstring(L, "disconnect");
-	lua_pushcfunction(L, lua_oncall);
+	lua_pushcfunction(L, lua_disconnect);
 	lua_rawset(L, LUA_GLOBALSINDEX);
 
 	for(int l=0; l<myCmdSet.GetClientCmdSet().GetCmdCount(); l++) {
@@ -411,7 +481,6 @@ LRESULT CMainView::OnRunCommand(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& 
 
 	std::string Text = szText;
 	if(trim(Text).size()==0) {
-		::SetWindowText(GetDlgItem(IDC_COMMAND), "");
 		return 0L;
 	}
 
@@ -599,31 +668,6 @@ int CMainView::LuaCallback()
 	}
 	assert(ar.name);
 
-	if(strcmp(ar.name, "connect")==0) {
-		if(GetClient()->Available()) GetClient()->Disconnect();
-		char address[100] = "127.0.0.1:1980";
-		if(lua_isstring(L, -1)) {
-			strcpy(address, lua_tostring(L, -1));
-		} else {
-			lua_getglobal(L, "default_server");
-			if(lua_isstring(L, -1)) {
-				strcpy(address, lua_tostring(L, -1));
-			}
-			lua_pop(L, -1);
-		}
-		lua_pushboolean(L, GetClient()->Connect(address)?1:0);
-		return 1;
-	}
-	if(strcmp(ar.name, "disconnect")==0) {
-		if(GetClient()->Available()) GetClient()->Disconnect();
-		return 0;
-	}
-
-	if(!GetClient()->Available()) {
-		tolua_error(L, "connection not available", NULL);
-		return 0;
-	}
-
 	const CmdInfo* pCmdInfo = myCmdSet.GetClientCmdSet().GetCmd(ar.name);
 	assert(pCmdInfo);
 	if(!pCmdInfo) {
@@ -633,7 +677,18 @@ int CMainView::LuaCallback()
 		return 0;
 	}
 
-	if(lua_gettop(L)!=(int)pCmdInfo->m_Args.size()) {
+	int nConn;
+	if(lua_gettop(L)==(int)pCmdInfo->m_Args.size()) {
+		nConn = GetClient()->GetIndex();
+	} else if(lua_gettop(L)==(int)pCmdInfo->m_Args.size()+1) {
+		if(!lua_isnumber(L, ((int)pCmdInfo->m_Args.size())*(-1) - 1)) {
+			tolua_error(L, "", NULL);
+			return 0;
+		}
+		nConn = lua_tointeger(L, ((int)pCmdInfo->m_Args.size())*(-1) - 1);
+		if(nConn<0) nConn = 0;
+		if(nConn>=sizeof(myClients)/sizeof(myClients[0])) nConn = sizeof(myClients)/sizeof(myClients[0]) - 1;
+	} else {
 		char szTxt[1000];
 		sprintf(szTxt, "invalid parameter count", ar.name);
 		tolua_error(L, szTxt, NULL);
@@ -695,13 +750,19 @@ int CMainView::LuaCallback()
 		}
 	}
 
-	GetClient()->SendData(data.GetBuffer(), data.GetLength());	
+	if(!myClients[nConn]->Available()) {
+		tolua_error(L, "connection not available", NULL);
+		return 0;
+	}
+
+	myClients[nConn]->SendData(data.GetBuffer(), data.GetLength());	
 
 	return 0;
 }
 
 void CMainView::Output(const char* pLine)
 {
+	OutputDebugString(pLine);
 	bool bEndOfText = m_Console.GetFirstVisableLine()>=m_Console.GetLineCount() - m_Console.LinesOnScreen() - 1;
 	m_Console.AppendText(pLine, strlen(pLine));
 	if(bEndOfText) {
