@@ -158,7 +158,7 @@ public:
 				break;
 			}
 
-			memmove(m_DataBuf, &m_DataBuf[len], m_dwDataBufSize-len);
+			memmove(m_DataBuf, &m_DataBuf[sizeof(len)+len], m_dwDataBufSize-sizeof(len)-len);
 			m_dwDataBufSize -= sizeof(len) + len;
 		}
 	}
