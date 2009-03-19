@@ -129,7 +129,3 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSArg("targetid", CMDARG_TYPE_DWORD);
 
 }
-
-CSGCmdSetManage::~CSGCmdSetManage()
-{
-}

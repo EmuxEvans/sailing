@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="SGGame"
-	ProjectGUID="{C6371335-04C3-42DF-9265-0EAA6F321DAF}"
-	RootNamespace="SGGame"
+	Name="SGCommon"
+	ProjectGUID="{8F2C8BAB-E985-4774-B4B5-F4FC08C9F3CE}"
+	RootNamespace="SGCommon"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -20,8 +20,8 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)"
-			ConfigurationType="1"
-			CharacterSet="0"
+			ConfigurationType="4"
+			CharacterSet="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,8 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\framework\inc\skates\lua"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -60,18 +60,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib rpcrt4.lib"
-				LinkIncremental="2"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -83,9 +75,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -93,7 +82,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)"
 			IntermediateDirectory="$(ConfigurationName)-$(PlatformName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -116,8 +105,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\framework\inc"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="..\..\framework\inc\skates\lua"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -134,20 +123,10 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="ws2_32.lib rpcrt4.lib"
-				LinkIncremental="1"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -157,9 +136,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -175,52 +151,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\main.cpp"
+				RelativePath=".\SGCmdSet.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\SGArea.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGAreaActor.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGBattleField.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGBuff.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGGameLoop.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGItem.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGPet.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SGPlayer.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AssemblerOutput="0"
-						GenerateXMLDocumentationFiles="false"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\SGSkill.cpp"
+				RelativePath=".\SGLua.cpp"
 				>
 			</File>
 		</Filter>
@@ -230,42 +165,90 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\SGArea.h"
+				RelativePath=".\SGCmdCode.h"
 				>
 			</File>
 			<File
-				RelativePath=".\SGAreaActor.h"
+				RelativePath=".\SGCmdSet.h"
 				>
 			</File>
 			<File
-				RelativePath=".\SGBattleField.h"
+				RelativePath=".\SGData.h"
 				>
 			</File>
 			<File
-				RelativePath=".\SGBuff.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGGameLoop.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGItem.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGPet.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGPlayer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SGSkill.h"
+				RelativePath=".\SGLua.h"
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\SGLua.cmd"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Combin file for $(InputName).pkg"
+					CommandLine="cd $(InputDir)&#x0D;&#x0A;cmd /C $(InputFileName)"
+					AdditionalDependencies="SGCmdCode.h;SGData.h"
+					Outputs="$(InputName).pkg"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Combin file for $(InputName).pkg"
+					CommandLine="cd $(InputDir)&#x0D;&#x0A;cmd /C $(InputFileName)"
+					AdditionalDependencies="SGCmdCode.h;SGData.h"
+					Outputs="$(InputName).pkg"
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\SGLua.inl"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine=""
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine=""
+				/>
+			</FileConfiguration>
+		</File>
+		<File
+			RelativePath=".\SGLua.pkg"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="build $(InputName).inl"
+					CommandLine="cd $(InputDir)&#x0D;&#x0A;..\..\framework\$(ConfigurationName)-$(PlatformName)\tolua.exe -n sglua -o $(InputName).inl $(InputFileName)"
+					Outputs="$(InputName).inl"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="cd $(InputDir)&#x0D;&#x0A;..\..\framework\$(ConfigurationName)-$(PlatformName)\tolua.exe -n sglua -o $(InputName).inl"
+				/>
+			</FileConfiguration>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
