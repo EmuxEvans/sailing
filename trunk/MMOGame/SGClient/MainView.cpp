@@ -16,7 +16,8 @@ extern "C" {
 #include <skates/misc.h>
 
 #include "..\Engine\CmdData.h"
-#include "..\SGCommon\SGCmdCode.h"
+#include "..\SGCommon\SGCode.h"
+#include "..\SGCommon\SGData.h"
 #include "..\SGCommon\SGCmdSet.h"
 #include "..\SGCommon\SGLua.h"
 

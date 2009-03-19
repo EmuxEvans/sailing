@@ -165,11 +165,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\SGCmdCode.h"
+				RelativePath=".\SGCmdSet.h"
 				>
 			</File>
 			<File
-				RelativePath=".\SGCmdSet.h"
+				RelativePath=".\SGCode.h"
 				>
 			</File>
 			<File
@@ -190,8 +190,8 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Combin file for $(InputName).pkg"
-					CommandLine="cd $(InputDir)&#x0D;&#x0A;cmd /C $(InputFileName)"
-					AdditionalDependencies="SGCmdCode.h;SGData.h"
+					CommandLine="cd $(InputDir)&#x0D;&#x0A;cmd /C $(InputFileName)&#x0D;&#x0A;"
+					AdditionalDependencies="SGCode.h;SGData.h"
 					Outputs="$(InputName).pkg"
 				/>
 			</FileConfiguration>
@@ -201,8 +201,8 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Combin file for $(InputName).pkg"
-					CommandLine="cd $(InputDir)&#x0D;&#x0A;cmd /C $(InputFileName)"
-					AdditionalDependencies="SGCmdCode.h;SGData.h"
+					CommandLine="cd $(InputDir)&#x0D;&#x0A;cmd /C $(InputFileName)&#x0D;&#x0A;"
+					AdditionalDependencies="SGCode.h;SGData.h"
 					Outputs="$(InputName).pkg"
 				/>
 			</FileConfiguration>
@@ -236,7 +236,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="build $(InputName).inl"
-					CommandLine="cd $(InputDir)&#x0D;&#x0A;..\..\framework\$(ConfigurationName)-$(PlatformName)\tolua.exe -n sglua -o $(InputName).inl $(InputFileName)"
+					CommandLine="cd $(InputDir)&#x0D;&#x0A;..\..\framework\$(ConfigurationName)-$(PlatformName)\tolua.exe -n sglua -o $(InputName).inl $(InputFileName)&#x0D;&#x0A;"
 					Outputs="$(InputName).inl"
 				/>
 			</FileConfiguration>
@@ -245,7 +245,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="cd $(InputDir)&#x0D;&#x0A;..\..\framework\$(ConfigurationName)-$(PlatformName)\tolua.exe -n sglua -o $(InputName).inl"
+					CommandLine="cd $(InputDir)&#x0D;&#x0A;..\..\framework\$(ConfigurationName)-$(PlatformName)\tolua.exe -n sglua -o $(InputName).inl&#x0D;&#x0A;"
 				/>
 			</FileConfiguration>
 		</File>
