@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "..\Engine\CmdData.h"
-#include "SGCmdCode.h"
+#include "SGCode.h"
 #include "SGData.h"
 
 #include "SGCmdSet.h"

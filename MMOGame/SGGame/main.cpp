@@ -8,7 +8,7 @@
 #include "..\Engine\asockio.h"
 #include "..\Engine\Game.h"
 
-#include "..\SGCommon\SGCmdCode.h"
+#include "..\SGCommon\SGCode.h"
 #include "..\SGCommon\SGData.h"
 
 #include "SGGameLoop.h"
