@@ -10,9 +10,6 @@
 #include "MainView.h"
 #include "MainFrm.h"
 
-static ISGClient* myClient = NULL;
-static ISGClientCallback* myCallback = NULL;
-
 CMainFrame::CMainFrame()
 {
 	m_nConnection = 0;
@@ -34,15 +31,10 @@ BOOL CMainFrame::OnIdle()
 {
 	UIUpdateToolBar();
 
-	if(!myClient || !myClient->Available()) {
-		return FALSE;
-	}
-
 	MSG msg;
 	while(!::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
 		SwitchToThread();
-
-		myClient->Wait();
+		m_view.Tick();
 	}
 
 	return FALSE;
@@ -92,10 +84,15 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	pLoop->AddMessageFilter(this);
 	pLoop->AddIdleHandler(this);
 
-	myCallback = &m_view;
-
 	SetConnection(m_nConnection);
 	return 0;
+}
+
+LRESULT CMainFrame::OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
+{
+	m_view.Clear();
+	bHandled = FALSE;
+	return 0L;
 }
 
 LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled)
@@ -112,11 +109,6 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 
 LRESULT CMainFrame::OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	if(myClient) {
-		myClient->Disconnect();
-		myClient->Release();
-	}
-
 	PostMessage(WM_CLOSE);
 	return 0;
 }
@@ -160,10 +152,4 @@ LRESULT CMainFrame::OnConnClick(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 {
 	SetConnection(wID-ID_CONN_00);
 	return 0;
-}
-
-ISGClient* GetClient()
-{
-	if(!myClient) myClient = CreateSGClient(myCallback, false);
-	return myClient;
 }

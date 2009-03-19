@@ -105,6 +105,7 @@ public:
 	bool GetString(const char*& pValue, unsigned int nMaxLen=0xffff);
 	template<class T>
 	bool GetStruct(const T*& Value);
+	const void* GetStruct(unsigned int nSize);
 	const char* GetString(unsigned int nMaxLen=0xffff);
 	template<class T>
 	bool GetArray(const T*& Array, unsigned int* Count, unsigned int Max=0xffff);

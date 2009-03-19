@@ -44,9 +44,12 @@ public:
 	LRESULT OnLoadText(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/);
 	LRESULT OnSaveText(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*bHandled*/);
 
-	virtual void OnConnect();
-	virtual void OnData(const void* pData, unsigned int nSize);
-	virtual void OnDisconnect();
+	void Tick();
+	void Clear();
+
+	virtual void OnConnect(ISGClient* pClient);
+	virtual void OnData(ISGClient* pClient, const void* pData, unsigned int nSize);
+	virtual void OnDisconnect(ISGClient* pClient);
 
 	int LuaCallback();
 	void Output(const char* pLine);
