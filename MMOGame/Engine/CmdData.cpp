@@ -30,6 +30,14 @@ bool CDataReader::GetString(const char*& pValue, unsigned int nMaxLen)
 	return false;
 }
 
+const void* CDataReader::GetStruct(unsigned int nSize)
+{
+	assert(m_nCurrent+nSize<=m_nSize);
+	if(m_nCurrent+nSize>m_nSize) return NULL;
+	m_nCurrent += nSize;
+	return m_pBuf + (m_nCurrent - nSize);
+}
+
 const char* CDataReader::GetString(unsigned int nMaxLen)
 {
 	const char* pValue;

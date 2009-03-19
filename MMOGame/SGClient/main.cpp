@@ -12,6 +12,7 @@
 #include "MainFrm.h"
 
 CAppModule _Module;
+CMainFrame* g_pMainFrm = NULL;
 
 int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 {
@@ -19,6 +20,7 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 	_Module.AddMessageLoop(&theLoop);
 
 	CMainFrame wndMain;
+	g_pMainFrm = &wndMain;
 
 	if(wndMain.CreateEx() == NULL)
 	{

@@ -9,11 +9,12 @@
 class CSGClient : public ISGClient
 {
 public:
-	CSGClient(ISGClientCallback* pCallback);
+	CSGClient(ISGClientCallback* pCallback, int nConn);
 	virtual ~CSGClient();
 
 	virtual void Release();
 
+	virtual int GetIndex();
 	virtual bool Available();
 	virtual bool Connect(const char* pAddr);
 	virtual bool SendData(const void* pData, unsigned int nSize);
@@ -24,18 +25,20 @@ public:
 	virtual void* GetUserData();
 
 private:
+	int m_nConn;
 	SOCK_HANDLE m_hSock;
 	ISGClientCallback* m_pCallback;
 	void* m_pUserData;
 };
 
-ISGClient* CreateSGClient(ISGClientCallback* pCallback, bool bAsync)
+ISGClient* CreateSGClient(ISGClientCallback* pCallback, int nConn)
 {
-	return new CSGClient(pCallback);
+	return new CSGClient(pCallback, nConn);
 }
 
-CSGClient::CSGClient(ISGClientCallback* pCallback)
+CSGClient::CSGClient(ISGClientCallback* pCallback, int nConn)
 {
+	m_nConn = nConn;
 	m_hSock = SOCK_INVALID_HANDLE;
 	m_pCallback = pCallback;
 	m_pUserData = NULL;
@@ -49,6 +52,11 @@ CSGClient::~CSGClient()
 void CSGClient::Release()
 {
 	delete this;
+}
+
+int CSGClient::GetIndex()
+{
+	return m_nConn;
 }
 
 bool CSGClient::Available()
@@ -65,7 +73,7 @@ bool CSGClient::Connect(const char* pAddr)
 	m_hSock = sock_connect(&sa, 0);
 	if(m_hSock==SOCK_INVALID_HANDLE) return false;
 
-	m_pCallback->OnConnect();
+	m_pCallback->OnConnect(this);
 
 	return true;
 }
@@ -83,7 +91,7 @@ bool CSGClient::SendData(const void* pData, unsigned int nSize)
 void CSGClient::Disconnect()
 {
 	if(m_hSock!=SOCK_INVALID_HANDLE) {
-		m_pCallback->OnDisconnect();
+		m_pCallback->OnDisconnect(this);
 		sock_disconnect(m_hSock);
 		sock_close(m_hSock);
 		m_hSock = SOCK_INVALID_HANDLE;
@@ -111,7 +119,7 @@ bool CSGClient::Wait()
 		Disconnect();
 		return false;
 	}
-	m_pCallback->OnData(szBuf, nSize);
+	m_pCallback->OnData(this, szBuf, nSize);
 	return true;
 }
 

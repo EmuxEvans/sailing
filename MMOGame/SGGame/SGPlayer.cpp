@@ -142,6 +142,8 @@ bool CSGPlayer::QuitPlayer()
 bool CSGPlayer::GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData)
 {
 	memset(pData, 0, sizeof(*pData));
+	strcpy(pData->name, this->GetName());
+	sprintf(pData->guild, "%p", this);
 	return true;
 }
 

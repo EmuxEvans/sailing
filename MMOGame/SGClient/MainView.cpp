@@ -5,14 +5,6 @@
 #include "stdafx.h"
 #include "resource.h"
 
-#include "..\Engine\CmdData.h"
-#include "..\SGCommon\SGCmdCode.h"
-#include "..\SGCommon\SGCmdSet.h"
-
-#include "SGClient.h"
-#include "MainView.h"
-#include "MainFrm.h"
-
 extern "C" {
 #include <skates/lua/lua.h>
 #include <skates/lua/lauxlib.h>
@@ -23,20 +15,37 @@ extern "C" {
 #include <skates/os.h>
 #include <skates/misc.h>
 
+#include "..\Engine\CmdData.h"
+#include "..\SGCommon\SGCmdCode.h"
+#include "..\SGCommon\SGCmdSet.h"
+#include "..\SGCommon\SGLua.h"
+
+#include "SGClient.h"
+#include "MainView.h"
+#include "MainFrm.h"
+
+extern CMainFrame* g_pMainFrm;
+
 static lua_State* L = NULL;
 static CMainView* g_pMainView = NULL;
 static CSGCmdSetManage myCmdSet;
 static const char* lua_script = 
-	"function onconnect()" "\n"
-	"	output(\"OnConnect\\n\")" "\n"
+	"function onconnect(conn)" "\n"
+	"	output(\"OnConnect \"..conn..\"\\n\")" "\n"
 	"end" "\n"
-	"function ondisconnect()" "\n"
-	"	output(\"OnDisconnect\\n\")" "\n"
+	"function ondisconnect(conn)" "\n"
+	"	output(\"OnDisconnect \"..conn..\"\\n\")" "\n"
 	"end" "\n"
-	"function ondata(args)" "\n"
-	"	output(\"OnData \" .. args.CmdName .. \"\\n\")" "\n"
+	"function ondata(conn, args)" "\n"
+	"	output(\"OnData \" ..conn..\" \".. args.CmdName .. \"\\n\")" "\n"
 	"end" "\n"
 ;
+static ISGClient* myClients[10] = { NULL };
+
+ISGClient* GetClient()
+{
+	return myClients[g_pMainFrm->GetConnection()];
+}
 
 inline std::string& lTrim(std::string &ss)  
 {
@@ -58,8 +67,28 @@ inline std::string& trim(std::string &st)
 	return st;
 }
 
+static int lua_switchto(lua_State* L)
+{
+	if(!lua_isnumber(L, -1)) {
+		tolua_error(L, "output invalid parameter", NULL);
+		return 0;		
+	}
+	int conn = lua_tointeger(L, -1);
+	if(conn<0) conn = 0;
+	if(conn>=sizeof(myClients)/sizeof(myClients[0])) conn = sizeof(myClients)/sizeof(myClients[0]) - 1;
+	g_pMainFrm->SetConnection(conn);
+	return 0;
+}
+
+static int lua_clear(lua_State* L)
+{
+	g_pMainView->m_Console.SetText("");
+	return 0;
+}
+
 static int lua_wait(lua_State* L)
 {
+	return 0;
 }
 
 static int lua_oncall(lua_State* L)
@@ -85,12 +114,19 @@ CMainView::CMainView()
 	luaopen_string(L);
 	luaopen_base(L);
 	luaopen_table(L);
-	//luaopen_io(L);
-	//luaopen_os(L);
-	//luaopen_math(L);
-	//luaopen_debug(L);
-	//luaopen_package(L);
+//	luaopen_io(L);
+	luaopen_os(L);
+	luaopen_math(L);
+	luaopen_debug(L);
+//	luaopen_package(L);
+	tolua_sglua_open(L);
 
+	lua_pushstring(L, "switchto");
+	lua_pushcfunction(L, lua_switchto);
+	lua_rawset(L, LUA_GLOBALSINDEX);
+	lua_pushstring(L, "clear");
+	lua_pushcfunction(L, lua_clear);
+	lua_rawset(L, LUA_GLOBALSINDEX);
 	lua_pushstring(L, "connect");
 	lua_pushcfunction(L, lua_oncall);
 	lua_rawset(L, LUA_GLOBALSINDEX);
@@ -122,6 +158,10 @@ CMainView::CMainView()
 	m_szFileName[0] = '\0';
 	GetCurrentDirectory(sizeof(m_szFileName), m_szFileName);
 
+	for(int l=0; l<sizeof(myClients)/sizeof(myClients[0]); l++) {
+		myClients[l] = CreateSGClient(this, l);
+	}
+
 	FILE* fp = fopen("SGClient.History.txt", "rt");
 	if(fp) {
 		char szLine[1000];
@@ -144,6 +184,10 @@ CMainView::CMainView()
 
 CMainView::~CMainView()
 {
+	for(int l=0; l<sizeof(myClients)/sizeof(myClients[0]); l++) {
+		myClients[l]->Release();
+	}
+
 	g_pMainView = NULL;
 	lua_close(L);
 
@@ -215,6 +259,7 @@ BOOL CMainView::OnInitDialog(HWND, LPARAM)
 	m_Console.SetDisplayLinenumbers(FALSE);
 	m_Console.SetDisplayFolding(FALSE);
 	m_Console.SendMessage(SCI_SETINDENTATIONGUIDES, TRUE, 0);
+//	m_Console.SetReadOnly(TRUE);
 
 	m_Script.Init();
 	m_Script.SetFontname(STYLE_DEFAULT, "Lucida Console");
@@ -431,17 +476,32 @@ LRESULT CMainView::OnSaveText(WORD wNotifyCode, WORD wID, HWND hWndCtl, BOOL& /*
 	return 0L;
 }
 
-void CMainView::OnConnect()
+void CMainView::Tick()
+{
+	for(int l=0; l<sizeof(myClients)/sizeof(myClients[0]); l++) {
+		myClients[l]->Wait();
+	}
+}
+
+void CMainView::Clear()
+{
+	for(int l=0; l<sizeof(myClients)/sizeof(myClients[0]); l++) {
+		if(myClients[l]->Available()) myClients[l]->Disconnect();
+	}
+}
+
+void CMainView::OnConnect(ISGClient* pClient)
 {
 	lua_getglobal(L, "onconnect");
-	if(lua_pcall(L, 0, 0, 0)!=0) {
+	lua_pushinteger(L, pClient->GetIndex());
+	if(lua_pcall(L, 1, 0, 0)!=0) {
 		Output(lua_tostring(L, -1));
 		Output("\n");
 		lua_pop(L, 1);
 	}
 }
 
-void CMainView::OnData(const void* pData, unsigned int nSize)
+void CMainView::OnData(ISGClient* pClient, const void* pData, unsigned int nSize)
 {
 	CDataReader data(pData, nSize);
 	const CmdInfo* pCmdInfo = myCmdSet.GetServerCmdSet().GetCmd(data.GetValue<unsigned short>());
@@ -452,6 +512,7 @@ void CMainView::OnData(const void* pData, unsigned int nSize)
 
 	lua_getglobal(L, "ondata");
 
+	lua_pushinteger(L, pClient->GetIndex());
 	lua_newtable(L);
 
 	lua_pushstring(L, "CmdName");
@@ -500,7 +561,7 @@ void CMainView::OnData(const void* pData, unsigned int nSize)
 				lua_pushstring(L, data.GetString());
 				break;
 			case CMDARG_TYPE_STRUCT:
-				lua_pushstring(L, "this is a struct");
+				tolua_pushusertype(L, (void*)data.GetStruct(pCmdInfo->m_Args[l].m_StructSize), pCmdInfo->m_Args[l].m_StructName);
 				break;
 			default:
 				assert(0);
@@ -510,17 +571,18 @@ void CMainView::OnData(const void* pData, unsigned int nSize)
 		lua_rawset(L, -3);
 	}
 
-	if(lua_pcall(L, 1, 0, 0)!=0) {
+	if(lua_pcall(L, 2, 0, 0)!=0) {
 		Output(lua_tostring(L, -1));
 		Output("\n");
 		lua_pop(L, 1);
 	}
 }
 
-void CMainView::OnDisconnect()
+void CMainView::OnDisconnect(ISGClient* pClient)
 {
 	lua_getglobal(L, "ondisconnect");
-	if(lua_pcall(L, 0, 0, 0)!=0) {
+	lua_pushinteger(L, pClient->GetIndex());
+	if(lua_pcall(L, 1, 0, 0)!=0) {
 		Output(lua_tostring(L, -1));
 		Output("\n");
 		lua_pop(L, 1);

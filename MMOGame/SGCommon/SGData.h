@@ -39,6 +39,7 @@
 
 typedef struct SGPLAYER_VIEWDATA {
 	char name[100];
+	char guild[100];
 } SGPLAYER_VIEWDATA;
 
 typedef struct SGNPC_VIEWDATA {

@@ -8,9 +8,9 @@ class ISGClientCallback
 public:
 	virtual ~ISGClientCallback() {}
 
-	virtual void OnConnect() = 0;
-	virtual void OnData(const void* pData, unsigned int nSize) = 0;
-	virtual void OnDisconnect() = 0;
+	virtual void OnConnect(ISGClient* pClient) = 0;
+	virtual void OnData(ISGClient* pClient, const void* pData, unsigned int nSize) = 0;
+	virtual void OnDisconnect(ISGClient* pClient) = 0;
 };
 
 class ISGClient
@@ -19,6 +19,8 @@ public:
 	virtual ~ISGClient() {}
 
 	virtual void Release() = 0;
+
+	virtual int GetIndex() = 0;
 
 	virtual bool Available() = 0;
 	virtual bool Connect(const char* pAddr) = 0;
@@ -30,4 +32,4 @@ public:
 	virtual void* GetUserData() = 0;
 };
 
-ISGClient* CreateSGClient(ISGClientCallback* pCallback, bool bAsync);
+ISGClient* CreateSGClient(ISGClientCallback* pCallback, int nConn);
