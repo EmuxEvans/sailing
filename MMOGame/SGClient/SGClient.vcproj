@@ -232,26 +232,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\SGGame\SGCmdSet.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -294,10 +274,6 @@
 			</File>
 			<File
 				RelativePath=".\SGClient.h"
-				>
-			</File>
-			<File
-				RelativePath="..\SGGame\SGCmdSet.h"
 				>
 			</File>
 			<File

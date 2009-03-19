@@ -8,7 +8,9 @@
 #include "..\Engine\asockio.h"
 #include "..\Engine\Game.h"
 
-#include "SG.h"
+#include "..\SGCommon\SGCmdCode.h"
+#include "..\SGCommon\SGData.h"
+
 #include "SGGameLoop.h"
 
 static BOOL InitTCPServer(unsigned short nPort);

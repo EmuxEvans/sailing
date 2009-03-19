@@ -4,7 +4,6 @@ class CSGCmdSetManage
 {
 public:
 	CSGCmdSetManage();
-	~CSGCmdSetManage();
 
 	CCmdSet& GetClientCmdSet() { return m_ClientCmdSet; }
 	CCmdSet& GetServerCmdSet() { return m_ServerCmdSet; }

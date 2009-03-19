@@ -5,7 +5,9 @@
 
 #include "..\Engine\Game.h"
 
-#include "SG.h"
+#include "..\SGCommon\SGCmdCode.h"
+#include "..\SGCommon\SGData.h"
+
 #include "SGArea.h"
 #include "SGAreaActor.h"
 #include "SGBuff.h"

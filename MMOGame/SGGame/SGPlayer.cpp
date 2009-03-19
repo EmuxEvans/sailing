@@ -6,7 +6,9 @@
 
 #include "..\Engine\Game.h"
 
-#include "SG.h"
+#include "..\SGCommon\SGCmdCode.h"
+#include "..\SGCommon\SGData.h"
+
 #include "SGArea.h"
 #include "SGAreaActor.h"
 #include "SGPlayer.h"
@@ -180,7 +182,6 @@ bool CSGPlayer::Equip(int nIndex, int nSolt)
 }
 
 void CSGPlayer::OnNotify(const CmdData* pCmdData)
-
 {
 	if(pCmdData->nCmd==SGCMDCODE_BATTLEFIELD_JOIN) {
 		assert(!m_pBattleField);

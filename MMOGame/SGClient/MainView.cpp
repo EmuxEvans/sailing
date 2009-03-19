@@ -6,8 +6,8 @@
 #include "resource.h"
 
 #include "..\Engine\CmdData.h"
-#include "..\SGGame\SGCmdCode.h"
-#include "..\SGGame\SGCmdSet.h"
+#include "..\SGCommon\SGCmdCode.h"
+#include "..\SGCommon\SGCmdSet.h"
 
 #include "SGClient.h"
 #include "MainView.h"

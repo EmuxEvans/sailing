@@ -1,0 +1,1 @@
+copy SGCmdCode.h + SGData.h SGLua.pkg
