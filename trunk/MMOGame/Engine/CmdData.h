@@ -18,29 +18,40 @@ enum {
 class CmdArg
 {
 public:
-	CmdArg(const char* name, unsigned int type, const char* struct_name=NULL, unsigned int struct_size=0) {
+	CmdArg(const char* name, unsigned int type, const char* desc="") {
 		m_Name = name;
 		m_Type = type;
-		m_StructName = struct_name?struct_name:"";
+		m_StructName = NULL;
+		m_StructSize = 0;
+		m_Desc = desc;
+	}
+	CmdArg(const char* name, unsigned int type, const char* struct_name, unsigned int struct_size, const char* desc="") {
+		m_Name = name;
+		m_Type = type;
+		m_StructName = struct_name;
 		m_StructSize = struct_size;
+		m_Desc = desc;
 	}
 
 	const char* m_Name;
 	unsigned int m_Type;
 	const char* m_StructName;
 	unsigned int m_StructSize;
+	const char* m_Desc;
 };
 
 class CmdInfo
 {
 public:
-	CmdInfo(const char* name, unsigned short code) {
+	CmdInfo(const char* name, unsigned short code, const char* desc="") {
 		m_Name = name;
 		m_Code = code;
+		m_Desc = desc;
 	}
 
 	const char* m_Name;
 	unsigned short m_Code;
+	const char* m_Desc;
 	std::vector<CmdArg> m_Args;
 };
 
@@ -50,11 +61,14 @@ public:
 	CCmdSet() {}
 	~CCmdSet() {}
 
-	void PushCmd(const char* name, unsigned short code) {
+	void PushCmd(const char* name, unsigned short code, const char* desc="") {
 		m_Cmds.push_back(CmdInfo(name, code));
 	}
-	void PushArg(const char* name, int type, const char* struct_name=NULL, unsigned int struct_size=0) {
-		m_Cmds[m_Cmds.size()-1].m_Args.push_back(CmdArg(name, type, struct_name, struct_size));
+	void PushArg(const char* name, int type, const char* desc="") {
+		m_Cmds[m_Cmds.size()-1].m_Args.push_back(CmdArg(name, type, desc));
+	}
+	void PushArg(const char* name, int type, const char* struct_name, unsigned int struct_size, const char* desc="") {
+		m_Cmds[m_Cmds.size()-1].m_Args.push_back(CmdArg(name, type, struct_name, struct_size, desc));
 	}
 
 	int GetCmdCount() {

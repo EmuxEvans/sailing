@@ -53,3 +53,7 @@ typedef struct SGPET_VIEWDATA {
 typedef struct SGBATTLEFIELD_VIEWDATA {
 	char name[100];
 } SGBATTLEFIELD_VIEWDATA;
+
+typedef struct SGTEAM_MEMBER_INFO {
+	char name[100];
+} SGTEAM_MEMBER_INFO;
