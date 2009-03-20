@@ -11,7 +11,8 @@
 // cmdcode for battle field
 #define SGCMDCODE_BATTLEFIELD_JOIN	0x1021
 #define SGCMDCODE_BATTLEFIELD_LEAVE	0x1022
-
+//#define SGCMDCODE_TEAM_JOIN		0x1023
+//#define SGCMDCODE_TEAM_LEAVE		0x1024
 
 /************* SGCMDCODE for Client *************/
 

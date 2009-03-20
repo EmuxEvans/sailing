@@ -11,6 +11,8 @@ protected:
 
 public:
 	virtual bool Join(CSGRole* pRole, int nIndex) = 0;
+	virtual bool Leave(CSGRole* pPlayer) = 0;
+
 	virtual bool Joinable(CSGRole* pRole, int& nIndex) = 0;
 
 	virtual CSGRole* GetRole(unsigned int nActorId) = 0;

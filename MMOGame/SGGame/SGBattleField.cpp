@@ -68,15 +68,17 @@ CSGBattleFieldImpl::~CSGBattleFieldImpl()
 
 bool CSGBattleFieldImpl::Join(CSGRole* pPlayer, int nIndex)
 {
-	CmdData cmd = { SGCMDCODE_BATTLEFIELD_JOIN, GetActorId(), NULL, 0 };
-	pPlayer->OnNotify(&cmd);
+	CCmdDataWriter<10> cmd(SGCMDCODE_BATTLEFIELD_JOIN, GetActorId());
+	cmd.PutValue(this);	
+	pPlayer->OnNotify(cmd.GetCmdData());
 	return false;
 }
 
 bool CSGBattleFieldImpl::Leave(CSGRole* pPlayer)
 {
-	CmdData cmd = { SGCMDCODE_BATTLEFIELD_LEAVE, GetActorId(), NULL, 0 };
-	pPlayer->OnNotify(&cmd);
+	CCmdDataWriter<10> cmd(SGCMDCODE_BATTLEFIELD_LEAVE, GetActorId());
+	cmd.PutValue(this);
+	pPlayer->OnNotify(cmd.GetCmdData());
 	return false;
 }
 
