@@ -84,7 +84,10 @@ bool CSGTeam::Join(CSGPlayer* pPlayer)
 
 	m_Members[nIndex] = pPlayer;
 	if(!GetMember(m_nLeader)) m_nLeader = pPlayer->GetActorId();
-	pPlayer->OnJoinTeam(this);
+
+	CCmdDataWriter<10> cmd(SGCMDCODE_TEAM_JOIN, 0);
+	cmd.PutValue(this);
+	pPlayer->OnNotify(cmd.GetCmdData());
 
 	return true;
 }
@@ -98,7 +101,9 @@ bool CSGTeam::Leave(CSGPlayer* pPlayer)
 		if(m_Members[nIndex]==pPlayer) break;
 	}
 	if(nIndex>=sizeof(m_Members)/sizeof(m_Members[0])) return false;
-	m_Members[nIndex]->OnLeaveTeam(this);
+	CCmdDataWriter<10> cmd(SGCMDCODE_TEAM_LEAVE, 0);
+	cmd.PutValue(this);
+	pPlayer->OnNotify(cmd.GetCmdData());
 
 	// send leave message to pPlayer
 	buf.PutValue<unsigned short>(SGCMDCODE_TEAM_LEAVE);
@@ -229,7 +234,7 @@ CSGPlayer::CSGPlayer(CSGConnection* pConnection, unsigned int nPlayerId) : CSGRo
 	m_pConnection = pConnection;
 	m_nPlayerId = nPlayerId;
 	sprintf(m_szName, "USER-%d", m_nPlayerId);
-	m_pBattleField = NULL;
+	m_pBattle = NULL;
 	m_pTeam = NULL;
 	m_pPet = NULL;
 	memset(m_Equip, 0, sizeof(m_Equip));
@@ -243,7 +248,7 @@ CSGPlayer::~CSGPlayer()
 {
 	m_pConnection->GetCallback()->OnPlayerDetach(GetPlayerId(), m_szName, this);
 
-	assert(!m_pBattleField);
+	assert(!m_pBattle);
 	assert(!m_pTeam);
 	assert(!m_pPet);
 }
@@ -261,6 +266,7 @@ bool CSGPlayer::QuitPlayer()
 	SetPositionNULL();
 	SetArea(NULL);
 	if(GetTeam()) GetTeam()->Leave(this);
+	if(GetBattleField()) GetBattleField()->Leave(this);
 	return true;
 }
 
@@ -318,17 +324,31 @@ bool CSGPlayer::Equip(int nIndex, int nSolt)
 
 void CSGPlayer::OnNotify(const CmdData* pCmdData)
 {
-	if(pCmdData->nCmd==SGCMDCODE_BATTLEFIELD_JOIN) {
-		assert(!m_pBattleField);
-		m_pBattleField = (CSGBattleField*)(GetArea()->GetActor(pCmdData->nWho));
-		assert(m_pBattleField);
+	CCmdDataReader cmd(pCmdData);
+	switch(cmd.CmdCode()) {
+	case SGCMDCODE_BATTLEFIELD_JOIN:
+		assert(!m_pBattle);
+		m_pBattle = cmd.GetValue<CSGBattleField*>();
+		assert(m_pBattle);
+		assert(m_pBattle->GetActorId()==cmd.CmdWho());
 		SetPositionNULL();
 		return;
-	}
-	if(pCmdData->nCmd==SGCMDCODE_BATTLEFIELD_LEAVE) {
-		assert(m_pBattleField);
-		m_pBattleField = NULL;
+	case SGCMDCODE_BATTLEFIELD_LEAVE:
+		assert(m_pBattle);
+		assert(m_pBattle->GetActorId()==cmd.CmdWho());
+		assert(m_pBattle==cmd.GetValue<CSGBattleField*>());
+		m_pBattle = NULL;
 		Move(NULL, NULL, 0);
+		return;
+	case SGCMDCODE_TEAM_JOIN:
+		assert(!m_pTeam);
+		m_pTeam = cmd.GetValue<CSGTeam*>();
+		assert(m_pTeam);
+		return;
+	case SGCMDCODE_TEAM_LEAVE:
+		assert(m_pTeam);
+		assert(m_pTeam==cmd.GetValue<CSGTeam*>());
+		m_pTeam = NULL;
 		return;
 	}
 
@@ -413,7 +433,6 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 	}
 
 	if(pCmdData->nCmd==SGCMDCODE_MAPCHAT_SAY || pCmdData->nCmd==SGCMDCODE_MAPCHAT_MSAY) {
-		CCmdDataReader cmd(pCmdData);
 		CDataBuffer<100> buf;
 		buf.PutValue<unsigned short>(pCmdData->nCmd);
 		buf.PutString(cmd.GetValue<const char*>());

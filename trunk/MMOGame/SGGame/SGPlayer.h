@@ -1,7 +1,6 @@
 #pragma once
 
 class IGameFES;
-class CSGBattleField;
 
 #define SGPLAYERTEAM_MEMBER_MAX		5
 
@@ -9,6 +8,7 @@ class CSGTeam;
 class CSGPlayer;
 class CSGPet;
 class CSGConnection;
+class CSGBattleField;
 
 class CSGTeam
 {
@@ -33,7 +33,6 @@ private:
 class CSGPlayer : public CSGRole
 {
 	friend class CSGPet;
-	friend class CSGTeam;
 public:
 	CSGPlayer(CSGConnection* pConnection, unsigned int nPlayerId);
 	virtual ~CSGPlayer();
@@ -49,7 +48,7 @@ public:
 		return m_szName;
 	}
 	CSGBattleField* GetBattleField() {
-		return m_pBattleField;
+		return m_pBattle;
 	}
 	CSGTeam* GetTeam() {
 		return m_pTeam;
@@ -80,21 +79,13 @@ protected:
 		assert(m_pPet==pPet);
 		m_pPet = NULL;
 	}
-	void OnJoinTeam(CSGTeam* pTeam) {
-		assert(m_pTeam==NULL);
-		m_pTeam = pTeam;
-	}
-	void OnLeaveTeam(CSGTeam* pTeam) {
-		assert(m_pTeam==pTeam);
-		m_pTeam = NULL;
-	}
 
 private:
 	CSGConnection* m_pConnection;
 	unsigned int m_nPlayerId;
 	char m_szName[100];
 
-	CSGBattleField* m_pBattleField;
+	CSGBattleField* m_pBattle;
 	CSGTeam* m_pTeam;
 	CSGPet* m_pPet;
 
