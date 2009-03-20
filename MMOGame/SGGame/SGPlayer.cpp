@@ -22,82 +22,206 @@
 void UserSendData(unsigned int nSeq, const void* pData, unsigned int nSize);
 void UserDisconnect(unsigned int nSeq);
 
-CSGPlayerTeam::CSGPlayerTeam()
+CSGTeam::CSGTeam()
 {
 	m_nLeader = 0;
 	memset(m_Members, 0, sizeof(m_Members));
 }
 
-CSGPlayerTeam::~CSGPlayerTeam()
+CSGTeam::~CSGTeam()
 {
 }
 
-CSGPlayer* CSGPlayerTeam::GetMember(int nIndex)
+CSGPlayer* CSGTeam::GetMember(int nIndex)
 {
 	if(nIndex<0 || nIndex>=sizeof(m_Members)/sizeof(m_Members[0])) return NULL;
 	return m_Members[nIndex];
 }
 
-bool CSGPlayerTeam::Join(CSGPlayer* pPlayer)
+CSGPlayer* CSGTeam::GetMember(unsigned int nActorId)
+{
+	for(int l=0; l<sizeof(m_Members)/sizeof(m_Members[0]); l++) {
+		if(m_Members[l] && m_Members[l]->GetActorId()==nActorId) return m_Members[l];
+	}
+	return NULL;
+}
+
+bool CSGTeam::Join(CSGPlayer* pPlayer)
 {
 	int nIndex = -1;
+	unsigned short count = 0;
 	for(int l=0; l<sizeof(m_Members)/sizeof(m_Members[0]); l++) {
-		if(!m_Members[l] && nIndex<0) nIndex = l;
+		if(!m_Members[l]) {
+			if(nIndex<0) nIndex = l;
+		} else {
+			count++;
+		}
 		assert(m_Members[l]!=pPlayer);
 		if(m_Members[l]==pPlayer) return false;
 	}
 	if(nIndex<0) return false;
+
+	CDataBuffer<20+sizeof(SGPLAYER_VIEWDATA_INTEAM)*SGPLAYERTEAM_MEMBER_MAX> buf;
+	SGPLAYER_VIEWDATA_INTEAM viewdata;
+
+	// send member join message for everyone
+	pPlayer->GetViewDataInTeam(&viewdata);
+	buf.PutValue<unsigned short>(SGCMDCODE_TEAM_CHANGE);
+	buf.PutStruct(&viewdata);
+	SendData(buf.GetBuffer(), buf.GetLength());
+
+	// send member infos to pPlayer
+	buf.Reset();
+	buf.PutValue<unsigned short>(SGCMDCODE_TEAM_INFO);
+	buf.PutValue(m_nLeader);
+	buf.PutValue(count);
+	for(int l=0; l<sizeof(m_Members)/sizeof(m_Members[0]); l++) {
+		if(!m_Members[l]) continue;
+		m_Members[l]->GetViewDataInTeam(&viewdata);
+		buf.PutStruct(&viewdata);
+	}
+	pPlayer->GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
+
 	m_Members[nIndex] = pPlayer;
 	if(!GetMember(m_nLeader)) m_nLeader = pPlayer->GetActorId();
-	SyncData();
+	pPlayer->OnJoinTeam(this);
+
 	return true;
 }
 
-bool CSGPlayerTeam::Leave(CSGPlayer* pPlayer)
+bool CSGTeam::Leave(CSGPlayer* pPlayer)
 {
 	int nIndex;
-
+	CDataBuffer<20> buf;
 
 	for(nIndex=0; nIndex<sizeof(m_Members)/sizeof(m_Members[0]); nIndex++) {
 		if(m_Members[nIndex]==pPlayer) break;
 	}
 	if(nIndex>=sizeof(m_Members)/sizeof(m_Members[0])) return false;
+	m_Members[nIndex]->OnLeaveTeam(this);
+
+	// send leave message to pPlayer
+	buf.PutValue<unsigned short>(SGCMDCODE_TEAM_LEAVE);
+	buf.PutValue(m_Members[nIndex]->GetActorId());
+	m_Members[nIndex]->GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
 	m_Members[nIndex] = NULL;
 
-	unsigned int nLeader = 0;
-	for(nIndex=0; nIndex<sizeof(m_Members)/sizeof(m_Members[0]); nIndex++) {
-		if(m_Members[nIndex]) {
-			nLeader = m_Members[nIndex]->GetActorId();
-			break;
+	if(!GetMember(m_nLeader)) {
+		unsigned int nLeader = 0;
+		for(nIndex=0; nIndex<sizeof(m_Members)/sizeof(m_Members[0]); nIndex++) {
+			if(m_Members[nIndex]) {
+				nLeader = m_Members[nIndex]->GetActorId();
+				break;
+			}
 		}
-	}
-	if(nIndex==sizeof(m_Members)/sizeof(m_Members[0])) {
-		delete this;
-		return true;
-	}
-	if(GetMember(m_nLeader)==NULL) {
+		if(nIndex==sizeof(m_Members)/sizeof(m_Members[0])) {
+			delete this;
+			return true;
+		}
 		m_nLeader = nLeader;
+
+		// send leader change
+		CDataBuffer<20> bufa;
+		bufa.PutValue<unsigned short>(SGCMDCODE_TEAM_LEAVE);
+		bufa.PutValue(m_nLeader);
+		SendData(bufa.GetBuffer(), bufa.GetLength());
 	}
 
-	SyncData();
+	// send leave message for everyone
+	SendData(buf.GetBuffer(), buf.GetLength());
+
 	return true;
 }
 
-void CSGPlayerTeam::OnData(CSGPlayer* pPlayer, const void* pData, unsigned int nSize)
+void CSGTeam::OnData(CSGPlayer* pPlayer, const CmdData* pCmdData)
 {
+	if(pPlayer->GetTeam() && pPlayer->GetTeam()!=this) return;
+
+	CCmdDataReader cmd(pCmdData);
+	CDataBuffer<300> buf;
+
+	switch(pCmdData->nCmd) {
+	case SGCMDCODE_TEAM_JOIN:
+		{
+			assert(!pPlayer->GetTeam());
+			buf.PutValue<unsigned short>(SGCMDCODE_TEAM_JOIN);
+			buf.PutValue(pPlayer->GetActorId());
+			buf.PutString(pPlayer->GetName());
+			buf.PutString("token");
+			GetMember(cmd.GetValue<unsigned int>())->GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
+			return;
+		}
+	case SGCMDCODE_TEAM_INVITE:
+		{
+			CSGPlayer* pWho = pPlayer->GetArea()->GetPlayer(cmd.GetValue<unsigned int>());
+			if(pWho) {
+				buf.PutValue<unsigned short>(SGCMDCODE_TEAM_INVITE);
+				buf.PutValue(pPlayer->GetActorId());
+				buf.PutString(pPlayer->GetName());
+				buf.PutString("token");
+				pWho->GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
+			}
+			return;
+		}
+	case SGCMDCODE_TEAM_ACCEPT:
+		{
+			CSGPlayer* pWho = pPlayer->GetArea()->GetPlayer(cmd.GetValue<unsigned int>());
+			if(pWho) {
+				if(pPlayer->GetTeam()) {
+					if(!pWho->GetTeam()) {
+						if(strcmp(cmd.GetString(), "token")==0) {
+							Join(pWho);
+						}
+					}
+				} else {
+					if(pWho->GetTeam()) {
+						if(strcmp(cmd.GetString(), "token")==0) {
+							Join(pPlayer);
+						}
+					}
+				}
+			}
+			return;
+		}
+	case SGCMDCODE_TEAM_SAY:
+		{
+			buf.PutValue<unsigned short>(SGCMDCODE_TEAM_SAY);
+			buf.PutValue(pPlayer->GetActorId());
+			buf.PutString(cmd.GetString());
+			SendData(buf.GetBuffer(), buf.GetLength());
+		}
+	case SGCMDCODE_TEAM_LEADER:
+		{
+			unsigned int nLeader = cmd.GetValue<unsigned int>();
+			if(pPlayer->GetActorId()==m_nLeader && GetMember(nLeader)) {
+				m_nLeader = nLeader;
+				CDataBuffer<20> bufa;
+				bufa.PutValue<unsigned short>(SGCMDCODE_TEAM_LEAVE);
+				bufa.PutValue(m_nLeader);
+				SendData(buf.GetBuffer(), buf.GetLength());
+			}
+		}
+		break;
+	case SGCMDCODE_TEAM_KICK:
+		{
+			CSGPlayer* pWho = GetMember(cmd.GetValue<unsigned int>());
+			if(pWho) Leave(pWho);
+			return;
+		}
+	case SGCMDCODE_TEAM_LEAVE:
+		{
+			Leave(pPlayer);
+			return;
+		}
+	}
 }
 
-void CSGPlayerTeam::SyncData()
+void CSGTeam::SendData(const void* pData, unsigned int nSize)
 {
-	CDataBuffer<100> buf;
-	buf.PutValue<unsigned short>(SGCMDCODE_TEAM_INFO);
-	buf.PutValue(m_nLeader);
 	for(int l=0; l<sizeof(m_Members)/sizeof(m_Members[0]); l++) {
 		if(!m_Members[l]) continue;
-		if(m_Members[l]->GetActorId()==m_nLeader) continue;
-		buf.PutValue(m_Members[l]->GetActorId());
+		m_Members[l]->GetConnection()->SendData(pData, nSize);
 	}
-	buf.PutValue<unsigned int>(0);
 }
 
 CSGPlayer::CSGPlayer(CSGConnection* pConnection, unsigned int nPlayerId) : CSGRole(SGACTORTYPE_PLAYER)
@@ -106,7 +230,7 @@ CSGPlayer::CSGPlayer(CSGConnection* pConnection, unsigned int nPlayerId) : CSGRo
 	m_nPlayerId = nPlayerId;
 	sprintf(m_szName, "USER-%d", m_nPlayerId);
 	m_pBattleField = NULL;
-	m_pPlayerTeam = NULL;
+	m_pTeam = NULL;
 	m_pPet = NULL;
 	memset(m_Equip, 0, sizeof(m_Equip));
 	memset(m_Bag, 0, sizeof(m_Bag));
@@ -120,7 +244,7 @@ CSGPlayer::~CSGPlayer()
 	m_pConnection->GetCallback()->OnPlayerDetach(GetPlayerId(), m_szName, this);
 
 	assert(!m_pBattleField);
-	assert(!m_pPlayerTeam);
+	assert(!m_pTeam);
 	assert(!m_pPet);
 }
 
@@ -136,6 +260,7 @@ bool CSGPlayer::QuitPlayer()
 {
 	SetPositionNULL();
 	SetArea(NULL);
+	if(GetTeam()) GetTeam()->Leave(this);
 	return true;
 }
 
@@ -144,6 +269,14 @@ bool CSGPlayer::GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData)
 	memset(pData, 0, sizeof(*pData));
 	strcpy(pData->name, this->GetName());
 	sprintf(pData->guild, "%p", this);
+	return true;
+}
+
+bool CSGPlayer::GetViewDataInTeam(SGPLAYER_VIEWDATA_INTEAM* pData)
+{
+	memset(pData, 0, sizeof(*pData));
+	pData->actorid = GetActorId();
+	strcpy(pData->name, GetName());
 	return true;
 }
 
@@ -319,6 +452,41 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 		}
 		return;
 	}
+
+	switch(pCmdData->nCmd) {
+	case SGCMDCODE_TEAM_JOIN:
+		{
+			if(GetTeam()) return;
+			unsigned int nActorId = cmd.GetValue<unsigned int>();
+			if(GetActorId()==nActorId) {
+				CSGTeam* pTeam = new CSGTeam;
+				pTeam->Join(this);
+				return;
+			}
+			CSGPlayer* pPlayer = GetArea()->GetPlayer(nActorId);
+			if(!pPlayer || !pPlayer->GetTeam()) return;
+			pPlayer->GetTeam()->OnData(this, pCmdData);
+			return;
+		}
+	case SGCMDCODE_TEAM_ACCEPT:
+		if(!GetTeam()) {
+			CSGPlayer* pPlayer = GetArea()->GetPlayer(cmd.GetValue<unsigned int>());
+			if(!pPlayer || !pPlayer->GetTeam()) return;
+			pPlayer->GetTeam()->OnData(this, pCmdData);
+			return;
+		} else {
+			GetTeam()->OnData(this, pCmdData);
+			return;
+		}
+	case SGCMDCODE_TEAM_INVITE:
+	case SGCMDCODE_TEAM_SAY:
+	case SGCMDCODE_TEAM_LEADER:
+	case SGCMDCODE_TEAM_KICK:
+	case SGCMDCODE_TEAM_LEAVE:
+		GetTeam()->OnData(this, pCmdData);
+		return;
+	}
+
 }
 
 void CSGPlayer::OnPassive(const CmdData* pCmdData)

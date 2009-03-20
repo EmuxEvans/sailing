@@ -284,7 +284,7 @@ bool CDataWriter::PutStruct(const T* pValue)
 {
 	assert(m_nCurrent+sizeof(T)<=m_nSize);
 	if(m_nCurrent+sizeof(T)>m_nSize) return false;
-	memcpy(m_pBuf + m_nCurrent, pValue);
+	memcpy(m_pBuf + m_nCurrent, pValue, sizeof(*pValue));
 	m_nCurrent += sizeof(T);
 	return true;
 }

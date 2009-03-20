@@ -5,24 +5,25 @@ class CSGBattleField;
 
 #define SGPLAYERTEAM_MEMBER_MAX		5
 
-class CSGPlayerTeam;
+class CSGTeam;
 class CSGPlayer;
 class CSGPet;
 class CSGConnection;
 
-class CSGPlayerTeam
+class CSGTeam
 {
 public:
-	CSGPlayerTeam();
-	~CSGPlayerTeam();
+	CSGTeam();
+	~CSGTeam();
 
 	CSGPlayer* GetMember(int nIndex);
+	CSGPlayer* GetMember(unsigned int nActorId);
 
 	bool Join(CSGPlayer* pPlayer);
 	bool Leave(CSGPlayer* pPlayer);
 
-	void OnData(CSGPlayer* pPlayer, const void* pData, unsigned int nSize);
-	void SyncData();
+	void OnData(CSGPlayer* pPlayer, const CmdData* pCmdData);
+	void SendData(const void* pData, unsigned int nSize);
 
 private:
 	unsigned int m_nLeader;
@@ -32,6 +33,7 @@ private:
 class CSGPlayer : public CSGRole
 {
 	friend class CSGPet;
+	friend class CSGTeam;
 public:
 	CSGPlayer(CSGConnection* pConnection, unsigned int nPlayerId);
 	virtual ~CSGPlayer();
@@ -49,8 +51,8 @@ public:
 	CSGBattleField* GetBattleField() {
 		return m_pBattleField;
 	}
-	CSGPlayerTeam* GetPlayerTeam() {
-		return m_pPlayerTeam;
+	CSGTeam* GetTeam() {
+		return m_pTeam;
 	}
 	CSGPet* GetPet() {
 		return m_pPet;
@@ -60,6 +62,7 @@ public:
 	bool QuitPlayer();
 
 	bool GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData);
+	bool GetViewDataInTeam(SGPLAYER_VIEWDATA_INTEAM* pData);
 
 	bool DropItem(int nIndex);
 	bool Equip(int nIndex, int nSolt);
@@ -77,6 +80,14 @@ protected:
 		assert(m_pPet==pPet);
 		m_pPet = NULL;
 	}
+	void OnJoinTeam(CSGTeam* pTeam) {
+		assert(m_pTeam==NULL);
+		m_pTeam = pTeam;
+	}
+	void OnLeaveTeam(CSGTeam* pTeam) {
+		assert(m_pTeam==pTeam);
+		m_pTeam = NULL;
+	}
 
 private:
 	CSGConnection* m_pConnection;
@@ -84,7 +95,7 @@ private:
 	char m_szName[100];
 
 	CSGBattleField* m_pBattleField;
-	CSGPlayerTeam* m_pPlayerTeam;
+	CSGTeam* m_pTeam;
 	CSGPet* m_pPet;
 
 	ItemUData	m_Equip[SGEQUIPMENT_COUNT];
