@@ -57,3 +57,8 @@ typedef struct SGBATTLEFIELD_VIEWDATA {
 typedef struct SGTEAM_MEMBER_INFO {
 	char name[100];
 } SGTEAM_MEMBER_INFO;
+
+typedef struct SGPLAYER_VIEWDATA_INTEAM {
+	unsigned int actorid;
+	char name[100];
+} SGPLAYER_VIEWDATA_INTEAM;

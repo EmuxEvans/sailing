@@ -610,6 +610,9 @@ void CMainView::OnData(ISGClient* pClient, const void* pData, unsigned int nSize
 				case CMDARG_TYPE_FLOAT|CMDARG_TYPE_ARRAY:
 					lua_pushnumber(L, (lua_Number)data.GetValue<float>());
 					break;
+				case CMDARG_TYPE_STRUCT|CMDARG_TYPE_ARRAY:
+					tolua_pushusertype(L, (void*)data.GetStruct(pCmdInfo->m_Args[l].m_StructSize), pCmdInfo->m_Args[l].m_StructName);
+					break;
 				default:
 					assert(0);
 					return;

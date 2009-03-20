@@ -114,7 +114,7 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSArg("viewdata", CMDARG_TYPE_STRUCT, "SGBATTLEFIELD_VIEWDATA", sizeof(SGBATTLEFIELD_VIEWDATA));
 
 	PushSCmd("move_leave", SGCMDCODE_MOVE_LEAVE, "对象离开视野范围");
-	PushSArg("actorid", CMDARG_TYPE_DWORD);
+	PushSArg("actorid", CMDARG_TYPE_DWORD, "对象的actorid");
 
 	PushCCmd("target_set", SGCMDCODE_TARGET_SET);
 	PushCArg("targetid", CMDARG_TYPE_DWORD);
@@ -130,9 +130,11 @@ CSGCmdSetManage::CSGCmdSetManage()
 
 	PushSCmd("team_join", SGCMDCODE_TEAM_JOIN, "请求加入team");
 	PushSArg("actorid", CMDARG_TYPE_DWORD);
+	PushSArg("name", CMDARG_TYPE_STRING);
 	PushSArg("token", CMDARG_TYPE_STRING);
 	PushSCmd("team_invite", SGCMDCODE_TEAM_INVITE, "收到邀请加入team");
 	PushSArg("actorid", CMDARG_TYPE_DWORD);
+	PushSArg("name", CMDARG_TYPE_STRING);
 	PushSArg("token", CMDARG_TYPE_STRING);
 
 	PushCCmd("team_accept", SGCMDCODE_TEAM_ACCEPT, "确认请求");
@@ -142,6 +144,8 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSCmd("team_info", SGCMDCODE_TEAM_INFO, "返回队伍信息");
 	PushSArg("leader", CMDARG_TYPE_DWORD);
 	PushSArg("infos", CMDARG_TYPE_STRUCT|CMDARG_TYPE_ARRAY, "SGTEAM_MEMBER_INFO", sizeof(SGTEAM_MEMBER_INFO));
+	PushSCmd("team_change", SGCMDCODE_TEAM_CHANGE, "返回队伍信息改变");
+	PushSArg("info", CMDARG_TYPE_STRUCT, "SGTEAM_MEMBER_INFO", sizeof(SGTEAM_MEMBER_INFO));
 
 	PushCCmd("team_leader", SGCMDCODE_TEAM_LEADER, "设置队伍队长");
 	PushCArg("leader", CMDARG_TYPE_DWORD);
