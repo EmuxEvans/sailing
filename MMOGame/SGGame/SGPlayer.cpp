@@ -251,11 +251,13 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 		buf.PutValue(pActor->GetPosition().x);
 		buf.PutValue(pActor->GetPosition().y);
 		buf.PutValue(pActor->GetPosition().z);
-		buf.PutValue(pActor->GetDestination().x);
-		buf.PutValue(pActor->GetDestination().y);
-		buf.PutValue(pActor->GetDestination().z);
-		buf.PutValue(pActor->GetWalkTime());
-		buf.PutValue(pActor->GetDirection());
+		if(pActor->GetActorType()!=SGACTORTYPE_BATTLEFIELD) {
+			buf.PutValue(pActor->GetDestination().x);
+			buf.PutValue(pActor->GetDestination().y);
+			buf.PutValue(pActor->GetDestination().z);
+			buf.PutValue(pActor->GetWalkTime());
+			buf.PutValue(pActor->GetDirection());
+		}
 
 		// send buf to client
 		if(buf.GetLength()) {
