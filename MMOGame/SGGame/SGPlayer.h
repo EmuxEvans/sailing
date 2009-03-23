@@ -16,6 +16,8 @@ public:
 	CSGTeam();
 	~CSGTeam();
 
+	unsigned int GetLeadActorId() { return m_nLeader; }
+
 	CSGPlayer* GetMember(int nIndex);
 	CSGPlayer* GetMember(unsigned int nActorId);
 

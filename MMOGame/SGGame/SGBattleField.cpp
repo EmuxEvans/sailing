@@ -32,19 +32,24 @@ public:
 	CSGBattleFieldImpl(CSGArea* pArea, const Vector& vecPosition);
 	virtual ~CSGBattleFieldImpl();
 
+	void Release();
+
 	virtual bool Join(CSGRole* pPlayer, int nIndex);
 	virtual bool Leave(CSGRole* pPlayer);
 
 	virtual bool Joinable(CSGRole* pPlayer, int& nIndex);
 
 	virtual CSGRole* GetRole(unsigned int nActorId);
+	int GetRoleIndex(unsigned int nActorId);
 
 	virtual bool GetViewData(CSGPlayer* pPlayer, SGBATTLEFIELD_VIEWDATA* pData);
 
-	virtual void Notify(const CmdData* pCmdData);
-	virtual void Notify(int nTeam, const CmdData* pCmdData);
-	virtual void Passive(const CmdData* pCmdData);
-	virtual void Passive(int nTeam, const CmdData* pCmdData);
+	virtual void OnData(CSGRole* pRole, const CmdData* pCmdData);
+
+	virtual void SendNotify(const CmdData* pCmdData);
+	virtual void SendNotify(int nTeam, const CmdData* pCmdData);
+	virtual void SendPassive(const CmdData* pCmdData);
+	virtual void SendPassive(int nTeam, const CmdData* pCmdData);
 
 private:
 	CSGRole* m_Roles[10];
@@ -66,25 +71,46 @@ CSGBattleFieldImpl::~CSGBattleFieldImpl()
 {
 }
 
+void CSGBattleFieldImpl::Release()
+{
+	SetPositionNULL();
+	SetArea(NULL);
+}
+
 bool CSGBattleFieldImpl::Join(CSGRole* pPlayer, int nIndex)
 {
+	if(nIndex<0 || nIndex>=sizeof(m_Roles)) {
+		if(!Joinable(pPlayer, nIndex)) {
+			return false;
+		}
+	}
+
 	CCmdDataWriter<10> cmd(SGCMDCODE_BATTLEFIELD_JOIN, GetActorId());
-	cmd.PutValue(this);	
+	cmd.PutValue(this);
 	pPlayer->OnNotify(cmd.GetCmdData());
-	return false;
+	m_Roles[nIndex] = pPlayer;
+	return true;
 }
 
 bool CSGBattleFieldImpl::Leave(CSGRole* pPlayer)
 {
+	int nIndex = GetRoleIndex(pPlayer->GetActorId());
+
+	m_Roles[nIndex] = NULL;
 	CCmdDataWriter<10> cmd(SGCMDCODE_BATTLEFIELD_LEAVE, GetActorId());
 	cmd.PutValue(this);
 	pPlayer->OnNotify(cmd.GetCmdData());
-	return false;
+	return true;
 }
 
 bool CSGBattleFieldImpl::Joinable(CSGRole* pPlayer, int& nIndex)
 {
-	return false;
+	for(nIndex=0; nIndex<sizeof(m_Roles)/sizeof(m_Roles[0]); nIndex++) {
+		if(!m_Roles[nIndex]) break;
+	}
+	if(nIndex==sizeof(m_Roles)/sizeof(m_Roles[0])) return false;
+
+	return true;
 }
 
 CSGRole* CSGBattleFieldImpl::GetRole(unsigned int nActorId)
@@ -95,12 +121,34 @@ CSGRole* CSGBattleFieldImpl::GetRole(unsigned int nActorId)
 	return NULL;
 }
 
-bool CSGBattleFieldImpl::GetViewData(CSGPlayer* pPlayer, SGBATTLEFIELD_VIEWDATA* pData)
+int CSGBattleFieldImpl::GetRoleIndex(unsigned int nActorId)
 {
-	return false;
+	for(int l=0; l<sizeof(m_Roles)/sizeof(m_Roles[0]); l++) {
+		if(m_Roles[l] && m_Roles[l]->GetActorId()==nActorId) return l;
+	}
+	return -1;
 }
 
-void CSGBattleFieldImpl::Notify(const CmdData* pCmdData)
+bool CSGBattleFieldImpl::GetViewData(CSGPlayer* pPlayer, SGBATTLEFIELD_VIEWDATA* pData)
+{
+	memset(pData, 0, sizeof(*pData));
+	strcpy(pData->name, "cailie");
+	return true;
+}
+
+void CSGBattleFieldImpl::OnData(CSGRole* pRole, const CmdData* pCmdData)
+{
+	switch(pCmdData->nCmd) {
+	case SGCMDCODE_FIGHT_RUNAWAY:
+		CCmdDataWriter<10> cmd(SGCMDCODE_BATTLEFIELD_LEAVE, GetActorId());
+		cmd.PutValue(this);
+		SendNotify(cmd.GetCmdData());
+		Release();
+		return;
+	}
+}
+
+void CSGBattleFieldImpl::SendNotify(const CmdData* pCmdData)
 {
 	for(int l=0; l<sizeof(m_Roles)/sizeof(m_Roles[0]); l++) {
 		if(m_Roles[l]) {
@@ -109,7 +157,7 @@ void CSGBattleFieldImpl::Notify(const CmdData* pCmdData)
 	}
 }
 
-void CSGBattleFieldImpl::Notify(int nTeam, const CmdData* pCmdData)
+void CSGBattleFieldImpl::SendNotify(int nTeam, const CmdData* pCmdData)
 {
 	if(nTeam==SGBATTLEFIELD_TEAM_RED) {
 		for(int l=0; l<sizeof(m_Roles)/sizeof(m_Roles[0])/2; l++) {
@@ -129,7 +177,7 @@ void CSGBattleFieldImpl::Notify(int nTeam, const CmdData* pCmdData)
 	}
 }
 
-void CSGBattleFieldImpl::Passive(const CmdData* pCmdData)
+void CSGBattleFieldImpl::SendPassive(const CmdData* pCmdData)
 {
 	for(int l=0; l<sizeof(m_Roles)/sizeof(m_Roles[0]); l++) {
 		if(m_Roles[l]) {
@@ -138,7 +186,7 @@ void CSGBattleFieldImpl::Passive(const CmdData* pCmdData)
 	}
 }
 
-void CSGBattleFieldImpl::Passive(int nTeam, const CmdData* pCmdData)
+void CSGBattleFieldImpl::SendPassive(int nTeam, const CmdData* pCmdData)
 {
 	if(nTeam==SGBATTLEFIELD_TEAM_RED) {
 		for(int l=0; l<sizeof(m_Roles)/sizeof(m_Roles[0])/2; l++) {

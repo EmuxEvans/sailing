@@ -203,7 +203,7 @@ template<class T>
 T CDataReader::GetValue() {
 	T Value;
 	assert(m_nCurrent+sizeof(T)<=m_nSize);
-	if(m_nCurrent+sizeof(T)>m_nSize) return 0;
+	if(m_nCurrent+sizeof(T)>m_nSize) return (T)-1;
 	Value = *((const T*)(m_pBuf + m_nCurrent));
 	m_nCurrent += sizeof(T);
 	return Value;
