@@ -73,7 +73,7 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSArg("direction", CMDARG_TYPE_FLOAT, "面朝方向");
 	PushSCmd("move_join_npc", SGCMDCODE_MOVE_JOIN_NPC, "有NPC进入视野范围");
 	PushSArg("actorid", CMDARG_TYPE_DWORD, "NPC的actorid");
-	PushSArg("viewdata", CMDARG_TYPE_STRUCT, "SGPLAYER_VIEWDATA", sizeof(SGPLAYER_VIEWDATA), "NPC的外表数据");
+	PushSArg("viewdata", CMDARG_TYPE_STRUCT, "SGNPC_VIEWDATA", sizeof(SGNPC_VIEWDATA), "NPC的外表数据");
 	PushSArg("cx", CMDARG_TYPE_FLOAT, "开始点坐标");
 	PushSArg("cy", CMDARG_TYPE_FLOAT);
 	PushSArg("cz", CMDARG_TYPE_FLOAT);
@@ -84,7 +84,7 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSArg("direction", CMDARG_TYPE_FLOAT, "面朝方向");
 	PushSCmd("move_join_pet", SGCMDCODE_MOVE_JOIN_PET, "有宠物进入视野范围");
 	PushSArg("actorid", CMDARG_TYPE_DWORD, "宠物的actorid");
-	PushSArg("viewdata", CMDARG_TYPE_STRUCT, "SGPLAYER_VIEWDATA", sizeof(SGPLAYER_VIEWDATA), "宠物的外表数据");
+	PushSArg("viewdata", CMDARG_TYPE_STRUCT, "SGPET_VIEWDATA", sizeof(SGPET_VIEWDATA), "宠物的外表数据");
 	PushSArg("cx", CMDARG_TYPE_FLOAT, "开始点坐标");
 	PushSArg("cy", CMDARG_TYPE_FLOAT);
 	PushSArg("cz", CMDARG_TYPE_FLOAT);
@@ -95,7 +95,7 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSArg("direction", CMDARG_TYPE_FLOAT, "面朝方向");
 	PushSCmd("move_join_battle", SGCMDCODE_MOVE_JOIN_BATTLE, "有战斗进入视野范围");
 	PushSArg("actorid", CMDARG_TYPE_DWORD);
-	PushSArg("viewdata", CMDARG_TYPE_STRUCT, "SGPLAYER_VIEWDATA", sizeof(SGPLAYER_VIEWDATA), "战斗的外表数据");
+	PushSArg("viewdata", CMDARG_TYPE_STRUCT, "SGBATTLEFIELD_VIEWDATA", sizeof(SGBATTLEFIELD_VIEWDATA), "战斗的外表数据");
 	PushSArg("cx", CMDARG_TYPE_FLOAT, "坐标");
 	PushSArg("cy", CMDARG_TYPE_FLOAT);
 	PushSArg("cz", CMDARG_TYPE_FLOAT);
@@ -123,6 +123,7 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSArg("actorid", CMDARG_TYPE_DWORD);
 	PushSArg("targetid", CMDARG_TYPE_DWORD);
 
+	PushCCmd("team_create", SGCMDCODE_TEAM_CREATE, "创建 team");
 	PushCCmd("team_join", SGCMDCODE_TEAM_JOIN, "加入 team");
 	PushCArg("actorid", CMDARG_TYPE_DWORD);
 	PushCCmd("team_invite", SGCMDCODE_TEAM_INVITE, "邀请别人加入 team");
@@ -163,4 +164,13 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushCCmd("team_leave", SGCMDCODE_TEAM_LEAVE, "主动离开队伍");
 	PushSCmd("team_leave", SGCMDCODE_TEAM_LEAVE, "通知有人离开队伍");
 	PushSArg("actorid", CMDARG_TYPE_DWORD, "谁离开了队伍");
+
+	PushCCmd("fight", SGCMDCODE_FIGHT, "开始战斗");
+	PushCCmd("fight_join", SGCMDCODE_FIGHT_JOIN, "加入战斗");
+	PushCArg("actorid", CMDARG_TYPE_DWORD, "battlefield的actorid");
+	PushCCmd("fight_runaway", SGCMDCODE_FIGHT_RUNAWAY, "逃离战斗");
+
+	PushSCmd("fight_start", SGCMDCODE_FIGHT_START, "开始战斗");
+	PushSCmd("fight_end", SGCMDCODE_FIGHT_END, "战斗结束");
+
 }
