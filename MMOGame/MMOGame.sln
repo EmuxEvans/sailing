@@ -39,6 +39,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_proto_lua", "..\framew
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SGCommon", "SGCommon\SGCommon.vcproj", "{8F2C8BAB-E985-4774-B4B5-F4FC08C9F3CE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "psgen", "psgen\psgen.vcproj", "{71EF5FDD-2B84-434A-8033-938EF9A1EFA3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -97,6 +99,10 @@ Global
 		{8F2C8BAB-E985-4774-B4B5-F4FC08C9F3CE}.Debug|Win32.Build.0 = Debug|Win32
 		{8F2C8BAB-E985-4774-B4B5-F4FC08C9F3CE}.Release|Win32.ActiveCfg = Release|Win32
 		{8F2C8BAB-E985-4774-B4B5-F4FC08C9F3CE}.Release|Win32.Build.0 = Release|Win32
+		{71EF5FDD-2B84-434A-8033-938EF9A1EFA3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{71EF5FDD-2B84-434A-8033-938EF9A1EFA3}.Debug|Win32.Build.0 = Debug|Win32
+		{71EF5FDD-2B84-434A-8033-938EF9A1EFA3}.Release|Win32.ActiveCfg = Release|Win32
+		{71EF5FDD-2B84-434A-8033-938EF9A1EFA3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
