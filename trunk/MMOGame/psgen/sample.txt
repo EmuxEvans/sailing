@@ -1,0 +1,6 @@
+
+type1 "welcome"
+{
+	int aaa "",
+	string<100> aaa ""
+};

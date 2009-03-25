@@ -9,14 +9,22 @@
 #define PROPERTY_TYPE_FLOAT		7
 #define PROPERTY_TYPE_STRING	8
 
-typedef struct PropertyInfo {
-	char			szName[20];
-	int				nType;
-	unsigned int	nOffset;
-	unsigned int	nSize;
-	unsigned int	nCount;
-	const char*		pDesc;
-} PropertyInfo;
+class IProperty;
+class IPropertySet;
+
+class IProperty
+{
+public:
+	virtual ~IProperty() { }
+
+	virtual const char* GetName() = 0;
+	virtual int GetType() = 0;
+	virtual IPropertySet* GetTypeDefine() = 0;
+	virtual unsigned int GetOffset() = 0;
+	virtual unsigned int GetSize() = 0;
+	virtual unsigned int GetCount() = 0;
+	virtual const char* GetDesc() = 0;
+};
 
 class IPropertySet
 {
@@ -25,9 +33,10 @@ public:
 
 	virtual const char* GetName() = 0;
 	virtual const char* GetDesc() = 0;
+	virtual int GetSize() = 0;
 
 	virtual int PropertyCount() = 0;
-	virtual const PropertyInfo* GetProperty(int nIndex) = 0;
+	virtual IProperty* GetProperty(int nIndex) = 0;
 
 	int GetPropertyIndex(const char* pName);
 
@@ -66,25 +75,4 @@ public:
 	bool SetValue(void* pData, const char* pName, unsigned int		Value) { return SetValue(pData, GetPropertyIndex(pName), Value); }
 	bool SetValue(void* pData, const char* pName, float				Value) { return SetValue(pData, GetPropertyIndex(pName), Value); }
 	bool SetValue(void* pData, const char* pName, const char*		Value) { return SetValue(pData, GetPropertyIndex(pName), Value); }
-};
-
-template<int Count>
-class CPropertySet : public IPropertySet
-{
-public:
-	CPropertySet();
-	virtual ~CPropertySet();
-
-	virtual int PropertyCount();
-	virtual const PropertyInfo* GetProperty(int nIndex);
-
-protected:
-	virtual void InitData() = 0;
-	void SetInfo(const char* pName, const char* pDesc);
-	void SetProperty(int nIndex, const char* pName, int nType, unsigned int nOffset, unsigned int nSize, unsigned int nCount, const char* pDesc);
-
-private:
-	const char* m_pName;
-	const char* m_pDesc;
-	PropertyInfo m_Infos[Count];
 };

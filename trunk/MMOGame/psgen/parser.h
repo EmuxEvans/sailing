@@ -1,19 +1,21 @@
 #pragma once
 
 typedef struct PDL_ARG {
-	std::string name;
-	std::string type;
-	std::string size;
-	std::string count;
-	std::string desc;
+	char name[100];
+	char type[100];
+	char size[100];
+	char count[100];
+	char desc[500];
 } PDL_ARG;
 
 typedef struct PDL_CMD {
-	std::string name;
-	std::string desc;
-	std::vector<PDL_ARG> args;
+	char name[100];
+	char desc[500];
+	PDL_ARG* args;
+	int args_count;
 } PDL_CMD;
 
-extern std::vector<PDL_CMD> cmds;
+extern bool psgen_parser(const char* text);
 
-extern bool pdl_parser(const char* text);
+extern int psgen_getcount();
+extern const PDL_CMD* psgen_get(int index);

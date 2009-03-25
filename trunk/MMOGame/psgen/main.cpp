@@ -31,13 +31,13 @@ static char strbuf[100*1024];
 
 int main(int argc, char* argv[])
 {
-	assert(argc==4);
+	assert(argc==5);
 	if(load_textfile(argv[1], strbuf, sizeof(strbuf))<0) {
 		assert(0);
 		return -1;
 	}
 
-	if(!pdl_parser(strbuf)) {
+	if(!psgen_parser(strbuf)) {
 		printf("failed to parse %s\n", argv[1]);
 		return -1;
 	}
@@ -49,22 +49,22 @@ int main(int argc, char* argv[])
 
 	FILE* fp;
 
-	fp = fopen(argv[2], "wt");
+	fp = fopen(argv[3], "wt");
 	if(!fp) {
 		printf("can't open inc file\n");
 		return -1;
 	}
-	if(!code_gen_inc(fp)) {
+	if(!code_gen_inc(argv[2], fp)) {
 		printf("failed to gen inc file\n");
 		return -1;
 	}
 	fclose(fp);
-	fp = fopen(argv[3], "wt");
+	fp = fopen(argv[4], "wt");
 	if(!fp) {
 		printf("can't open inl file\n");
 		return -1;
 	}
-	if(!code_gen_inl(fp)) {
+	if(!code_gen_inl(argv[2], fp)) {
 		printf("failed to gen inl file\n");
 		return -1;
 	}
