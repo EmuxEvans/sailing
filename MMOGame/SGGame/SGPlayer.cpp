@@ -283,7 +283,7 @@ bool CSGPlayer::QuitPlayer()
 bool CSGPlayer::GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData)
 {
 	memset(pData, 0, sizeof(*pData));
-	strcpy(pData->name, this->GetName());
+	strcpy(pData->nick, this->GetName());
 	sprintf(pData->guild, "%p", this);
 	return true;
 }
@@ -292,7 +292,7 @@ bool CSGPlayer::GetViewDataInTeam(SGPLAYER_VIEWDATA_INTEAM* pData)
 {
 	memset(pData, 0, sizeof(*pData));
 	pData->actorid = GetActorId();
-	strcpy(pData->name, GetName());
+	strcpy(pData->nick, GetName());
 	return true;
 }
 

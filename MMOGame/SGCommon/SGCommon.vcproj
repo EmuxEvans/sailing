@@ -155,6 +155,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SGData.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SGLua.cpp"
 				>
 			</File>
@@ -177,10 +181,42 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SGDataDef.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SGDataDef.inl"
+				>
+			</File>
+			<File
 				RelativePath=".\SGLua.h"
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\SGDataDef.txt"
+			>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="gen "
+					CommandLine="cd &quot;$(InputDir)&quot;&#x0D;&#x0A;&quot;$(OutDir)\psgen.exe&quot; $(InputFileName) $(InputName) $(InputName).h $(InputName).inl"
+					Outputs="$(InputName).h;$(InputName).inl"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="gen "
+					CommandLine="cd &quot;$(InputDir)&quot;&#x0D;&#x0A;&quot;$(OutDir)\psgen.exe&quot; $(InputFileName) $(InputName) $(InputName).h $(InputName).inl"
+					Outputs="$(InputName).h;$(InputName).inl"
+				/>
+			</FileConfiguration>
+		</File>
 		<File
 			RelativePath=".\SGLua.cmd"
 			>

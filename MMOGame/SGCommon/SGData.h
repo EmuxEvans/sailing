@@ -37,28 +37,6 @@
 #define SGBATTLEFIELD_TEAM_RED		0
 #define SGBATTLEFIELD_TEAM_BLUE		1
 
-typedef struct SGPLAYER_VIEWDATA {
-	char name[100];
-	char guild[100];
-} SGPLAYER_VIEWDATA;
+#define SGNICK_STRLEN				10
 
-typedef struct SGNPC_VIEWDATA {
-	char name[100];
-} SGNPC_VIEWDATA;
-
-typedef struct SGPET_VIEWDATA {
-	unsigned int m_nOwner;
-} SGPET_VIEWDATA;
-
-typedef struct SGBATTLEFIELD_VIEWDATA {
-	char name[100];
-} SGBATTLEFIELD_VIEWDATA;
-
-typedef struct SGTEAM_MEMBER_INFO {
-	char name[100];
-} SGTEAM_MEMBER_INFO;
-
-typedef struct SGPLAYER_VIEWDATA_INTEAM {
-	unsigned int actorid;
-	char name[100];
-} SGPLAYER_VIEWDATA_INTEAM;
+#include "SGDataDef.h"

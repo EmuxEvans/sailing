@@ -38,6 +38,10 @@ public:
 	CPropertySet();
 	virtual ~CPropertySet();
 
+	virtual const char* GetName();
+	virtual const char* GetDesc();
+	virtual unsigned int GetSize();
+
 	virtual int PropertyCount();
 	virtual IProperty* GetProperty(int nIndex);
 
@@ -47,9 +51,10 @@ protected:
 	void SetProperty(int nIndex, const char* pName, int nType, unsigned int nOffset, unsigned int nSize, unsigned int nCount, const char* pDesc);
 
 private:
-	const char* m_pName;
-	const char* m_pDesc;
-	CProperty m_Infos[Count];
+	const char*		m_pName;
+	const char*		m_pDesc;
+	unsigned int	m_nSize;
+	CProperty		m_Infos[Count];
 };
 
 template<int Count>
@@ -64,6 +69,24 @@ CPropertySet<Count>::CPropertySet()
 template<int Count>
 CPropertySet<Count>::~CPropertySet()
 {
+}
+
+template<int Count>
+const char* CPropertySet<Count>::GetName()
+{
+	return m_pName;
+}
+
+template<int Count>
+const char* CPropertySet<Count>::GetDesc()
+{
+	return m_pDesc;
+}
+
+template<int Count>
+unsigned int CPropertySet<Count>::GetSize()
+{
+	return m_nSize;
 }
 
 template<int Count>
@@ -92,10 +115,10 @@ void CPropertySet<Count>::SetProperty(int nIndex, const char* pName, int nType, 
 {
 	assert(nIndex>=0 && nIndex<Count);
 	if(nIndex<0 || nIndex>=Count) return;
-	strcpy(m_Infos[nIndex].szName, pName);
-	m_Infos[nIndex].nType = nType;
-	m_Infos[nIndex].nOffset = nOffset;
-	m_Infos[nIndex].nSize = nSize;
-	m_Infos[nIndex].nCount = nCount;
-	m_Infos[nIndex].pDesc = pDesc;
+	m_Infos[nIndex].m_Name = pName;
+	m_Infos[nIndex].m_Type = nType;
+	m_Infos[nIndex].m_Offset = nOffset;
+	m_Infos[nIndex].m_Size = nSize;
+	m_Infos[nIndex].m_Count = nCount;
+	m_Infos[nIndex].m_Desc = pDesc;
 }

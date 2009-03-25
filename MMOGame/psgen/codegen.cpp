@@ -18,6 +18,19 @@ static const char* type2type(const char* name)
 	return NULL;
 }
 
+static const char* type2type1(const char* name)
+{
+	if(strcmp(name, "char")==0)		return "char";
+	if(strcmp(name, "short")==0)	return "short";
+	if(strcmp(name, "int")==0)		return "int";
+	if(strcmp(name, "byte")==0)		return "unsigned char";
+	if(strcmp(name, "word")==0)		return "unsigned short";
+	if(strcmp(name, "dword")==0)	return "unsigned int";
+	if(strcmp(name, "float")==0)	return "float";
+	if(strcmp(name, "string")==0)	return "char";
+	return NULL;
+}
+
 static const char* type2type(const PDL_ARG* arg)
 {
 	if(strcmp(arg->type, "char")==0)	return "sizeof(char)";
@@ -45,7 +58,7 @@ bool code_gen_inc(const char* name, FILE* fp)
 			if(strcmp(psgen_get(c)->args[a].type, "string")==0) {
 				fprintf(fp,"	char %s[%s+1];\n", psgen_get(c)->args[a].name, psgen_get(c)->args[a].size);
 			} else {
-				fprintf(fp,"	%s %s;\n", psgen_get(c)->args[a].type, psgen_get(c)->args[a].name);
+				fprintf(fp,"	%s %s;\n", type2type1(psgen_get(c)->args[a].type), psgen_get(c)->args[a].name);
 			}
 		}
 		fprintf(fp,"} %s;\n", psgen_get(c)->name);

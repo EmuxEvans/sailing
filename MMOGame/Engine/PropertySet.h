@@ -33,7 +33,7 @@ public:
 
 	virtual const char* GetName() = 0;
 	virtual const char* GetDesc() = 0;
-	virtual int GetSize() = 0;
+	virtual unsigned int GetSize() = 0;
 
 	virtual int PropertyCount() = 0;
 	virtual IProperty* GetProperty(int nIndex) = 0;
