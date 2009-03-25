@@ -4,7 +4,9 @@
 
 #include "parser.h"
 
-std::vector<PDL_CMD> cmds;
+static PDL_ARG args[2000];
+static PDL_CMD cmds[400];
+static int args_cur = 0, cmds_cur = 0;
 
 static const char* get_token_char(const char* buf, char c);
 static const char* get_token_string(const char* buf, char* value, int size);
@@ -14,11 +16,11 @@ static const char* get_token_number(const char* buf, char* value, int size);
 static const char* escape_blank(const char* buf);
 
 static const char* parser_cmd(const char* buf);
-static const char* parser_arg(PDL_CMD& cmd, const char* buf);
+static const char* parser_arg(const char* buf);
 
 static int load_textfile(const char* filename, char* buf, int buflen);
 
-bool pdl_parser(const char* text)
+bool psgen_parser(const char* text)
 {
 	const char* buf;
 
@@ -33,6 +35,16 @@ bool pdl_parser(const char* text)
 	}
 
 	return true;
+}
+
+int psgen_getcount()
+{
+	return cmds_cur;
+}
+
+const PDL_CMD* psgen_get(int index)
+{
+	return &cmds[index];
 }
 
 const char* get_token_char(const char* buf, char c)
@@ -56,10 +68,10 @@ const char* get_token_string(const char* buf, char* value, int size)
 			end++; continue;
 		}
 	}
-	if(end+2<size) return NULL;
+	if(end+2>size) return NULL;
 
-	memcpy(value, buf, end+1);
-	value[end+1] = '\0';
+	memcpy(value, buf+1, end+1-1);
+	value[end+1-2] = '\0';
 
 	return buf+end+1;
 }
@@ -158,13 +170,14 @@ const char* parser_cmd(const char* buf)
 	buf=get_token_char(buf, '{');
 	if(!buf) return NULL;
 
-	PDL_CMD cmd;
-	cmd.name = name;
-	cmd.desc = desc;
+	strcpy(cmds[cmds_cur].name, name);
+	strcpy(cmds[cmds_cur].desc, desc);
+	cmds[cmds_cur].args = &args[args_cur];
+	cmds[cmds_cur].args_count = 0;
 
 	for(;;) {
 		const char* tbuf;
-		tbuf = parser_arg(cmd, buf);
+		tbuf = parser_arg(buf);
 		if(!tbuf) break;
 		buf = tbuf;
 
@@ -176,12 +189,11 @@ const char* parser_cmd(const char* buf)
 		return NULL;
 	}
 
-	cmds.push_back(cmd);
-
+	cmds_cur++;
 	return buf;
 }
 
-const char* parser_arg(PDL_CMD& cmd, const char* buf)
+const char* parser_arg(const char* buf)
 {
 	char type[100];
 	char size[100];
@@ -192,7 +204,7 @@ const char* parser_arg(PDL_CMD& cmd, const char* buf)
 
 	type[0] = '\0';
 	size[0] = '\0';
-	count[0] = '\0';
+	strcpy(count, "1");
 	name[0] = '\0';
 
 	if(			(tbuf=get_token_id(buf, type, sizeof(type)))
@@ -215,12 +227,13 @@ const char* parser_arg(PDL_CMD& cmd, const char* buf)
 	if(!tbuf) return NULL;
 
 	PDL_ARG arg;
-	arg.name = name;
-	arg.type = type;
-	arg.size = size;
-	arg.count = count;
-	arg.desc = desc;
-	cmd.args.push_back(arg);
+	strcpy(args[args_cur].name, name);
+	strcpy(args[args_cur].type, type);
+	strcpy(args[args_cur].size, size);
+	strcpy(args[args_cur].count, count);
+	strcpy(args[args_cur].desc, desc);
+	args_cur++;
+	cmds[cmds_cur].args_count++;
 
 	return tbuf;
 }
