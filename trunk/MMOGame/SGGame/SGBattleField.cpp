@@ -132,7 +132,7 @@ int CSGBattleFieldImpl::GetRoleIndex(unsigned int nActorId)
 bool CSGBattleFieldImpl::GetViewData(CSGPlayer* pPlayer, SGBATTLEFIELD_VIEWDATA* pData)
 {
 	memset(pData, 0, sizeof(*pData));
-	strcpy(pData->name, "cailie");
+	strcpy(pData->nick, "cailie");
 	return true;
 }
 

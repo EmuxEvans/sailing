@@ -165,8 +165,9 @@ const char* parser_cmd(const char* buf)
 
 	buf=get_token_id(buf, name, sizeof(name));
 	if(!buf) return NULL;
-	buf=get_token_string(buf, desc, sizeof(desc));
-	if(!buf) return NULL;
+	desc[0] = '\0';
+//	buf=get_token_string(buf, desc, sizeof(desc));
+//	if(!buf) return NULL;
 	buf=get_token_char(buf, '{');
 	if(!buf) return NULL;
 
@@ -178,10 +179,6 @@ const char* parser_cmd(const char* buf)
 	for(;;) {
 		const char* tbuf;
 		tbuf = parser_arg(buf);
-		if(!tbuf) break;
-		buf = tbuf;
-
-		tbuf = get_token_char(buf, ',');
 		if(!tbuf) break;
 		buf = tbuf;
 	}
@@ -223,7 +220,10 @@ const char* parser_arg(const char* buf)
 		return NULL;
 	}
 
-	tbuf = get_token_string(tbuf, desc, sizeof(desc));
+	desc[0] = '\0';
+//	tbuf = get_token_string(tbuf, desc, sizeof(desc));
+//	if(!tbuf) return NULL;
+	tbuf = get_token_char(tbuf, ';');
 	if(!tbuf) return NULL;
 
 	PDL_ARG arg;
