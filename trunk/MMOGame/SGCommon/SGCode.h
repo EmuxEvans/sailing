@@ -23,6 +23,9 @@
 #define SGCMDCODE_LOGIN_REPORT			0x5003
 #define SGCMDCODE_LOGIN_SELECT			0x5004
 
+// cmdcode for player equip
+#define SGCMDCODE_EQUIP					0x5600
+
 // cmdcode for player move
 #define SGCMDCODE_MOVE					0x5100
 #define SGCMDCODE_MOVE_JOIN_PLAYER		0x5101

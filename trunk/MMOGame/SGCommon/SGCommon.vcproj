@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\framework\inc\skates\lua"
+				AdditionalIncludeDirectories="..\..\framework\inc\skates\lua;..\Engine"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -105,7 +105,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\framework\inc\skates\lua"
+				AdditionalIncludeDirectories="..\..\framework\inc\skates\lua;..\Engine"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -202,7 +202,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="gen "
-					CommandLine="cd &quot;$(InputDir)&quot;&#x0D;&#x0A;&quot;$(OutDir)\psgen.exe&quot; $(InputFileName) $(InputName) $(InputName).h $(InputName).inl"
+					CommandLine="cd &quot;$(InputDir)&quot;&#x0D;&#x0A;&quot;$(OutDir)\psgen.exe&quot; $(InputFileName) $(InputName) $(InputName).h $(InputName).inl&#x0D;&#x0A;"
 					Outputs="$(InputName).h;$(InputName).inl"
 				/>
 			</FileConfiguration>
@@ -212,7 +212,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="gen "
-					CommandLine="cd &quot;$(InputDir)&quot;&#x0D;&#x0A;&quot;$(OutDir)\psgen.exe&quot; $(InputFileName) $(InputName) $(InputName).h $(InputName).inl"
+					CommandLine="cd &quot;$(InputDir)&quot;&#x0D;&#x0A;&quot;$(OutDir)\psgen.exe&quot; $(InputFileName) $(InputName) $(InputName).h $(InputName).inl&#x0D;&#x0A;"
 					Outputs="$(InputName).h;$(InputName).inl"
 				/>
 			</FileConfiguration>

@@ -362,6 +362,11 @@ void CAreaActor<TArea, TAreaActor>::SetPosition(const Vector& vecPosition, float
 	pCell = m_pArea->GetCell(vecPosition);
 	pOrignCell = m_pAreaCell;
 
+	if(pOrignCell==NULL && pCell!=NULL) {
+		CmdData cmdJoin = { CMDCODE_MOVE_JOIN, GetActorId(), NULL, 0 };
+		OnNotify(&cmdJoin);
+	}
+
 	if(pOrignCell!=pCell) {
 		ChangeCell(pOrignCell, pCell);
 	}
@@ -372,6 +377,9 @@ void CAreaActor<TArea, TAreaActor>::SetPositionNULL()
 {
 	if(m_pArea && m_pAreaCell) {
 		ChangeCell(m_pAreaCell, NULL);
+
+		CmdData cmdLeave = { CMDCODE_MOVE_LEAVE, GetActorId(), NULL, 0 };
+		OnNotify(&cmdLeave);
 	}
 }
 

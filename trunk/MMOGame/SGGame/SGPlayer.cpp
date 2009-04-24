@@ -247,9 +247,10 @@ CSGPlayer::CSGPlayer(CSGConnection* pConnection, unsigned int nPlayerId) : CSGRo
 	m_pBattle = NULL;
 	m_pTeam = NULL;
 	m_pPet = NULL;
-	memset(m_Equip, 0, sizeof(m_Equip));
-	memset(m_Bag, 0, sizeof(m_Bag));
-	memset(m_Warehouse, 0, sizeof(m_Warehouse));
+	memset(&m_Equips, 0, sizeof(m_Equips));
+	//memset(m_Equip, 0, sizeof(m_Equip));
+	//memset(m_Bag, 0, sizeof(m_Bag));
+	//memset(m_Warehouse, 0, sizeof(m_Warehouse));
 
 	m_pConnection->GetCallback()->OnPlayerAttach(GetPlayerId(), m_szName, this);
 }
@@ -466,6 +467,9 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 void CSGPlayer::OnAction(const CmdData* pCmdData)
 {
 	CCmdDataReader cmd(pCmdData);
+
+	if(pCmdData->nCmd==SGCMDCODE_EQUIP) {
+	}
 
 	if(pCmdData->nCmd==SGCMDCODE_MOVE) {
 		Vector s(cmd.GetValue<float>(), cmd.GetValue<float>(), cmd.GetValue<float>());
