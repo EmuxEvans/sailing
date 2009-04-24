@@ -159,6 +159,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DataObject.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameArea.cpp"
 				>
 			</File>
@@ -210,6 +214,10 @@
 			</File>
 			<File
 				RelativePath=".\CmdData.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DataObject.h"
 				>
 			</File>
 			<File

@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "..\Engine\CmdData.h"
+#include "CmdData.h"
 #include "SGCode.h"
 #include "SGData.h"
 
@@ -25,6 +25,19 @@ CSGCmdSetManage::CSGCmdSetManage()
 
 	PushSCmd("login_return", SGCMDCODE_LOGIN_RETURN, "服务器返回结果");
 	PushSArg("result", CMDARG_TYPE_DWORD, "返回值, 0=成功");
+
+	PushCCmd("eqips", SGCMDCODE_EQUIP, "玩家装备");
+	PushCArg("face", CMDARG_TYPE_DWORD, "");
+	PushCArg("hair", CMDARG_TYPE_DWORD, "");
+	PushCArg("headwear", CMDARG_TYPE_DWORD, "");
+	PushCArg("helmet", CMDARG_TYPE_DWORD, "");
+	PushCArg("chest", CMDARG_TYPE_DWORD, "");
+	PushCArg("cuff", CMDARG_TYPE_DWORD, "");
+	PushCArg("belt", CMDARG_TYPE_DWORD, "");
+	PushCArg("shoulder", CMDARG_TYPE_DWORD, "");
+	PushCArg("clock", CMDARG_TYPE_DWORD, "");
+	PushCArg("pants", CMDARG_TYPE_DWORD, "");
+	PushCArg("shoes", CMDARG_TYPE_DWORD, "");
 
 	PushCCmd("move", SGCMDCODE_MOVE, "玩家移动");
 	PushCArg("sx", CMDARG_TYPE_FLOAT, "当前坐标");

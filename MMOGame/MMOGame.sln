@@ -38,6 +38,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_proto_lua", "..\framework\win32\test_proto_lua.vcproj", "{0E7E6E58-6C5C-4F18-B813-EEC518865403}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SGCommon", "SGCommon\SGCommon.vcproj", "{8F2C8BAB-E985-4774-B4B5-F4FC08C9F3CE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{71EF5FDD-2B84-434A-8033-938EF9A1EFA3} = {71EF5FDD-2B84-434A-8033-938EF9A1EFA3}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "psgen", "psgen\psgen.vcproj", "{71EF5FDD-2B84-434A-8033-938EF9A1EFA3}"
 EndProject

@@ -58,6 +58,9 @@ public:
 	CSGPet* GetPet() {
 		return m_pPet;
 	}
+	const SGPLAYER_EQUIPMENTS& GetEqiups() {
+		return m_Equips;
+	}
 
 	bool InitPlayer();
 	bool QuitPlayer();
@@ -90,6 +93,8 @@ private:
 	CSGBattleField* m_pBattle;
 	CSGTeam* m_pTeam;
 	CSGPet* m_pPet;
+
+	SGPLAYER_EQUIPMENTS	m_Equips;
 
 	ItemUData	m_Equip[SGEQUIPMENT_COUNT];
 	ItemUData	m_Bag[SGBAG_MAX];
