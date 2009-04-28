@@ -46,7 +46,6 @@ public:
 	virtual IProperty* GetProperty(int nIndex);
 
 protected:
-	virtual void InitData() = 0;
 	void SetInfo(const char* pName, const char* pDesc);
 	void SetProperty(int nIndex, const char* pName, int nType, unsigned int nOffset, unsigned int nSize, unsigned int nCount, const char* pDesc);
 
@@ -63,7 +62,6 @@ CPropertySet<Count>::CPropertySet()
 	m_pName = NULL;
 	m_pDesc = NULL;
 	memset(m_Infos, 0, sizeof(m_Infos));
-	InitData();
 }
 
 template<int Count>

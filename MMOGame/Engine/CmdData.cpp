@@ -14,6 +14,7 @@ CDataReader::CDataReader(const void* pBuf, unsigned int nSize)
 
 void CDataReader::Reset()
 {
+	m_bError = false;
 	m_nCurrent = 0;	
 }
 
