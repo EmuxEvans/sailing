@@ -136,6 +136,11 @@ BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
+    POPUP "Code Generate"
+    BEGIN
+        MENUITEM "Generate .h For Client...",   ID_GENERATE_HFILE
+        MENUITEM "Generate DB File...",         ID_GENERATE_DBFILE
+    END
     POPUP "&Help"
     BEGIN
         MENUITEM "&About SGClient...",          ID_APP_ABOUT

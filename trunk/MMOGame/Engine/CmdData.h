@@ -126,7 +126,11 @@ public:
 	template<class T>
 	bool GetArray(const T*& Array, unsigned int Count);
 
+	bool Error() {
+		return m_bError;
+	}
 private:
+	bool m_bError;
 	const char* m_pBuf;
 	unsigned int m_nCurrent, m_nSize;
 };
@@ -192,9 +196,9 @@ template<class T>
 bool CDataReader::GetValue(T& Value, T Min, T Max)
 {
 	assert(m_nCurrent+sizeof(T)<=m_nSize);
-	if(m_nCurrent+sizeof(T)>m_nSize) return false;
+	if(m_nCurrent+sizeof(T)>m_nSize) { m_bError = true; return false; }
 	Value = *((const T*)(m_pBuf + m_nCurrent));
-	if((Min!=0 || Max!=0) && (Value<Min || Value>Max)) return false;
+	if((Min!=0 || Max!=0) && (Value<Min || Value>Max)) { m_bError = true; return false; }
 	m_nCurrent += sizeof(T);
 	return true;
 }
@@ -203,7 +207,7 @@ template<class T>
 T CDataReader::GetValue() {
 	T Value;
 	assert(m_nCurrent+sizeof(T)<=m_nSize);
-	if(m_nCurrent+sizeof(T)>m_nSize) return (T)-1;
+	if(m_nCurrent+sizeof(T)>m_nSize) { m_bError = true; return (T)-1; }
 	Value = *((const T*)(m_pBuf + m_nCurrent));
 	m_nCurrent += sizeof(T);
 	return Value;
@@ -213,21 +217,21 @@ template<class T>
 bool CDataReader::GetStruct(const T*& Value)
 {
 	assert(m_nCurrent+sizeof(T)<=m_nSize);
-	if(m_nCurrent+sizeof(T)>m_nSize) return 0;
+	if(m_nCurrent+sizeof(T)>m_nSize) { m_bError = true; return false; }
 	Value = (const T*)(m_pBuf + m_nCurrent);
 	m_nCurrent += sizeof(T);
-	return Value;
+	return true;
 }
 
 template<class T>
 bool CDataReader::GetArray(const T*& Array, unsigned int* Count, unsigned int Max)
 {
 	assert(m_nCurrent+sizeof(unsigned short)<=m_nSize);
-	if(m_nCurrent+sizeof(unsigned short)>m_nSize) return false;
+	if(m_nCurrent+sizeof(unsigned short)>m_nSize) { m_bError = true; return false; }
 	*Count = *((unsigned short*)(m_pBuf+m_nCurrent));
-	if(Max!=0x10000 && *Count>Max) return false;
+	if(Max!=0x10000 && *Count>Max) { m_bError = true; return false; }
 	assert(m_nCurrent+sizeof(unsigned short)+sizeof(T)*(*Count)<=m_nSize);
-	if(m_nCurrent+sizeof(unsigned short)+sizeof(T)*(*Count)>m_nSize) return false;
+	if(m_nCurrent+sizeof(unsigned short)+sizeof(T)*(*Count)>m_nSize) { m_bError = true; return false; }
 	Array = (T*)(m_pBuf+m_nCurrent+sizeof(unsigned short));
 	m_nCurrent += sizeof(unsigned short) + sizeof(T)*(*Count);	
 	return true;
@@ -237,11 +241,11 @@ template<class T>
 bool CDataReader::GetArray(const T*& Array, unsigned int Count)
 {
 	assert(m_nCurrent+sizeof(unsigned short)<=m_nSize);
-	if(m_nCurrent+sizeof(unsigned short)>m_nSize) return false;
+	if(m_nCurrent+sizeof(unsigned short)>m_nSize) { m_bError = true; return false; }
 	assert((unsigned int)(*((unsigned short*)(m_pBuf+m_nCurrent)))==Count);
-	if((unsigned int)(*((unsigned short*)(m_pBuf+m_nCurrent)))!=Count) return false;
+	if((unsigned int)(*((unsigned short*)(m_pBuf+m_nCurrent)))!=Count) { m_bError = true; return false; }
 	assert(m_nCurrent+sizeof(unsigned short)+sizeof(T)*(ACount)<=m_nSize);
-	if(m_nCurrent+sizeof(unsigned short)+sizeof(T)*(ACount)>m_nSize) return false;
+	if(m_nCurrent+sizeof(unsigned short)+sizeof(T)*(ACount)>m_nSize) { m_bError = true; return false; }
 	Array = (T*)(m_pBuf+m_nCurrent+sizeof(unsigned short));
 	m_nCurrent += sizeof(unsigned short) + sizeof(T)*Count;
 	return true;
@@ -285,7 +289,7 @@ bool CDataWriter::PutStruct(const T* pValue)
 	assert(m_nCurrent+sizeof(T)<=m_nSize);
 	if(m_nCurrent+sizeof(T)>m_nSize) return false;
 	memcpy(m_pBuf + m_nCurrent, pValue, sizeof(*pValue));
-	m_nCurrent += sizeof(T);
+	m_nCurrent += sizeof(*pValue);
 	return true;
 }
 

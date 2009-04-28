@@ -1,11 +1,30 @@
 
+SGPLAYER_INFO {
+	dword					pid;
+	string<SGNICK_STRLEN>	nick;
+};
+
+SGPLAYER_EQUIPMENTS {
+	dword	face;
+	dword	hair;
+	dword	headwear;
+	dword	helmet;
+	dword	chest;
+	dword	cuff;
+	dword	belt;
+	dword	shoulder;
+	dword	clock;
+	dword	pants;
+	dword	shoes;
+};
+
 SGPLAYER_VIEWDATA {
-	string<SGNICK_STRLEN> nick;
-	string<SGNICK_STRLEN> guild;
+	string<SGNICK_STRLEN>	nick;
+	string<SGNICK_STRLEN>	guild;
 };
 
 SGNPC_VIEWDATA {
-	string<SGNICK_STRLEN> nick;
+	string<SGNICK_STRLEN>	nick;
 };
 
 SGPET_VIEWDATA {

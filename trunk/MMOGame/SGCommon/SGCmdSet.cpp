@@ -173,7 +173,7 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSArg("body", CMDARG_TYPE_STRING);
 
 	PushCCmd("team_kick", SGCMDCODE_TEAM_KICK, "把人踢出队伍");
-	PushSArg("actorid", CMDARG_TYPE_DWORD, "把谁踢出队伍");
+	PushCArg("actorid", CMDARG_TYPE_DWORD, "把谁踢出队伍");
 	PushCCmd("team_leave", SGCMDCODE_TEAM_LEAVE, "主动离开队伍");
 	PushSCmd("team_leave", SGCMDCODE_TEAM_LEAVE, "通知有人离开队伍");
 	PushSArg("actorid", CMDARG_TYPE_DWORD, "谁离开了队伍");

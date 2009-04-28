@@ -64,6 +64,7 @@ bool code_gen_inc(const char* name, FILE* fp)
 		fprintf(fp,"} %s;\n", psgen_get(c)->name);
 		fprintf(fp,"\n");
 	}
+
 	return true;
 }
 
@@ -74,7 +75,7 @@ bool code_gen_inl(const char* name, FILE* fp)
 		fprintf(fp,"class CPropertySet_%s : public CPropertySet<%d>\n", psgen_get(c)->name, psgen_get(c)->args_count);
 		fprintf(fp,"{\n");
 		fprintf(fp,"public:\n");
-		fprintf(fp,"	virtual void InitData() {\n");
+		fprintf(fp,"	CPropertySet_%s() {\n", psgen_get(c)->name);
 		for(int a=0; a<psgen_get(c)->args_count; a++) {
 			fprintf(fp,"		SetProperty(%d, \"%s\", %s, offsetof(%s, %s), %s, %s, \"%s\");\n",
 				a,
