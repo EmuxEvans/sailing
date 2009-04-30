@@ -1,1 +1,1 @@
-copy SGCode.h + SGData.h SGLua.pkg
+copy SGCode.h + SGData.h + SGDataDef.h SGLua.pkg
