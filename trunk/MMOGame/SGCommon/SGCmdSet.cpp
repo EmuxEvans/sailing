@@ -58,6 +58,12 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSArg("ez", CMDARG_TYPE_FLOAT);
 	PushSArg("time", CMDARG_TYPE_DWORD, "预测花费的时间");
 
+	PushSCmd("telport", SGCMDCODE_TELPORT, "瞬移到目标点");
+	PushSArg("sx", CMDARG_TYPE_FLOAT, "目标坐标");
+	PushSArg("sy", CMDARG_TYPE_FLOAT);
+	PushSArg("sz", CMDARG_TYPE_FLOAT);
+	PushSArg("direction", CMDARG_TYPE_FLOAT, "面的朝向");
+
 	PushCCmd("mapsay", SGCMDCODE_MAPCHAT_SAY, "在地图上说话");
 	PushCArg("body", CMDARG_TYPE_STRING, "内容");
 
