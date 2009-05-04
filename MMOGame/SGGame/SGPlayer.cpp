@@ -494,6 +494,13 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 		GetArea()->Notify(pCmdData, GetAreaCell()->GetAreaCol(), GetAreaCell()->GetAreaRow());
 		return;
 	}
+	if(pCmdData->nCmd==SGCMDCODE_TELPORT) {
+		SetPositionNULL();
+		Vector p(cmd.GetValue<float>(), cmd.GetValue<float>(), cmd.GetValue<float>());
+		float d = cmd.GetValue<float>();
+		SetPosition(p, d);
+		return;
+	}
 	if(pCmdData->nCmd==SGCMDCODE_MAPCHAT_SAY) {
 		CCmdDataWriter<100> out(SGCMDCODE_MAPCHAT_SAY, GetActorId());
 		out.PutValue(GetName());
