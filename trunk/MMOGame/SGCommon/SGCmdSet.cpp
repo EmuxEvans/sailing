@@ -26,6 +26,10 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSCmd("login_return", SGCMDCODE_LOGIN_RETURN, "服务器返回结果");
 	PushSArg("result", CMDARG_TYPE_DWORD, "返回值, 0=成功");
 
+	PushCCmd("create", SGCMDCODE_CREATE, "创建角色");
+	PushCArg("username", CMDARG_TYPE_STRING);
+	PushCArg("sex", CMDARG_TYPE_DWORD);
+
 	PushCCmd("eqips", SGCMDCODE_EQUIP, "玩家装备");
 	PushCArg("face", CMDARG_TYPE_DWORD, "");
 	PushCArg("hair", CMDARG_TYPE_DWORD, "");

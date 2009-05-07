@@ -1,7 +1,7 @@
 
 SGPLAYER_INFO {
-	dword					pid;
 	string<SGNICK_STRLEN>	nick;
+	dword	sex;
 };
 
 SGPLAYER_EQUIPMENTS {
@@ -19,8 +19,8 @@ SGPLAYER_EQUIPMENTS {
 };
 
 SGPLAYER_VIEWDATA {
-	string<SGNICK_STRLEN>	nick;
-	string<SGNICK_STRLEN>	guild;
+	SGPLAYER_INFO		info;
+	SGPLAYER_EQUIPMENTS	equips;
 };
 
 SGNPC_VIEWDATA {

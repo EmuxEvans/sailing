@@ -8,6 +8,7 @@
 #define PROPERTY_TYPE_DWORD		6
 #define PROPERTY_TYPE_FLOAT		7
 #define PROPERTY_TYPE_STRING	8
+#define PROPERTY_TYPE_STRUCT	9
 
 class IProperty;
 class IPropertySet;

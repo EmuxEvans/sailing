@@ -63,6 +63,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="ws2_32.lib rpcrt4.lib"
 				LinkIncremental="2"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -72,6 +73,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				EmbedManifest="false"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"

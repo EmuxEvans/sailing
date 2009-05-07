@@ -46,8 +46,8 @@ public:
 	unsigned int GetPlayerId() const {
 		return m_nPlayerId;
 	}
-	const char* GetName() const {
-		return m_szName;
+	const SGPLAYER_INFO& GetInfo() const {
+		return m_Info;
 	}
 	CSGBattleField* GetBattleField() {
 		return m_pBattle;
@@ -88,13 +88,13 @@ protected:
 private:
 	CSGConnection* m_pConnection;
 	unsigned int m_nPlayerId;
-	char m_szName[100];
 
 	CSGBattleField* m_pBattle;
 	CSGTeam* m_pTeam;
 	CSGPet* m_pPet;
 
 	SGPLAYER_EQUIPMENTS	m_Equips;
+	SGPLAYER_INFO m_Info;
 
 	ItemUData	m_Equip[SGEQUIPMENT_COUNT];
 	ItemUData	m_Bag[SGBAG_MAX];

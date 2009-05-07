@@ -227,7 +227,7 @@
 					Name="VCCustomBuildTool"
 					Description="Combin file for $(InputName).pkg"
 					CommandLine="cd $(InputDir)&#x0D;&#x0A;cmd /C $(InputFileName)&#x0D;&#x0A;"
-					AdditionalDependencies="SGCode.h;SGData.h"
+					AdditionalDependencies="SGCode.h;SGData.h;SGDataDef.h"
 					Outputs="$(InputName).pkg"
 				/>
 			</FileConfiguration>
@@ -238,7 +238,7 @@
 					Name="VCCustomBuildTool"
 					Description="Combin file for $(InputName).pkg"
 					CommandLine="cd $(InputDir)&#x0D;&#x0A;cmd /C $(InputFileName)&#x0D;&#x0A;"
-					AdditionalDependencies="SGCode.h;SGData.h"
+					AdditionalDependencies="SGCode.h;SGData.h;SGDataDef.h"
 					Outputs="$(InputName).pkg"
 				/>
 			</FileConfiguration>
