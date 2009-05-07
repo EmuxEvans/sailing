@@ -161,7 +161,7 @@ void CSGTeam::OnData(CSGPlayer* pPlayer, const CmdData* pCmdData)
 			assert(!pPlayer->GetTeam());
 			buf.PutValue<unsigned short>(SGCMDCODE_TEAM_JOIN);
 			buf.PutValue(pPlayer->GetActorId());
-			buf.PutString(pPlayer->GetName());
+			buf.PutString(pPlayer->GetInfo().nick);
 			buf.PutString("token");
 			GetMember(cmd.GetValue<unsigned int>())->GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
 			return;
@@ -172,7 +172,7 @@ void CSGTeam::OnData(CSGPlayer* pPlayer, const CmdData* pCmdData)
 			if(pWho) {
 				buf.PutValue<unsigned short>(SGCMDCODE_TEAM_INVITE);
 				buf.PutValue(pPlayer->GetActorId());
-				buf.PutString(pPlayer->GetName());
+				buf.PutString(pPlayer->GetInfo().nick);
 				buf.PutString("token");
 				pWho->GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
 			}
@@ -243,21 +243,22 @@ CSGPlayer::CSGPlayer(CSGConnection* pConnection, unsigned int nPlayerId) : CSGRo
 {
 	m_pConnection = pConnection;
 	m_nPlayerId = nPlayerId;
-	sprintf(m_szName, "USER-%d", m_nPlayerId);
 	m_pBattle = NULL;
 	m_pTeam = NULL;
 	m_pPet = NULL;
 	memset(&m_Equips, 0, sizeof(m_Equips));
+	memset(&m_Info, 0, sizeof(m_Info));
+	sprintf(m_Info.nick, "USER-%d", m_nPlayerId);
 	//memset(m_Equip, 0, sizeof(m_Equip));
 	//memset(m_Bag, 0, sizeof(m_Bag));
 	//memset(m_Warehouse, 0, sizeof(m_Warehouse));
 
-	m_pConnection->GetCallback()->OnPlayerAttach(GetPlayerId(), m_szName, this);
+	m_pConnection->GetCallback()->OnPlayerAttach(GetPlayerId(), m_Info.nick, this);
 }
 
 CSGPlayer::~CSGPlayer()
 {
-	m_pConnection->GetCallback()->OnPlayerDetach(GetPlayerId(), m_szName, this);
+	m_pConnection->GetCallback()->OnPlayerDetach(GetPlayerId(), m_Info.nick, this);
 
 	assert(!m_pBattle);
 	assert(!m_pTeam);
@@ -283,9 +284,8 @@ bool CSGPlayer::QuitPlayer()
 
 bool CSGPlayer::GetViewData(CSGPlayer* pPlayer, SGPLAYER_VIEWDATA* pData)
 {
-	memset(pData, 0, sizeof(*pData));
-	strcpy(pData->nick, this->GetName());
-	sprintf(pData->guild, "%p", this);
+	memcpy(&pData->info, &GetInfo(), sizeof(SGPLAYER_INFO));
+	memcpy(&pData->equips, &GetEqiups(), sizeof(SGPLAYER_EQUIPMENTS));
 	return true;
 }
 
@@ -293,7 +293,7 @@ bool CSGPlayer::GetViewDataInTeam(SGPLAYER_VIEWDATA_INTEAM* pData)
 {
 	memset(pData, 0, sizeof(*pData));
 	pData->actorid = GetActorId();
-	strcpy(pData->nick, GetName());
+	strcpy(pData->nick, GetInfo().nick);
 	return true;
 }
 
@@ -468,6 +468,16 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 {
 	CCmdDataReader cmd(pCmdData);
 
+	if(pCmdData->nCmd==SGCMDCODE_CREATE) {
+		m_pConnection->GetCallback()->OnPlayerDetach(GetPlayerId(), m_Info.nick, this);
+		strcpy(m_Info.nick, cmd.GetString());
+		m_Info.sex = cmd.GetValue<unsigned int>();
+		m_pConnection->GetCallback()->OnPlayerAttach(GetPlayerId(), m_Info.nick, this);
+
+		CCmdDataWriter<10> out(SGCMDCODE_MOVE_CHANGE, GetActorId());
+		GetArea()->Notify(out.GetCmdData(), GetAreaCell());
+		return;
+	}
 	if(pCmdData->nCmd==SGCMDCODE_EQUIP) {
 		SGPLAYER_EQUIPMENTS equips;
 		equips.face		= cmd.GetValue<unsigned int>();
@@ -490,7 +500,8 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 	if(pCmdData->nCmd==SGCMDCODE_MOVE) {
 		Vector s(cmd.GetValue<float>(), cmd.GetValue<float>(), cmd.GetValue<float>());
 		Vector e(cmd.GetValue<float>(), cmd.GetValue<float>(), cmd.GetValue<float>());
-		Move(&s, &e, cmd.GetValue<unsigned int>());
+		SetPosition(s, GetDirection());
+		//Move(&s, &e, cmd.GetValue<unsigned int>());
 		GetArea()->Notify(pCmdData, GetAreaCell()->GetAreaCol(), GetAreaCell()->GetAreaRow());
 		return;
 	}
@@ -503,7 +514,7 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 	}
 	if(pCmdData->nCmd==SGCMDCODE_MAPCHAT_SAY) {
 		CCmdDataWriter<100> out(SGCMDCODE_MAPCHAT_SAY, GetActorId());
-		out.PutValue(GetName());
+		out.PutValue(GetInfo().nick);
 		out.PutValue(cmd.GetString());
 		GetArea()->Notify(out.GetCmdData(), GetAreaCell());
 		return;
@@ -512,7 +523,7 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 		CSGPlayer* pPlayer = GetConnection()->GetCallback()->GetPlayer(cmd.GetString());
 		CCmdDataWriter<100> out(SGCMDCODE_MAPCHAT_MSAY, GetActorId());
 		if(pPlayer) {
-			out.PutValue(GetName());
+			out.PutValue(GetInfo().nick);
 			out.PutValue(cmd.GetString());
 			pPlayer->OnNotify(out.GetCmdData());
 		}

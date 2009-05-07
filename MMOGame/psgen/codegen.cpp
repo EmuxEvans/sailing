@@ -15,7 +15,8 @@ static const char* type2type(const char* name)
 	if(strcmp(name, "dword")==0)	return "PROPERTY_TYPE_DWORD";
 	if(strcmp(name, "float")==0)	return "PROPERTY_TYPE_FLOAT";
 	if(strcmp(name, "string")==0)	return "PROPERTY_TYPE_STRING";
-	return NULL;
+	return "PROPERTY_TYPE_STRUCT";
+//	return NULL;
 }
 
 static const char* type2type1(const char* name)
@@ -28,11 +29,13 @@ static const char* type2type1(const char* name)
 	if(strcmp(name, "dword")==0)	return "unsigned int";
 	if(strcmp(name, "float")==0)	return "float";
 	if(strcmp(name, "string")==0)	return "char";
-	return NULL;
+	return name;
+//	return NULL;
 }
 
 static const char* type2type(const PDL_ARG* arg)
 {
+	static char value[100];
 	if(strcmp(arg->type, "char")==0)	return "sizeof(char)";
 	if(strcmp(arg->type, "short")==0)	return "sizeof(short)";
 	if(strcmp(arg->type, "int")==0)		return "sizeof(int)";
@@ -41,7 +44,9 @@ static const char* type2type(const PDL_ARG* arg)
 	if(strcmp(arg->type, "dword")==0)	return "sizeof(unsigned int)";
 	if(strcmp(arg->type, "float")==0)	return "sizeof(float)";
 	if(strcmp(arg->type, "string")==0)	return arg->size;
-	return NULL;
+	sprintf(value, "sizeof(%s)", arg->type);
+	return value;
+//	return NULL;
 }
 
 bool code_check()

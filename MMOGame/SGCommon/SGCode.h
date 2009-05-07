@@ -22,6 +22,7 @@
 #define SGCMDCODE_LOGIN_RETURN			0x5002
 #define SGCMDCODE_LOGIN_REPORT			0x5003
 #define SGCMDCODE_LOGIN_SELECT			0x5004
+#define SGCMDCODE_CREATE				0x5005
 
 // cmdcode for player equip
 #define SGCMDCODE_EQUIP					0x5600
