@@ -67,6 +67,7 @@ public:
 
 	CSGPlayer* GetPlayer(unsigned int nPlayerId);
 	CSGPlayer* GetPlayer(const char* pName);
+	CSGPlayer* GetNextPlayer(CSGPlayer* pPlayer);
 
 	CSGArea* GetArea(unsigned int nAreaId);
 
@@ -85,4 +86,5 @@ private:
 	std::map<unsigned int, CSGConnection*> m_mapConnections;
 	std::map<unsigned int, CSGPlayer*> m_mapPlayersById;
 	std::map<std::string, CSGPlayer*> m_mapPlayersByName;
+	std::map<unsigned int, CSGPlayer*>::iterator m_itrPlayersById;
 };

@@ -19,6 +19,8 @@
 #include "SGGameLoop.h"
 #include "SGBattleField.h"
 
+#define SGQSI_NAME					"sgqsi"
+
 void UserSendData(unsigned int nSeq, const void* pData, unsigned int nSize);
 void UserDisconnect(unsigned int nSeq);
 
@@ -453,10 +455,13 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 		return;
 	}
 
-	if(pCmdData->nCmd==SGCMDCODE_MAPCHAT_SAY || pCmdData->nCmd==SGCMDCODE_MAPCHAT_MSAY) {
+	if(pCmdData->nCmd==SGCMDCODE_MAPSAY || pCmdData->nCmd==SGCMDCODE_SAY) {
 		CDataBuffer<100> buf;
 		buf.PutValue<unsigned short>(pCmdData->nCmd);
 		buf.PutString(cmd.GetValue<const char*>());
+		if(pCmdData->nCmd==SGCMDCODE_MAPSAY) {
+			buf.PutString(cmd.GetValue<const char*>());
+		}
 		buf.PutString(cmd.GetValue<const char*>());
 		// send buf to client
 		GetConnection()->SendData(buf.GetBuffer(), buf.GetLength());
@@ -512,20 +517,38 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 		SetPosition(p, d);
 		return;
 	}
-	if(pCmdData->nCmd==SGCMDCODE_MAPCHAT_SAY) {
-		CCmdDataWriter<100> out(SGCMDCODE_MAPCHAT_SAY, GetActorId());
+	if(pCmdData->nCmd==SGCMDCODE_MAPSAY) {
+		CCmdDataWriter<100> out(SGCMDCODE_MAPSAY, GetActorId());
 		out.PutValue(GetInfo().nick);
+		out.PutValue(cmd.GetString());
 		out.PutValue(cmd.GetString());
 		GetArea()->Notify(out.GetCmdData(), GetAreaCell());
 		return;
 	}
-	if(pCmdData->nCmd==SGCMDCODE_MAPCHAT_MSAY) {
-		CSGPlayer* pPlayer = GetConnection()->GetCallback()->GetPlayer(cmd.GetString());
-		CCmdDataWriter<100> out(SGCMDCODE_MAPCHAT_MSAY, GetActorId());
-		if(pPlayer) {
-			out.PutValue(GetInfo().nick);
-			out.PutValue(cmd.GetString());
-			pPlayer->OnNotify(out.GetCmdData());
+	if(pCmdData->nCmd==SGCMDCODE_SAY) {
+		const char* with = cmd.GetString();
+
+		if(strcmp(SGQSI_NAME, with)==0) {
+			CSGPlayer* pPlayer = GetConnection()->GetCallback()->GetNextPlayer(NULL);
+			while(pPlayer) {
+				char tmp[500];
+				sprintf(tmp, "%08d %08d %s", pPlayer->GetPlayerId(), pPlayer->GetActorId(), pPlayer->GetInfo().nick);
+
+				CCmdDataWriter<100> out(SGCMDCODE_SAY, GetActorId());
+				out.PutValue<const char*>(SGQSI_NAME);
+				out.PutValue<const char*>(tmp);
+				pPlayer->OnNotify(out.GetCmdData());
+
+				pPlayer = GetConnection()->GetCallback()->GetNextPlayer(pPlayer);
+			}
+		} else {
+			CSGPlayer* pPlayer = GetConnection()->GetCallback()->GetPlayer(with);
+			if(pPlayer) {
+				CCmdDataWriter<100> out(SGCMDCODE_SAY, GetActorId());
+				out.PutValue(GetInfo().nick);
+				out.PutValue(cmd.GetString());
+				pPlayer->OnNotify(out.GetCmdData());
+			}
 		}
 		return;
 	}
