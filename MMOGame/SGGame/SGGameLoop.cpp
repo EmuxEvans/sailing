@@ -156,6 +156,18 @@ CSGPlayer* CSGGameLoopCallback::GetPlayer(const char* pName)
 	return i==m_mapPlayersByName.end()?i->second:NULL;
 }
 
+CSGPlayer* CSGGameLoopCallback::GetNextPlayer(CSGPlayer* pPlayer)
+{
+	if(!pPlayer)
+		m_itrPlayersById = m_mapPlayersById.begin();
+	if(m_itrPlayersById==m_mapPlayersById.end()) {
+		return NULL;
+	}
+	pPlayer = m_itrPlayersById->second;
+	m_itrPlayersById++;
+	return pPlayer;
+}
+
 CSGArea* CSGGameLoopCallback::GetArea(unsigned int nAreaId)
 {
 	return &g_GlobalArea;

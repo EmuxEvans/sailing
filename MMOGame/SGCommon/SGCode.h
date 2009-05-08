@@ -46,10 +46,9 @@
 #define SGCMDCODE_TARGET_SET			0x5201
 #define SGCMDCODE_TARGET_CHANGE			0x5201
 
-// cmdcode for mapchat
-#define SGCMDCODE_MAPCHAT				0x5300
-#define SGCMDCODE_MAPCHAT_SAY			0x5301
-#define SGCMDCODE_MAPCHAT_MSAY			0x5302
+// cmdcode for chat
+#define SGCMDCODE_MAPSAY				0x5301
+#define SGCMDCODE_SAY					0x5302
 
 // cmdcode for team
 #define SGCMDCODE_TEAM					0x5400

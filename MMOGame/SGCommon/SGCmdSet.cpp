@@ -16,6 +16,8 @@
 
 CSGCmdSetManage::CSGCmdSetManage()
 {
+	
+
 	PushSCmd("login_seed", SGCMDCODE_LOGIN_SEED, "服务端通知客户端用来扰乱密码的salt");
 	PushSArg("salt", CMDARG_TYPE_BYTE|CMDARG_TYPE_ARRAY);
 
@@ -68,20 +70,22 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSArg("sz", CMDARG_TYPE_FLOAT);
 	PushSArg("direction", CMDARG_TYPE_FLOAT, "面的朝向");
 
-	PushCCmd("mapsay", SGCMDCODE_MAPCHAT_SAY, "在地图上说话");
+	PushCCmd("mapsay", SGCMDCODE_MAPSAY, "在地图上说话");
+	PushCArg("who", CMDARG_TYPE_STRING, "对谁");
 	PushCArg("body", CMDARG_TYPE_STRING, "内容");
 
-	PushCCmd("mapmsay", SGCMDCODE_MAPCHAT_MSAY, "在地图上私聊");
+	PushSCmd("mapsay", SGCMDCODE_MAPSAY, "服务器返回有人在地图上说话");
+	PushSArg("who", CMDARG_TYPE_STRING, "谁说");
+	PushSArg("with", CMDARG_TYPE_STRING, "对谁");
+	PushSArg("body", CMDARG_TYPE_STRING, "内容");
+
+	PushCCmd("say", SGCMDCODE_SAY, "私聊");
 	PushCArg("who", CMDARG_TYPE_STRING, "和谁");
 	PushCArg("body", CMDARG_TYPE_STRING, "内容");
 
-	PushSCmd("mapsay", SGCMDCODE_MAPCHAT_SAY, "服务器返回有人在地图上说话");
-	PushSArg("who", CMDARG_TYPE_STRING, "谁");
-	PushSArg("body", CMDARG_TYPE_STRING, "说什么");
-
-	PushSCmd("mapmsay", SGCMDCODE_MAPCHAT_MSAY, "服务器通知有人在地图上私聊");
-	PushSArg("who", CMDARG_TYPE_STRING, "谁");
-	PushSArg("body", CMDARG_TYPE_STRING, "说什么");
+	PushSCmd("say", SGCMDCODE_SAY, "服务器通知有人和你私聊");
+	PushSArg("who", CMDARG_TYPE_STRING, "谁说");
+	PushSArg("body", CMDARG_TYPE_STRING, "内容");
 
 	PushSCmd("move_join_player", SGCMDCODE_MOVE_JOIN_PLAYER, "有玩家进入视野范围");
 	PushSArg("actorid", CMDARG_TYPE_DWORD, "玩家的actorid");
