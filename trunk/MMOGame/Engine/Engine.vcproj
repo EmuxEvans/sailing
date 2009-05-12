@@ -257,6 +257,17 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PropertyDB.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\PropertySet.cpp"
 				>
 			</File>
@@ -324,6 +335,10 @@
 			</File>
 			<File
 				RelativePath=".\Math.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyDB.h"
 				>
 			</File>
 			<File
