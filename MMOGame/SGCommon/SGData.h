@@ -5,16 +5,19 @@
 #define SGWAREHOUSE_MAX				80
 
 // 人装备点
-#define SGEQUIPMENT_HEAD			0 // 头
-#define SGEQUIPMENT_NECK			1 // 脖子
-#define SGEQUIPMENT_LHAND			2 // 左手
-#define SGEQUIPMENT_RHAND			3 // 右手
-#define SGEQUIPMENT_LFINGER			4 // 左边的手指
-#define SGEQUIPMENT_RFINGER			5 // 右边的手指
-#define SGEQUIPMENT_CLOTHES			6 // 上衣
-#define SGEQUIPMENT_WAIST			7 // 腰部
-#define SGEQUIPMENT_LEG				8 // 大腿
-#define SGEQUIPMENT_FOOT			9 // 脚
+#define SGEQUIPMENT_HEAD			0  // 头
+#define SGEQUIPMENT_NECK			1  // 脖子
+#define SGEQUIPMENT_BACK			2  // 背
+#define SGEQUIPMENT_ARM				3  // 手臂
+#define SGEQUIPMENT_SHOULDER		4  // 肩膀
+#define SGEQUIPMENT_LHAND			5  // 左手
+#define SGEQUIPMENT_RHAND			6  // 右手
+#define SGEQUIPMENT_LFINGER			7  // 左边的手指
+#define SGEQUIPMENT_RFINGER			8  // 右边的手指
+#define SGEQUIPMENT_CLOTHES			9  // 上衣
+#define SGEQUIPMENT_WAIST			10 // 腰部
+#define SGEQUIPMENT_LEG				11 // 大腿
+#define SGEQUIPMENT_FOOT			12 // 脚
 
  // 装备类型 范围 0~9999
 #define SGITEM_TYPE_NECKLACE		1  // 项链
@@ -45,24 +48,27 @@
 #define SGITEM_TYPE_STAFF			26 // 法杖
 
  // 装备类型之防具位置分类
-#define SGITEM_SUBTYPE_ARMET		0 // 头盔
-#define SGITEM_SUBTYPE_CHEST		1 // 上衣
-#define SGITEM_SUBTYPE_CUFF			2 // 护腕
-#define SGITEM_SUBTYPE_BELT			3 // 腰带
-#define SGITEM_SUBTYPE_PANTS		4 // 裤子
-#define SGITEM_SUBTYPE_SHOES		5 // 鞋子
-#define SGITEM_SUBTYPE_SHOUDER		6 // 护肩
+#define SGITEM_SUBTYPE_ARMET		0  // 头盔
+#define SGITEM_SUBTYPE_CHEST		1  // 上衣
+#define SGITEM_SUBTYPE_CUFF			2  // 护腕
+#define SGITEM_SUBTYPE_BELT			3  // 腰带
+#define SGITEM_SUBTYPE_PANTS		4  // 裤子
+#define SGITEM_SUBTYPE_SHOES		5  // 鞋子
+#define SGITEM_SUBTYPE_SHOUDER		6  // 护肩
  // 装备类型之防具材质分类
-#define SGITEM_SUBTYPE_CLOTH		30 //
+#define SGITEM_SUBTYPE_CLOTH		30 // 布甲
+#define SGITEM_SUBTYPE_LEATHER		40 // 皮甲
+#define SGITEM_SUBTYPE_LIGHTARMOR	50 // 轻甲
+#define SGITEM_SUBTYPE_HEAVYARMOR	60 // 重甲
 
-//
+// 角色类新
 #define SGACTORTYPE_NPC				0
 #define SGACTORTYPE_PLAYER			1
 #define SGACTORTYPE_PET				2
 #define SGACTORTYPE_BATTLEFIELD		3
 #define SGACTORTYPE_PROPS			4
 
-//
+// 动作类型
 #define SGACTIONMASK_QUEST			0x0001
 #define SGACTIONMASK_TALK			0x0002
 #define SGACTIONMASK_TRADE			0x0004
