@@ -13,7 +13,8 @@
 #define SGEQUIPMENT_RFINGER			5 // 右边的手指
 #define SGEQUIPMENT_CLOTHES			6 // 上衣
 #define SGEQUIPMENT_WAIST			7 // 腰部
-#define SGEQUIPMENT_FOOT			8 // 脚
+#define SGEQUIPMENT_LEG				8 // 大腿
+#define SGEQUIPMENT_FOOT			9 // 脚
 
  // 装备类型 范围 0~9999
 #define SGITEM_TYPE_NECKLACE		1  // 项链
