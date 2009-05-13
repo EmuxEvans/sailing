@@ -361,6 +361,8 @@ LRESULT CMainFrame::OnGenHFile(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 #include "..\Engine\PropertySet.h"
 #include "..\Engine\PropertyDB.h"
 
+#include "..\SGCommon\SGData.h"
+
 extern int SGDataDef_GetPropertySetCount();
 extern IPropertySet* SGDataDef_GetPropertySet(int nIndex);
 extern IPropertySet* SGDataDef_GetPropertySet(const char* pName);
@@ -373,14 +375,25 @@ LRESULT CMainFrame::OnGenDBFile(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndC
 	FILE* fp;
 	char SqlText[1000];
 	IPropertyDBConnection* pConnection = CreatePropertyDBConnection("");
-	CPropertyDBTable Table(SGDataDef_GetPropertySet("SGPLAYER_INFO"), "SGPLAYER_INFO", false);
+	CPropertyDBTable Table(SGDataDef_GetPropertySet("SGPLAYER_INFO"), "SGPLAYER_INFO", CPropertyDBTable::SINGLE);
 	fp = _tfopen(a.m_szFileName, _T("wt"));
 	if(!fp) return 0;
 
 	pConnection->CreateTable(&Table, SqlText, sizeof(SqlText));
 	_fputts(SqlText, fp);
 
-	pConnection->Release();
 	fclose(fp);
+
+	SGPLAYER_INFO info;
+	memset(&info, 0, sizeof(info));
+	strcpy(info.nick, "welcome");
+	info.sex = 0;
+
+	pConnection->Insert(&Table, 10980, &info);
+	pConnection->Delete(&Table, 10980);
+	pConnection->Read(&Table, 10980, &info);
+	pConnection->Write(&Table, 10980, &info);
+
+	pConnection->Release();
 	return 0;
 }

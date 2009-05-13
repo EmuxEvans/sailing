@@ -2,10 +2,16 @@
 
 class CPropertyDBTable {
 public:
-	CPropertyDBTable(IPropertySet* pSet, const char* pTableName, bool bArray) {
+	enum TableType {
+		SINGLE,
+		ARRAY,
+		QUEUE,
+	};
+
+	CPropertyDBTable(IPropertySet* pSet, const char* pTableName, TableType nTableType) {
 		m_pSet = pSet;
 		m_pTableName = pTableName;
-		m_bArray = bArray;
+		m_nTableType = nTableType;
 	}
 	~CPropertyDBTable() { }
 
@@ -15,14 +21,14 @@ public:
 	const char* GetTableName() {
 		return m_pTableName;
 	}
-	bool GetIsArray() {
-		return m_bArray;
+	TableType GetTableType() {
+		return m_nTableType;
 	}
 
 private:
 	IPropertySet*	m_pSet;
 	const char*		m_pTableName;
-	bool			m_bArray;
+	TableType		m_nTableType;
 };
 
 class IPropertyDBConnection {
@@ -33,16 +39,16 @@ public:
 	virtual bool CreateTable(CPropertyDBTable* pTable, char* pSqlText, unsigned int nLength) = 0;
 	virtual bool DeleteTable(CPropertyDBTable* pTable, char* pSqlText, unsigned int nLength) = 0;
 
-	virtual bool Insert(CPropertyDBTable* pTable, unsigned int nPlayerId, const void* pData) = 0;
-	virtual bool Delete(CPropertyDBTable* pTable, unsigned int nPlayerId) = 0;
-	virtual bool Read(CPropertyDBTable* pTable, unsigned int nPlayerId, void* pData) = 0;
-	virtual bool Write(CPropertyDBTable* pTable, unsigned int nPlayerId, const void* pData) = 0;
+	virtual bool Insert(CPropertyDBTable* pTable, unsigned int nUID, const void* pData) = 0;
+	virtual bool Delete(CPropertyDBTable* pTable, unsigned int nUID) = 0;
+	virtual bool Read(CPropertyDBTable* pTable, unsigned int nUID, void* pData) = 0;
+	virtual bool Write(CPropertyDBTable* pTable, unsigned int nUID, const void* pData) = 0;
 
-	virtual bool GetArrayCount(CPropertyDBTable* pTable, unsigned int nPlayerId, unsigned int& nCount) = 0;
-	virtual bool Insert(CPropertyDBTable* pTable, unsigned int nPlayerId, unsigned int nIndex, const void* pData) = 0;
-	virtual bool Delete(CPropertyDBTable* pTable, unsigned int nPlayerId, unsigned int nIndex) = 0;
-	virtual bool Read(CPropertyDBTable* pTable, unsigned int nPlayerId, unsigned int nIndex, void* pData) = 0;
-	virtual bool Write(CPropertyDBTable* pTable, unsigned int nPlayerId, unsigned int nIndex, const void* pData) = 0;
+	virtual bool GetArrayCount(CPropertyDBTable* pTable, unsigned int nUID, unsigned int& nCount) = 0;
+	virtual bool Insert(CPropertyDBTable* pTable, unsigned int nUID, unsigned int nIndex, const void* pData) = 0;
+	virtual bool Delete(CPropertyDBTable* pTable, unsigned int nUID, unsigned int nIndex) = 0;
+	virtual bool Read(CPropertyDBTable* pTable, unsigned int nUID, unsigned int nIndex, void* pData) = 0;
+	virtual bool Write(CPropertyDBTable* pTable, unsigned int nUID, unsigned int nIndex, const void* pData) = 0;
 };
 
 IPropertyDBConnection* CreatePropertyDBConnection(const char* connstr);
