@@ -221,10 +221,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\DataObject.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\GameArea.cpp"
 				>
 			</File>
@@ -259,13 +255,6 @@
 			<File
 				RelativePath=".\PropertyDB.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\PropertySet.cpp"
@@ -287,10 +276,6 @@
 			</File>
 			<File
 				RelativePath=".\CmdData.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DataObject.h"
 				>
 			</File>
 			<File
