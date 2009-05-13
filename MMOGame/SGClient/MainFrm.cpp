@@ -359,61 +359,28 @@ LRESULT CMainFrame::OnGenHFile(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 }
 
 #include "..\Engine\PropertySet.h"
-#include "..\Engine\PropertySet.inl"
+#include "..\Engine\PropertyDB.h"
 
-int SGDataDef_GetPropertySetCount();
-IPropertySet* SGDataDef_GetPropertySet(int nIndex);
-IPropertySet* SGDataDef_GetPropertySet(const char* pName);
+extern int SGDataDef_GetPropertySetCount();
+extern IPropertySet* SGDataDef_GetPropertySet(int nIndex);
+extern IPropertySet* SGDataDef_GetPropertySet(const char* pName);
 
 LRESULT CMainFrame::OnGenDBFile(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 {
-	CFileDialog a(FALSE, _T("*.h"), _T("out.h"), 0, _T("Include File (*.h)\0*.h\0"));
+	CFileDialog a(FALSE, _T("*.sql"), _T("out.sql"), 0, _T("Sql File (*.sql)\0*.sql\0"));
 	if(a.DoModal()!=IDOK) return 0;
+
 	FILE* fp;
+	char SqlText[1000];
+	IPropertyDBConnection* pConnection = CreatePropertyDBConnection("");
+	CPropertyDBTable Table(SGDataDef_GetPropertySet("SGPLAYER_INFO"), "SGPLAYER_INFO", false);
 	fp = _tfopen(a.m_szFileName, _T("wt"));
 	if(!fp) return 0;
 
-	struct {
-		const char* table_name;
-		const char* struct_name;
-		bool isarray;
-	} tables[] = {
-		{ "SGPLAYER_INFO", "SGPLAYER_INFO", false },
-	};
-	for(int t=0; t<sizeof(tables)/sizeof(tables[0]); t++) {
-		IPropertySet* pSet = SGDataDef_GetPropertySet(tables[t].struct_name);
-		if(!pSet) {
-			MessageBox(_T("Error in Generate DB File"));
-			fclose(fp);
-			return 0;
-		}
-		_ftprintf(fp, _T("create table %s ("), tables[t].table_name);
-		for(int p=0; p<pSet->PropertyCount(); p++) {
-			switch(pSet->GetProperty(p)->GetType()) {
-			case PROPERTY_TYPE_CHAR:
-				break;
-			case PROPERTY_TYPE_SHORT:
-				break;
-			case PROPERTY_TYPE_INT:
-				break;
-			case PROPERTY_TYPE_BYTE:
-				break;
-			case PROPERTY_TYPE_WORD:
-				break;
-			case PROPERTY_TYPE_DWORD:
-				break;
-			case PROPERTY_TYPE_FLOAT:
-				break;
-			case PROPERTY_TYPE_STRING:
-				break;
-			default:
-				MessageBox(_T("Error in Generate DB File"));
-				fclose(fp);
-				return 0;
-			}
-			_ftprintf(fp, _T(");"));
-		}
-		_ftprintf(fp, _T(");\n\n"));
-	}
+	pConnection->CreateTable(&Table, SqlText, sizeof(SqlText));
+	_fputts(SqlText, fp);
+
+	pConnection->Release();
+	fclose(fp);
 	return 0;
 }

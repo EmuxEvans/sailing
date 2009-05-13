@@ -61,7 +61,6 @@ CPropertySet<Count>::CPropertySet()
 {
 	m_pName = NULL;
 	m_pDesc = NULL;
-	memset(m_Infos, 0, sizeof(m_Infos));
 }
 
 template<int Count>

@@ -81,6 +81,7 @@ bool code_gen_inl(const char* name, FILE* fp)
 		fprintf(fp,"{\n");
 		fprintf(fp,"public:\n");
 		fprintf(fp,"	CPropertySet_%s() {\n", psgen_get(c)->name);
+		fprintf(fp,"		SetInfo(\"%s\", \"%s\");\n", psgen_get(c)->name, "");
 		for(int a=0; a<psgen_get(c)->args_count; a++) {
 			fprintf(fp,"		SetProperty(%d, \"%s\", %s, offsetof(%s, %s), %s, %s, \"%s\");\n",
 				a,
