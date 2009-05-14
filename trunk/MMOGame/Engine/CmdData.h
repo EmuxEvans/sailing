@@ -102,8 +102,8 @@ private:
 typedef struct CmdData {
 	unsigned int nCmd;
 	unsigned int nWho;
-	void* pData;
 	unsigned int nSize;
+	void* pData;
 } CmdData;
 
 class CDataReader {

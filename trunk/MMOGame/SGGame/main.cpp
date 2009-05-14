@@ -16,6 +16,9 @@
 static BOOL InitTCPServer(unsigned short nPort);
 static BOOL FinalTCPServer();
 static IGameLoop* pLoop = NULL;
+static bool bReplayMode = false;
+static const char* OptGetValue(int argc, char* argv[], const char* name, const char* defvalue);
+static bool OptGetSwitch(int argc, char* argv[], const char* name, bool defvalue);
 
 int main(int argc, char* argv[])
 {
@@ -24,12 +27,23 @@ int main(int argc, char* argv[])
 	ASockIOInit();
 	GameLoop_Init();
 
-	{
-		IGameLoopCallback* pCallback;
+	if(OptGetValue(argc-1, &argv[1], "play", NULL)) {
+		IGameLoopCallback* pCallback = CSGGameLoopCallback::GetSingleton();
+		CGameLoopRecorder Recorder(pCallback);
+		bReplayMode = true;
+		Recorder.Play(OptGetValue(argc-1, &argv[1], "play", NULL));
+	} else {
+		IGameLoopCallback* pCallback = CSGGameLoopCallback::GetSingleton();
+		CGameLoopRecorder Recorder(pCallback);
 
-		pCallback = CSGGameLoopCallback::GetSingleton();
-		pLoop = GameLoop_Create(pCallback);
-		pLoop->Start(100);
+		if(OptGetValue(argc-1, &argv[1], "record", NULL)) {
+			Recorder.Open(OptGetValue(argc-1, &argv[1], "record", NULL));
+			pLoop = GameLoop_Create(&Recorder);
+		} else {
+			pLoop = GameLoop_Create(pCallback);
+		}
+
+		pLoop->Start(1000);
 
 		InitTCPServer(1980);
 		getchar();
@@ -37,15 +51,33 @@ int main(int argc, char* argv[])
 
 		pLoop->Stop();
 		pLoop->Wait();
-		GameLoop_Destroy(pLoop);
+		pLoop->Release();
 		CSGGameLoopCallback::Cleanup();
+		Recorder.Close();
 	}
 
 	GameLoop_Final();
-
 	ASockIOFini();
 	//WSACleanup();
 	return 0;
+}
+
+const char* OptGetValue(int argc, char* argv[], const char* name, const char* defvalue)
+{
+	for(int i=0; i<argc; i++) {
+		if(*argv[i]!='-') continue;
+		char* filepst = strchr(argv[i], ':');
+		if(filepst==NULL) continue;
+		if(strlen(name)!=filepst-argv[i]-1) continue;
+		if(memcmp(argv[i]+1, name, filepst-argv[i]-1)!=0) continue;
+		return filepst+1;
+	}
+	return defvalue;
+}
+
+bool OptGetSwitch(int argc, char* argv[], const char* name, bool defvalue)
+{
+	return true;
 }
 
 //
@@ -310,6 +342,8 @@ VOID CALLBACK OnUserData(HCONNECT hConn, DWORD nLen, LPBYTE pBuf, LPVOID pKey)
 
 void UserSendData(unsigned int nSeq, const void* pData, unsigned int nSize)
 {
+	if(bReplayMode) return;
+
 	unsigned int nIndex = nSeq & 0xffff;
 	if(nIndex>=sizeof(g_csClients)/sizeof(g_csClients[0])) return;
 	EnterCriticalSection(&g_csClients[nIndex]);
@@ -321,6 +355,8 @@ void UserSendData(unsigned int nSeq, const void* pData, unsigned int nSize)
 
 void UserDisconnect(unsigned int nSeq)
 {
+	if(bReplayMode) return;
+
 	unsigned int nIndex = nSeq & 0xffff;
 	if(nIndex>=sizeof(g_csClients)/sizeof(g_csClients[0])) return;
 	EnterCriticalSection(&g_csClients[nIndex]);
