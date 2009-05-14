@@ -35,9 +35,33 @@ public:
 	virtual void OnShutdown() = 0;
 };
 
+class CGameLoopRecorder : public IGameLoopCallback
+{
+public:
+	CGameLoopRecorder(IGameLoopCallback* pCallback);
+	virtual ~CGameLoopRecorder();
+
+	bool Open(const char* pLogPath);
+	bool Close();
+	bool Play(const char* pLogPath);
+
+	virtual void Process(const CmdData* pCmdData);
+	virtual void Tick(unsigned int nCurrent, unsigned int nDelta);
+
+	virtual void OnStart();
+	virtual void OnShutdown();
+
+private:
+	IGameLoopCallback* m_pCallback;
+	FILE* m_hLogHandle;
+};
+
 class IGameLoop
 {
 public:
+	virtual ~IGameLoop() {}
+	virtual void Release() = 0;
+
 	virtual bool Start(unsigned int nMinTime) = 0;
 	virtual bool Stop() = 0;
 	virtual void Wait() = 0;
@@ -47,7 +71,6 @@ public:
 bool GameLoop_Init();
 bool GameLoop_Final();
 IGameLoop* GameLoop_Create(IGameLoopCallback* pCallback);
-void GameLoop_Destroy(IGameLoop* pLoop);
 IGameFES* GameLoop_GetFES(unsigned int nIp, unsigned int short nPort);
 
 // Async Procedure Call

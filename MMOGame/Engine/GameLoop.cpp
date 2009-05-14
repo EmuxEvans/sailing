@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <process.h>
+#include <assert.h>
+#include <stdio.h>
+
 #include <string>
 #include <vector>
 #include <queue>
@@ -131,6 +134,102 @@ void output_thread_proc(void* arg)
 	((CWinGameFES*)arg)->Loop();
 }
 
+
+CGameLoopRecorder::CGameLoopRecorder(IGameLoopCallback* pCallback)
+{
+	m_pCallback = pCallback;
+	m_hLogHandle = NULL;
+}
+
+CGameLoopRecorder::~CGameLoopRecorder()
+{
+}
+
+bool CGameLoopRecorder::Open(const char* pLogPath)
+{
+	if(m_hLogHandle) return false;
+	m_hLogHandle = fopen(pLogPath, "wb");
+	return m_hLogHandle!=NULL;
+}
+
+bool CGameLoopRecorder::Close()
+{
+	if(!m_hLogHandle) return false;
+	fclose(m_hLogHandle);
+	m_hLogHandle = NULL;
+	return true;
+}
+
+bool CGameLoopRecorder::Play(const char* pLogPath)
+{
+	FILE* hLog;
+	hLog = fopen(pLogPath, "rb");
+	if(hLog==NULL) return false;
+
+	unsigned int nCmd, nWho, nSize;
+	static char szBuf[10*1024];
+	for(;;) {
+		fread(&nCmd, sizeof(nCmd), 1, hLog);
+		fread(&nWho, sizeof(nWho), 1, hLog);
+		fread(&nSize, sizeof(nSize), 1, hLog);
+		if(feof(hLog)) break;
+		if(nSize>0) fread(szBuf, nSize, 1, hLog);
+
+		printf("nCmd=%u nWho=%u nSize=%u\n", nCmd, nWho, nSize);
+
+		if(nCmd==0) {
+			assert(nSize==sizeof(unsigned int) + sizeof(unsigned int));
+			m_pCallback->Tick(*((unsigned int*)szBuf + 0), *((unsigned int*)szBuf + 1));
+		} else {
+			CmdData cmd = { nCmd, nWho, nSize, szBuf };
+			m_pCallback->Process(&cmd);
+		}
+	}
+
+	fclose(hLog);
+	return true;
+}
+
+void CGameLoopRecorder::Process(const CmdData* pCmdData)
+{
+	assert(pCmdData->nCmd!=0);
+
+	fwrite(&pCmdData->nCmd, sizeof(pCmdData->nCmd), 1, m_hLogHandle);
+	fwrite(&pCmdData->nWho, sizeof(pCmdData->nWho), 1, m_hLogHandle);
+	fwrite(&pCmdData->nSize, sizeof(pCmdData->nSize), 1, m_hLogHandle);
+	fwrite(pCmdData->pData, pCmdData->nSize, 1, m_hLogHandle);
+
+	printf("nCmd=%u nWho=%u nSize=%u\n", pCmdData->nCmd, pCmdData->nWho, pCmdData->nSize);
+
+	m_pCallback->Process(pCmdData);
+}
+
+void CGameLoopRecorder::Tick(unsigned int nCurrent, unsigned int nDelta)
+{
+	unsigned int nCmd = 0;
+	unsigned int nWho = 0;
+	unsigned int nSize = sizeof(nCurrent) + sizeof(nDelta);
+	fwrite(&nCmd, sizeof(nCmd), 1, m_hLogHandle);
+	fwrite(&nWho, sizeof(nWho), 1, m_hLogHandle);
+	fwrite(&nSize, sizeof(nSize), 1, m_hLogHandle);
+	fwrite(&nCurrent, sizeof(nCurrent), 1, m_hLogHandle);
+	fwrite(&nDelta, sizeof(nDelta), 1, m_hLogHandle);
+
+	printf("nCmd=%u nWho=%u nSize=%u\n", nCmd, nWho, nSize);
+
+	m_pCallback->Tick(nCurrent, nDelta);
+}
+
+void CGameLoopRecorder::OnStart()
+{
+	m_pCallback->OnStart();
+}
+
+void CGameLoopRecorder::OnShutdown()
+{
+	m_pCallback->OnShutdown();
+}
+
 // GameLoop
 class CWinGameLoop : public IGameLoop
 {
@@ -146,6 +245,9 @@ public:
 	virtual ~CWinGameLoop() {
 		DeleteCriticalSection(&m_csMsgQ);
 	}
+	virtual void Release() {
+		delete this;
+	}
 
 	void OnGameAPCCreate(CGameAPC* pAPC) {
 		InterlockedIncrement((LONG*)&m_nGameAPC);
@@ -158,6 +260,14 @@ public:
 	}
 	void OnGameADBDestroy(CGameAsyncDB* pADB) {
 		InterlockedDecrement((LONG*)&m_nGameADB);
+	}
+
+	virtual bool OpenOutputFile(const char* pLogFile) {
+		return true;
+	}
+
+	virtual bool CloseOutputFile() {
+		return true;
 	}
 
 	virtual bool Start(unsigned int nMinTime) {
@@ -184,7 +294,7 @@ public:
 	}
 
 	virtual bool PushMsg(unsigned int nCmd, unsigned int nWho, const void* pData, unsigned int nSize) {
-		CmdData Data = { nCmd, nWho, NULL, nSize };
+		CmdData Data = { nCmd, nWho, nSize, NULL};
 		if(nSize) {
 			Data.pData = malloc(nSize);
 			if(!Data.pData) return false;
@@ -200,17 +310,23 @@ public:
 
 	void Run() {
 		unsigned int nMsgQ;
-		unsigned int nTime1, nTime2;
+		unsigned int nTimeE, nTimeS;
 		bool bQuit = false;
 
 		m_dwThreadId = GetCurrentThreadId();
 
 		m_pCallback->OnStart();
 
-		nTime1 = GetTickCount();
-		nTime2 = nTime1;
+		nTimeE = GetTickCount();
+		nTimeS = nTimeE;
 		for(;;) {
-			m_pCallback->Tick(nTime1, nTime1-nTime2);
+			nTimeE = GetTickCount();
+			if(nTimeE-nTimeS>=m_nMinTime) {
+				m_pCallback->Tick(nTimeE, nTimeE-nTimeS);
+				nTimeS = nTimeE;
+			} else {
+				SwitchToThread();
+			}
 
 			EnterCriticalSection(&m_csMsgQ);
 			nMsgQ = m_nMsgQ;
@@ -230,14 +346,6 @@ public:
 				m_MsgQ[nMsgQ?1:0].pop();
 			}
 			if(bQuit) break;
-
-			nTime2 = nTime1;
-			nTime1 = GetTickCount();
-
-			if(nTime1-nTime2<m_nMinTime) {
-				Sleep(m_nMinTime-(nTime1-nTime2));
-				nTime1 = GetTickCount();
-			}
 		}
 
 		m_pCallback->OnShutdown();
@@ -283,11 +391,6 @@ bool GameLoop_Final()
 IGameLoop* GameLoop_Create(IGameLoopCallback* pCallback)
 {
 	return new CWinGameLoop(pCallback);
-}
-
-void GameLoop_Destroy(IGameLoop* pLoop)
-{
-	delete pLoop;
 }
 
 IGameFES* GameLoop_GetFES(unsigned int nIp, unsigned int short nPort)
