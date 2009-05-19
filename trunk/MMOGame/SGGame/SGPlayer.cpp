@@ -270,7 +270,7 @@ CSGPlayer::~CSGPlayer()
 bool CSGPlayer::InitPlayer()
 {
 	SetArea(GetConnection()->GetCallback()->GetArea(0));
-	Vector p(10.0f, 10.0f, 0.0f);
+	Vector p(200.144f, 206.656f, 0.129f);
 	SetPosition(p, 0.0f);
 	return true;
 }
@@ -375,6 +375,10 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 		return;
 	}
 
+	if(pCmdData->nCmd==CMDCODE_MOVE && pCmdData->nWho!=GetActorId()) {
+		GetConnection()->SendData(pCmdData->pData, pCmdData->nSize);
+		return;
+	}
 	if(pCmdData->nCmd==CMDCODE_MOVE_JOIN || pCmdData->nCmd==SGCMDCODE_MOVE_CHANGE) {
 		CSGAreaActor* pActor = GetArea()->GetActor(pCmdData->nWho);
 		assert(pActor);
@@ -503,16 +507,40 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 	}
 
 	if(pCmdData->nCmd==SGCMDCODE_MOVE) {
-		Vector s(cmd.GetValue<float>(), cmd.GetValue<float>(), cmd.GetValue<float>());
-		Vector e(cmd.GetValue<float>(), cmd.GetValue<float>(), cmd.GetValue<float>());
+		Vector s;
+		s.x = cmd.GetValue<float>();
+		s.y = cmd.GetValue<float>();
+		s.z = cmd.GetValue<float>();
+		Vector e;
+		e.x = cmd.GetValue<float>();
+		e.y = cmd.GetValue<float>();
+		e.z = cmd.GetValue<float>();
+		unsigned int ntime;
+		ntime = cmd.GetValue<unsigned int>();
+
 		SetPosition(s, GetDirection());
 		//Move(&s, &e, cmd.GetValue<unsigned int>());
-		GetArea()->Notify(pCmdData, GetAreaCell()->GetAreaCol(), GetAreaCell()->GetAreaRow());
+
+		CCmdDataWriter<100> out(CMDCODE_MOVE, GetActorId());
+		out.PutValue<unsigned short>(SGCMDCODE_MOVE);
+		out.PutValue(GetActorId());
+		out.PutValue(s.x);
+		out.PutValue(s.y);
+		out.PutValue(s.z);
+		out.PutValue(e.x);
+		out.PutValue(e.y);
+		out.PutValue(e.z);
+		out.PutValue(ntime);
+
+		GetArea()->Notify(out.GetCmdData(), GetAreaCell()->GetAreaCol(), GetAreaCell()->GetAreaRow());
 		return;
 	}
 	if(pCmdData->nCmd==SGCMDCODE_TELPORT) {
 		SetPositionNULL();
-		Vector p(cmd.GetValue<float>(), cmd.GetValue<float>(), cmd.GetValue<float>());
+		Vector p;
+		p.x = cmd.GetValue<float>();
+		p.y = cmd.GetValue<float>();
+		p.z = cmd.GetValue<float>();
 		float d = cmd.GetValue<float>();
 		SetPosition(p, d);
 		return;

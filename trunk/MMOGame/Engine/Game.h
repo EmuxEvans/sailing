@@ -4,6 +4,8 @@
 #include "CmdData.h"
 
 #include "GameLoop.h"
+#include "GameAsync.h"
+
 #include "GameArea.h"
 #include "GameArea.inl"
 #include "GameBuff.h"

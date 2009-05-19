@@ -16,8 +16,6 @@
 
 CSGCmdSetManage::CSGCmdSetManage()
 {
-	
-
 	PushSCmd("login_seed", SGCMDCODE_LOGIN_SEED, "服务端通知客户端用来扰乱密码的salt");
 	PushSArg("salt", CMDARG_TYPE_BYTE|CMDARG_TYPE_ARRAY);
 
@@ -64,11 +62,11 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSArg("ez", CMDARG_TYPE_FLOAT);
 	PushSArg("time", CMDARG_TYPE_DWORD, "预测花费的时间");
 
-	PushSCmd("telport", SGCMDCODE_TELPORT, "瞬移到目标点");
-	PushSArg("sx", CMDARG_TYPE_FLOAT, "目标坐标");
-	PushSArg("sy", CMDARG_TYPE_FLOAT);
-	PushSArg("sz", CMDARG_TYPE_FLOAT);
-	PushSArg("direction", CMDARG_TYPE_FLOAT, "面的朝向");
+	PushCCmd("telport", SGCMDCODE_TELPORT, "瞬移到目标点");
+	PushCArg("sx", CMDARG_TYPE_FLOAT, "目标坐标");
+	PushCArg("sy", CMDARG_TYPE_FLOAT);
+	PushCArg("sz", CMDARG_TYPE_FLOAT);
+	PushCArg("direction", CMDARG_TYPE_FLOAT, "面的朝向");
 
 	PushCCmd("mapsay", SGCMDCODE_MAPSAY, "在地图上说话");
 	PushCArg("who", CMDARG_TYPE_STRING, "对谁");
@@ -143,10 +141,10 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushSCmd("move_leave", SGCMDCODE_MOVE_LEAVE, "对象离开视野范围");
 	PushSArg("actorid", CMDARG_TYPE_DWORD, "对象的actorid");
 
-	PushCCmd("target_set", SGCMDCODE_TARGET_SET);
+	PushCCmd("target_set", SGCMDCODE_TARGET_SET, "设置目标");
 	PushCArg("targetid", CMDARG_TYPE_DWORD);
 
-	PushSCmd("target_change", SGCMDCODE_TARGET_SET);
+	PushSCmd("target_change", SGCMDCODE_TARGET_SET, "通知目标变化");
 	PushSArg("actorid", CMDARG_TYPE_DWORD);
 	PushSArg("targetid", CMDARG_TYPE_DWORD);
 

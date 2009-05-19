@@ -24,7 +24,6 @@ static CRITICAL_SECTION epmap_cs;
 
 #define WM_SG_SENDDATA		(WM_USER+10)
 #define WM_SG_DISCONNECT	(WM_USER+11)
-#define WM_SG_DATABASE		(WM_USER+12)
 
 typedef struct SendBuf {
 	unsigned int nSize;
@@ -32,10 +31,7 @@ typedef struct SendBuf {
 } SendBuf;
 
 static void output_thread_proc(void* arg);
-static void gameadb_thread_proc(void* arg);
-static DWORD g_dwGameADBThreadId = 0;
 static void gameloop_thread_proc(void* arg);
-static DWORD WINAPI CGameAPC_Procedure(LPVOID lpParameter);
 
 // Game FES Thread
 class CWinGameFES : public IGameFES
@@ -160,36 +156,6 @@ bool CGameLoopRecorder::Close()
 	return true;
 }
 
-bool CGameLoopRecorder::Play(const char* pLogPath)
-{
-	FILE* hLog;
-	hLog = fopen(pLogPath, "rb");
-	if(hLog==NULL) return false;
-
-	unsigned int nCmd, nWho, nSize;
-	static char szBuf[10*1024];
-	for(;;) {
-		fread(&nCmd, sizeof(nCmd), 1, hLog);
-		fread(&nWho, sizeof(nWho), 1, hLog);
-		fread(&nSize, sizeof(nSize), 1, hLog);
-		if(feof(hLog)) break;
-		if(nSize>0) fread(szBuf, nSize, 1, hLog);
-
-		printf("nCmd=%u nWho=%u nSize=%u\n", nCmd, nWho, nSize);
-
-		if(nCmd==0) {
-			assert(nSize==sizeof(unsigned int) + sizeof(unsigned int));
-			m_pCallback->Tick(*((unsigned int*)szBuf + 0), *((unsigned int*)szBuf + 1));
-		} else {
-			CmdData cmd = { nCmd, nWho, nSize, szBuf };
-			m_pCallback->Process(&cmd);
-		}
-	}
-
-	fclose(hLog);
-	return true;
-}
-
 void CGameLoopRecorder::Process(const CmdData* pCmdData)
 {
 	assert(pCmdData->nCmd!=0);
@@ -249,24 +215,40 @@ public:
 		delete this;
 	}
 
-	void OnGameAPCCreate(CGameAPC* pAPC) {
-		InterlockedIncrement((LONG*)&m_nGameAPC);
-	}
-	void OnGameAPCDestroy(CGameAPC* pAPC) {
-		InterlockedDecrement((LONG*)&m_nGameAPC);
-	}
-	void OnGameADBCreate(CGameAsyncDB* pADB) {
-		InterlockedIncrement((LONG*)&m_nGameADB);
-	}
-	void OnGameADBDestroy(CGameAsyncDB* pADB) {
-		InterlockedDecrement((LONG*)&m_nGameADB);
-	}
-
 	virtual bool OpenOutputFile(const char* pLogFile) {
 		return true;
 	}
 
 	virtual bool CloseOutputFile() {
+		return true;
+	}
+
+	virtual bool Playback(const char* pLogFileName) {
+		FILE* hLog;
+		hLog = fopen(pLogFileName, "rb");
+		if(hLog==NULL) return false;
+
+		unsigned int nCmd, nWho, nSize;
+		static char szBuf[10*1024];
+		for(;;) {
+			fread(&nCmd, sizeof(nCmd), 1, hLog);
+			fread(&nWho, sizeof(nWho), 1, hLog);
+			fread(&nSize, sizeof(nSize), 1, hLog);
+			if(feof(hLog)) break;
+			if(nSize>0) fread(szBuf, nSize, 1, hLog);
+
+			printf("nCmd=%u nWho=%u nSize=%u\n", nCmd, nWho, nSize);
+
+			if(nCmd==0) {
+				assert(nSize==sizeof(unsigned int) + sizeof(unsigned int));
+				m_pCallback->Tick(*((unsigned int*)szBuf + 0), *((unsigned int*)szBuf + 1));
+			} else {
+				CmdData cmd = { nCmd, nWho, nSize, szBuf };
+				m_pCallback->Process(&cmd);
+			}
+		}
+
+		fclose(hLog);
 		return true;
 	}
 
@@ -364,8 +346,6 @@ private:
 bool GameLoop_Init()
 {
 	InitializeCriticalSectionAndSpinCount(&epmap_cs, 0x80000400);
-	_beginthread(gameadb_thread_proc, 0, NULL);
-	while(!g_dwGameADBThreadId) SwitchToThread();
 	return true;
 }
 
@@ -377,13 +357,6 @@ bool GameLoop_Final()
 		delete epmap[i];
 	}
 
-	while(!::PostThreadMessage(g_dwGameADBThreadId, WM_QUIT, 0, 0)) SwitchToThread();
-
-	HANDLE hThread = OpenThread(SYNCHRONIZE , FALSE, g_dwGameADBThreadId);
-	if(hThread) {
-		WaitForSingleObject(hThread, INFINITE);
-		CloseHandle(hThread);
-	}
 	DeleteCriticalSection(&epmap_cs);
 	return true;
 }
@@ -412,68 +385,8 @@ IGameFES* GameLoop_GetFES(unsigned int nIp, unsigned int short nPort)
 	return pFES;
 }
 
-// Async Procedure Call
-DWORD WINAPI CGameAPC_Procedure(LPVOID lpParameter)
-{
-	((CGameAPC*)lpParameter)->Execute();
-	return 0;
-}
-
-CGameAPC::CGameAPC(IGameLoop* pGameLoop)
-{
-	m_pGameLoop = pGameLoop;
-	((CWinGameLoop*)m_pGameLoop)->OnGameAPCCreate(this);
-}
-
-CGameAPC::~CGameAPC()
-{
-	((CWinGameLoop*)m_pGameLoop)->OnGameAPCDestroy(this);
-}
-
-bool CGameAPC::Queue()
-{
-	return QueueUserWorkItem(CGameAPC_Procedure, this, WT_EXECUTEDEFAULT)?true:false;
-}
-
-// Async Database Write OR Read
-CGameAsyncDB::CGameAsyncDB(IGameLoop* pGameLoop)
-{
-	m_pGameLoop = pGameLoop;
-	((CWinGameLoop*)m_pGameLoop)->OnGameADBCreate(this);
-}
-
-CGameAsyncDB::~CGameAsyncDB()
-{
-	((CWinGameLoop*)m_pGameLoop)->OnGameADBDestroy(this);
-}
-
-bool CGameAsyncDB::Queue()
-{
-	return PostThreadMessage(g_dwGameADBThreadId, WM_SG_DATABASE, (WPARAM)this, 0)?true:false;
-}
-
 void gameloop_thread_proc(void* arg)
 {
 	CWinGameLoop* pGameLoop = (CWinGameLoop*)arg;
 	pGameLoop->Run();
-}
-
-void gameadb_thread_proc(void* arg)
-{
-	MSG msg;
-	::PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
-
-	g_dwGameADBThreadId = GetCurrentThreadId();
-
-	while(::GetMessage(&msg, NULL, 0, 0)) {
-		if(msg.message==WM_QUIT) break;
-
-		switch(msg.message) {
-		case WM_SG_DATABASE:
-			((CGameAsyncDB*)msg.wParam)->Execute();
-			break;
-		default:
-			break;
-		}
-	}
 }

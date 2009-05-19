@@ -208,64 +208,6 @@
 	</References>
 	<Files>
 		<Filter
-			Name="sources"
-			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-			>
-			<File
-				RelativePath=".\asockio.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\CmdData.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameArea.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameBuff.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameItem.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameLoop.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameQuest.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameSkill.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameUser.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Math.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PropertyDB.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PropertySet.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\ScriptState.cpp"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="includes"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
@@ -288,6 +230,10 @@
 			</File>
 			<File
 				RelativePath=".\GameArea.inl"
+				>
+			</File>
+			<File
+				RelativePath=".\GameAsync.h"
 				>
 			</File>
 			<File
@@ -336,6 +282,68 @@
 			</File>
 			<File
 				RelativePath=".\ScriptState.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="sources"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+			>
+			<File
+				RelativePath=".\asockio.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CmdData.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameArea.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameAsync.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameBuff.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameItem.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameLoop.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameQuest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameSkill.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GameUser.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Math.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertyDB.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PropertySet.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ScriptState.cpp"
 				>
 			</File>
 		</Filter>

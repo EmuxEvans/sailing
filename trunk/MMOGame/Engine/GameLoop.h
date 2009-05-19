@@ -7,8 +7,6 @@ typedef struct FESClientData {
 } FESClientData;
 
 class IGameFES;
-class CGameAPC;
-class CGameAsyncDB;
 class IGameLoopCallback;
 class IGameLoop;
 
@@ -43,7 +41,6 @@ public:
 
 	bool Open(const char* pLogPath);
 	bool Close();
-	bool Play(const char* pLogPath);
 
 	virtual void Process(const CmdData* pCmdData);
 	virtual void Tick(unsigned int nCurrent, unsigned int nDelta);
@@ -62,6 +59,8 @@ public:
 	virtual ~IGameLoop() {}
 	virtual void Release() = 0;
 
+	virtual bool Playback(const char* pLogFileName) = 0;
+
 	virtual bool Start(unsigned int nMinTime) = 0;
 	virtual bool Stop() = 0;
 	virtual void Wait() = 0;
@@ -72,37 +71,3 @@ bool GameLoop_Init();
 bool GameLoop_Final();
 IGameLoop* GameLoop_Create(IGameLoopCallback* pCallback);
 IGameFES* GameLoop_GetFES(unsigned int nIp, unsigned int short nPort);
-
-// Async Procedure Call
-class CGameAPC
-{
-protected:
-	CGameAPC(IGameLoop* pGameLoop);
-	virtual ~CGameAPC();
-
-public:
-	bool Queue();
-	virtual void Execute() = 0;
-
-private:
-	IGameLoop* m_pGameLoop;
-};
-
-// Async Database Write OR Read
-class CGameAsyncDB
-{
-protected:
-	CGameAsyncDB(IGameLoop* pGameLoop);
-	virtual ~CGameAsyncDB();
-
-public:
-	bool Queue();
-	virtual void Execute() = 0;
-
-	IGameLoop* GetGameLoop() {
-		return m_pGameLoop;
-	}
-
-private:
-	IGameLoop* m_pGameLoop;
-};
