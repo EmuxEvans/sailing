@@ -197,5 +197,4 @@ CSGCmdSetManage::CSGCmdSetManage()
 
 	PushSCmd("fight_start", SGCMDCODE_FIGHT_START, "开始战斗");
 	PushSCmd("fight_end", SGCMDCODE_FIGHT_END, "战斗结束");
-
 }

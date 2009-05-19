@@ -3,11 +3,11 @@
 #include "Math.h"
 #include "CmdData.h"
 
-#include "GameLoop.h"
-#include "GameAsync.h"
+#include "MsgLoop.h"
+#include "Async.h"
 
-#include "GameArea.h"
-#include "GameArea.inl"
+#include "Area.h"
+#include "Area.inl"
 #include "GameBuff.h"
 #include "GameItem.h"
 #include "GameSkill.h"
