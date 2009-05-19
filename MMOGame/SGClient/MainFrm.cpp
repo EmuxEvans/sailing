@@ -206,27 +206,27 @@ LRESULT CMainFrame::OnGenHFile(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 				break;
 			case CMDARG_TYPE_SHORT:
 				_ftprintf(fp, _T("		memcpy(__buf+__len, &%s, sizeof(short));\n"), sets.GetClientCmdSet().GetCmd(cmd)->m_Args[arg].m_Name);
-				_ftprintf(fp, _T("		__len += sizeof(char);\n"));
+				_ftprintf(fp, _T("		__len += sizeof(short);\n"));
 				break;
 			case CMDARG_TYPE_INT:
 				_ftprintf(fp, _T("		memcpy(__buf+__len, &%s, sizeof(int));\n"), sets.GetClientCmdSet().GetCmd(cmd)->m_Args[arg].m_Name);
-				_ftprintf(fp, _T("		__len += sizeof(char);\n"));
+				_ftprintf(fp, _T("		__len += sizeof(int);\n"));
 				break;
 			case CMDARG_TYPE_BYTE:
 				_ftprintf(fp, _T("		memcpy(__buf+__len, &%s, sizeof(unsigned char));\n"), sets.GetClientCmdSet().GetCmd(cmd)->m_Args[arg].m_Name);
-				_ftprintf(fp, _T("		__len += sizeof(char);\n"));
+				_ftprintf(fp, _T("		__len += sizeof(unsigned char);\n"));
 				break;
 			case CMDARG_TYPE_WORD:
 				_ftprintf(fp, _T("		memcpy(__buf+__len, &%s, sizeof(unsigned short));\n"), sets.GetClientCmdSet().GetCmd(cmd)->m_Args[arg].m_Name);
-				_ftprintf(fp, _T("		__len += sizeof(char);\n"));
+				_ftprintf(fp, _T("		__len += sizeof(unsigned short);\n"));
 				break;
 			case CMDARG_TYPE_DWORD:
 				_ftprintf(fp, _T("		memcpy(__buf+__len, &%s, sizeof(unsigned int));\n"), sets.GetClientCmdSet().GetCmd(cmd)->m_Args[arg].m_Name);
-				_ftprintf(fp, _T("		__len += sizeof(char);\n"));
+				_ftprintf(fp, _T("		__len += sizeof(unsigned int);\n"));
 				break;
 			case CMDARG_TYPE_FLOAT:
 				_ftprintf(fp, _T("		memcpy(__buf+__len, &%s, sizeof(float));\n"), sets.GetClientCmdSet().GetCmd(cmd)->m_Args[arg].m_Name);
-				_ftprintf(fp, _T("		__len += sizeof(char);\n"));
+				_ftprintf(fp, _T("		__len += sizeof(float);\n"));
 				break;
 			case CMDARG_TYPE_STRING:
 				_ftprintf(fp, _T("		memcpy(__buf+__len, %s, strlen(%s)+1);\n"), sets.GetClientCmdSet().GetCmd(cmd)->m_Args[arg].m_Name, sets.GetClientCmdSet().GetCmd(cmd)->m_Args[arg].m_Name);
@@ -282,73 +282,80 @@ LRESULT CMainFrame::OnGenHFile(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCt
 	_ftprintf(fp, _T("	unsigned int __cur = 2;\n"));
 	for(int cmd=0; cmd<sets.GetServerCmdSet().GetCmdCount(); cmd++) {
 		_ftprintf(fp, _T("	if(*((const unsigned short*)__buf)==%d) {\n"), sets.GetServerCmdSet().GetCmd(cmd)->m_Code);
-		_ftprintf(fp, _T("		%s(\n"), sets.GetServerCmdSet().GetCmd(cmd)->m_Name);
+
 		for(int arg=0; arg<(int)sets.GetServerCmdSet().GetCmd(cmd)->m_Args.size(); arg++) {
-			_ftprintf(fp, _T("			"));
 			switch(sets.GetServerCmdSet().GetCmd(cmd)->m_Args[arg].m_Type) {
 			case CMDARG_TYPE_CHAR:
-				_ftprintf(fp, _T("get_%s(__buf, __len, __cur)"), _T("char"));
+				_ftprintf(fp, _T("\t\tchar a%d = get_%s(__buf, __len, __cur);\n"), arg, _T("char"));
 				break;
 			case CMDARG_TYPE_SHORT:
-				_ftprintf(fp, _T("get_%s(__buf, __len, __cur)"), _T("short"));
+				_ftprintf(fp, _T("\t\tshort a%d = get_%s(__buf, __len, __cur);\n"), arg, _T("short"));
 				break;
 			case CMDARG_TYPE_INT:
-				_ftprintf(fp, _T("get_%s(__buf, __len, __cur)"), _T("int"));
+				_ftprintf(fp, _T("\t\tint a%d = get_%s(__buf, __len, __cur);\n"), arg, _T("int"));
 				break;
 			case CMDARG_TYPE_BYTE:
-				_ftprintf(fp, _T("get_%s(__buf, __len, __cur)"), _T("byte"));
+				_ftprintf(fp, _T("\t\tunsigned char a%d = get_%s(__buf, __len, __cur);\n"), arg, _T("byte"));
 				break;
 			case CMDARG_TYPE_WORD:
-				_ftprintf(fp, _T("get_%s(__buf, __len, __cur)"), _T("word"));
+				_ftprintf(fp, _T("\t\tunsigned short a%d = get_%s(__buf, __len, __cur);\n"), arg, _T("word"));
 				break;
 			case CMDARG_TYPE_DWORD:
-				_ftprintf(fp, _T("get_%s(__buf, __len, __cur)"), _T("dword"));
+				_ftprintf(fp, _T("\t\tunsigned int a%d = get_%s(__buf, __len, __cur);\n"), arg, _T("dword"));
 				break;
 			case CMDARG_TYPE_FLOAT:
-				_ftprintf(fp, _T("get_%s(__buf, __len, __cur)"), _T("float"));
+				_ftprintf(fp, _T("\t\tfloat a%d = get_%s(__buf, __len, __cur);\n"), arg, _T("float"));
 				break;
 			case CMDARG_TYPE_STRING:
-				_ftprintf(fp, _T("get_string(__buf, __len, __cur)"));
+				_ftprintf(fp, _T("\t\tconst char* a%d = get_string(__buf, __len, __cur);\n"), arg);
 				break;
 			case CMDARG_TYPE_STRUCT:
-				_ftprintf(fp, _T("(const %s*)get_struct(__buf, __len, __cur, sizeof(%s))"),
+				_ftprintf(fp, _T("\t\tconst %s* a%d = (const %s*)get_struct(__buf, __len, __cur, sizeof(%s));\n"),
+					sets.GetServerCmdSet().GetCmd(cmd)->m_Args[arg].m_StructName,
+					arg,
 					sets.GetServerCmdSet().GetCmd(cmd)->m_Args[arg].m_StructName,
 					sets.GetServerCmdSet().GetCmd(cmd)->m_Args[arg].m_StructName);
 				break;
 			case CMDARG_TYPE_CHAR|CMDARG_TYPE_ARRAY:
-				_ftprintf(fp, _T("get_array_%s(__buf, __len, __cur)"), _T("char"));
+				_ftprintf(fp, _T("\t\tconst char* a%d = get_array_%s(__buf, __len, __cur);\n"), arg, _T("char"));
 				break;
 			case CMDARG_TYPE_SHORT|CMDARG_TYPE_ARRAY:
-				_ftprintf(fp, _T("get_array_%s(__buf, __len, __cur)"), _T("short"));
+				_ftprintf(fp, _T("\t\tconst short* a%d = get_array_%s(__buf, __len, __cur);\n"), arg, _T("short"));
 				break;
 			case CMDARG_TYPE_INT|CMDARG_TYPE_ARRAY:
-				_ftprintf(fp, _T("get_array_%s(__buf, __len, __cur)"), _T("int"));
+				_ftprintf(fp, _T("\t\tconst int* a%d = get_array_%s(__buf, __len, __cur);\n"), arg, _T("int"));
 				break;
 			case CMDARG_TYPE_BYTE|CMDARG_TYPE_ARRAY:
-				_ftprintf(fp, _T("get_array_%s(__buf, __len, __cur)"), _T("byte"));
+				_ftprintf(fp, _T("\t\tconst unsigned char* a%d = get_array_%s(__buf, __len, __cur);\n"), arg, _T("byte"));
 				break;
 			case CMDARG_TYPE_WORD|CMDARG_TYPE_ARRAY:
-				_ftprintf(fp, _T("get_array_%s(__buf, __len, __cur)"), _T("word"));
+				_ftprintf(fp, _T("\t\tconst unsigned short* a%d = get_array_%s(__buf, __len, __cur);\n"), arg, _T("word"));
 				break;
 			case CMDARG_TYPE_DWORD|CMDARG_TYPE_ARRAY:
-				_ftprintf(fp, _T("get_array_%s(__buf, __len, __cur)"), _T("dword"));
+				_ftprintf(fp, _T("\t\tconst unsigned int* a%d = get_array_%s(__buf, __len, __cur);\n"), arg, _T("dword"));
 				break;
 			case CMDARG_TYPE_FLOAT|CMDARG_TYPE_ARRAY:
-				_ftprintf(fp, _T("get_array_%s(__buf, __len, __cur)"), _T("float"));
+				_ftprintf(fp, _T("\t\tconst float* a%d = get_array_%s(__buf, __len, __cur);\n"), arg, _T("float"));
 				break;
 			case CMDARG_TYPE_STRUCT|CMDARG_TYPE_ARRAY:
-				_ftprintf(fp, _T("(const %s*)get_array_struct(__buf, __len, __cur, sizeof(%s))"),
+				_ftprintf(fp, _T("\t\tconst %s* a%d = (const %s*)get_array_struct(__buf, __len, __cur, sizeof(%s));\n"),
+					sets.GetServerCmdSet().GetCmd(cmd)->m_Args[arg].m_StructName,
+					arg,
 					sets.GetServerCmdSet().GetCmd(cmd)->m_Args[arg].m_StructName,
 					sets.GetServerCmdSet().GetCmd(cmd)->m_Args[arg].m_StructName);
 				break;
 			}
-			if(arg<(int)sets.GetServerCmdSet().GetCmd(cmd)->m_Args.size()-1) {
-				_ftprintf(fp, _T(",\n"), sets.GetServerCmdSet().GetCmd(cmd)->m_Args[arg].m_Name);
+		}
+
+		_ftprintf(fp, _T("		%s("), sets.GetServerCmdSet().GetCmd(cmd)->m_Name);
+		for(int arg=0; arg<(int)sets.GetServerCmdSet().GetCmd(cmd)->m_Args.size(); arg++) {
+			if(arg==0) {
+				_ftprintf(fp, _T("a%d"), arg);
 			} else {
-				_ftprintf(fp, _T("\n"), sets.GetServerCmdSet().GetCmd(cmd)->m_Args[arg].m_Name);
+				_ftprintf(fp, _T(", a%d"), arg);
 			}
 		}
-		_ftprintf(fp, _T("		);\n"));
+		_ftprintf(fp, _T(");\n"));
 		_ftprintf(fp, _T("	}\n"));
 	}
 	_ftprintf(fp, _T("}\n"));

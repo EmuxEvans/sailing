@@ -26,12 +26,14 @@ int main(int argc, char* argv[])
 	//WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ASockIOInit();
 	GameLoop_Init();
+	GameAsync_Init();
 
 	if(OptGetValue(argc-1, &argv[1], "play", NULL)) {
 		IGameLoopCallback* pCallback = CSGGameLoopCallback::GetSingleton();
-		CGameLoopRecorder Recorder(pCallback);
 		bReplayMode = true;
-		Recorder.Play(OptGetValue(argc-1, &argv[1], "play", NULL));
+		pLoop = GameLoop_Create(pCallback);
+		pLoop->Playback(OptGetValue(argc-1, &argv[1], "record", NULL));
+		pLoop->Release();
 	} else {
 		IGameLoopCallback* pCallback = CSGGameLoopCallback::GetSingleton();
 		CGameLoopRecorder Recorder(pCallback);
@@ -56,6 +58,7 @@ int main(int argc, char* argv[])
 		Recorder.Close();
 	}
 
+	GameAsync_Final();
 	GameLoop_Final();
 	ASockIOFini();
 	//WSACleanup();

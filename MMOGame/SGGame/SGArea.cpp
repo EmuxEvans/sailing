@@ -14,7 +14,7 @@
 #include "SGItem.h"
 #include "SGSkill.h"
 
-CSGArea::CSGArea() : CArea(1.0f, 1.0f, m_Cells, 99, 99)
+CSGArea::CSGArea() : CArea(400.0f, 400.0f, m_Cells, 99, 99)
 {
 }
 

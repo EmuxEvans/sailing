@@ -1,6 +1,6 @@
 #pragma once
 
-#define AREA_ACTION_NOTIFY_RANGE		1
+#define AREA_ACTION_NOTIFY_RANGE		0
 
 #define CMDCODE_MOVE			1001
 #define CMDCODE_MOVE_JOIN		1002
