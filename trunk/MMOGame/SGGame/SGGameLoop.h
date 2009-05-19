@@ -7,6 +7,8 @@ class CSGArea;
 class CSGConnection;
 class CSGGameLoopCallback;
 
+class IGameFES;
+
 class CSGConnection
 {
 public:
@@ -45,7 +47,7 @@ private:
 	unsigned int m_nFESSeq;
 };
 
-class CSGGameLoopCallback : public IGameLoopCallback
+class CSGGameLoopCallback : public IMsgLoopCallback
 {
 	friend class CSGConnection;
 	friend class CSGPlayer;

@@ -15,7 +15,7 @@
 
 static BOOL InitTCPServer(unsigned short nPort);
 static BOOL FinalTCPServer();
-static IGameLoop* pLoop = NULL;
+static IMsgLoop* pLoop = NULL;
 static bool bReplayMode = false;
 static const char* OptGetValue(int argc, char* argv[], const char* name, const char* defvalue);
 static bool OptGetSwitch(int argc, char* argv[], const char* name, bool defvalue);
@@ -25,27 +25,17 @@ int main(int argc, char* argv[])
 	//WSAData wsaData;
 	//WSAStartup(MAKEWORD(2, 2), &wsaData);
 	ASockIOInit();
-	GameLoop_Init();
-	GameAsync_Init();
+	MsgLoop_Init();
+	Async_Init();
 
 	if(OptGetValue(argc-1, &argv[1], "play", NULL)) {
-		IGameLoopCallback* pCallback = CSGGameLoopCallback::GetSingleton();
 		bReplayMode = true;
-		pLoop = GameLoop_Create(pCallback);
-		pLoop->Playback(OptGetValue(argc-1, &argv[1], "record", NULL));
-		pLoop->Release();
+		pLoop = MsgLoop_Create();
+		pLoop->Playback(CSGGameLoopCallback::GetSingleton(), OptGetValue(argc-1, &argv[1], "play", NULL));
 	} else {
-		IGameLoopCallback* pCallback = CSGGameLoopCallback::GetSingleton();
-		CGameLoopRecorder Recorder(pCallback);
+		pLoop = MsgLoop_Create();
 
-		if(OptGetValue(argc-1, &argv[1], "record", NULL)) {
-			Recorder.Open(OptGetValue(argc-1, &argv[1], "record", NULL));
-			pLoop = GameLoop_Create(&Recorder);
-		} else {
-			pLoop = GameLoop_Create(pCallback);
-		}
-
-		pLoop->Start(1000);
+		pLoop->Start(CSGGameLoopCallback::GetSingleton(), 1000, OptGetValue(argc-1, &argv[1], "record", NULL));
 
 		InitTCPServer(1980);
 		getchar();
@@ -53,13 +43,11 @@ int main(int argc, char* argv[])
 
 		pLoop->Stop();
 		pLoop->Wait();
-		pLoop->Release();
 		CSGGameLoopCallback::Cleanup();
-		Recorder.Close();
 	}
 
-	GameAsync_Final();
-	GameLoop_Final();
+	Async_Final();
+	MsgLoop_Final();
 	ASockIOFini();
 	//WSACleanup();
 	return 0;

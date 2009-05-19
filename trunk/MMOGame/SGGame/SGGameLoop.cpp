@@ -185,7 +185,7 @@ void CSGGameLoopCallback::Process(const CmdData* pCmdData)
 			pConnection->Release();
 		}
 		CCmdDataReader cmd(pCmdData);
-		IGameFES* pFES = NULL; /* GameLoop_GetFES(cmd.GetValue<unsigned int>(), cmd.GetValue<unsigned short>());
+		IGameFES* pFES = NULL; /* MsgLoop_GetFES(cmd.GetValue<unsigned int>(), cmd.GetValue<unsigned short>());
 		assert(pFES);
 		if(!pFES) return; */
 		cmd.GetValue<unsigned int>();

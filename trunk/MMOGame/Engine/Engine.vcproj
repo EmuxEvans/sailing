@@ -213,7 +213,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\Area.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Area.inl"
+				>
+			</File>
+			<File
 				RelativePath=".\asockio.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Async.h"
 				>
 			</File>
 			<File
@@ -225,27 +237,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GameArea.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GameArea.inl"
-				>
-			</File>
-			<File
-				RelativePath=".\GameAsync.h"
-				>
-			</File>
-			<File
 				RelativePath=".\GameBuff.h"
 				>
 			</File>
 			<File
 				RelativePath=".\GameItem.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GameLoop.h"
 				>
 			</File>
 			<File
@@ -269,6 +265,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MsgLoop.h"
+				>
+			</File>
+			<File
 				RelativePath=".\PropertyDB.h"
 				>
 			</File>
@@ -281,7 +281,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RPC.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ScriptState.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TCPServer.h"
 				>
 			</File>
 		</Filter>
@@ -291,19 +299,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\Area.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\asockio.cpp"
 				>
 			</File>
 			<File
+				RelativePath=".\Async.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\CmdData.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameArea.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameAsync.cpp"
 				>
 			</File>
 			<File
@@ -312,10 +320,6 @@
 			</File>
 			<File
 				RelativePath=".\GameItem.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GameLoop.cpp"
 				>
 			</File>
 			<File
@@ -335,6 +339,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MsgLoop.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PropertyDB.cpp"
 				>
 			</File>
@@ -343,7 +351,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RPC.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ScriptState.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TCPServer.cpp"
 				>
 			</File>
 		</Filter>
