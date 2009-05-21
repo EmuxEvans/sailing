@@ -31,17 +31,19 @@ CSGCmdSetManage::CSGCmdSetManage()
 	PushCArg("sex", CMDARG_TYPE_DWORD);
 
 	PushCCmd("eqips", SGCMDCODE_EQUIP, "玩家装备");
-	PushCArg("face", CMDARG_TYPE_DWORD, "");
-	PushCArg("hair", CMDARG_TYPE_DWORD, "");
-	PushCArg("headwear", CMDARG_TYPE_DWORD, "");
-	PushCArg("helmet", CMDARG_TYPE_DWORD, "");
+	PushCArg("head", CMDARG_TYPE_DWORD, "");
 	PushCArg("chest", CMDARG_TYPE_DWORD, "");
 	PushCArg("cuff", CMDARG_TYPE_DWORD, "");
 	PushCArg("belt", CMDARG_TYPE_DWORD, "");
-	PushCArg("shoulder", CMDARG_TYPE_DWORD, "");
-	PushCArg("clock", CMDARG_TYPE_DWORD, "");
 	PushCArg("pants", CMDARG_TYPE_DWORD, "");
 	PushCArg("shoes", CMDARG_TYPE_DWORD, "");
+	PushCArg("shoulder", CMDARG_TYPE_DWORD, "");
+	PushCArg("cloak", CMDARG_TYPE_DWORD, "");
+	PushCArg("medal1", CMDARG_TYPE_DWORD, "");
+	PushCArg("medal2", CMDARG_TYPE_DWORD, "");
+	PushCArg("medal3", CMDARG_TYPE_DWORD, "");
+	PushCArg("mainweapon", CMDARG_TYPE_DWORD, "");
+	PushCArg("slaveweapon", CMDARG_TYPE_DWORD, "");
 
 	PushCCmd("move", SGCMDCODE_MOVE, "玩家移动");
 	PushCArg("sx", CMDARG_TYPE_FLOAT, "当前坐标");

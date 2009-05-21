@@ -489,17 +489,19 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 	}
 	if(pCmdData->nCmd==SGCMDCODE_EQUIP) {
 		SGPLAYER_EQUIPMENTS equips;
-		equips.face		= cmd.GetValue<unsigned int>();
-		equips.hair		= cmd.GetValue<unsigned int>();
-		equips.headwear	= cmd.GetValue<unsigned int>();
-		equips.helmet	= cmd.GetValue<unsigned int>();
-		equips.chest	= cmd.GetValue<unsigned int>();
-		equips.cuff		= cmd.GetValue<unsigned int>();
-		equips.belt		= cmd.GetValue<unsigned int>();
-		equips.shoulder	= cmd.GetValue<unsigned int>();
-		equips.clock	= cmd.GetValue<unsigned int>();
-		equips.pants	= cmd.GetValue<unsigned int>();
-		equips.shoes	= cmd.GetValue<unsigned int>();
+		equips.head			= cmd.GetValue<unsigned int>();
+		equips.chest		= cmd.GetValue<unsigned int>();
+		equips.cuff			= cmd.GetValue<unsigned int>();
+		equips.belt			= cmd.GetValue<unsigned int>();
+		equips.pants		= cmd.GetValue<unsigned int>();
+		equips.shoes		= cmd.GetValue<unsigned int>();
+		equips.shoulder		= cmd.GetValue<unsigned int>();
+		equips.cloak		= cmd.GetValue<unsigned int>();
+		equips.medal1		= cmd.GetValue<unsigned int>();
+		equips.medal2		= cmd.GetValue<unsigned int>();
+		equips.medal3		= cmd.GetValue<unsigned int>();
+		equips.mainweapon	= cmd.GetValue<unsigned int>();
+		equips.slaveweapon	= cmd.GetValue<unsigned int>();
 		memcpy(&m_Equips, &equips, sizeof(SGPLAYER_EQUIPMENTS));
 		CCmdDataWriter<10> out(SGCMDCODE_MOVE_CHANGE, GetActorId());
 		GetArea()->Notify(out.GetCmdData(), GetAreaCell());

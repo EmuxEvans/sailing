@@ -5,17 +5,19 @@ SGPLAYER_INFO {
 };
 
 SGPLAYER_EQUIPMENTS {
-	dword	face;
-	dword	hair;
-	dword	headwear;
-	dword	helmet;
+	dword	head;
 	dword	chest;
 	dword	cuff;
 	dword	belt;
-	dword	shoulder;
-	dword	clock;
 	dword	pants;
 	dword	shoes;
+	dword	shoulder;
+	dword	cloak;
+	dword	medal1;
+	dword	medal2;
+	dword	medal3;
+	dword	mainweapon;
+	dword	slaveweapon;
 };
 
 SGPLAYER_VIEWDATA {
