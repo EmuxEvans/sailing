@@ -5,6 +5,18 @@
 #include "parser.h"
 #include "codegen.h"
 
+static bool type_is_struct(const char* name) {
+	if(strcmp(name, "char")==0)		return false;
+	if(strcmp(name, "short")==0)	return false;
+	if(strcmp(name, "int")==0)		return false;
+	if(strcmp(name, "byte")==0)		return false;
+	if(strcmp(name, "word")==0)		return false;
+	if(strcmp(name, "dword")==0)	return false;
+	if(strcmp(name, "float")==0)	return false;
+	if(strcmp(name, "string")==0)	return false;
+	return true;
+}
+
 static const char* type2type(const char* name)
 {
 	if(strcmp(name, "char")==0)		return "PROPERTY_TYPE_CHAR";
@@ -83,10 +95,14 @@ bool code_gen_inl(const char* name, FILE* fp)
 		fprintf(fp,"	CPropertySet_%s() {\n", psgen_get(c)->name);
 		fprintf(fp,"		SetInfo(\"%s\", \"%s\");\n", psgen_get(c)->name, "");
 		for(int a=0; a<psgen_get(c)->args_count; a++) {
-			fprintf(fp,"		SetProperty(%d, \"%s\", %s, offsetof(%s, %s), %s, %s, \"%s\");\n",
+			fprintf(fp,"		SetProperty(%d, \"%s\", %s, %s%s, offsetof(%s, %s), %s, %s, \"%s\");\n",
 				a,
 				psgen_get(c)->args[a].name,
 				type2type(psgen_get(c)->args[a].type),
+
+				type_is_struct(psgen_get(c)->args[a].type)?"&ps_SGDataDef_":"",
+				type_is_struct(psgen_get(c)->args[a].type)?psgen_get(c)->args[a].type:"NULL",
+
 				psgen_get(c)->name, psgen_get(c)->args[a].name,
 				type2type(psgen_get(c)->args + a),
 				psgen_get(c)->args[a].count,

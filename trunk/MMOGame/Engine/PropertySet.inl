@@ -47,7 +47,7 @@ public:
 
 protected:
 	void SetInfo(const char* pName, const char* pDesc);
-	void SetProperty(int nIndex, const char* pName, int nType, unsigned int nOffset, unsigned int nSize, unsigned int nCount, const char* pDesc);
+	void SetProperty(int nIndex, const char* pName, int nType, IPropertySet* pTypeDefine, unsigned int nOffset, unsigned int nSize, unsigned int nCount, const char* pDesc);
 
 private:
 	const char*		m_pName;
@@ -108,12 +108,13 @@ void CPropertySet<Count>::SetInfo(const char* pName, const char* pDesc)
 }
 
 template<int Count>
-void CPropertySet<Count>::SetProperty(int nIndex, const char* pName, int nType, unsigned int nOffset, unsigned int nSize, unsigned int nCount, const char* pDesc)
+void CPropertySet<Count>::SetProperty(int nIndex, const char* pName, int nType, IPropertySet* pTypeDefine, unsigned int nOffset, unsigned int nSize, unsigned int nCount, const char* pDesc)
 {
 	assert(nIndex>=0 && nIndex<Count);
 	if(nIndex<0 || nIndex>=Count) return;
 	m_Infos[nIndex].m_Name = pName;
 	m_Infos[nIndex].m_Type = nType;
+	m_Infos[nIndex].m_TypeDefine = pTypeDefine;
 	m_Infos[nIndex].m_Offset = nOffset;
 	m_Infos[nIndex].m_Size = nSize;
 	m_Infos[nIndex].m_Count = nCount;

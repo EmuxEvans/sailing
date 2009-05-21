@@ -7,28 +7,23 @@ function ondisconnect(conn)
 	output("--OnDisconnect ("..conn..") --\n")
 end
 
-function serialize(o, userdata)
-	if userdata=="" then
-		if type(o) == "number" then
-			output(o)
-		elseif type(o) == "string" then
-			output(string.format("%q", o))
-		elseif type(o) == "table" then
-			output("{")
-			for k,v in pairs(o) do
+function serialize(o)
+	if type(o) == "number" then
+		output(o)
+	elseif type(o) == "string" then
+		output(string.format("%q", o))
+	elseif type(o) == "table" then
+		output("{\n")
+		for k,v in pairs(o) do
+			if type(k) == "number" then
 				output(" ["..k.."] = ")
-				serialize(v)
-				output(",")
+			else
+				output(" "..k.." = ")
 			end
-			output("}")
+			serialize(v)
+			output(",")
 		end
-	end
-	
-	if type(o) == userdata then
-		output("{");
-		output("name="..o.name..", ");
-		output("guild="..o.guild..",");
-		output("}");
+		output("}")
 	end
 end
 
@@ -37,24 +32,10 @@ function ondata(conn, args)
 	local count = 0;
 	for k,v in pairs(args) do
 		if k~="CmdName" and k~="CmdCode" then
-			if type(v)~="userdata" then
-				count = count + 1;
-				output("  "..k.." = ")
-				serialize(v, "")
-				output(",")
-			end
-		end
-	end
-	if count>0 then
-		output("\n");
-	end
-	for k,v in pairs(args) do
-		if k~="CmdName" and k~="CmdCode" then
-			if type(v)=="userdata" then
-				output("  "..k.." = ")
-				serialize(v, "userdata")
-				output(",\n")
-			end
+			count = count + 1;
+			output("  "..k.." = ")
+			serialize(v)
+			output(",")
 		end
 	end
 end

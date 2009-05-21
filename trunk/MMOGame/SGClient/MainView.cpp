@@ -571,6 +571,56 @@ void CMainView::OnConnect(ISGClient* pClient)
 	}
 }
 
+#include "..\Engine\PropertySet.h"
+
+int SGDataDef_GetPropertySetCount();
+IPropertySet* SGDataDef_GetPropertySet(int nIndex);
+IPropertySet* SGDataDef_GetPropertySet(const char* pName);
+
+bool pushstruct(lua_State* L, const void* pData, const char* pTypeName)
+{
+	IPropertySet* pSet = SGDataDef_GetPropertySet(pTypeName);
+	assert(pSet);
+	if(pSet==NULL) return false;
+
+	lua_newtable(L);
+	for(int n=0; n<pSet->PropertyCount(); n++) {
+		lua_pushstring(L, pSet->GetProperty(n)->GetName());
+		switch(pSet->GetProperty(n)->GetType()) {
+		case PROPERTY_TYPE_CHAR:
+			lua_pushinteger(L, (lua_Integer)(*((const char*)((const char*)pData + pSet->GetProperty(n)->GetOffset()))));
+			break;
+		case PROPERTY_TYPE_SHORT:
+			lua_pushinteger(L, (lua_Integer)(*((const short*)((const char*)pData + pSet->GetProperty(n)->GetOffset()))));
+			break;
+		case PROPERTY_TYPE_INT:
+			lua_pushinteger(L, (lua_Integer)(*((const int*)((const char*)pData + pSet->GetProperty(n)->GetOffset()))));
+			break;
+		case PROPERTY_TYPE_BYTE:
+			lua_pushinteger(L, (lua_Integer)(*((const unsigned char*)((const char*)pData + pSet->GetProperty(n)->GetOffset()))));
+			break;
+		case PROPERTY_TYPE_WORD:
+			lua_pushinteger(L, (lua_Integer)(*((const unsigned short*)((const char*)pData + pSet->GetProperty(n)->GetOffset()))));
+			break;
+		case PROPERTY_TYPE_DWORD:
+			lua_pushinteger(L, (lua_Integer)(*((const unsigned int*)((const char*)pData + pSet->GetProperty(n)->GetOffset()))));
+			break;
+		case PROPERTY_TYPE_FLOAT:
+			lua_pushnumber(L, (lua_Number)(*((const float*)((const char*)pData + pSet->GetProperty(n)->GetOffset()))));
+			break;
+		case PROPERTY_TYPE_STRING:
+			lua_pushstring(L, (const char*)pData + pSet->GetProperty(n)->GetOffset());
+			break;
+		case PROPERTY_TYPE_STRUCT:
+			pushstruct(L, (const char*)pData + pSet->GetProperty(n)->GetOffset(), pSet->GetProperty(n)->GetTypeDefine()->GetName());
+			break;
+		}
+		lua_rawset(L, -3);
+	}
+
+	return true;
+}
+
 void CMainView::OnData(ISGClient* pClient, const void* pData, unsigned int nSize)
 {
 	CDataReader data(pData, nSize);
@@ -611,7 +661,7 @@ void CMainView::OnData(ISGClient* pClient, const void* pData, unsigned int nSize
 					lua_pushnumber(L, (lua_Number)data.GetValue<float>());
 					break;
 				case CMDARG_TYPE_STRUCT|CMDARG_TYPE_ARRAY:
-					tolua_pushusertype(L, (void*)data.GetStruct(pCmdInfo->m_Args[l].m_StructSize), pCmdInfo->m_Args[l].m_StructName);
+					pushstruct(L, data.GetStruct(pCmdInfo->m_Args[l].m_StructSize), pCmdInfo->m_Args[l].m_StructName);
 					break;
 				default:
 					assert(0);
@@ -634,7 +684,7 @@ void CMainView::OnData(ISGClient* pClient, const void* pData, unsigned int nSize
 				lua_pushstring(L, data.GetString());
 				break;
 			case CMDARG_TYPE_STRUCT:
-				tolua_pushusertype(L, (void*)data.GetStruct(pCmdInfo->m_Args[l].m_StructSize), pCmdInfo->m_Args[l].m_StructName);
+				pushstruct(L, data.GetStruct(pCmdInfo->m_Args[l].m_StructSize), pCmdInfo->m_Args[l].m_StructName);
 				break;
 			default:
 				assert(0);
