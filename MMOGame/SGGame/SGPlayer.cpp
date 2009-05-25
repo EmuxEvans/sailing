@@ -251,6 +251,7 @@ CSGPlayer::CSGPlayer(CSGConnection* pConnection, unsigned int nPlayerId) : CSGRo
 	memset(&m_Equips, 0, sizeof(m_Equips));
 	memset(&m_Info, 0, sizeof(m_Info));
 	sprintf(m_Info.nick, "USER-%d", m_nPlayerId);
+	m_Info.sex = nPlayerId%2;
 	//memset(m_Equip, 0, sizeof(m_Equip));
 	//memset(m_Bag, 0, sizeof(m_Bag));
 	//memset(m_Warehouse, 0, sizeof(m_Warehouse));
@@ -375,7 +376,7 @@ void CSGPlayer::OnNotify(const CmdData* pCmdData)
 		return;
 	}
 
-	if(pCmdData->nCmd==CMDCODE_MOVE && pCmdData->nWho!=GetActorId()) {
+	if(pCmdData->nCmd==CMDCODE_MOVE) {
 		GetConnection()->SendData(pCmdData->pData, pCmdData->nSize);
 		return;
 	}
@@ -504,10 +505,11 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 		equips.slaveweapon	= cmd.GetValue<unsigned int>();
 		memcpy(&m_Equips, &equips, sizeof(SGPLAYER_EQUIPMENTS));
 		CCmdDataWriter<10> out(SGCMDCODE_MOVE_CHANGE, GetActorId());
+
+		OnNotify(out.GetCmdData());
 		GetArea()->Notify(out.GetCmdData(), GetAreaCell());
 		return;
 	}
-
 	if(pCmdData->nCmd==SGCMDCODE_MOVE) {
 		Vector s;
 		s.x = cmd.GetValue<float>();
@@ -534,6 +536,7 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 		out.PutValue(e.z);
 		out.PutValue(ntime);
 
+		OnNotify(out.GetCmdData());
 		GetArea()->Notify(out.GetCmdData(), GetAreaCell()->GetAreaCol(), GetAreaCell()->GetAreaRow());
 		return;
 	}
@@ -552,6 +555,8 @@ void CSGPlayer::OnAction(const CmdData* pCmdData)
 		out.PutValue(GetInfo().nick);
 		out.PutValue(cmd.GetString());
 		out.PutValue(cmd.GetString());
+
+		OnNotify(out.GetCmdData());
 		GetArea()->Notify(out.GetCmdData(), GetAreaCell());
 		return;
 	}

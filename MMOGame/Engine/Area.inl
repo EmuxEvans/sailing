@@ -226,7 +226,6 @@ template<class TArea, class TAreaActor>
 void CAreaCell<TArea, TAreaActor>::Notify(const CmdData* pCmdData)
 {
 	for(int i=0; i<sizeof(m_Actors)/sizeof(m_Actors[0]); i++) {
-//		if(m_Actors[i]) {
 		if(m_Actors[i] && m_Actors[i]->GetActorId()!=pCmdData->nWho) {
 			m_Actors[i]->OnNotify(pCmdData);
 		}

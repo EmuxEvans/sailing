@@ -215,7 +215,10 @@ CMainView::CMainView()
 	lua_pushcfunction(L, lua_output);
 	lua_rawset(L, LUA_GLOBALSINDEX);
 
+
+	GetCurrentDirectory(sizeof(m_szCurrentDir), m_szCurrentDir);
 	char szTxt[10000];
+
 	if(load_textfile("SGClient.lua", szTxt, sizeof(szTxt))>=0) {
 		lua_script = szTxt;
 	}
@@ -262,6 +265,7 @@ CMainView::~CMainView()
 	g_pMainView = NULL;
 	lua_close(L);
 
+	SetCurrentDirectory(m_szCurrentDir);
 	FILE* fp = fopen("SGClient.History.txt", "wt");
 	if(fp) {
 		std::list<std::string>::iterator i;

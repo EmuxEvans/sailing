@@ -57,6 +57,7 @@ public:
 private:
 	BOOL m_bCommandMode;
 	char m_szFileName[MAX_PATH];
+	char m_szCurrentDir[MAX_PATH];
 	int m_nConsoleWidth, m_nConsoleHeight;
 	int m_nScriptTop, m_nScriptWidth;
 	int m_nBottomTop;

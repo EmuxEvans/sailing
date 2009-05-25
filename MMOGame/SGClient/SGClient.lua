@@ -38,4 +38,5 @@ function ondata(conn, args)
 			output(",")
 		end
 	end
+	output("\n")
 end
