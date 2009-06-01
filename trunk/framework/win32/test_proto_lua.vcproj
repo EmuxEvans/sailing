@@ -404,7 +404,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Compiling Protocol Define File..."
-					CommandLine="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+					CommandLine="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; CL &quot;$(InputPath)&quot;"
 					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;"
 				/>
 			</FileConfiguration>
@@ -414,7 +414,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Compiling Protocol Define File..."
-					CommandLine="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+					CommandLine="&quot;$(ProjectDir)..\$(ConfigurationName)-$(PlatformName)\prot_gen.exe&quot; CL &quot;$(InputPath)&quot;"
 					Outputs="&quot;$(InputPath).h&quot;;&quot;$(InputPath).c&quot;"
 				/>
 			</FileConfiguration>

@@ -66,7 +66,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;..\..\framework_dep\wtl\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -152,7 +152,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;..\..\framework_dep\wtl\include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
