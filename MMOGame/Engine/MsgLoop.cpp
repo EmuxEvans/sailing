@@ -127,14 +127,6 @@ public:
 		DeleteCriticalSection(&m_csMsgQ);
 	}
 
-	virtual bool OpenOutputFile(const char* pLogFile) {
-		return true;
-	}
-
-	virtual bool CloseOutputFile() {
-		return true;
-	}
-
 	virtual bool Playback(IMsgLoopCallback* pCallback, const char* pLogFileName) {
 		FILE* hLog;
 		hLog = fopen(pLogFileName, "rb");

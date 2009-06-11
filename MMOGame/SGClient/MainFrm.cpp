@@ -154,7 +154,7 @@ LRESULT CMainFrame::OnConnClick(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/
 	return 0;
 }
 
-#include "..\Engine\CmdData.h"
+#include "..\Engine\CmdInfo.h"
 #include "..\SGCommon\SGCmdSet.h"
 
 CSGCmdSetManage sets;
