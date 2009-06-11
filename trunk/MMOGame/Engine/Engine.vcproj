@@ -233,6 +233,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CmdInfo.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Game.h"
 				>
 			</File>
@@ -261,6 +265,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LogicServer.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MapServer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Math.h"
 				>
 			</File>
@@ -281,15 +293,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\RPC.h"
-				>
-			</File>
-			<File
 				RelativePath=".\ScriptState.h"
 				>
 			</File>
 			<File
-				RelativePath=".\TCPServer.h"
+				RelativePath=".\SessionServer.h"
 				>
 			</File>
 		</Filter>
@@ -315,6 +323,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CmdInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GameBuff.cpp"
 				>
 			</File>
@@ -335,6 +347,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LogicServer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MapServer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Math.cpp"
 				>
 			</File>
@@ -351,15 +371,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\RPC.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ScriptState.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\TCPServer.cpp"
+				RelativePath=".\SessionServer.cpp"
 				>
 			</File>
 		</Filter>

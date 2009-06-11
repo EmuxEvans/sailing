@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "CmdData.h"
+#include "CmdInfo.h"
 #include "SGCode.h"
 #include "SGData.h"
 
