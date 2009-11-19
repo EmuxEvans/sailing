@@ -60,14 +60,14 @@ int DrawGL()
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_CULL_FACE);
-/*
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0f, (GLfloat)_width/(GLfloat)_height, 0.1f, 100.0f);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	DrawScene();
-*/
+
 	glDisable(GL_DEPTH_TEST);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -397,11 +397,13 @@ void DoTick()
 		pPanel->AddWidget(new XUILabel ("B2", 10,  60, 100, 40));
 		pPanel->AddWidget(new XUIButton("B321", 10, 110, 100, 20));
 		pPanel->AddWidget(new XUILabel ("B4", 10, 160, 100, 40));
+		pPanel->AddWidget(new XUILabel ("END", 10, 160, 100, 40));
 		_gXUI.GetRoot()->AddChild(pPanel);
 		bInit = true;
 	}
 
-//	_gXUI.Render(NULL);
+	_gXUI.BeginFrame();
+	_gXUI.EndFrame();
 }
 
 int DrawScene()
