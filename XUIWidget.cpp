@@ -31,6 +31,9 @@ XUIWidget::XUIWidget() : m_Scroll(0, 0)
 	m_nClientTop = 0;
 	m_nClientRight = 0;
 	m_nClientBottom = 0;
+	m_nScrollWidth = 1;
+	m_nScrollHeight = 1;
+	m_bScroll = false;
 }
 
 XUIWidget::~XUIWidget()
@@ -103,7 +106,7 @@ bool XUIWidget::IsEnable()
 	return true;
 }
 
-XUIPoint& XUIWidget::RootToWidget(const XUIPoint& In, XUIPoint& Out)
+XUIPoint& XUIWidget::ScreenToWidget(const XUIPoint& In, XUIPoint& Out)
 {
 	XUIPoint P = In;
 	XUIWidget* pWidget = this;
@@ -111,8 +114,8 @@ XUIPoint& XUIWidget::RootToWidget(const XUIPoint& In, XUIPoint& Out)
 		P.x -= pWidget->m_nLeft;
 		P.y -= pWidget->m_nTop;
 		if(pWidget!=this) {
-			P.x -= pWidget->m_nClientLeft + pWidget->m_Scroll.x;
-			P.y -= pWidget->m_nClientTop + pWidget->m_Scroll.y;
+			P.x -= pWidget->m_nClientLeft - (pWidget->m_bScroll?pWidget->m_Scroll.x:0);
+			P.y -= pWidget->m_nClientTop  - (pWidget->m_bScroll?pWidget->m_Scroll.y:0);
 		}
 		pWidget = pWidget->GetParent();
 	}
@@ -120,16 +123,16 @@ XUIPoint& XUIWidget::RootToWidget(const XUIPoint& In, XUIPoint& Out)
 	return Out;
 }
 
-XUIPoint& XUIWidget::WidgetToRoot(const XUIPoint& In, XUIPoint& Out)
+XUIPoint& XUIWidget::WidgetToScreen(const XUIPoint& In, XUIPoint& Out)
 {
 	XUIPoint P = In;
 	XUIWidget* pWidget = this;
 	while(pWidget) {
-		P.x += pWidget->m_nLeft + (pWidget==this?0:pWidget->m_nClientLeft);
-		P.y += pWidget->m_nTop  + (pWidget==this?0:pWidget->m_nClientTop);
+		P.x += pWidget->m_nLeft;
+		P.y += pWidget->m_nTop;
 		if(pWidget!=this) {
-			P.x += pWidget->m_nClientLeft + pWidget->m_Scroll.x;
-			P.y += pWidget->m_nClientTop + pWidget->m_Scroll.y;
+			P.x += pWidget->m_nClientLeft - (pWidget->m_bScroll?pWidget->m_Scroll.x:0);
+			P.y += pWidget->m_nClientTop  - (pWidget->m_bScroll?pWidget->m_Scroll.y:0);
 		}
 		pWidget = pWidget->GetParent();
 	}
@@ -165,16 +168,47 @@ void XUIWidget::SetClientArea(int nLeft, int nTop, int nRight, int nBottom)
 	m_nClientBottom = nBottom;
 }
 
-void XUIWidget::SetScroll(const XUIPoint& Scroll)
+void XUIWidget::EnableScroll(bool bEnable)
+{
+	m_bScroll = bEnable;
+	AdjustScroll();
+}
+
+void XUIWidget::SetScrollPosition(const XUIPoint& Scroll)
 {
 	m_Scroll = Scroll;
+	if(m_bScroll) AdjustScroll();
+}
+
+void XUIWidget::SetScrollSize(int nWidth, int nHeight)
+{
+	m_nScrollWidth = nWidth;
+	m_nScrollHeight = nHeight;
+	if(m_bScroll) AdjustScroll();
+}
+
+void XUIWidget::AdjustScroll()
+{
+	if(m_nScrollWidth<GetClientWidth()) {
+		m_Scroll.x = 0;
+	} else {
+		if(m_Scroll.x<0) m_Scroll.x = 0;
+		if(m_Scroll.x+GetClientWidth()>m_nScrollWidth) m_Scroll.x = m_nScrollWidth - GetClientWidth();
+	}
+
+	if(m_nScrollHeight<GetClientHeight()) {
+		m_Scroll.y = 0;
+	} else {
+		if(m_Scroll.y<0) m_Scroll.y = 0;
+		if(m_Scroll.y+GetClientHeight()>m_nScrollHeight) m_Scroll.y = m_nScrollHeight - GetClientHeight();
+	}
 }
 
 void XUIWidget::onRender(XUIDevice* pDevice)
 {
 	XUIWidget* pWidget = GetFirstChild();
 
-	pDevice->AddBeginScissor(m_nClientLeft-m_Scroll.x, m_nClientTop-m_Scroll.y);
+	pDevice->AddBeginScissor(m_nClientLeft-(m_bScroll?m_Scroll.x:0), m_nClientTop-(m_bScroll?m_Scroll.y:0));
 	while(pWidget!=NULL) {
 		pDevice->AddBeginScissor(pWidget->m_nLeft, pWidget->m_nTop);
 		pWidget->onRender(pDevice);
@@ -265,9 +299,15 @@ XUIWidget* XUI::GetWidget(const XUIPoint& Point)
 		P.x -= pWidget->m_nLeft;
 		P.y -= pWidget->m_nTop;
 		if(P.x>=0 && P.y>=0 && P.x<pWidget->m_nWidth && P.y<pWidget->m_nHeight) {
-			P.x -= pWidget->m_nClientLeft - pWidget->m_Scroll.x;
-			P.y -= pWidget->m_nClientTop - pWidget->m_Scroll.y;
+			P.x -= pWidget->m_nClientLeft;
+			P.y -= pWidget->m_nClientTop;
 			pReturn = pWidget;
+			if(P.x<0 || P.y<0 || P.x>=pWidget->GetClientWidth() || P.y>=pWidget->GetClientHeight()) break;
+
+			if(pWidget->m_bScroll) {
+				P.x += pWidget->m_Scroll.x;
+				P.y += pWidget->m_Scroll.y;
+			}
 			pWidget = pWidget->GetLastChild();
 			continue;
 		}
@@ -305,14 +345,14 @@ void XUI::MouseMove(const XUIPoint& Point)
 			if(m_pOver) m_pOver->onMouseLeave();
 			pWidget->onMouseEnter();
 		}
-		pWidget->onMouseMove(pWidget->RootToWidget(Point, wp));
+		pWidget->onMouseMove(pWidget->ScreenToWidget(Point, wp));
 	} else {
 		if(m_pOver) {
 			m_pOver->onMouseLeave();
 		}
 	}
 	if(m_pCapture && m_pCapture!=pWidget) {
-		m_pCapture->onMouseMove(m_pCapture->RootToWidget(Point, wp));
+		m_pCapture->onMouseMove(m_pCapture->ScreenToWidget(Point, wp));
 	}
 
 	m_pOver = pWidget;
@@ -323,7 +363,7 @@ void XUI::MouseWheel(const XUIPoint& Point, int _rel)
 	XUIWidget* pWidget = GetWidget(Point);
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseWheel(pWidget->RootToWidget(Point, wp), _rel);
+		pWidget->onMouseWheel(pWidget->ScreenToWidget(Point, wp), _rel);
 	}
 }
 
@@ -333,12 +373,12 @@ void XUI::MouseButtonPressed(const XUIPoint& Point, unsigned short nId)
 
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseButtonPressed(pWidget->RootToWidget(Point, wp), nId);
+		pWidget->onMouseButtonPressed(pWidget->ScreenToWidget(Point, wp), nId);
 	}
 
 	if(m_pCapture!=NULL && m_pCapture!=pWidget) {
 		XUIPoint wp;
-		m_pCapture->onMouseButtonPressed(m_pCapture->RootToWidget(Point, wp), nId);
+		m_pCapture->onMouseButtonPressed(m_pCapture->ScreenToWidget(Point, wp), nId);
 	}
 }
 
@@ -348,12 +388,12 @@ void XUI::MouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseButtonReleased(pWidget->RootToWidget(Point, wp), nId);
+		pWidget->onMouseButtonReleased(pWidget->ScreenToWidget(Point, wp), nId);
 	}
 
 	if(m_pCapture!=NULL && m_pCapture!=pWidget) {
 		XUIPoint wp;
-		m_pCapture->onMouseButtonReleased(m_pCapture->RootToWidget(Point, wp), nId);
+		m_pCapture->onMouseButtonReleased(m_pCapture->ScreenToWidget(Point, wp), nId);
 	}
 }
 
@@ -362,7 +402,7 @@ void XUI::MouseButtonClick(const XUIPoint& Point, unsigned short nId)
 	XUIWidget* pWidget = GetWidget(Point);
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseButtonClick(pWidget->RootToWidget(Point, wp), nId);
+		pWidget->onMouseButtonClick(pWidget->ScreenToWidget(Point, wp), nId);
 	}
 }
 
@@ -371,7 +411,7 @@ void XUI::MouseButtonDoubleClick(const XUIPoint& Point, unsigned short nId)
 	XUIWidget* pWidget = GetWidget(Point);
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseButtonDoubleClick(pWidget->RootToWidget(Point, wp), nId);
+		pWidget->onMouseButtonDoubleClick(pWidget->ScreenToWidget(Point, wp), nId);
 	}
 }
 

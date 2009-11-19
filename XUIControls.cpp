@@ -65,16 +65,16 @@ void XUILabel::onRender(XUIDevice* pDevice)
 XUIScrollPanel::XUIScrollPanel()
 {
 	m_pText = NULL;
-	m_nScrollCount = 0;
 	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, AREA_HEADER-SCROLL_AREA_PADDING);
+	EnableScroll(true);
 }
 
 XUIScrollPanel::XUIScrollPanel(const char* pText, int nLeft, int nTop, int nWidth, int nHeight)
 {
 	SetText(pText);
 	SetWidgetRect(nLeft, nTop, nWidth, nHeight);
-	m_nScrollCount = 0;
 	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, AREA_HEADER-SCROLL_AREA_PADDING);
+	EnableScroll(true);
 }
 
 XUIScrollPanel::~XUIScrollPanel()
@@ -83,10 +83,9 @@ XUIScrollPanel::~XUIScrollPanel()
 
 bool XUIScrollPanel::AddWidget(XUIWidget* pWidget)
 {
-	if(m_nScrollCount>0) m_nScrollCount += INTEND_SIZE;
-	pWidget->SetWidgetRect(0, m_nScrollCount, GetClientWidth(), pWidget->GetWidgetHeight());
+	pWidget->SetWidgetRect(0, GetScrollHeight(), GetClientWidth(), pWidget->GetWidgetHeight());
 	AddChild(pWidget);
-	m_nScrollCount += pWidget->GetWidgetHeight();
+	SetScrollSize(GetClientWidth(), GetScrollHeight()+(GetScrollHeight()>0?INTEND_SIZE:0)+pWidget->GetWidgetHeight());
 	return true;
 }
 
@@ -96,16 +95,16 @@ void XUIScrollPanel::onRender(XUIDevice* pDevice)
 	pDevice->AddText(AREA_HEADER/2, AREA_HEADER/2-TEXT_HEIGHT/2, 0, XUI_RGBA(255,255,255,128), m_pText);
 
 	int nBarStart, nBarHeight;
-	if(m_nScrollCount>=GetClientHeight()) {
+	if(GetScrollHeight()>=GetClientHeight()) {
 		nBarStart = 0;
 		nBarHeight = GetClientHeight();
 	} else {
-		nBarStart = (int)((float)GetScroll().y/(float)m_nScrollCount * GetClientHeight());
-		nBarHeight = (int)((float)(GetScroll().y+GetClientHeight())/(float)m_nScrollCount * GetClientHeight()) - nBarStart;
+		nBarStart = (int)((float)GetScrollPosition().y/(float)GetScrollHeight() * GetClientHeight());
+		nBarHeight = (int)((float)(GetScrollPosition().y+GetClientHeight())/(float)GetScrollHeight() * GetClientHeight()) - nBarStart;
 		if(nBarHeight>GetClientHeight()) nBarHeight = GetClientHeight();
 	}
-	nBarStart = (int)((float)GetScroll().y/(float)m_nScrollCount * GetClientHeight());
-	nBarHeight = (int)((float)(GetScroll().y+GetClientHeight())/(float)m_nScrollCount * GetClientHeight()) - nBarStart;
+	nBarStart = (int)((float)GetScrollPosition().y/(float)GetScrollHeight() * GetClientHeight());
+	nBarHeight = (int)((float)(GetScrollPosition().y+GetClientHeight())/(float)GetScrollHeight() * GetClientHeight()) - nBarStart;
 	if(nBarStart+nBarHeight>GetClientHeight()) nBarHeight = GetClientHeight() - nBarStart;
 
 	int nBarLeft, nBarWidth;
@@ -124,18 +123,18 @@ void XUIScrollPanel::onMouseMove(const XUIPoint& Point)
 {
 	if(m_nCaptureScroll<0) return;
 
-	int nScroll = m_nCaptureScroll + (int)(((float)Point.y-m_nCaptureY)/GetClientHeight()*m_nScrollCount);
+	int nScroll = m_nCaptureScroll + (int)(((float)Point.y-m_nCaptureY)/GetClientHeight()*GetScrollHeight());
 	if(nScroll<0) nScroll = 0;
-	if(nScroll+GetClientHeight()>m_nScrollCount) nScroll = m_nScrollCount - GetClientHeight();
-	SetScrollY(nScroll);
+	if(nScroll+GetClientHeight()>GetScrollHeight()) nScroll = GetScrollHeight() - GetClientHeight();
+	SetScrollPosition(XUIPoint(0, nScroll));
 }
 
 void XUIScrollPanel::onMouseWheel(const XUIPoint& Point, int _rel)
 {
-	int nScroll = GetScroll().x + _rel;
+	int nScroll = GetScrollPosition().x + _rel;
 	if(nScroll<0) nScroll = 0;
-	if(nScroll+GetClientHeight()>m_nScrollCount) nScroll = m_nScrollCount - GetClientHeight();
-	SetScrollY(nScroll);
+	if(nScroll+GetClientHeight()>GetScrollHeight()) nScroll = GetScrollHeight() - GetClientHeight();
+	SetScrollPosition(XUIPoint(0, nScroll));
 }
 
 void XUIScrollPanel::onMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
@@ -146,7 +145,7 @@ void XUIScrollPanel::onMouseButtonPressed(const XUIPoint& Point, unsigned short 
 
 	if(Point.x<nBarLeft || Point.x>=nBarLeft+nBarWidth) return;
 	if(Point.y<GetClientTop() || Point.y>=GetClientHeight()) return;
-	m_nCaptureScroll = GetScroll().y;
+	m_nCaptureScroll = GetScrollPosition().y;
 	m_nCaptureY = Point.y;
 
 	GetXUI()->SetCapture(this, true);
