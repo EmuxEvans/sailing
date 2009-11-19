@@ -4,6 +4,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdio.h>
+#include <assert.h>
 
 #include "XUIWidget.h"
 #include "XUIDevice.h"
@@ -316,27 +317,25 @@ error:
 	return res;
 }
 
-bool XUIDeviceGL::Render(XUIWidget* pWidget)
+void XUIDeviceGL::RenderBegin()
 {
-	m_nScissors = 0;
-	m_rx = m_ry = 0;
 	m_nViewX = 0;
 	m_nViewY = 0;
 	m_nViewWidth  = m_nWidth;
 	m_nViewHeight = m_nHeight;
+	m_nScissors = 0;
 	glEnable(GL_SCISSOR_TEST);
 	glScissor(m_nViewX, m_nViewY, m_nViewWidth, m_nViewHeight);
-	XUIDevice::InternalRender(pWidget);
+}
+
+void XUIDeviceGL::RenderEnd()
+{
 	glDisable(GL_SCISSOR_TEST);
 	assert(m_nScissors==0);
-	return true;
 }
 
 void XUIDeviceGL::OnCmdRect(int x, int y, int w, int h, int r, XUIColor color)
 {
-	x += m_rx;
-	y += m_ry;
-
 	if(r==0) {
 		drawRect((float)x+0.5f, (float)y+0.5f, (float)w-1, (float)h-1, 1.0f, color);
 	} else {
@@ -346,9 +345,6 @@ void XUIDeviceGL::OnCmdRect(int x, int y, int w, int h, int r, XUIColor color)
 
 void XUIDeviceGL::OnCmdTriangle(int x, int y, int w, int h, int d, XUIColor color)
 {
-	x += m_rx;
-	y += m_ry;
-
 	switch(d) {
 	case 1:
 		{
@@ -375,48 +371,29 @@ void XUIDeviceGL::OnCmdTriangle(int x, int y, int w, int h, int d, XUIColor colo
 
 void XUIDeviceGL::OnCmdText(int x, int y, int align, XUIColor color, const char* text)
 {
-	x += m_rx;
-	y += m_ry;
-
 	drawText((float)x, (float)y, text, align, color);
 }
 
 void XUIDeviceGL::OnCmdBeginScissor(int x, int y, int w, int h)
 {
-	if(w>=0) {
-		m_Scissors[m_nScissors].view = true;
-		m_Scissors[m_nScissors].x = m_nViewX;
-		m_Scissors[m_nScissors].y = m_nViewY;
-		m_Scissors[m_nScissors].w = m_nViewWidth;
-		m_Scissors[m_nScissors].h = m_nViewHeight;
-		m_nViewX = m_rx + x;
-		m_nViewY = m_ry + y;
-		m_nViewWidth = w;
-		m_nViewHeight = h;
-
-		glScissor(m_nViewX, m_nHeight-m_nViewY-m_nViewHeight, m_nViewWidth, m_nViewHeight);
-	} else {
-		m_Scissors[m_nScissors].view = false;
-		m_Scissors[m_nScissors].x = x;
-		m_Scissors[m_nScissors].y = y;
-		m_rx += x;
-		m_ry += y;
-	}
+	m_Scissors[m_nScissors].x = m_nViewX;
+	m_Scissors[m_nScissors].y = m_nViewY;
+	m_Scissors[m_nScissors].w = m_nViewWidth;
+	m_Scissors[m_nScissors].h = m_nViewHeight;
+	m_nViewX = x;
+	m_nViewY = y;
+	m_nViewWidth = w;
+	m_nViewHeight = h;
 	m_nScissors++;
+	glScissor(m_nViewX, m_nHeight-m_nViewY-m_nViewHeight, m_nViewWidth, m_nViewHeight);
 }
 
 void XUIDeviceGL::OnCmdEndScissor()
 {
 	m_nScissors--;
-	if(m_Scissors[m_nScissors].view) {
-		glScissor(m_Scissors[m_nScissors].x, m_Scissors[m_nScissors].y, m_Scissors[m_nScissors].w, m_Scissors[m_nScissors].h);
-		m_nViewX = m_Scissors[m_nScissors].x;
-		m_nViewY = m_Scissors[m_nScissors].y;
-		m_nViewWidth = m_Scissors[m_nScissors].w;
-		m_nViewHeight = m_Scissors[m_nScissors].h;
-//		glScissor(m_nViewX, m_nHeight-m_nViewY-m_nViewHeight, m_nViewWidth, m_nViewHeight);
-	} else {
-		m_rx -= m_Scissors[m_nScissors].x;
-		m_ry -= m_Scissors[m_nScissors].y;
-	}
+	m_nViewX = m_Scissors[m_nScissors].x;
+	m_nViewY = m_Scissors[m_nScissors].y;
+	m_nViewWidth = m_Scissors[m_nScissors].w;
+	m_nViewHeight = m_Scissors[m_nScissors].h;
+	glScissor(m_nViewX, m_nHeight-m_nViewY-m_nViewHeight, m_nViewWidth, m_nViewHeight);
 }

@@ -17,7 +17,7 @@
 	}													\
 }
 
-XUIWidget::XUIWidget()
+XUIWidget::XUIWidget() : m_Scroll(0, 0)
 {
 	m_pParent = NULL;
 	m_pNext = NULL;
@@ -108,8 +108,12 @@ XUIPoint& XUIWidget::RootToWidget(const XUIPoint& In, XUIPoint& Out)
 	XUIPoint P = In;
 	XUIWidget* pWidget = this;
 	while(pWidget) {
-		P.x -= pWidget->m_nLeft + (pWidget==this?0:pWidget->m_nClientLeft);
-		P.y -= pWidget->m_nTop  + (pWidget==this?0:pWidget->m_nClientTop);
+		P.x -= pWidget->m_nLeft;
+		P.y -= pWidget->m_nTop;
+		if(pWidget!=this) {
+			P.x -= pWidget->m_nClientLeft + pWidget->m_Scroll.x;
+			P.y -= pWidget->m_nClientTop + pWidget->m_Scroll.y;
+		}
 		pWidget = pWidget->GetParent();
 	}
 	Out = P;
@@ -123,6 +127,10 @@ XUIPoint& XUIWidget::WidgetToRoot(const XUIPoint& In, XUIPoint& Out)
 	while(pWidget) {
 		P.x += pWidget->m_nLeft + (pWidget==this?0:pWidget->m_nClientLeft);
 		P.y += pWidget->m_nTop  + (pWidget==this?0:pWidget->m_nClientTop);
+		if(pWidget!=this) {
+			P.x += pWidget->m_nClientLeft + pWidget->m_Scroll.x;
+			P.y += pWidget->m_nClientTop + pWidget->m_Scroll.y;
+		}
 		pWidget = pWidget->GetParent();
 	}
 	Out = P;
@@ -157,11 +165,16 @@ void XUIWidget::SetClientArea(int nLeft, int nTop, int nRight, int nBottom)
 	m_nClientBottom = nBottom;
 }
 
+void XUIWidget::SetScroll(const XUIPoint& Scroll)
+{
+	m_Scroll = Scroll;
+}
+
 void XUIWidget::onRender(XUIDevice* pDevice)
 {
 	XUIWidget* pWidget = GetFirstChild();
 
-	pDevice->AddBeginScissor(m_nClientLeft, m_nClientTop);
+	pDevice->AddBeginScissor(m_nClientLeft-m_Scroll.x, m_nClientTop-m_Scroll.y);
 	while(pWidget!=NULL) {
 		pDevice->AddBeginScissor(pWidget->m_nLeft, pWidget->m_nTop);
 		pWidget->onRender(pDevice);
@@ -226,8 +239,7 @@ void XUIWidget::onKeyChar(unsigned short nKey, unsigned int Char)
 XUIWidgetRoot::XUIWidgetRoot(XUI* pXUI)
 {
 	m_pXUI = pXUI;
-	m_nLeft = 0;
-	m_nTop = 0;
+	SetWidgetPosition(0, 0);
 }
 
 XUIWidgetRoot::~XUIWidgetRoot()
@@ -253,8 +265,8 @@ XUIWidget* XUI::GetWidget(const XUIPoint& Point)
 		P.x -= pWidget->m_nLeft;
 		P.y -= pWidget->m_nTop;
 		if(P.x>=0 && P.y>=0 && P.x<pWidget->m_nWidth && P.y<pWidget->m_nHeight) {
-			P.x -= pWidget->m_nClientLeft;
-			P.y -= pWidget->m_nClientTop;
+			P.x -= pWidget->m_nClientLeft - pWidget->m_Scroll.x;
+			P.y -= pWidget->m_nClientTop - pWidget->m_Scroll.y;
 			pReturn = pWidget;
 			pWidget = pWidget->GetLastChild();
 			continue;

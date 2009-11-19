@@ -133,6 +133,9 @@ public:
 	void SetWidgetPosition(int nLeft, int nTop);
 	void SetWidgetSize(int nWidth, int nHeight);
 	void SetClientArea(int nLeft, int nTop, int nRight, int nBottom);
+	void SetScroll(const XUIPoint& Scroll);
+	void SetScrollX(int x) { m_Scroll.x = x; }
+	void SetScrollY(int y) { m_Scroll.y = y; }
 
 	int GetWidgetWidth() { return m_nWidth; }
 	int GetWidgetHeight() { return m_nHeight; }
@@ -140,6 +143,7 @@ public:
 	int GetClientTop() { return m_nClientTop; }
 	int GetClientWidth() { return m_nWidth-m_nClientLeft-m_nClientRight; };
 	int GetClientHeight() { return m_nHeight-m_nClientTop-m_nClientBottom; };
+	const XUIPoint& GetScroll() { return m_Scroll; }
 
 protected:
 
@@ -159,6 +163,7 @@ protected:
 	virtual void onKeyReleased(unsigned short nKey);
 	virtual void onKeyChar(unsigned short nKey, unsigned int Char);
 
+private:
 	XUIWidget* m_pParent;
 	XUIWidget* m_pNext;
 	XUIWidget* m_pPrev;
@@ -168,6 +173,7 @@ protected:
 
 	int m_nLeft, m_nTop, m_nWidth, m_nHeight;
 	int m_nClientLeft, m_nClientTop, m_nClientRight, m_nClientBottom;
+	XUIPoint m_Scroll;
 };
 
 class XUIWidgetRoot : public XUIWidget
