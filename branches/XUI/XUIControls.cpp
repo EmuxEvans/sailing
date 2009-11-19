@@ -33,12 +33,12 @@ XUIButton::~XUIButton()
 
 void XUIButton::onRender(XUIDevice* pDevice)
 {
-	pDevice->AddRect(0, 0, m_nWidth, m_nHeight, m_nHeight/2-1, XUI_RGBA(128, 128, 128, IsEnable()&&m_bOver?196:96));
+	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), GetWidgetHeight()/2-1, XUI_RGBA(128, 128, 128, IsEnable()&&m_bOver?196:96));
 
 	if(IsEnable())
-		pDevice->AddText(m_nWidth/2, m_nHeight/2-TEXT_HEIGHT/2-1, 1, m_bOver?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_pText);
+		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, 1, m_bOver?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_pText);
 	else
-		pDevice->AddText(m_nWidth/2, m_nHeight/2-TEXT_HEIGHT/2-1, 1, XUI_RGBA(128,128,128,200), m_pText);
+		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, 1, XUI_RGBA(128,128,128,200), m_pText);
 }
 
 XUILabel::XUILabel()
@@ -58,16 +58,14 @@ XUILabel::~XUILabel()
 
 void XUILabel::onRender(XUIDevice* pDevice)
 {
-	pDevice->AddRect(0, 0, m_nWidth, m_nHeight, 0, XUI_RGBA(128,128,128, 196));
-	pDevice->AddText(m_nWidth/2, m_nHeight/2-TEXT_HEIGHT/2, 1, XUI_RGBA(250, 250, 250, 255), m_pText);
+	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 0, XUI_RGBA(128,128,128, 196));
+	pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2, 1, XUI_RGBA(250, 250, 250, 255), m_pText);
 }
 
 XUIScrollPanel::XUIScrollPanel()
 {
 	m_pText = NULL;
 	m_nScrollCount = 0;
-	m_nScroll = 0;
-	m_nCaptureScroll = -1;
 	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, AREA_HEADER-SCROLL_AREA_PADDING);
 }
 
@@ -76,8 +74,6 @@ XUIScrollPanel::XUIScrollPanel(const char* pText, int nLeft, int nTop, int nWidt
 	SetText(pText);
 	SetWidgetRect(nLeft, nTop, nWidth, nHeight);
 	m_nScrollCount = 0;
-	m_nScroll = 0;
-	m_nCaptureScroll = -1;
 	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, AREA_HEADER-SCROLL_AREA_PADDING);
 }
 
@@ -96,7 +92,7 @@ bool XUIScrollPanel::AddWidget(XUIWidget* pWidget)
 
 void XUIScrollPanel::onRender(XUIDevice* pDevice)
 {
-	pDevice->AddRect(0, 0, m_nWidth, m_nHeight, 6, XUI_RGBA(0,0,0,192));
+	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,0,0,192));
 	pDevice->AddText(AREA_HEADER/2, AREA_HEADER/2-TEXT_HEIGHT/2, 0, XUI_RGBA(255,255,255,128), m_pText);
 
 	int nBarStart, nBarHeight;
@@ -104,12 +100,12 @@ void XUIScrollPanel::onRender(XUIDevice* pDevice)
 		nBarStart = 0;
 		nBarHeight = GetClientHeight();
 	} else {
-		nBarStart = (int)((float)m_nScroll/(float)m_nScrollCount * GetClientHeight());
-		nBarHeight = (int)((float)(m_nScroll+GetClientHeight())/(float)m_nScrollCount * GetClientHeight()) - nBarStart;
+		nBarStart = (int)((float)GetScroll().y/(float)m_nScrollCount * GetClientHeight());
+		nBarHeight = (int)((float)(GetScroll().y+GetClientHeight())/(float)m_nScrollCount * GetClientHeight()) - nBarStart;
 		if(nBarHeight>GetClientHeight()) nBarHeight = GetClientHeight();
 	}
-	nBarStart = (int)((float)m_nScroll/(float)m_nScrollCount * GetClientHeight());
-	nBarHeight = (int)((float)(m_nScroll+GetClientHeight())/(float)m_nScrollCount * GetClientHeight()) - nBarStart;
+	nBarStart = (int)((float)GetScroll().y/(float)m_nScrollCount * GetClientHeight());
+	nBarHeight = (int)((float)(GetScroll().y+GetClientHeight())/(float)m_nScrollCount * GetClientHeight()) - nBarStart;
 	if(nBarStart+nBarHeight>GetClientHeight()) nBarHeight = GetClientHeight() - nBarStart;
 
 	int nBarLeft, nBarWidth;
@@ -120,9 +116,7 @@ void XUIScrollPanel::onRender(XUIDevice* pDevice)
 	pDevice->AddRect(nBarLeft, GetClientTop()+nBarStart, nBarWidth, nBarHeight, nBarWidth/2-1, XUI_RGBA(255,255,255,200));
 
 	pDevice->AddBeginScissor(GetClientLeft(), GetClientTop(), GetClientWidth(), GetClientHeight());
-	pDevice->AddBeginScissor(0, -m_nScroll);
 	XUIWidget::onRender(pDevice);
-	pDevice->AddEndScissor();
 	pDevice->AddEndScissor();
 }
 
@@ -130,16 +124,18 @@ void XUIScrollPanel::onMouseMove(const XUIPoint& Point)
 {
 	if(m_nCaptureScroll<0) return;
 
-	m_nScroll = m_nCaptureScroll + (int)(((float)Point.y-m_nCaptureY)/GetClientHeight()*m_nScrollCount);
-	if(m_nScroll<0) m_nScroll = 0;
-	if(m_nScroll+GetClientHeight()>m_nScrollCount) m_nScroll = m_nScrollCount - GetClientHeight();
+	int nScroll = m_nCaptureScroll + (int)(((float)Point.y-m_nCaptureY)/GetClientHeight()*m_nScrollCount);
+	if(nScroll<0) nScroll = 0;
+	if(nScroll+GetClientHeight()>m_nScrollCount) nScroll = m_nScrollCount - GetClientHeight();
+	SetScrollY(nScroll);
 }
 
 void XUIScrollPanel::onMouseWheel(const XUIPoint& Point, int _rel)
 {
-	m_nScroll += _rel;
-	if(m_nScroll<0) m_nScroll = 0;
-	if(m_nScroll+GetClientHeight()>m_nScrollCount) m_nScroll = m_nScrollCount - GetClientHeight();
+	int nScroll = GetScroll().x + _rel;
+	if(nScroll<0) nScroll = 0;
+	if(nScroll+GetClientHeight()>m_nScrollCount) nScroll = m_nScrollCount - GetClientHeight();
+	SetScrollY(nScroll);
 }
 
 void XUIScrollPanel::onMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
@@ -150,7 +146,7 @@ void XUIScrollPanel::onMouseButtonPressed(const XUIPoint& Point, unsigned short 
 
 	if(Point.x<nBarLeft || Point.x>=nBarLeft+nBarWidth) return;
 	if(Point.y<GetClientTop() || Point.y>=GetClientHeight()) return;
-	m_nCaptureScroll = m_nScroll;
+	m_nCaptureScroll = GetScroll().y;
 	m_nCaptureY = Point.y;
 
 	GetXUI()->SetCapture(this, true);

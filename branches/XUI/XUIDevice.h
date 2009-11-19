@@ -12,7 +12,7 @@ public:
 	XUIDevice();
 	virtual ~XUIDevice();
 
-	virtual bool Render(XUIWidget* pWidget) = 0;
+	bool Render(XUIWidget* pWidget);
 
 	bool AddRect(int x, int y, int w, int h, int r, XUIColor color);
 	bool AddTriangle(int x, int y, int w, int h, int d, XUIColor color);
@@ -21,11 +21,20 @@ public:
 	bool AddEndScissor();
 
 protected:
-	void InternalRender(XUIWidget* pWidget);
+	virtual void RenderBegin() = 0;
+	virtual void RenderEnd() = 0;
 
 	virtual void OnCmdRect(int x, int y, int w, int h, int r, XUIColor color) = 0;
 	virtual void OnCmdTriangle(int x, int y, int w, int h, int d, XUIColor color) = 0;
 	virtual void OnCmdText(int x, int y, int align, XUIColor color, const char* text) = 0;
 	virtual void OnCmdBeginScissor(int x, int y, int w, int h) = 0;
 	virtual void OnCmdEndScissor() = 0;
+
+private:
+	struct {
+		bool hard;
+		int x, y;
+	} m_Scissors[20];
+	int m_nScissors;
+	int m_rx, m_ry;
 };
