@@ -273,6 +273,34 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 		_gXUI.MouseMove(XUIPoint(LOWORD(lParam), HIWORD(lParam)));
 		break;
+	case WM_LBUTTONDOWN:
+		_gXUI.MouseButtonPressed(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
+		break;
+	case WM_RBUTTONDOWN:
+		_gXUI.MouseButtonPressed(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_RBUTTON);
+		break;
+	case WM_MBUTTONDOWN:
+		_gXUI.MouseButtonPressed(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
+		break;
+	case WM_LBUTTONUP:
+		_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
+		break;
+	case WM_RBUTTONUP:
+		_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_RBUTTON);
+		break;
+	case WM_MBUTTONUP:
+		_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
+		break;
+	case WM_LBUTTONDBLCLK:
+		_gXUI.MouseButtonDoubleClick(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
+		break;
+	case WM_RBUTTONDBLCLK:
+		_gXUI.MouseButtonDoubleClick(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_RBUTTON);
+		break;
+	case WM_MBUTTONDBLCLK:
+		_gXUI.MouseButtonDoubleClick(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
+		break;
+
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -333,6 +361,38 @@ void DoTick()
 	static bool bInit = false;
 	if(!bInit) {
 		XUIScrollPanel* pPanel = new XUIScrollPanel("PANEL", 10, 10, 200, 500);
+		pPanel->AddWidget(new XUIButton("B1", 10,  10, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B2", 10,  60, 100, 40));
+		pPanel->AddWidget(new XUIButton("B321", 10, 110, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B4", 10, 160, 100, 40));
+		pPanel->AddWidget(new XUIButton("B1", 10,  10, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B2", 10,  60, 100, 40));
+		pPanel->AddWidget(new XUIButton("B321", 10, 110, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B4", 10, 160, 100, 40));
+		pPanel->AddWidget(new XUIButton("B1", 10,  10, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B2", 10,  60, 100, 40));
+		pPanel->AddWidget(new XUIButton("B321", 10, 110, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B4", 10, 160, 100, 40));
+		pPanel->AddWidget(new XUIButton("B1", 10,  10, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B2", 10,  60, 100, 40));
+		pPanel->AddWidget(new XUIButton("B321", 10, 110, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B4", 10, 160, 100, 40));
+		pPanel->AddWidget(new XUIButton("B1", 10,  10, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B2", 10,  60, 100, 40));
+		pPanel->AddWidget(new XUIButton("B321", 10, 110, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B4", 10, 160, 100, 40));
+		pPanel->AddWidget(new XUIButton("B1", 10,  10, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B2", 10,  60, 100, 40));
+		pPanel->AddWidget(new XUIButton("B321", 10, 110, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B4", 10, 160, 100, 40));
+		pPanel->AddWidget(new XUIButton("B1", 10,  10, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B2", 10,  60, 100, 40));
+		pPanel->AddWidget(new XUIButton("B321", 10, 110, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B4", 10, 160, 100, 40));
+		pPanel->AddWidget(new XUIButton("B1", 10,  10, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B2", 10,  60, 100, 40));
+		pPanel->AddWidget(new XUIButton("B321", 10, 110, 100, 20));
+		pPanel->AddWidget(new XUILabel ("B4", 10, 160, 100, 40));
 		pPanel->AddWidget(new XUIButton("B1", 10,  10, 100, 20));
 		pPanel->AddWidget(new XUILabel ("B2", 10,  60, 100, 40));
 		pPanel->AddWidget(new XUIButton("B321", 10, 110, 100, 20));

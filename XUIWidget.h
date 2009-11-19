@@ -15,6 +15,12 @@ public:
 	int x, y;
 };
 
+namespace XUI_INPUT {
+	static const unsigned short MOUSE_LBUTTON = 0x1;
+	static const unsigned short MOUSE_RBUTTON = 0x2;
+	static const unsigned short MOUSE_MBUTTON = 0x4;
+};
+
 class XUIRect
 {
 public:
@@ -147,8 +153,8 @@ protected:
 	virtual void onMouseWheel(const XUIPoint& Point, int _rel);
 	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
 	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
-	virtual void onMouseButtonClick(const XUIPoint& Point);
-	virtual void onMouseButtonDoubleClick(const XUIPoint& Point);
+	virtual void onMouseButtonClick(const XUIPoint& Point, unsigned short nId);
+	virtual void onMouseButtonDoubleClick(const XUIPoint& Point, unsigned short nId);
 	virtual void onKeyPressed(unsigned short nKey);
 	virtual void onKeyReleased(unsigned short nKey);
 	virtual void onKeyChar(unsigned short nKey, unsigned int Char);
@@ -196,8 +202,8 @@ public:
 	void MouseWheel(const XUIPoint& Point, int _rel);
 	void MouseButtonPressed(const XUIPoint& Point, unsigned short nId);
 	void MouseButtonReleased(const XUIPoint& Point, unsigned short nId);
-	void MouseButtonClick(const XUIPoint& Point);
-	void MouseButtonDoubleClick(const XUIPoint& Point);
+	void MouseButtonClick(const XUIPoint& Point, unsigned short nId);
+	void MouseButtonDoubleClick(const XUIPoint& Point, unsigned short nId);
 	void KeyPressed(unsigned short nKey);
 	void KeyReleased(unsigned short nKey);
 	void KeyChar(unsigned short nKey, unsigned int Char);

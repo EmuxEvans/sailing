@@ -203,11 +203,11 @@ void XUIWidget::onMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 {
 }
 
-void XUIWidget::onMouseButtonClick(const XUIPoint& Point)
+void XUIWidget::onMouseButtonClick(const XUIPoint& Point, unsigned short nId)
 {
 }
 
-void XUIWidget::onMouseButtonDoubleClick(const XUIPoint& Point)
+void XUIWidget::onMouseButtonDoubleClick(const XUIPoint& Point, unsigned short nId)
 {
 }
 
@@ -345,21 +345,21 @@ void XUI::MouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 	}
 }
 
-void XUI::MouseButtonClick(const XUIPoint& Point)
+void XUI::MouseButtonClick(const XUIPoint& Point, unsigned short nId)
 {
 	XUIWidget* pWidget = GetWidget(Point);
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseButtonClick(pWidget->RootToWidget(Point, wp));
+		pWidget->onMouseButtonClick(pWidget->RootToWidget(Point, wp), nId);
 	}
 }
 
-void XUI::MouseButtonDoubleClick(const XUIPoint& Point)
+void XUI::MouseButtonDoubleClick(const XUIPoint& Point, unsigned short nId)
 {
 	XUIWidget* pWidget = GetWidget(Point);
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseButtonDoubleClick(pWidget->RootToWidget(Point, wp));
+		pWidget->onMouseButtonDoubleClick(pWidget->RootToWidget(Point, wp), nId);
 	}
 }
 
