@@ -378,6 +378,7 @@ int DrawScene()
 
 int DrawUI()
 {
-	_gXUI.Render(&_gXUIDevice);
+	_gXUIDevice.Render(_gXUI.GetRoot());
+//	_gXUI.Render(&_gXUIDevice);
 	return 0;
 }

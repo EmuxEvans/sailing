@@ -262,7 +262,8 @@ XUIDeviceGL::~XUIDeviceGL()
 
 bool XUIDeviceGL::ResetDevice(int nWidth, int nHeight)
 {
-	XUIDevice::ResetDevice(nWidth, nHeight);
+	m_nWidth = nWidth;
+	m_nHeight = nHeight;
 
 	for (unsigned i = 0; i < CIRCLE_VERTS; ++i)
 	{
@@ -319,7 +320,17 @@ bool XUIDeviceGL::Render(XUIWidget* pWidget)
 {
 	m_nScissors = 0;
 	m_rx = m_ry = 0;
+	float pv[4];
+	glGetFloatv(GL_SCISSOR_BOX, pv);
+	m_nViewX = (int)pv[0];
+	m_nViewY = (int)pv[1];
+	m_nViewWidth  = (int)pv[2];
+	m_nViewHeight = (int)pv[3];
+
+	glScissor(m_nViewX, m_nViewY, m_nViewWidth, m_nViewHeight);
+	glEnable(GL_SCISSOR_TEST);
 	XUIDevice::InternalRender(pWidget);
+	glDisable(GL_SCISSOR_TEST);
 	assert(m_nScissors==0);
 	return true;
 }
@@ -375,22 +386,24 @@ void XUIDeviceGL::OnCmdText(int x, int y, int align, XUIColor color, const char*
 
 void XUIDeviceGL::OnCmdBeginScissor(int x, int y, int w, int h)
 {
-	m_rx += x;
-	m_ry += y;
-	m_Scissors[m_nScissors].x = x;
-	m_Scissors[m_nScissors].y = y;
 	if(w>=0) {
 		m_Scissors[m_nScissors].view = true;
-		m_Scissors[m_nScissors].l = m_nViewX;
-		m_Scissors[m_nScissors].t = m_nViewY;
+		m_Scissors[m_nScissors].x = m_nViewX;
+		m_Scissors[m_nScissors].y = m_nViewY;
 		m_Scissors[m_nScissors].w = m_nViewWidth;
 		m_Scissors[m_nScissors].h = m_nViewHeight;
-		m_nViewX = m_rx;
-		m_nViewY = m_ry;
+		m_nViewX = m_rx + x;
+		m_nViewY = m_ry + y;
 		m_nViewWidth = w;
 		m_nViewHeight = h;
+
+		glScissor(m_nViewX, m_nHeight-m_nViewY-m_nViewHeight, m_nViewWidth, m_nViewHeight);
 	} else {
 		m_Scissors[m_nScissors].view = false;
+		m_Scissors[m_nScissors].x = x;
+		m_Scissors[m_nScissors].y = y;
+		m_rx += x;
+		m_ry += y;
 	}
 	m_nScissors++;
 }
@@ -398,8 +411,15 @@ void XUIDeviceGL::OnCmdBeginScissor(int x, int y, int w, int h)
 void XUIDeviceGL::OnCmdEndScissor()
 {
 	m_nScissors--;
-	m_rx -= m_Scissors[m_nScissors].x;
-	m_ry -= m_Scissors[m_nScissors].y;
 	if(m_Scissors[m_nScissors].view) {
+		glScissor(m_Scissors[m_nScissors].x, m_Scissors[m_nScissors].y, m_Scissors[m_nScissors].w, m_Scissors[m_nScissors].h);
+		m_nViewX = m_Scissors[m_nScissors].x;
+		m_nViewY = m_Scissors[m_nScissors].y;
+		m_nViewWidth = m_Scissors[m_nScissors].w;
+		m_nViewHeight = m_Scissors[m_nScissors].h;
+		glScissor(m_nViewX, m_nHeight-m_nViewY-m_nViewHeight, m_nViewWidth, m_nViewHeight);
+	} else {
+		m_rx -= m_Scissors[m_nScissors].x;
+		m_ry -= m_Scissors[m_nScissors].y;
 	}
 }

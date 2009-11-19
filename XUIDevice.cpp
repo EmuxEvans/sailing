@@ -11,11 +11,6 @@ XUIDevice::~XUIDevice()
 {
 }
 
-bool XUIDevice::ResetDevice(int nWidth, int nHeight)
-{
-	return true;
-}
-
 bool XUIDevice::AddRect(int x, int y, int w, int h, int r, XUIColor color)
 {
 	OnCmdRect(x, y, w, h, r, color);

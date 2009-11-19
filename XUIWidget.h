@@ -130,7 +130,7 @@ public:
 
 	int GetWidgetWidth() { return m_nWidth; }
 	int GetWidgetHeight() { return m_nHeight; }
-	int GetClientLeft() { return m_nClientTop; }
+	int GetClientLeft() { return m_nClientLeft; }
 	int GetClientTop() { return m_nClientTop; }
 	int GetClientWidth() { return m_nWidth-m_nClientLeft-m_nClientRight; };
 	int GetClientHeight() { return m_nHeight-m_nClientTop-m_nClientBottom; };
@@ -160,7 +160,6 @@ protected:
 	XUIWidget* m_pLastChild;
 	bool m_bDelete, m_bEnable, m_bVisable;
 
-public:
 	int m_nLeft, m_nTop, m_nWidth, m_nHeight;
 	int m_nClientLeft, m_nClientTop, m_nClientRight, m_nClientBottom;
 };
