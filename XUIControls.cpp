@@ -65,6 +65,7 @@ void XUILabel::onRender(XUIDevice* pDevice)
 XUIScrollPanel::XUIScrollPanel()
 {
 	m_pText = NULL;
+	m_nWidgetsHeight = 0;
 	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, AREA_HEADER-SCROLL_AREA_PADDING);
 	EnableScroll(true);
 }
@@ -72,6 +73,7 @@ XUIScrollPanel::XUIScrollPanel()
 XUIScrollPanel::XUIScrollPanel(const char* pText, int nLeft, int nTop, int nWidth, int nHeight)
 {
 	SetText(pText);
+	m_nWidgetsHeight = 0;
 	SetWidgetRect(nLeft, nTop, nWidth, nHeight);
 	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, AREA_HEADER-SCROLL_AREA_PADDING);
 	EnableScroll(true);
@@ -83,9 +85,11 @@ XUIScrollPanel::~XUIScrollPanel()
 
 bool XUIScrollPanel::AddWidget(XUIWidget* pWidget)
 {
-	pWidget->SetWidgetRect(0, GetScrollHeight(), GetClientWidth(), pWidget->GetWidgetHeight());
+	if(m_nWidgetsHeight) m_nWidgetsHeight += INTEND_SIZE;
+	pWidget->SetWidgetRect(0, m_nWidgetsHeight, GetClientWidth(), pWidget->GetWidgetHeight());
 	AddChild(pWidget);
-	SetScrollSize(GetClientWidth(), GetScrollHeight()+(GetScrollHeight()>0?INTEND_SIZE:0)+pWidget->GetWidgetHeight());
+	m_nWidgetsHeight += pWidget->GetWidgetHeight();
+	SetScrollSize(GetClientWidth(), m_nWidgetsHeight);
 	return true;
 }
 
