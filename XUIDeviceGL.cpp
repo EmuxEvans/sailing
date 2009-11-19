@@ -320,15 +320,12 @@ bool XUIDeviceGL::Render(XUIWidget* pWidget)
 {
 	m_nScissors = 0;
 	m_rx = m_ry = 0;
-	float pv[4];
-	glGetFloatv(GL_SCISSOR_BOX, pv);
-	m_nViewX = (int)pv[0];
-	m_nViewY = (int)pv[1];
-	m_nViewWidth  = (int)pv[2];
-	m_nViewHeight = (int)pv[3];
-
-	glScissor(m_nViewX, m_nViewY, m_nViewWidth, m_nViewHeight);
+	m_nViewX = 0;
+	m_nViewY = 0;
+	m_nViewWidth  = m_nWidth;
+	m_nViewHeight = m_nHeight;
 	glEnable(GL_SCISSOR_TEST);
+	glScissor(m_nViewX, m_nViewY, m_nViewWidth, m_nViewHeight);
 	XUIDevice::InternalRender(pWidget);
 	glDisable(GL_SCISSOR_TEST);
 	assert(m_nScissors==0);
@@ -417,7 +414,7 @@ void XUIDeviceGL::OnCmdEndScissor()
 		m_nViewY = m_Scissors[m_nScissors].y;
 		m_nViewWidth = m_Scissors[m_nScissors].w;
 		m_nViewHeight = m_Scissors[m_nScissors].h;
-		glScissor(m_nViewX, m_nHeight-m_nViewY-m_nViewHeight, m_nViewWidth, m_nViewHeight);
+//		glScissor(m_nViewX, m_nHeight-m_nViewY-m_nViewHeight, m_nViewWidth, m_nViewHeight);
 	} else {
 		m_rx -= m_Scissors[m_nScissors].x;
 		m_ry -= m_Scissors[m_nScissors].y;

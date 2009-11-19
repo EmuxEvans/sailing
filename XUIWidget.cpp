@@ -411,7 +411,7 @@ void XUI::EndFrame()
 		}
 
 		if(pWidget->GetLastChild()) {
-			pStack[nStack++] = pWidget->GetLastChild();
+			pStack[++nStack] = pWidget->GetLastChild();
 		}
 	}
 }
@@ -423,5 +423,5 @@ void XUI::Render(XUIDevice* pDevice)
 
 void XUI::Reset(int nWidth, int nHeight)
 {
-	m_pRoot->SetWidgetRect(0, 0, nWidth, nHeight);
+	m_pRoot->SetWidgetSize(nWidth, nHeight);
 }
