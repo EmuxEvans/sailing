@@ -12,7 +12,6 @@ public:
 	XUIDevice();
 	virtual ~XUIDevice();
 
-	virtual bool ResetDevice(int nWidth, int nHeight);
 	virtual bool Render(XUIWidget* pWidget) = 0;
 
 	bool AddRect(int x, int y, int w, int h, int r, XUIColor color);

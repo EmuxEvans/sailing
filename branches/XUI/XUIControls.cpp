@@ -86,9 +86,9 @@ XUIScrollPanel::~XUIScrollPanel()
 bool XUIScrollPanel::AddWidget(XUIWidget* pWidget)
 {
 	if(m_nScrollCount>0) m_nScrollCount += INTEND_SIZE;
-	pWidget->SetWidgetRect(0, m_nScrollCount, m_nWidth-SCROLL_AREA_PADDING*4, pWidget->m_nHeight);
+	pWidget->SetWidgetRect(0, m_nScrollCount, GetClientWidth(), pWidget->GetWidgetHeight());
 	AddChild(pWidget);
-	m_nScrollCount += pWidget->m_nHeight;
+	m_nScrollCount += pWidget->GetWidgetHeight();
 	return true;
 }
 
@@ -117,7 +117,9 @@ void XUIScrollPanel::onRender(XUIDevice* pDevice)
 	pDevice->AddRect(nBarLeft, GetClientTop(), nBarWidth, GetClientHeight(), nBarWidth/2-1, XUI_RGBA(0,0,0,255));
 	pDevice->AddRect(nBarLeft, GetClientTop()+nBarStart, nBarWidth, nBarHeight, nBarWidth/2-1, XUI_RGBA(255,255,255,200));
 
+	pDevice->AddBeginScissor(GetClientLeft(), GetClientTop(), GetClientWidth(), GetClientHeight());
 	XUIWidget::onRender(pDevice);
+	pDevice->AddEndScissor();
 }
 
 void XUIScrollPanel::MouseWheel(const XUIPoint& Point, int _rel)

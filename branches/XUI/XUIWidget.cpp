@@ -161,9 +161,9 @@ void XUIWidget::onRender(XUIDevice* pDevice)
 {
 	XUIWidget* pWidget = GetFirstChild();
 
-	pDevice->AddBeginScissor(m_nClientLeft, m_nClientTop, m_nWidth-m_nClientRight, m_nHeight-m_nClientBottom);
+	pDevice->AddBeginScissor(m_nClientLeft, m_nClientTop);
 	while(pWidget!=NULL) {
-		pDevice->AddBeginScissor(pWidget->m_nLeft, pWidget->m_nTop, pWidget->m_nWidth, pWidget->m_nHeight);
+		pDevice->AddBeginScissor(pWidget->m_nLeft, pWidget->m_nTop);
 		pWidget->onRender(pDevice);
 		pDevice->AddEndScissor();
 		pWidget = pWidget->GetNext();
