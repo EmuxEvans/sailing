@@ -126,16 +126,13 @@ public:
 	void Enable(bool bEnable=true) { m_bEnable = bEnable; }
 	bool IsEnable();
 
-	XUIPoint& RootToWidget(const XUIPoint& In, XUIPoint& Out);
-	XUIPoint& WidgetToRoot(const XUIPoint& In, XUIPoint& Out);
+	XUIPoint& ScreenToWidget(const XUIPoint& In, XUIPoint& Out);
+	XUIPoint& WidgetToScreen(const XUIPoint& In, XUIPoint& Out);
 
 	void SetWidgetRect(int nLeft, int nTop, int nWidth, int nHeight);
 	void SetWidgetPosition(int nLeft, int nTop);
 	void SetWidgetSize(int nWidth, int nHeight);
 	void SetClientArea(int nLeft, int nTop, int nRight, int nBottom);
-	void SetScroll(const XUIPoint& Scroll);
-	void SetScrollX(int x) { m_Scroll.x = x; }
-	void SetScrollY(int y) { m_Scroll.y = y; }
 
 	int GetWidgetWidth() { return m_nWidth; }
 	int GetWidgetHeight() { return m_nHeight; }
@@ -143,7 +140,15 @@ public:
 	int GetClientTop() { return m_nClientTop; }
 	int GetClientWidth() { return m_nWidth-m_nClientLeft-m_nClientRight; };
 	int GetClientHeight() { return m_nHeight-m_nClientTop-m_nClientBottom; };
-	const XUIPoint& GetScroll() { return m_Scroll; }
+
+	void EnableScroll(bool bEnable);
+	void SetScrollPosition(const XUIPoint& Scroll);
+	void SetScrollSize(int nWidth, int nHeight);
+	void AdjustScroll();
+
+	const XUIPoint& GetScrollPosition() { return m_Scroll; }
+	int GetScrollWidth() { return m_nScrollWidth; }
+	int GetScrollHeight() { return m_nScrollHeight; }
 
 protected:
 
@@ -173,7 +178,10 @@ private:
 
 	int m_nLeft, m_nTop, m_nWidth, m_nHeight;
 	int m_nClientLeft, m_nClientTop, m_nClientRight, m_nClientBottom;
+
+	bool m_bScroll;
 	XUIPoint m_Scroll;
+	int m_nScrollWidth, m_nScrollHeight;
 };
 
 class XUIWidgetRoot : public XUIWidget

@@ -57,7 +57,6 @@ protected:
 
 private:
 	const char* m_pText;
-	int m_nScrollCount;
 	int m_nCaptureY, m_nCaptureScroll;
 
 };
