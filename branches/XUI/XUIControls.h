@@ -58,5 +58,6 @@ protected:
 private:
 	const char* m_pText;
 	int m_nCaptureY, m_nCaptureScroll;
+	int m_nWidgetsHeight;
 
 };
