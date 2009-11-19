@@ -67,6 +67,7 @@ XUIScrollPanel::XUIScrollPanel()
 	m_pText = NULL;
 	m_nScrollCount = 0;
 	m_nScroll = 0;
+	m_nCaptureScroll = -1;
 	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, AREA_HEADER-SCROLL_AREA_PADDING);
 }
 
@@ -76,6 +77,7 @@ XUIScrollPanel::XUIScrollPanel(const char* pText, int nLeft, int nTop, int nWidt
 	SetWidgetRect(nLeft, nTop, nWidth, nHeight);
 	m_nScrollCount = 0;
 	m_nScroll = 0;
+	m_nCaptureScroll = -1;
 	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, AREA_HEADER-SCROLL_AREA_PADDING);
 }
 
@@ -118,10 +120,44 @@ void XUIScrollPanel::onRender(XUIDevice* pDevice)
 	pDevice->AddRect(nBarLeft, GetClientTop()+nBarStart, nBarWidth, nBarHeight, nBarWidth/2-1, XUI_RGBA(255,255,255,200));
 
 	pDevice->AddBeginScissor(GetClientLeft(), GetClientTop(), GetClientWidth(), GetClientHeight());
+	pDevice->AddBeginScissor(0, -m_nScroll);
 	XUIWidget::onRender(pDevice);
+	pDevice->AddEndScissor();
 	pDevice->AddEndScissor();
 }
 
-void XUIScrollPanel::MouseWheel(const XUIPoint& Point, int _rel)
+void XUIScrollPanel::onMouseMove(const XUIPoint& Point)
 {
+	if(m_nCaptureScroll<0) return;
+
+	m_nScroll = m_nCaptureScroll + (int)(((float)Point.y-m_nCaptureY)/GetClientHeight()*m_nScrollCount);
+	if(m_nScroll<0) m_nScroll = 0;
+	if(m_nScroll+GetClientHeight()>m_nScrollCount) m_nScroll = m_nScrollCount - GetClientHeight();
+}
+
+void XUIScrollPanel::onMouseWheel(const XUIPoint& Point, int _rel)
+{
+	m_nScroll += _rel;
+	if(m_nScroll<0) m_nScroll = 0;
+	if(m_nScroll+GetClientHeight()>m_nScrollCount) m_nScroll = m_nScrollCount - GetClientHeight();
+}
+
+void XUIScrollPanel::onMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
+{
+	int nBarLeft, nBarWidth;
+	nBarLeft = GetWidgetWidth()-SCROLL_AREA_PADDING*2-SCROLL_AREA_PADDING/2 + 1;
+	nBarWidth = SCROLL_AREA_PADDING*2 - 2;
+
+	if(Point.x<nBarLeft || Point.x>=nBarLeft+nBarWidth) return;
+	if(Point.y<GetClientTop() || Point.y>=GetClientHeight()) return;
+	m_nCaptureScroll = m_nScroll;
+	m_nCaptureY = Point.y;
+
+	GetXUI()->SetCapture(this, true);
+}
+
+void XUIScrollPanel::onMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
+{
+	m_nCaptureScroll = -1;
+	GetXUI()->SetCapture(this, false);
 }
