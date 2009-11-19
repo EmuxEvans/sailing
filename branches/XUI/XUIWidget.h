@@ -104,7 +104,7 @@ class XUIWidget
 	friend class XUI;
 	friend class XUIDevice;
 public:
-	XUIWidget();
+	XUIWidget(bool bManualFree=false);
 	virtual ~XUIWidget();
 
 	XUIWidget* GetParent() { return m_pParent; }
@@ -115,15 +115,15 @@ public:
 
 	void AddChild(XUIWidget* pWidget);
 	void BringToTop();
-	void Destroy() { m_bDelete = true; }
+	void Delete() { m_bDelete = true; }
 
 	XUI* GetXUI();
 	XUIWidgetRoot* GetRoot();
 
-	void Visable(bool bVisable=true) { m_bVisable = bVisable; }
+	void SetVisable(bool bVisable=true) { m_bVisable = bVisable; }
 	bool IsVisable();
 
-	void Enable(bool bEnable=true) { m_bEnable = bEnable; }
+	void SetEnable(bool bEnable=true) { m_bEnable = bEnable; }
 	bool IsEnable();
 
 	XUIPoint& ScreenToWidget(const XUIPoint& In, XUIPoint& Out);
@@ -132,14 +132,11 @@ public:
 	void SetWidgetRect(int nLeft, int nTop, int nWidth, int nHeight);
 	void SetWidgetPosition(int nLeft, int nTop);
 	void SetWidgetSize(int nWidth, int nHeight);
-	void SetClientArea(int nLeft, int nTop, int nRight, int nBottom);
 
+	int GetWidgetLeft() { return m_nLeft; }
+	int GetWidgetTop() { return m_nTop; }
 	int GetWidgetWidth() { return m_nWidth; }
 	int GetWidgetHeight() { return m_nHeight; }
-	int GetClientLeft() { return m_nClientLeft; }
-	int GetClientTop() { return m_nClientTop; }
-	int GetClientWidth() { return m_nWidth-m_nClientLeft-m_nClientRight; };
-	int GetClientHeight() { return m_nHeight-m_nClientTop-m_nClientBottom; };
 
 	void EnableScroll(bool bEnable);
 	void SetScrollPosition(const XUIPoint& Scroll);
@@ -150,7 +147,11 @@ public:
 	int GetScrollWidth() { return m_nScrollWidth; }
 	int GetScrollHeight() { return m_nScrollHeight; }
 
+	void ManualFree() { m_bManualFree = true; }
+
 protected:
+
+	void Destroy();
 
 	virtual void onRender(XUIDevice* pDevice);
 
@@ -168,7 +169,11 @@ protected:
 	virtual void onKeyReleased(unsigned short nKey);
 	virtual void onKeyChar(unsigned short nKey, unsigned int Char);
 
+	virtual void OnWidgetMove(int nLeft, int nTop);
+	virtual void OnSizeChange(int nWidth, int nHeight);
+
 private:
+	bool m_bManualFree;
 	XUIWidget* m_pParent;
 	XUIWidget* m_pNext;
 	XUIWidget* m_pPrev;
@@ -177,7 +182,6 @@ private:
 	bool m_bDelete, m_bEnable, m_bVisable;
 
 	int m_nLeft, m_nTop, m_nWidth, m_nHeight;
-	int m_nClientLeft, m_nClientTop, m_nClientRight, m_nClientBottom;
 
 	bool m_bScroll;
 	XUIPoint m_Scroll;
@@ -186,14 +190,13 @@ private:
 
 class XUIWidgetRoot : public XUIWidget
 {
+	friend class XUI;
 public:
-	XUIWidgetRoot(XUI* pXUI);
-	virtual ~XUIWidgetRoot();
+	XUIWidgetRoot() : XUIWidget(true) { }
 
 	XUI* GetXUI() { return m_pXUI; }
 
-
-private:
+protected:
 	XUI* m_pXUI;
 };
 
@@ -203,7 +206,7 @@ public:
 	XUI();
 	~XUI();
 
-	XUIWidgetRoot* GetRoot() { return m_pRoot; }
+	XUIWidgetRoot* GetRoot() { return &m_Root; }
 	XUIWidget* GetFocus() { return m_pFocus; }
 	XUIWidget* GetOver() { return m_pOver; }
 
@@ -228,7 +231,7 @@ public:
 	void Reset(int nWidth, int nHeight);
 
 private:
-	XUIWidgetRoot* m_pRoot;
+	XUIWidgetRoot m_Root;
 	XUIWidget* m_pFocus;
 	XUIWidget* m_pOver;
 	XUIWidget* m_pCapture;

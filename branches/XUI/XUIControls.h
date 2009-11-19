@@ -3,7 +3,7 @@
 class XUIButton : public XUIWidget
 {
 public:
-	XUIButton();
+	XUIButton(bool bManualFree);
 	XUIButton(const char* pText, int nLeft, int nTop, int nWidth, int nHeight);
 	virtual ~XUIButton();
 
@@ -23,7 +23,7 @@ private:
 class XUILabel : public XUIWidget
 {
 public:
-	XUILabel();
+	XUILabel(bool bManualFree);
 	XUILabel(const char* pText, int nLeft, int nTop, int nWidth, int nHeight);
 	virtual ~XUILabel();
 
@@ -39,7 +39,7 @@ private:
 class XUIScrollPanel : public XUIWidget
 {
 public:
-	XUIScrollPanel();
+	XUIScrollPanel(bool bManualFree);
 	XUIScrollPanel(const char* pText, int nLeft, int nTop, int nWidth, int nHeight);
 	virtual ~XUIScrollPanel();
 
@@ -55,9 +55,12 @@ protected:
 	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
 	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
 
+	virtual void OnSizeChange(int nWidth, int nHeight);
+
 private:
 	const char* m_pText;
 	int m_nCaptureY, m_nCaptureScroll;
 	int m_nWidgetsHeight;
+	XUIWidget m_ClientArea;
 
 };
