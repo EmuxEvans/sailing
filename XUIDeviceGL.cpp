@@ -255,10 +255,12 @@ static void drawText(float x, float y, const char *text, int align, unsigned int
 
 XUIDeviceGL::XUIDeviceGL()
 {
+	g_ftex = -1;
 }
 
 XUIDeviceGL::~XUIDeviceGL()
 {
+	if(g_ftex!=-1) glDeleteTextures(1, &g_ftex);
 }
 
 bool XUIDeviceGL::ResetDevice(int nWidth, int nHeight)
@@ -296,8 +298,9 @@ bool XUIDeviceGL::ResetDevice(int nWidth, int nHeight)
 	if (!bmap) goto error;
 	
 	stbtt_BakeFontBitmap(ttfBuffer,0, 15.0f, bmap,512,512, 32,96, g_cdata);
-	
+
 	// can free ttf_buffer at this point
+	if(g_ftex!=-1) glDeleteTextures(1, &g_ftex);
 	glGenTextures(1, &g_ftex);
 	glBindTexture(GL_TEXTURE_2D, g_ftex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, 512,512, 0, GL_ALPHA, GL_UNSIGNED_BYTE, bmap);
