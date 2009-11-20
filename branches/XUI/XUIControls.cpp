@@ -130,17 +130,14 @@ void XUIScrollPanel::onMouseMove(const XUIPoint& Point)
 	if(m_nCaptureScroll<0) return;
 
 	int nScroll = m_nCaptureScroll + (int)(((float)Point.y-m_nCaptureY)/m_ClientArea.GetWidgetHeight()*m_ClientArea.GetScrollHeight());
-	if(nScroll<0) nScroll = 0;
-	if(nScroll+m_ClientArea.GetWidgetHeight()>m_ClientArea.GetScrollHeight()) nScroll = m_ClientArea.GetScrollHeight() - m_ClientArea.GetWidgetHeight();
 	m_ClientArea.SetScrollPosition(XUIPoint(0, nScroll));
 }
 
-void XUIScrollPanel::onMouseWheel(const XUIPoint& Point, int _rel)
+bool XUIScrollPanel::onMouseWheel(const XUIPoint& Point, int _rel)
 {
-	int nScroll = GetScrollPosition().x + _rel;
-	if(nScroll<0) nScroll = 0;
-	if(nScroll+m_ClientArea.GetWidgetHeight()>GetScrollHeight()) nScroll = GetScrollHeight() - m_ClientArea.GetWidgetHeight();
-	SetScrollPosition(XUIPoint(0, nScroll));
+	int nScroll = m_ClientArea.GetScrollPosition().y - _rel*20;
+	m_ClientArea.SetScrollPosition(XUIPoint(0, nScroll));
+	return true;
 }
 
 void XUIScrollPanel::onMouseButtonPressed(const XUIPoint& Point, unsigned short nId)

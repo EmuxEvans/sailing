@@ -1,6 +1,6 @@
 #include <windows.h>
-#include <gl\gl.h>
-#include <gl\glu.h>
+#include <gl\glew.h>
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdio.h>

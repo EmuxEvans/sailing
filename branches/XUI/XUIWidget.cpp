@@ -256,8 +256,9 @@ void XUIWidget::onMouseLeave()
 {
 }
 
-void XUIWidget::onMouseWheel(const XUIPoint& Point, int _rel)
+bool XUIWidget::onMouseWheel(const XUIPoint& Point, int _rel)
 {
+	return false;
 }
 
 void XUIWidget::onMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
@@ -375,9 +376,10 @@ void XUI::MouseMove(const XUIPoint& Point)
 void XUI::MouseWheel(const XUIPoint& Point, int _rel) 
 {
 	XUIWidget* pWidget = GetWidget(Point);
-	if(pWidget) {
+	while(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseWheel(pWidget->ScreenToWidget(Point, wp), _rel);
+		if(pWidget->onMouseWheel(pWidget->ScreenToWidget(Point, wp), _rel)) break;
+		pWidget = pWidget->GetParent();
 	}
 }
 

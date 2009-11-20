@@ -160,7 +160,7 @@ protected:
 	virtual void onMouseMove(const XUIPoint& Point);
 	virtual void onMouseEnter();
 	virtual void onMouseLeave();
-	virtual void onMouseWheel(const XUIPoint& Point, int _rel);
+	virtual bool onMouseWheel(const XUIPoint& Point, int _rel);
 	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
 	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
 	virtual void onMouseButtonClick(const XUIPoint& Point, unsigned short nId);
