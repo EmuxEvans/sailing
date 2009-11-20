@@ -97,8 +97,33 @@ void XUI_DoTick()
 class XUI_Delegate
 {
 public:
+	void Invoke();
 };
 
+class XUI_IDelegate {
+public:
+	XUI_IDelegate() {
+		m_pDelegate = NULL;
+		m_pNext = NULL;
+		m_pPrev = NULL;
+	}
+	~XUI_IDelegate() {
+	}
+
+	virtual void Invoke() = 0;
+
+	XUI_Delegate* m_pDelegate;
+	XUI_IDelegate* m_pNext;
+	XUI_IDelegate* m_pPrev;
+};
+
+template<class T>
 class XUI_DelegateImpl {
 public:
+	virtual void Invoke() {
+		(m_pThis->*m_pInvoke)();
+	}
+
+	T* m_pThis;
+	void (*T::m_pInvoke)();
 };
