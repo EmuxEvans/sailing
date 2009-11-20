@@ -41,7 +41,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
+				AdditionalIncludeDirectories="glew\include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;GLEW_STATIC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -115,7 +116,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
+				AdditionalIncludeDirectories="glew\include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;GLEW_STATIC"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -177,6 +179,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XUIApp.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XUIControls.cpp"
 				>
 			</File>
@@ -207,6 +213,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XUIApp.h"
+				>
+			</File>
+			<File
 				RelativePath=".\XUIControls.h"
 				>
 			</File>
@@ -219,10 +229,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\XUIMain.h"
-				>
-			</File>
-			<File
 				RelativePath=".\XUIWidget.h"
 				>
 			</File>
@@ -232,6 +238,38 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+		</Filter>
+		<Filter
+			Name="glew"
+			>
+			<Filter
+				Name="include"
+				>
+				<File
+					RelativePath=".\glew\include\GL\glew.h"
+					>
+				</File>
+				<File
+					RelativePath=".\glew\include\GL\glxew.h"
+					>
+				</File>
+				<File
+					RelativePath=".\glew\include\GL\wglew.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="source"
+				>
+				<File
+					RelativePath=".\glew\src\glew.c"
+					>
+				</File>
+				<File
+					RelativePath=".\glew\src\visualinfo.c"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

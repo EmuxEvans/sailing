@@ -51,7 +51,7 @@ protected:
 	virtual void onRender(XUIDevice* pDevice);
 
 	virtual void onMouseMove(const XUIPoint& Point);
-	virtual void onMouseWheel(const XUIPoint& Point, int _rel);
+	virtual bool onMouseWheel(const XUIPoint& Point, int _rel);
 	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
 	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
 
@@ -62,5 +62,4 @@ private:
 	int m_nCaptureY, m_nCaptureScroll;
 	int m_nWidgetsHeight;
 	XUIWidget m_ClientArea;
-
 };
