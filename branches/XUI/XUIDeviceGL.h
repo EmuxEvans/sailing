@@ -19,6 +19,7 @@ protected:
 	virtual void OnCmdText(int x, int y, int align, XUIColor color, const char* text);
 	virtual void OnCmdBeginScissor(int x, int y, int w, int h);
 	virtual void OnCmdEndScissor();
+	virtual void OnCmdLine(int x1, int y1, int x2, int y2, float r, float fth, XUIColor color);
 
 private:
 	struct {

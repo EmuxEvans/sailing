@@ -102,6 +102,42 @@ static void drawPolygon(const float* coords, unsigned numCoords, float r, unsign
 	glEnd();
 }
 
+static void drawLine(float x0, float y0, float x1, float y1, float r, float fth, unsigned int col)
+{
+	float dx = x1-x0;
+	float dy = y1-y0;
+	float d = sqrtf(dx*dx+dy*dy);
+	if (d > 0.0001f)
+	{
+		d = 1.0f/d;
+		dx *= d;
+		dy *= d;
+	}
+	float t = dx;
+	dx = dy;
+	dy = -t;
+	float verts[4*2];
+	r -= fth;
+	r *= 0.5f;
+	if (r < 0.01f) r = 0.01f;
+	dx *= r;
+	dy *= r;
+	
+	verts[0] = x0-dx;
+	verts[1] = y0-dy;
+	
+	verts[2] = x0+dx;
+	verts[3] = y0+dy;
+	
+	verts[4] = x1+dx;
+	verts[5] = y1+dy;
+	
+	verts[6] = x1-dx;
+	verts[7] = y1-dy;
+	
+	drawPolygon(verts, 4, fth, col);
+}
+
 static void drawRect(float x, float y, float w, float h, float fth, unsigned int col)
 {
 	float verts[4*2] =
@@ -374,6 +410,11 @@ void XUIDeviceGL::OnCmdTriangle(int x, int y, int w, int h, int d, XUIColor colo
 void XUIDeviceGL::OnCmdText(int x, int y, int align, XUIColor color, const char* text)
 {
 	drawText((float)x, (float)y, text, align, color);
+}
+
+void XUIDeviceGL::OnCmdLine(int x1, int y1, int x2, int y2, float r, float fth, XUIColor color)
+{
+	drawLine((float)x1, (float)y1, (float)x2, (float)y2, r, fth, color);
 }
 
 void XUIDeviceGL::OnCmdBeginScissor(int x, int y, int w, int h)

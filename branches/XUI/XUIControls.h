@@ -51,13 +51,14 @@ protected:
 	virtual void onRender(XUIDevice* pDevice);
 
 	virtual void onMouseMove(const XUIPoint& Point);
+	virtual void onMouseLeave();
 	virtual bool onMouseWheel(const XUIPoint& Point, int _rel);
 	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
 	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
 
 private:
 	const char* m_pText;
-	bool m_bInMove;
+	bool m_bInMove, m_bBarLight;
 	XUIPoint m_InMovePoint;
 	int m_nInMoveX, m_nInMoveY;
 	int m_nCaptureY, m_nCaptureScroll;

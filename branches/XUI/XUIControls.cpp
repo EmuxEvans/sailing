@@ -73,6 +73,7 @@ XUIScrollPanel::XUIScrollPanel(bool bManualFree)
 	m_pText = NULL;
 
 	m_bInMove = false;
+	m_bBarLight = false;
 
 	m_nWidgetsHeight = 0;
 	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, SCROLL_AREA_PADDING);
@@ -84,6 +85,7 @@ XUIScrollPanel::XUIScrollPanel(const char* pText, int nLeft, int nTop, int nWidt
 	SetText(pText);
 
 	m_bInMove = false;
+	m_bBarLight = false;
 
 	m_nWidgetsHeight = 0;
 	SetWidgetRect(nLeft, nTop, nWidth, nHeight);
@@ -110,8 +112,11 @@ void XUIScrollPanel::onRender(XUIDevice* pDevice)
 	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,0,0,192));
 	pDevice->AddRect(SCROLL_AREA_PADDING, SCROLL_AREA_PADDING,
 		GetWidgetWidth()-SCROLL_AREA_PADDING*2, AREA_HEADER-SCROLL_AREA_PADDING*2,
-		(AREA_HEADER-SCROLL_AREA_PADDING*2)/2, XUI_RGBA(0, 0, 0, 255));
-	pDevice->AddText(AREA_HEADER/2, AREA_HEADER/2-TEXT_HEIGHT/2-1, 0, XUI_RGBA(255,255,255,128), m_pText);
+//		(AREA_HEADER-SCROLL_AREA_PADDING*2)/2-1,
+		0,
+		m_bBarLight?XUI_RGBA(255, 150, 0, 192):XUI_RGBA(198, 112, 0, 192));
+	pDevice->AddText(AREA_HEADER/2, AREA_HEADER/2-TEXT_HEIGHT/2-1, 0,
+		m_bBarLight?XUI_RGBA(255,255,255,255):XUI_RGBA(255,255,255,128), m_pText);
 
 	int nBarStart, nBarHeight;
 	if(m_nWidgetsHeight>=GetClientHeight()) {
@@ -151,7 +156,20 @@ void XUIScrollPanel::onMouseMove(const XUIPoint& Point)
 		SetScrollPosition(XUIPoint(0, nScroll));
 	}
 
+	if(		Point.x>=SCROLL_AREA_PADDING && Point.y>=SCROLL_AREA_PADDING
+		&&	Point.x<GetWidgetWidth()-SCROLL_AREA_PADDING
+		&&	Point.y<AREA_HEADER-SCROLL_AREA_PADDING) {
+		m_bBarLight = true;
+	} else {
+		m_bBarLight = false;
+	}
+
 	XUIWidget::onMouseMove(Point);
+}
+
+void XUIScrollPanel::onMouseLeave()
+{
+	m_bBarLight = false;
 }
 
 bool XUIScrollPanel::onMouseWheel(const XUIPoint& Point, int _rel)
