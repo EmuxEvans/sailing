@@ -1,5 +1,8 @@
 #include <stddef.h>
+#include <assert.h>
 
+#include "XUIMisc.h"
+#include "XUIDelegate.h"
 #include "XUIWidget.h"
 #include "XUIDevice.h"
 
@@ -238,63 +241,78 @@ void XUIWidget::onRender(XUIDevice* pDevice)
 
 void XUIWidget::onLostFocus(XUIWidget* pNew)
 {
+	_eventLostFocus.Invoke(this, pNew);
 }
 
 void XUIWidget::onSetFocus(XUIWidget* pOld)
 {
+	_eventSetFocus.Invoke(this, pOld);
 }
 
 void XUIWidget::onMouseMove(const XUIPoint& Point)
 {
+	_eventMouseMove.Invoke(this, Point);
 }
 
 void XUIWidget::onMouseEnter()
 {
+	_eventMouseEnter.Invoke(this);
 }
 
 void XUIWidget::onMouseLeave()
 {
+	_eventMouseLeave.Invoke(this);
 }
 
 bool XUIWidget::onMouseWheel(const XUIPoint& Point, int _rel)
 {
+	_eventMouseWheel.Invoke(this, Point, _rel);
 	return false;
 }
 
 void XUIWidget::onMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
 {
+	_eventMouseButtonPressed.Invoke(this, Point, nId);
 }
 
 void XUIWidget::onMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 {
+	_eventMouseButtonReleased.Invoke(this, Point, nId);
 }
 
 void XUIWidget::onMouseButtonClick(const XUIPoint& Point, unsigned short nId)
 {
+	_eventMouseButtonClick.Invoke(this, Point, nId);
 }
 
 void XUIWidget::onMouseButtonDoubleClick(const XUIPoint& Point, unsigned short nId)
 {
+	_eventMouseButtonDoubleClick.Invoke(this, Point, nId);
 }
 
 void XUIWidget::onKeyPressed(unsigned short nKey)
 {
+	_eventKeyPressed.Invoke(this, nKey);
 }
 
 void XUIWidget::onKeyReleased(unsigned short nKey)
 {
+	_eventKeyReleased.Invoke(this, nKey);
 }
 
 void XUIWidget::onKeyChar(unsigned short nKey, unsigned int Char)
 {
+	_eventKeyChar.Invoke(this, nKey, Char);
 }
 
 void XUIWidget::OnWidgetMove(int nLeft, int nTop)
 {
+	_eventSizeChange.Invoke(this, nLeft, nTop);
 }
 
 void XUIWidget::OnSizeChange(int nWidth, int nHeight)
 {
+	_eventSizeChange.Invoke(this, nWidth, nHeight);
 }
 
 XUI::XUI()

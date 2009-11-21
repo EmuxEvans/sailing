@@ -1,10 +1,13 @@
+#include <assert.h>
 #include <windows.h>
 #include <gl\glew.h>
 
-#include "XUIDevice.h"
-#include "XUIDeviceGL.h"
+#include "XUIMisc.h"
+#include "XUIDelegate.h"
 #include "XUIWidget.h"
 #include "XUIControls.h"
+#include "XUIDevice.h"
+#include "XUIDeviceGL.h"
 #include "XUIApp.h"
 
 #define SCREEN_WIDTH		800

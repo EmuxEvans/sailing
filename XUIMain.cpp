@@ -1,9 +1,12 @@
+#include <assert.h>
 #include <windows.h>
 #include <gl\glew.h>
 
-#include "XUIDevice.h"
+#include "XUIMisc.h"
+#include "XUIDelegate.h"
 #include "XUIWidget.h"
 #include "XUIControls.h"
+#include "XUIDevice.h"
 #include "XUIApp.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -93,37 +96,36 @@ void XUI_DoTick()
 	XUI_GetXUI().BeginFrame();
 	XUI_GetXUI().EndFrame();
 }
+/*
+#include <assert.h>
+#include "XUIDelegate.h"
 
-class XUI_Delegate
+class server {
+public:
+	XUI_Delegate1<bool> eventKK;
+
+};
+
+class my {
+public:
+
+	void dododo(bool v1)
+	{
+	}
+
+	void vvvv(server* pp) {
+		XUI_DelegateImpl1<my, bool>* ppp = new XUI_DelegateImpl1<my, bool>();
+		pp->eventKK.Register(ppp->R(this, &my::dododo));
+	}
+
+};
+
+void aaa()
 {
-public:
-	void Invoke();
-};
-
-class XUI_IDelegate {
-public:
-	XUI_IDelegate() {
-		m_pDelegate = NULL;
-		m_pNext = NULL;
-		m_pPrev = NULL;
-	}
-	~XUI_IDelegate() {
-	}
-
-	virtual void Invoke() = 0;
-
-	XUI_Delegate* m_pDelegate;
-	XUI_IDelegate* m_pNext;
-	XUI_IDelegate* m_pPrev;
-};
-
-template<class T>
-class XUI_DelegateImpl {
-public:
-	virtual void Invoke() {
-		(m_pThis->*m_pInvoke)();
-	}
-
-	T* m_pThis;
-	void (*T::m_pInvoke)();
-};
+	XUI_Delegate1<bool> a1;
+	server s;
+	my c;
+	c.vvvv(&s);
+	s.eventKK.Invoke(true);
+}
+*/
