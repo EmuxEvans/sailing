@@ -175,6 +175,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\Delegate.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stb_truetype.c"
 				>
 			</File>
@@ -199,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XUIMisc.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XUIWidget.cpp"
 				>
 			</File>
@@ -208,6 +216,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\Delegate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DelegateImpl.h"
+				>
+			</File>
 			<File
 				RelativePath=".\stb_truetype.h"
 				>
@@ -221,11 +237,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XUIDelegate.h"
+				>
+			</File>
+			<File
 				RelativePath=".\XUIDevice.h"
 				>
 			</File>
 			<File
 				RelativePath=".\XUIDeviceGL.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XUIMisc.h"
 				>
 			</File>
 			<File

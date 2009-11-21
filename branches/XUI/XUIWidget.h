@@ -1,103 +1,25 @@
 #pragma once
 
-class XUIPoint
-{
-public:
-	XUIPoint() { }
-	XUIPoint(int _nX, int _nY) {
-		x = _nX;
-		y = _nY;
-	}
-	XUIPoint(const XUIPoint& Point) {
-		x = Point.x;
-		y = Point.y;
-	}
-	int x, y;
-};
-
-namespace XUI_INPUT {
-	static const unsigned short MOUSE_LBUTTON = 0x1;
-	static const unsigned short MOUSE_RBUTTON = 0x2;
-	static const unsigned short MOUSE_MBUTTON = 0x4;
-};
-
-class XUIRect
-{
-public:
-	XUIRect() {
-		left = 0;
-		top = 0;
-		right = 0;
-		bottom = 0;
-	}
-
-	XUIRect(int l, int t, int r, int b) {
-		left = l;
-		top = t;
-		right = r;
-		bottom = b;
-	}
-
-	XUIRect(const XUIPoint& point, int width, int height) {
-		right = (left = point.x) + width;
-		bottom = (top = point.y) + height;
-	}
-
-	XUIRect(const XUIPoint& topLeft, const XUIPoint& bottomRight) {
-		left = topLeft.x;
-		top = topLeft.y;
-		right = bottomRight.x;
-		bottom = bottomRight.y;
-	}
-
-	int Width() const {
-		return right - left;
-	}
-
-	int Height() const {
-		return bottom - top;
-	}
-
-	XUIPoint& TopLeft()
-	{
-		return *((XUIPoint*)this);
-	}
-
-	XUIPoint& BottomRight()
-	{
-		return *((XUIPoint*)this + 1);
-	}
-
-	const XUIPoint& TopLeft() const {
-		return *((XUIPoint*)this);
-	}
-
-	const XUIPoint& BottomRight() const {
-		return *((XUIPoint*)this + 1);
-	}
-
-	bool PointInRect(const XUIPoint& point) const {
-		return point.x>=left && point.x<right && point.y>=top && point.y<bottom;
-	}
-
-	void SetRect(int x1, int y1, int x2, int y2) {
-		left = x1;
-		top = y1;
-		right = x2;
-		bottom = y2;
-	}
-
-	void SetRect(const XUIPoint& topLeft, const XUIPoint& bottomRight) {
-		SetRect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
-	}
-
-	int left, top, right, bottom;
-};
-
 class XUI;
 class XUIWidget;
 class XUIWidgetRoot;
 class XUIDevice;
+
+XUI_DELEGATE_DEFINE1(eventLostFocus, XUIWidget*)
+XUI_DELEGATE_DEFINE1(eventSetFocus, XUIWidget*)
+XUI_DELEGATE_DEFINE1(eventMouseMove, const XUIPoint&)
+XUI_DELEGATE_DEFINE0(eventMouseEnter)
+XUI_DELEGATE_DEFINE0(eventMouseLeave)
+XUI_DELEGATE_DEFINE2(eventMouseWheel, const XUIPoint&, int)
+XUI_DELEGATE_DEFINE2(eventMouseButtonPressed, const XUIPoint&, unsigned short)
+XUI_DELEGATE_DEFINE2(eventMouseButtonReleased, const XUIPoint&, unsigned short)
+XUI_DELEGATE_DEFINE2(eventMouseButtonClick, const XUIPoint&, unsigned short)
+XUI_DELEGATE_DEFINE2(eventMouseButtonDoubleClick, const XUIPoint&, unsigned short)
+XUI_DELEGATE_DEFINE1(eventKeyPressed, unsigned short)
+XUI_DELEGATE_DEFINE1(eventKeyReleased, unsigned short)
+XUI_DELEGATE_DEFINE2(eventKeyChar, unsigned short, unsigned int)
+XUI_DELEGATE_DEFINE2(eventWidgetMove, int, int)
+XUI_DELEGATE_DEFINE2(eventSizeChange, int, int)
 
 class XUIWidget
 {
@@ -148,6 +70,22 @@ public:
 	int GetScrollHeight() { return m_nScrollHeight; }
 
 	void ManualFree() { m_bManualFree = true; }
+
+	eventLostFocus				_eventLostFocus;
+	eventSetFocus				_eventSetFocus;
+	eventMouseMove				_eventMouseMove;
+	eventMouseEnter				_eventMouseEnter;
+	eventMouseLeave				_eventMouseLeave;
+	eventMouseWheel				_eventMouseWheel;
+	eventMouseButtonPressed		_eventMouseButtonPressed;
+	eventMouseButtonReleased	_eventMouseButtonReleased;
+	eventMouseButtonClick		_eventMouseButtonClick;
+	eventMouseButtonDoubleClick	_eventMouseButtonDoubleClick;
+	eventKeyPressed				_eventKeyPressed;
+	eventKeyReleased			_eventKeyReleased;
+	eventKeyChar				_eventKeyChar;
+	eventWidgetMove				_eventWidgetMove;
+	eventSizeChange				_eventSizeChange;
 
 protected:
 
@@ -236,3 +174,6 @@ private:
 	XUIWidget* m_pOver;
 	XUIWidget* m_pCapture;
 };
+
+#undef MY_COMBINE
+#undef MY_COMBINE1

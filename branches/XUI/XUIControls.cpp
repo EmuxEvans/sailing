@@ -1,5 +1,8 @@
+#include <assert.h>
 #include <stddef.h>
 
+#include "XUIMisc.h"
+#include "XUIDelegate.h"
 #include "XUIWidget.h"
 #include "XUIControls.h"
 #include "XUIDevice.h"

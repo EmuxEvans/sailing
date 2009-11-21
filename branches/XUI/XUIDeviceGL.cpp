@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "XUIWidget.h"
 #include "XUIDevice.h"
 #include "XUIDeviceGL.h"
 
