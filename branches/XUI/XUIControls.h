@@ -55,11 +55,11 @@ protected:
 	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
 	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
 
-	virtual void OnSizeChange(int nWidth, int nHeight);
-
 private:
 	const char* m_pText;
+	bool m_bInMove;
+	XUIPoint m_InMovePoint;
+	int m_nInMoveX, m_nInMoveY;
 	int m_nCaptureY, m_nCaptureScroll;
 	int m_nWidgetsHeight;
-	XUIWidget m_ClientArea;
 };

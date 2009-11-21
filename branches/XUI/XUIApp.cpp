@@ -265,14 +265,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	case WM_SIZE:
 		ReSizeGLScene(LOWORD(lParam), HIWORD(lParam));
 		return 0;
-	case WM_KEYDOWN:
-		keys[wParam] = TRUE;
-		return 0;
-	case WM_KEYUP:
-		keys[wParam] = FALSE;
-		return 0;
 	case WM_MOUSEMOVE:
 		_gXUI.MouseMove(XUIPoint(LOWORD(lParam), HIWORD(lParam)));
+		break;
+	case WM_MOUSEWHEEL:
+		POINT Point;
+		Point.x = LOWORD(lParam);
+		Point.y = HIWORD(lParam);
+		ScreenToClient(hWnd, &Point);
+		_gXUI.MouseWheel(XUIPoint(Point.x, Point.y), GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
 		break;
 	case WM_LBUTTONDOWN:
 		_gXUI.MouseButtonPressed(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
@@ -301,12 +302,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	case WM_MBUTTONDBLCLK:
 		_gXUI.MouseButtonDoubleClick(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
 		break;
-	case WM_MOUSEWHEEL:
-		POINT Point;
-		Point.x = LOWORD(lParam);
-		Point.y = HIWORD(lParam);
-		ScreenToClient(hWnd, &Point);
-		_gXUI.MouseWheel(XUIPoint(Point.x, Point.y), GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
+	case WM_KEYDOWN:
+		keys[wParam] = TRUE;
+		return 0;
+	case WM_KEYUP:
+		keys[wParam] = FALSE;
+		return 0;
+	case WM_CHAR:
+		_gXUI.KeyChar((lParam>>16)&0xff, wParam);
 		break;
 	}
 
