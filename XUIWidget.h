@@ -29,6 +29,11 @@ public:
 	XUIWidget(bool bManualFree=false);
 	virtual ~XUIWidget();
 
+	XUI* GetXUI();
+	XUIWidgetRoot* GetRoot();
+
+	void ManualFree() { m_bManualFree = true; }
+
 	XUIWidget* GetParent() { return m_pParent; }
 	XUIWidget* GetFirstChild() { return m_pFirstChild; }
 	XUIWidget* GetLastChild() { return m_pLastChild; }
@@ -38,9 +43,6 @@ public:
 	void AddChild(XUIWidget* pWidget);
 	void BringToTop();
 	void Delete() { m_bDelete = true; }
-
-	XUI* GetXUI();
-	XUIWidgetRoot* GetRoot();
 
 	void SetVisable(bool bVisable=true) { m_bVisable = bVisable; }
 	bool IsVisable();
@@ -60,16 +62,25 @@ public:
 	int GetWidgetWidth() { return m_nWidth; }
 	int GetWidgetHeight() { return m_nHeight; }
 
+	void SetClientArea(int nLeft, int nTop, int nRight, int nBottom);
+
+	int GetClientLeft() { return m_nClientLeft; }
+	int GetClientTop() { return m_nClientTop; }
+	int GetClientRight() { return m_nClientRight; }
+	int GetClientBottom() { return m_nClientBottom; }
+	int GetClientWidth() { return m_nWidth-m_nClientLeft-m_nClientRight; }
+	int GetClientHeight() { return m_nHeight-m_nClientTop-m_nClientBottom; }
+
 	void EnableScroll(bool bEnable);
 	void SetScrollPosition(const XUIPoint& Scroll);
 	void SetScrollSize(int nWidth, int nHeight);
 	void AdjustScroll();
 
-	const XUIPoint& GetScrollPosition() { return m_Scroll; }
+	XUIPoint GetScrollPosition() { return XUIPoint(m_nScrollX, m_nScrollY); }
+	int GetScrollPositionX() { return m_nScrollX; }
+	int GetScrollPositionY() { return m_nScrollY; }
 	int GetScrollWidth() { return m_nScrollWidth; }
 	int GetScrollHeight() { return m_nScrollHeight; }
-
-	void ManualFree() { m_bManualFree = true; }
 
 	eventLostFocus				_eventLostFocus;
 	eventSetFocus				_eventSetFocus;
@@ -120,10 +131,10 @@ private:
 	bool m_bDelete, m_bEnable, m_bVisable;
 
 	int m_nLeft, m_nTop, m_nWidth, m_nHeight;
+	int m_nClientLeft, m_nClientTop, m_nClientRight, m_nClientBottom;
 
 	bool m_bScroll;
-	XUIPoint m_Scroll;
-	int m_nScrollWidth, m_nScrollHeight;
+	int m_nScrollX, m_nScrollY, m_nScrollWidth, m_nScrollHeight;
 };
 
 class XUIWidgetRoot : public XUIWidget
@@ -173,7 +184,7 @@ private:
 	XUIWidget* m_pFocus;
 	XUIWidget* m_pOver;
 	XUIWidget* m_pCapture;
+	XUIPoint m_LButtonPoint;
+	XUIPoint m_RButtonPoint;
+	XUIPoint m_MButtonPoint;
 };
-
-#undef MY_COMBINE
-#undef MY_COMBINE1

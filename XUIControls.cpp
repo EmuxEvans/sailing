@@ -15,7 +15,7 @@ static const int DEFAULT_SPACING = 4;
 static const int TEXT_HEIGHT = 8;
 static const int SCROLL_AREA_PADDING = 6;
 static const int INTEND_SIZE = 16;
-static const int AREA_HEADER = 28;
+static const int AREA_HEADER = 30;
 
 XUIButton::XUIButton(bool bManualFree)
 {
@@ -67,23 +67,28 @@ void XUILabel::onRender(XUIDevice* pDevice)
 	pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2, 1, XUI_RGBA(250, 250, 250, 255), m_pText);
 }
 
-XUIScrollPanel::XUIScrollPanel(bool bManualFree) : m_ClientArea(true)
+XUIScrollPanel::XUIScrollPanel(bool bManualFree)
 {
 	if(bManualFree) ManualFree();
 	m_pText = NULL;
-	m_nWidgetsHeight = 0;
 
-	m_ClientArea.EnableScroll(true);
-	AddChild(&m_ClientArea);
+	m_bInMove = false;
+
+	m_nWidgetsHeight = 0;
+	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, SCROLL_AREA_PADDING);
+	EnableScroll(true);
 }
 
-XUIScrollPanel::XUIScrollPanel(const char* pText, int nLeft, int nTop, int nWidth, int nHeight) : m_ClientArea(true)
+XUIScrollPanel::XUIScrollPanel(const char* pText, int nLeft, int nTop, int nWidth, int nHeight)
 {
 	SetText(pText);
+
+	m_bInMove = false;
+
 	m_nWidgetsHeight = 0;
 	SetWidgetRect(nLeft, nTop, nWidth, nHeight);
-	m_ClientArea.EnableScroll(true);
-	AddChild(&m_ClientArea);
+	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING*4, SCROLL_AREA_PADDING);
+	EnableScroll(true);
 }
 
 XUIScrollPanel::~XUIScrollPanel()
@@ -93,94 +98,120 @@ XUIScrollPanel::~XUIScrollPanel()
 bool XUIScrollPanel::AddWidget(XUIWidget* pWidget)
 {
 	if(m_nWidgetsHeight) m_nWidgetsHeight += INTEND_SIZE;
-	pWidget->SetWidgetRect(0, m_nWidgetsHeight, m_ClientArea.GetWidgetWidth(), pWidget->GetWidgetHeight());
-	m_ClientArea.AddChild(pWidget);
+	pWidget->SetWidgetRect(0, m_nWidgetsHeight, GetClientWidth(), pWidget->GetWidgetHeight());
+	AddChild(pWidget);
 	m_nWidgetsHeight += pWidget->GetWidgetHeight();
-	m_ClientArea.SetScrollSize(m_ClientArea.GetWidgetWidth(), m_nWidgetsHeight);
+	SetScrollSize(GetClientWidth(), m_nWidgetsHeight);
 	return true;
 }
 
 void XUIScrollPanel::onRender(XUIDevice* pDevice)
 {
 	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,0,0,192));
-	pDevice->AddText(AREA_HEADER/2, AREA_HEADER/2-TEXT_HEIGHT/2, 0, XUI_RGBA(255,255,255,128), m_pText);
+	pDevice->AddRect(SCROLL_AREA_PADDING, SCROLL_AREA_PADDING,
+		GetWidgetWidth()-SCROLL_AREA_PADDING*2, AREA_HEADER-SCROLL_AREA_PADDING*2,
+		(AREA_HEADER-SCROLL_AREA_PADDING*2)/2, XUI_RGBA(0, 0, 0, 255));
+	pDevice->AddText(AREA_HEADER/2, AREA_HEADER/2-TEXT_HEIGHT/2-1, 0, XUI_RGBA(255,255,255,128), m_pText);
 
 	int nBarStart, nBarHeight;
-	if(m_ClientArea.GetScrollHeight()>=m_ClientArea.GetWidgetHeight()) {
+	if(m_nWidgetsHeight>=GetClientHeight()) {
 		nBarStart = 0;
-		nBarHeight = m_ClientArea.GetWidgetHeight();
+		nBarHeight = GetClientHeight();
 	} else {
-		nBarStart = (int)((float)m_ClientArea.GetScrollPosition().y/(float)m_ClientArea.GetScrollHeight() * m_ClientArea.GetWidgetHeight());
-		nBarHeight = (int)((float)(m_ClientArea.GetScrollPosition().y+m_ClientArea.GetWidgetHeight())/(float)m_ClientArea.GetScrollHeight() * m_ClientArea.GetWidgetHeight()) - nBarStart;
-		if(nBarHeight>m_ClientArea.GetWidgetHeight()) nBarHeight = m_ClientArea.GetWidgetHeight();
+		nBarStart = (int)((float)GetScrollPositionY()/(float)m_nWidgetsHeight * GetClientHeight());
+		nBarHeight = (int)((float)(GetScrollPositionY()+GetClientHeight())/(float)m_nWidgetsHeight * GetClientHeight()) - nBarStart;
+		if(nBarHeight>GetClientHeight()) nBarHeight = GetClientHeight();
 	}
-	nBarStart = (int)((float)m_ClientArea.GetScrollPosition().y/(float)m_ClientArea.GetScrollHeight() * m_ClientArea.GetWidgetHeight());
-	nBarHeight = (int)((float)(m_ClientArea.GetScrollPosition().y+m_ClientArea.GetWidgetHeight())/(float)m_ClientArea.GetScrollHeight() * m_ClientArea.GetWidgetHeight()) - nBarStart;
-	if(nBarStart+nBarHeight>m_ClientArea.GetWidgetHeight()) nBarHeight = m_ClientArea.GetWidgetHeight() - nBarStart;
+	nBarStart = (int)((float)GetScrollPositionY()/(float)m_nWidgetsHeight * GetClientHeight());
+	nBarHeight = (int)((float)(GetScrollPositionY()+GetClientHeight())/(float)m_nWidgetsHeight * GetClientHeight()) - nBarStart;
+	if(nBarStart+nBarHeight>GetClientHeight()) nBarHeight = GetClientHeight() - nBarStart;
 
 	int nBarLeft, nBarWidth;
 	nBarLeft = GetWidgetWidth()-SCROLL_AREA_PADDING*2-SCROLL_AREA_PADDING/2 + 1;
 	nBarWidth = SCROLL_AREA_PADDING*2 - 2;
 
-	pDevice->AddRect(nBarLeft, m_ClientArea.GetWidgetTop(), nBarWidth, m_ClientArea.GetWidgetHeight(), nBarWidth/2-1, XUI_RGBA(0,0,0,255));
-	pDevice->AddRect(nBarLeft, m_ClientArea.GetWidgetTop()+nBarStart, nBarWidth, nBarHeight, nBarWidth/2-1, XUI_RGBA(255,255,255,200));
+	pDevice->AddRect(nBarLeft, GetClientTop(), nBarWidth, GetClientHeight(), nBarWidth/2-1, XUI_RGBA(0,0,0,255));
+	pDevice->AddRect(nBarLeft, GetClientTop()+nBarStart, nBarWidth, nBarHeight, nBarWidth/2-1, XUI_RGBA(255,255,255,200));
 
 	XUIWidget::onRender(pDevice);
 }
 
 void XUIScrollPanel::onMouseMove(const XUIPoint& Point)
 {
-	if(m_nCaptureScroll<0) return;
+	if(m_bInMove) {
+		XUIPoint InMovePoint(Point.x, Point.y);
+		WidgetToScreen(InMovePoint, InMovePoint);
+		SetWidgetPosition(GetWidgetLeft()+InMovePoint.x-m_InMovePoint.x, GetWidgetTop()+InMovePoint.y-m_InMovePoint.y);
+		m_InMovePoint.x = InMovePoint.x;
+		m_InMovePoint.y = InMovePoint.y;
+	}
 
-	int nScroll = m_nCaptureScroll + (int)(((float)Point.y-m_nCaptureY)/m_ClientArea.GetWidgetHeight()*m_ClientArea.GetScrollHeight());
-	m_ClientArea.SetScrollPosition(XUIPoint(0, nScroll));
+	if(m_nCaptureScroll>=0) {
+		int nScroll = m_nCaptureScroll + (int)(((float)Point.y-m_nCaptureY)/GetClientHeight()*m_nWidgetsHeight);
+		SetScrollPosition(XUIPoint(0, nScroll));
+	}
+
+	XUIWidget::onMouseMove(Point);
 }
 
 bool XUIScrollPanel::onMouseWheel(const XUIPoint& Point, int _rel)
 {
-	int nScroll = m_ClientArea.GetScrollPosition().y - _rel*20;
-	m_ClientArea.SetScrollPosition(XUIPoint(0, nScroll));
+	int nScroll = GetScrollPositionY() - _rel*20;
+	SetScrollPosition(XUIPoint(0, nScroll));
+
+	XUIWidget::onMouseWheel(Point, _rel);
 	return true;
 }
 
 void XUIScrollPanel::onMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
 {
-	if(m_ClientArea.GetWidgetHeight()<m_nWidgetsHeight) {
+	if(		Point.x>=SCROLL_AREA_PADDING
+		&&	Point.y>=SCROLL_AREA_PADDING
+		&&	Point.x<GetWidgetWidth()-SCROLL_AREA_PADDING
+		&&	Point.y<AREA_HEADER-SCROLL_AREA_PADDING) {
+
+		m_bInMove = true;
+		m_InMovePoint.x = Point.x;
+		m_InMovePoint.y = Point.y;
+		WidgetToScreen(m_InMovePoint, m_InMovePoint);
+		GetXUI()->SetCapture(this, true);
+	}
+
+	if(GetClientHeight()<m_nWidgetsHeight) {
 		int nBarLeft, nBarWidth;
 		nBarLeft = GetWidgetWidth()-SCROLL_AREA_PADDING*2-SCROLL_AREA_PADDING/2 + 1;
 		nBarWidth = SCROLL_AREA_PADDING*2 - 2;
 
-		if(Point.x<nBarLeft || Point.x>=nBarLeft+nBarWidth) return;
-		if(Point.y<m_ClientArea.GetWidgetTop() || Point.y>=m_ClientArea.GetWidgetHeight()) return;
+		if(Point.x>=nBarLeft && Point.x<nBarLeft+nBarWidth) {
+			if(Point.y>=GetClientTop() && Point.y<GetClientTop()+GetClientHeight()) {
+				int nBarTop, nBarHeight;
+				nBarTop = (int)(GetClientHeight()*GetScrollPositionY()/(float)m_nWidgetsHeight);
+				nBarHeight = (int)(GetClientHeight()*GetClientHeight()/(float)m_nWidgetsHeight);
 
-		int nBarTop, nBarHeight;
-		nBarTop = (int)(m_ClientArea.GetWidgetHeight()*m_ClientArea.GetScrollPosition().y/(float)m_nWidgetsHeight);
-		nBarHeight = (int)(m_ClientArea.GetWidgetHeight()*m_ClientArea.GetWidgetHeight()/(float)m_nWidgetsHeight);
+				if(Point.y>GetClientTop()+nBarTop && Point.y<GetClientTop()+nBarTop+nBarHeight) {
+					m_nCaptureScroll = GetScrollPositionY();
+					m_nCaptureY = Point.y;
+				} else {
+					m_nCaptureScroll = (int)((Point.y-GetClientTop()-nBarHeight/2)/(float)GetClientHeight()*m_nWidgetsHeight);
+					if(m_nCaptureScroll<0) m_nCaptureScroll = 0;
+					if(m_nCaptureScroll>=m_nWidgetsHeight-GetClientHeight()) m_nCaptureScroll = m_nWidgetsHeight-GetClientHeight();
+					m_nCaptureY = Point.y;
+					SetScrollPosition(XUIPoint(0, m_nCaptureScroll));
+				}
 
-		if(Point.y>m_ClientArea.GetWidgetTop()+nBarTop && Point.y<m_ClientArea.GetWidgetTop()+nBarTop+nBarHeight) {
-			m_nCaptureScroll = m_ClientArea.GetScrollPosition().y;
-			m_nCaptureY = Point.y;
-		} else {
-			m_nCaptureScroll = (int)((Point.y-m_ClientArea.GetWidgetTop()-nBarHeight/2)/(float)m_ClientArea.GetWidgetHeight()*m_nWidgetsHeight);
-			if(m_nCaptureScroll<0) m_nCaptureScroll = 0;
-			if(m_nCaptureScroll>=m_nWidgetsHeight-m_ClientArea.GetWidgetHeight()) m_nCaptureScroll = m_nWidgetsHeight-m_ClientArea.GetWidgetHeight();
-			m_nCaptureY = Point.y;
-			m_ClientArea.SetScrollPosition(XUIPoint(0, m_nCaptureScroll));
+				GetXUI()->SetCapture(this, true);
+			}
 		}
-
-		GetXUI()->SetCapture(this, true);
 	}
+
+	XUIWidget::onMouseButtonPressed(Point, nId);
 }
 
 void XUIScrollPanel::onMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 {
+	m_bInMove = false;
 	m_nCaptureScroll = -1;
 	GetXUI()->SetCapture(this, false);
-}
 
-void XUIScrollPanel::OnSizeChange(int nWidth, int nHeight)
-{
-	m_ClientArea.SetWidgetRect(SCROLL_AREA_PADDING, AREA_HEADER,
-		nWidth  - SCROLL_AREA_PADDING - SCROLL_AREA_PADDING*4,
-		nHeight - AREA_HEADER - AREA_HEADER-SCROLL_AREA_PADDING);
+	XUIWidget::onMouseButtonReleased(Point, nId);
 }

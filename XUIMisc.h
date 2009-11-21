@@ -12,6 +12,17 @@ public:
 		x = Point.x;
 		y = Point.y;
 	}
+
+	bool operator ==(const XUIPoint& point) const
+	{
+		return (x == point.x && y == point.y);
+	}
+
+	bool operator !=(const XUIPoint& point) const
+	{
+		return (x != point.x || y != point.y);
+	}
+
 	int x, y;
 };
 
