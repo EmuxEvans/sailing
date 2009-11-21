@@ -96,36 +96,3 @@ void XUI_DoTick()
 	XUI_GetXUI().BeginFrame();
 	XUI_GetXUI().EndFrame();
 }
-/*
-#include <assert.h>
-#include "XUIDelegate.h"
-
-class server {
-public:
-	XUI_Delegate1<bool> eventKK;
-
-};
-
-class my {
-public:
-
-	void dododo(bool v1)
-	{
-	}
-
-	void vvvv(server* pp) {
-		XUI_DelegateImpl1<my, bool>* ppp = new XUI_DelegateImpl1<my, bool>();
-		pp->eventKK.Register(ppp->R(this, &my::dododo));
-	}
-
-};
-
-void aaa()
-{
-	XUI_Delegate1<bool> a1;
-	server s;
-	my c;
-	c.vvvv(&s);
-	s.eventKK.Invoke(true);
-}
-*/
