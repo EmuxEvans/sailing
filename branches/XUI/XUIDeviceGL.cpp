@@ -207,7 +207,7 @@ static void getBakedQuad(stbtt_bakedchar *chardata, int pw, int ph, int char_ind
 	stbtt_bakedchar *b = chardata + char_index;
 	int round_x = STBTT_ifloor(*xpos + b->xoff);
 	int round_y = STBTT_ifloor(*ypos - b->yoff);
-	
+
 	q->x0 = (float)round_x;
 	q->y0 = (float)round_y;
 	q->x1 = (float)round_x + b->x1 - b->x0;
@@ -412,9 +412,9 @@ void XUIDeviceGL::OnCmdText(int x, int y, int align, XUIColor color, const char*
 	drawText((float)x, (float)y, text, align, color);
 }
 
-void XUIDeviceGL::OnCmdLine(int x1, int y1, int x2, int y2, float r, float fth, XUIColor color)
+void XUIDeviceGL::OnCmdLine(int x1, int y1, int x2, int y2, float r, XUIColor color)
 {
-	drawLine((float)x1, (float)y1, (float)x2, (float)y2, r, fth, color);
+	drawLine((float)x1, (float)y1, (float)x2, (float)y2, r, 1.0f, color);
 }
 
 void XUIDeviceGL::OnCmdBeginScissor(int x, int y, int w, int h)

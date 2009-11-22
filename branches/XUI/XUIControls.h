@@ -3,8 +3,8 @@
 class XUIButton : public XUIWidget
 {
 public:
-	XUIButton(bool bManualFree);
-	XUIButton(const char* pText, int nLeft, int nTop, int nWidth, int nHeight);
+	XUIButton(const char* pName, bool bManualFree);
+	XUIButton(const char* pName, const char* pText, int nLeft, int nTop, int nWidth, int nHeight);
 	virtual ~XUIButton();
 
 	void SetText(const char* pText) { m_pText = pText; }
@@ -23,8 +23,8 @@ private:
 class XUILabel : public XUIWidget
 {
 public:
-	XUILabel(bool bManualFree);
-	XUILabel(const char* pText, int nLeft, int nTop, int nWidth, int nHeight);
+	XUILabel(const char* pName, bool bManualFree);
+	XUILabel(const char* pName, const char* pText, int nLeft, int nTop, int nWidth, int nHeight);
 	virtual ~XUILabel();
 
 	void SetText(const char* pText) { m_pText = pText; }
@@ -39,8 +39,8 @@ private:
 class XUIScrollPanel : public XUIWidget
 {
 public:
-	XUIScrollPanel(bool bManualFree);
-	XUIScrollPanel(const char* pText, int nLeft, int nTop, int nWidth, int nHeight);
+	XUIScrollPanel(const char* pName, bool bManualFree);
+	XUIScrollPanel(const char* pName, const char* pText, int nLeft, int nTop, int nWidth, int nHeight);
 	virtual ~XUIScrollPanel();
 
 	bool AddWidget(XUIWidget* pWidget);

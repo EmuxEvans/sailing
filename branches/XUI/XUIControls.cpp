@@ -17,14 +17,14 @@ static const int SCROLL_AREA_PADDING = 6;
 static const int INTEND_SIZE = 16;
 static const int AREA_HEADER = 30;
 
-XUIButton::XUIButton(bool bManualFree)
+XUIButton::XUIButton(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
 {
 	if(bManualFree) ManualFree();
 	m_bOver = false;
 	m_pText = "";
 }
 
-XUIButton::XUIButton(const char* pText, int nLeft, int nTop, int nWidth, int nHeight)
+XUIButton::XUIButton(const char* pName, const char* pText, int nLeft, int nTop, int nWidth, int nHeight) : XUIWidget(pName)
 {
 	m_bOver = false;
 	SetText(pText);
@@ -45,13 +45,13 @@ void XUIButton::onRender(XUIDevice* pDevice)
 		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, 1, XUI_RGBA(128,128,128,200), m_pText);
 }
 
-XUILabel::XUILabel(bool bManualFree)
+XUILabel::XUILabel(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
 {
 	if(bManualFree) ManualFree();
 	m_pText = NULL;
 }
 
-XUILabel::XUILabel(const char* pText, int nLeft, int nTop, int nWidth, int nHeight)
+XUILabel::XUILabel(const char* pName, const char* pText, int nLeft, int nTop, int nWidth, int nHeight) : XUIWidget(pName)
 {
 	SetText(pText);
 	SetWidgetRect(nLeft, nTop, nWidth, nHeight);
@@ -67,7 +67,7 @@ void XUILabel::onRender(XUIDevice* pDevice)
 	pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2, 1, XUI_RGBA(250, 250, 250, 255), m_pText);
 }
 
-XUIScrollPanel::XUIScrollPanel(bool bManualFree)
+XUIScrollPanel::XUIScrollPanel(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
 {
 	if(bManualFree) ManualFree();
 	m_pText = NULL;
@@ -80,7 +80,7 @@ XUIScrollPanel::XUIScrollPanel(bool bManualFree)
 	EnableScroll(true);
 }
 
-XUIScrollPanel::XUIScrollPanel(const char* pText, int nLeft, int nTop, int nWidth, int nHeight)
+XUIScrollPanel::XUIScrollPanel(const char* pName, const char* pText, int nLeft, int nTop, int nWidth, int nHeight) : XUIWidget(pName)
 {
 	SetText(pText);
 
