@@ -26,12 +26,14 @@ class XUIWidget
 	friend class XUI;
 	friend class XUIDevice;
 public:
-	XUIWidget(bool bManualFree=false);
+	XUIWidget(const char* pName, bool bManualFree=false);
 	virtual ~XUIWidget();
 
 	XUI* GetXUI();
 	XUIWidgetRoot* GetRoot();
 
+	const XUIString& GetWidgetName() { return m_sName; }
+	XUIWidget* GetWidget(const char* pName);
 	void ManualFree() { m_bManualFree = true; }
 
 	XUIWidget* GetParent() { return m_pParent; }
@@ -122,6 +124,7 @@ protected:
 	virtual void OnSizeChange(int nWidth, int nHeight);
 
 private:
+	XUIString m_sName;
 	bool m_bManualFree;
 	XUIWidget* m_pParent;
 	XUIWidget* m_pNext;
@@ -141,7 +144,7 @@ class XUIWidgetRoot : public XUIWidget
 {
 	friend class XUI;
 public:
-	XUIWidgetRoot() : XUIWidget(true) { }
+	XUIWidgetRoot() : XUIWidget("ROOT", true) { }
 
 	XUI* GetXUI() { return m_pXUI; }
 

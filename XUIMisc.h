@@ -1,5 +1,8 @@
 #pragma once
 
+#include <string>
+typedef std::string XUIString;
+
 class XUIPoint
 {
 public:

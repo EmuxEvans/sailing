@@ -20,8 +20,9 @@
 	}													\
 }
 
-XUIWidget::XUIWidget(bool bManualFree)
+XUIWidget::XUIWidget(const char* pName, bool bManualFree)
 {
+	m_sName = pName;
 	m_bManualFree = bManualFree;
 
 	m_pParent = NULL;
@@ -111,6 +112,17 @@ XUIWidgetRoot* XUIWidget::GetRoot()
 		pRoot = NULL;
 	}
 	return pRoot;
+}
+
+XUIWidget* XUIWidget::GetWidget(const char* pName)
+{
+	XUIWidget* pWidget = GetFirstChild();
+	while(pWidget) {
+		if(pWidget->GetWidgetName()==pName) return pWidget;
+		if(!pWidget->m_bVisable) return false;
+		pWidget = pWidget->GetParent();
+	}
+	return NULL;
 }
 
 bool XUIWidget::IsVisable()
