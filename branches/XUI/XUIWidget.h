@@ -55,6 +55,7 @@ public:
 	XUIPoint& ScreenToWidget(const XUIPoint& In, XUIPoint& Out);
 	XUIPoint& WidgetToScreen(const XUIPoint& In, XUIPoint& Out);
 
+	void CenterWidget();
 	void SetWidgetRect(int nLeft, int nTop, int nWidth, int nHeight);
 	void SetWidgetPosition(int nLeft, int nTop);
 	void SetWidgetSize(int nWidth, int nHeight);

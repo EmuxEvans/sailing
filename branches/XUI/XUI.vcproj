@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XUIControlFactroy.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XUIControls.cpp"
 				>
 			</File>
@@ -230,6 +234,10 @@
 			</File>
 			<File
 				RelativePath=".\XUIApp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XUIControlFactroy.h"
 				>
 			</File>
 			<File
@@ -294,6 +302,42 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="xml"
+			>
+			<File
+				RelativePath=".\xml\tinystr.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\xml\tinystr.h"
+				>
+			</File>
+			<File
+				RelativePath=".\xml\tinyxml.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\xml\tinyxml.h"
+				>
+			</File>
+			<File
+				RelativePath=".\xml\tinyxmlerror.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\xml\tinyxmlparser.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\xml\XmlUtils.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\xml\XmlUtils.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>
