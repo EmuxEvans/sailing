@@ -179,6 +179,13 @@ XUIPoint& XUIWidget::WidgetToScreen(const XUIPoint& In, XUIPoint& Out)
 	return Out;
 }
 
+void XUIWidget::CenterWidget()
+{
+	if(m_pParent) {
+		SetWidgetPosition((m_pParent->GetClientWidth()-GetWidgetWidth())/2, (m_pParent->GetClientHeight()-GetWidgetHeight())/2);
+	}
+}
+
 void XUIWidget::SetWidgetRect(int nLeft, int nTop, int nWidth, int nHeight)
 {
 	bool bMove = (m_nLeft!=nLeft || m_nTop!=nTop);

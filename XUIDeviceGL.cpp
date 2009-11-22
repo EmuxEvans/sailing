@@ -212,7 +212,7 @@ static void getBakedQuad(stbtt_bakedchar *chardata, int pw, int ph, int char_ind
 	q->y0 = (float)round_y;
 	q->x1 = (float)round_x + b->x1 - b->x0;
 	q->y1 = (float)round_y - b->y1 + b->y0;
-	
+
 	q->s0 = b->x0 / (float)pw;
 	q->t0 = b->y0 / (float)pw;
 	q->s1 = b->x1 / (float)ph;
@@ -266,20 +266,23 @@ static void drawText(float x, float y, const char *text, int align, unsigned int
 		{			
 			stbtt_aligned_quad q;
 			getBakedQuad(g_cdata, 512,512, c-32, &x,&y,&q);
+
+			q.y0 = y - (q.y0 - y) + 10;
+			q.y1 = y - (q.y1 - y) + 10;
 			
 			glTexCoord2f(q.s0, q.t1);
-			glVertex2f(q.x0, q.y0);
-			glTexCoord2f(q.s1, q.t0);
-			glVertex2f(q.x1, q.y1);
-			glTexCoord2f(q.s1, q.t1);
-			glVertex2f(q.x1, q.y0);
-			
-			glTexCoord2f(q.s0, q.t1);
-			glVertex2f(q.x0, q.y0);
-			glTexCoord2f(q.s0, q.t0);
 			glVertex2f(q.x0, q.y1);
 			glTexCoord2f(q.s1, q.t0);
+			glVertex2f(q.x1, q.y0);
+			glTexCoord2f(q.s1, q.t1);
 			glVertex2f(q.x1, q.y1);
+			
+			glTexCoord2f(q.s0, q.t1);
+			glVertex2f(q.x0, q.y1);
+			glTexCoord2f(q.s0, q.t0);
+			glVertex2f(q.x0, q.y0);
+			glTexCoord2f(q.s1, q.t0);
+			glVertex2f(q.x1, q.y0);
 		}
 		++text;
 	}

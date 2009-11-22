@@ -63,7 +63,6 @@ XUILabel::~XUILabel()
 
 void XUILabel::onRender(XUIDevice* pDevice)
 {
-	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 0, XUI_RGBA(128,128,128, 196));
 	pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2, 1, XUI_RGBA(250, 250, 250, 255), m_pText);
 }
 
@@ -112,31 +111,21 @@ void XUIScrollPanel::onRender(XUIDevice* pDevice)
 	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,0,0,192));
 	pDevice->AddRect(SCROLL_AREA_PADDING, SCROLL_AREA_PADDING,
 		GetWidgetWidth()-SCROLL_AREA_PADDING*2, AREA_HEADER-SCROLL_AREA_PADDING*2,
-//		(AREA_HEADER-SCROLL_AREA_PADDING*2)/2-1,
-		0,
-		m_bBarLight?XUI_RGBA(255, 150, 0, 192):XUI_RGBA(198, 112, 0, 192));
+		2, m_bBarLight?XUI_RGBA(255, 150, 0, 192):XUI_RGBA(198, 112, 0, 192));
 	pDevice->AddText(AREA_HEADER/2, AREA_HEADER/2-TEXT_HEIGHT/2-1, 0,
 		m_bBarLight?XUI_RGBA(255,255,255,255):XUI_RGBA(255,255,255,128), m_pText);
 
-	int nBarStart, nBarHeight;
-	if(m_nWidgetsHeight>=GetClientHeight()) {
-		nBarStart = 0;
-		nBarHeight = GetClientHeight();
-	} else {
+	if(m_nWidgetsHeight>GetClientHeight()) {
+		int nBarStart, nBarHeight;
 		nBarStart = (int)((float)GetScrollPositionY()/(float)m_nWidgetsHeight * GetClientHeight());
 		nBarHeight = (int)((float)(GetScrollPositionY()+GetClientHeight())/(float)m_nWidgetsHeight * GetClientHeight()) - nBarStart;
-		if(nBarHeight>GetClientHeight()) nBarHeight = GetClientHeight();
+		if(nBarStart+nBarHeight>GetClientHeight()) nBarHeight = GetClientHeight() - nBarStart;
+		int nBarLeft, nBarWidth;
+		nBarLeft = GetWidgetWidth()-SCROLL_AREA_PADDING*2-SCROLL_AREA_PADDING/2 + 1;
+		nBarWidth = SCROLL_AREA_PADDING*2 - 2;
+		pDevice->AddRect(nBarLeft, GetClientTop(), nBarWidth, GetClientHeight(), nBarWidth/2-1, XUI_RGBA(0,0,0,255));
+		pDevice->AddRect(nBarLeft, GetClientTop()+nBarStart, nBarWidth, nBarHeight, nBarWidth/2-1, XUI_RGBA(255,255,255,200));
 	}
-	nBarStart = (int)((float)GetScrollPositionY()/(float)m_nWidgetsHeight * GetClientHeight());
-	nBarHeight = (int)((float)(GetScrollPositionY()+GetClientHeight())/(float)m_nWidgetsHeight * GetClientHeight()) - nBarStart;
-	if(nBarStart+nBarHeight>GetClientHeight()) nBarHeight = GetClientHeight() - nBarStart;
-
-	int nBarLeft, nBarWidth;
-	nBarLeft = GetWidgetWidth()-SCROLL_AREA_PADDING*2-SCROLL_AREA_PADDING/2 + 1;
-	nBarWidth = SCROLL_AREA_PADDING*2 - 2;
-
-	pDevice->AddRect(nBarLeft, GetClientTop(), nBarWidth, GetClientHeight(), nBarWidth/2-1, XUI_RGBA(0,0,0,255));
-	pDevice->AddRect(nBarLeft, GetClientTop()+nBarStart, nBarWidth, nBarHeight, nBarWidth/2-1, XUI_RGBA(255,255,255,200));
 
 	XUIWidget::onRender(pDevice);
 }
