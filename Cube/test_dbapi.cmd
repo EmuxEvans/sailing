@@ -1,1 +1,0 @@
-test_dbapi.exe "provider=sqlite;dbname=cube.db"
