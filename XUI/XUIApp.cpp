@@ -250,6 +250,8 @@ static BOOL CreateGLWindow(char* title, int width, int height, int bits, bool fu
 	return TRUE;
 }
 
+static DWORD g_mbClick = 0;
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(uMsg) {
@@ -267,6 +269,25 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		return 0;
 	case WM_MOUSEMOVE:
 		_gXUI.MouseMove(XUIPoint(LOWORD(lParam), HIWORD(lParam)));
+		{
+			DWORD mbClick = 0;
+			if(GetKeyState(VK_LBUTTON)&0x8000) mbClick |= 0x001;
+			if(GetKeyState(VK_RBUTTON)&0x8000) mbClick |= 0x010;
+			if(GetKeyState(VK_MBUTTON)&0x8000) mbClick |= 0x100;
+			mbClick = mbClick ^ g_mbClick;
+			if((mbClick&0x00f) && (g_mbClick&0x00f)) {
+				mbClick &= 0xff0;
+				_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
+			}
+			if((mbClick&0x0f0) && (g_mbClick&0x0f0)) {
+				mbClick &= 0xf0f;
+				_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_RBUTTON);
+			}
+			if((mbClick&0xf00) && (g_mbClick&0xf00)) {
+				mbClick &= 0x0ff;
+				_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
+			}
+		}
 		break;
 	case WM_MOUSEWHEEL:
 		POINT Point;
@@ -276,21 +297,27 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		_gXUI.MouseWheel(XUIPoint(Point.x, Point.y), GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
 		break;
 	case WM_LBUTTONDOWN:
+		g_mbClick |= 0x001;
 		_gXUI.MouseButtonPressed(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
 		break;
 	case WM_RBUTTONDOWN:
+		g_mbClick |= 0x010;
 		_gXUI.MouseButtonPressed(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_RBUTTON);
 		break;
 	case WM_MBUTTONDOWN:
+		g_mbClick |= 0x100;
 		_gXUI.MouseButtonPressed(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
 		break;
 	case WM_LBUTTONUP:
+		g_mbClick &= 0xff0;
 		_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
 		break;
 	case WM_RBUTTONUP:
+		g_mbClick &= 0xf0f;
 		_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_RBUTTON);
 		break;
 	case WM_MBUTTONUP:
+		g_mbClick &= 0x0ff;
 		_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
 		break;
 	case WM_LBUTTONDBLCLK:

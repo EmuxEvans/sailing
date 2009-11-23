@@ -122,3 +122,10 @@ private:
 	XUIPoint m_InMovePoint;
 	int m_nInMoveX, m_nInMoveY;
 };
+
+class XUIList : public XUIScrollPanel
+{
+public:
+	XUIList(const char* pName="", bool bManualFree=false);
+	XUIList(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
+};
