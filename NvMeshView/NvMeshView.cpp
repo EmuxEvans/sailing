@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "Resource.h"
 
+#include <io.h>
+#include <string.h>
 #include <assert.h>
 #include <windows.h>
 #include <commdlg.h>
@@ -16,6 +18,8 @@
 #include "XUIDevice.h"
 #include "XUIApp.h"
 
+#include <vector>
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	return XUI_AppMain();
@@ -26,11 +30,6 @@ public:
 	virtual ~IXUIAppEventLink() { }
 
 };
-
-UINT_PTR CALLBACK OFNHookProc(HWND, UINT, WPARAM, LPARAM)
-{
-	return 0;
-}
 
 class XUIApp {
 public:
@@ -46,26 +45,70 @@ public:
 
 
 	void OnFileOpen_Select(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
-		XUIWidget* pSelect = m_pFileOpen->GetWidget("PANEL")->GetWidget("SELECT");
-		XUIPoint P(pSelect->GetWidgetLeft() + pSelect->GetWidgetWidth() + 20, pSelect->GetWidgetTop());
-		pSelect->GetParent()->WidgetToScreen(P, P);
-		m_pFileList->GetParent()->ScreenToWidget(P, P);
-		m_pFileList->SetWidgetPosition(P.x, P.y-5);
 		m_pFileList->SetVisable(!m_pFileList->IsVisable());
+		if(m_pFileList->IsVisable()) {
+			m_pFileList->BringToTop();
+			scanDirectory("meshes", ".obj");
+		}
+	}
+
+	void OnFileListClick(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
+		m_pFileList->SetVisable(false);
+		m_pFileName->SetText(dynamic_cast<XUIButton*>(pWidget)->GetText());
 	}
 
 	void OnFileOpen_Open(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
 		int i = 0;
 	}
 
+	void OnWidgetMove(XUIWidget* pWidget, int nLeft, int nTop)
+	{
+		m_pFileList->SetWidgetPosition(m_pFileOpen->GetWidgetLeft()+m_nFileListOffsetX, m_pFileOpen->GetWidgetTop()+m_nFileListOffsetY);
+		m_pFileList->BringToTop();
+	}
+
+	void scanDirectory(const char* pPath, const char* ext) {
+		clearFiles();
+
+		_finddata_t dir;
+		char pathWithExt[MAX_PATH];
+		long fh;
+		strcpy(pathWithExt, pPath);
+		strcat(pathWithExt, "/*");
+		strcat(pathWithExt, ext);
+		fh = _findfirst(pathWithExt, &dir);
+		if (fh == -1L) return;
+		do {
+			eventMouseButtonClickImpl<XUIApp>* pEvent = new eventMouseButtonClickImpl<XUIApp>();
+			XUIButton* pButton = new XUIButton("", dir.name, 0, 0, 100, 15);
+			m_pFileList->AddWidget(pButton);
+			pButton->_eventMouseButtonClick.Register(pEvent->R(this, &XUIApp::OnFileListClick));
+			events.push_back(new eventMouseButtonClickImpl<XUIApp>);
+		} while (_findnext(fh, &dir) == 0);
+		_findclose(fh);
+	}
+
+	void clearFiles() {
+		for(size_t i=0; i<events.size(); i++) {
+			delete events[i];
+		}
+		m_pFileList->ClearWidgets();
+		events.clear();
+	}
+
 private:
 	XUIDialog* m_pWelcome;
 	XUIDialog* m_pFileOpen;
+	XUILabel* m_pFileName;
 	XUIScrollPanel* m_pFileList;
+	int m_nFileListOffsetX, m_nFileListOffsetY;
 	eventMouseButtonClickImpl<XUIApp> m_eventWelcome_Close;
 	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Select;
 	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Open;
 	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Welcome;
+	eventWidgetMoveImpl<XUIApp> m_eventFileListMove;
+
+	std::vector<eventMouseButtonClickImpl<XUIApp>*> events;
 };
 
 void XUIApp::AppInit()
@@ -79,10 +122,12 @@ void XUIApp::AppInit()
 
 	m_pFileOpen = new XUIDialog("", "Main Tool", 10, 10, 200, 110);
 	XUIScrollPanel* pFileOpen = new XUIScrollPanel("PANEL", 0, 0, m_pFileOpen->GetClientWidth(), m_pFileOpen->GetClientHeight());
-	XUILabel* pFile = new XUILabel("FILE", "", 10, 15, 100, 15);
-	pFileOpen->AddWidget(pFile);
-	pFile->SetWidgetSize(pFile->GetWidgetWidth()-20, pFile->GetWidgetHeight());
-	pFileOpen->AddChild(new XUIButton("SELECT", "...", pFile->GetWidgetWidth(), pFile->GetWidgetTop(), pFileOpen->GetClientWidth()-pFile->GetWidgetWidth(), pFile->GetWidgetHeight()));
+	m_pFileName = new XUILabel("FILE", "", 10, 15, 100, 15);
+	pFileOpen->AddWidget(m_pFileName);
+	m_pFileName->SetWidgetSize(m_pFileName->GetWidgetWidth()-20, m_pFileName->GetWidgetHeight());
+	pFileOpen->AddChild(new XUIButton("SELECT", "...", m_pFileName->GetWidgetWidth(), m_pFileName->GetWidgetTop(), pFileOpen->GetClientWidth()-m_pFileName->GetWidgetWidth(), m_pFileName->GetWidgetHeight()));
+
+	pFileOpen->AddWidget(new XUISlider("", "Scale", 10, 20, 100, 20));
 	pFileOpen->AddWidget(new XUIButton("OPEN", "Open", 10, 20, 100, 20));
 	pFileOpen->AddWidget(new XUIButton("SHOW", "Show Welcome", 10, 20, 100, 20));
 	pFileOpen->GetWidget("SELECT")->_eventMouseButtonClick.Register(m_eventFileOpen_Select.R(this, &XUIApp::OnFileOpen_Select));
@@ -101,8 +146,19 @@ void XUIApp::AppInit()
 	m_pFileList->m_bShowBoard = true;
 	m_pFileList->SetVisable(false);
 	XUI_GetXUI().GetRoot()->AddChild(m_pFileList);
-	m_pFileList->SetClientArea(5, 5, 5, 5);
+	m_pFileList->SetClientArea(m_pFileList->GetClientLeft()+5,
+		m_pFileList->GetClientTop()+5,
+		m_pFileList->GetClientRight()+5,
+		m_pFileList->GetClientBottom()+5);
 
+	XUIWidget* pSelect = m_pFileOpen->GetWidget("PANEL")->GetWidget("SELECT");
+	XUIPoint P(pSelect->GetWidgetLeft() + pSelect->GetWidgetWidth() + 20, pSelect->GetWidgetTop()-5);
+	pSelect->GetParent()->WidgetToScreen(P, P);
+	m_pFileList->GetParent()->ScreenToWidget(P, P);
+	m_pFileList->SetWidgetPosition(P.x, P.y);
+	m_nFileListOffsetX = P.x - m_pFileOpen->GetWidgetLeft();
+	m_nFileListOffsetY = P.y - m_pFileOpen->GetWidgetTop();
+	m_pFileOpen->_eventWidgetMove.Register(m_eventFileListMove.R(this, &XUIApp::OnWidgetMove));
 }
 
 void XUIApp::AppFinal()

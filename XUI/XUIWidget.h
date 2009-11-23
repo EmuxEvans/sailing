@@ -103,12 +103,13 @@ public:
 
 protected:
 
+	virtual void ActiveWidget(XUIWidget* pWidget);
 	void Destroy();
 
 	virtual void onRender(XUIDevice* pDevice);
 
 	virtual void onLostFocus(XUIWidget* pNew);
-	virtual void onSetFocus(XUIWidget* pOld);
+	virtual bool onSetFocus(XUIWidget* pOld);
 	virtual void onMouseMove(const XUIPoint& Point);
 	virtual void onMouseEnter();
 	virtual void onMouseLeave();
