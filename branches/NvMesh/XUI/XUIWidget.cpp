@@ -57,6 +57,13 @@ XUIWidget::~XUIWidget()
 {
 }
 
+void XUIWidget::ActiveWidget(XUIWidget* pWidget)
+{
+	if(m_pParent) {
+		m_pParent->ActiveWidget(pWidget);
+	}
+}
+
 void XUIWidget::Destroy()
 {
 	while(m_pFirstChild) {
@@ -287,9 +294,10 @@ void XUIWidget::onLostFocus(XUIWidget* pNew)
 	_eventLostFocus.Invoke(this, pNew);
 }
 
-void XUIWidget::onSetFocus(XUIWidget* pOld)
+bool XUIWidget::onSetFocus(XUIWidget* pOld)
 {
 	_eventSetFocus.Invoke(this, pOld);
+	return false;
 }
 
 void XUIWidget::onMouseMove(const XUIPoint& Point)
@@ -350,7 +358,7 @@ void XUIWidget::onKeyChar(unsigned short nKey, unsigned int Char)
 
 void XUIWidget::OnWidgetMove(int nLeft, int nTop)
 {
-	_eventSizeChange.Invoke(this, nLeft, nTop);
+	_eventWidgetMove.Invoke(this, nLeft, nTop);
 }
 
 void XUIWidget::OnSizeChange(int nWidth, int nHeight)
@@ -456,20 +464,29 @@ void XUI::MouseButtonPressed(const XUIPoint& Point, unsigned short nId)
 	}
 
 	XUIWidget* pWidget = GetWidget(Point);
+
+	if(m_pCapture!=pWidget && m_pCapture!=NULL) {
+		XUIPoint wp;
+		m_pCapture->onMouseButtonPressed(m_pCapture->ScreenToWidget(Point, wp), nId);
+	}
+
 	if(pWidget) {
 		XUIPoint wp;
 		pWidget->onMouseButtonPressed(pWidget->ScreenToWidget(Point, wp), nId);
-	}
-
-	if(m_pCapture!=NULL && m_pCapture!=pWidget) {
-		XUIPoint wp;
-		m_pCapture->onMouseButtonPressed(m_pCapture->ScreenToWidget(Point, wp), nId);
+		if(nId==XUI_INPUT::MOUSE_LBUTTON) {
+			pWidget->ActiveWidget(pWidget);
+		}
 	}
 }
 
 void XUI::MouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 {
 	XUIWidget* pWidget = GetWidget(Point);
+
+	if(m_pCapture!=pWidget && m_pCapture!=NULL) {
+		XUIPoint wp;
+		m_pCapture->onMouseButtonReleased(m_pCapture->ScreenToWidget(Point, wp), nId);
+	}
 
 	if(pWidget) {
 		XUIPoint wp;
@@ -488,11 +505,6 @@ void XUI::MouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 				pWidget->onMouseButtonClick(wp, nId);
 			}
 		}
-	}
-
-	if(m_pCapture!=NULL && m_pCapture!=pWidget) {
-		XUIPoint wp;
-		m_pCapture->onMouseButtonReleased(m_pCapture->ScreenToWidget(Point, wp), nId);
 	}
 }
 
