@@ -152,7 +152,8 @@ void XUISlider::onRender(XUIDevice* pDevice)
 
 	int nPosX = (int)((GetWidgetWidth()-SLIDER_WIDTH) * (m_fValue-m_fMin) / (m_fMax-m_fMin));
 
-	pDevice->AddRect(nPosX, 0, SLIDER_WIDTH, GetWidgetHeight(), 2, m_bIn||m_nCaptureX>=0?XUI_RGBA(255,255,255,255):XUI_RGBA(255,255,255,64));
+	pDevice->AddRect(nPosX, 0, SLIDER_WIDTH, GetWidgetHeight(), 2, XUI_RGBA(255,255,255,64));
+//	pDevice->AddRect(nPosX, 0, SLIDER_WIDTH, GetWidgetHeight(), 2, m_bIn||m_nCaptureX>=0?XUI_RGBA(255,255,255,255):XUI_RGBA(255,255,255,64));
 
 	int digits = (int)(ceilf(log10f(m_fInc)));
 	char fmt[16];
