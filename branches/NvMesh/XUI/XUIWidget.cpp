@@ -50,7 +50,6 @@ XUIWidget::XUIWidget(const char* pName, bool bManualFree)
 	m_nScrollY = 0;
 	m_nScrollWidth = 1;
 	m_nScrollHeight = 1;
-
 }
 
 XUIWidget::~XUIWidget()
