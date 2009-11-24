@@ -41,6 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="$(SolutionDir)Depends\glew\include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -104,6 +105,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="$(SolutionDir)Depends\glew\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -152,6 +154,10 @@
 				RelativePath=".\MeshLoaderObj.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\RecastDebugDraw.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -160,6 +166,10 @@
 			>
 			<File
 				RelativePath=".\MeshLoaderObj.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastDebugDraw.h"
 				>
 			</File>
 		</Filter>

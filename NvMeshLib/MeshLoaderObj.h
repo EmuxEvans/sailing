@@ -27,6 +27,7 @@ public:
 
 	bool load(const char* fileName);
 	bool save(const char* filename);
+	void clear();
 
 	inline const float* getVerts() const { return m_verts; }
 	inline const float* getNormals() const { return m_normals; }
@@ -46,7 +47,8 @@ public:
 	void setScale(float scale) { m_scale = scale; }
 	float getScale() { return m_scale; }
 
-private:
+//private:
+public:
 
 	float* m_verts;
 	int* m_tris;
