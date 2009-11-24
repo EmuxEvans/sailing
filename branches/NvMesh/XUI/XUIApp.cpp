@@ -60,13 +60,6 @@ static int DrawGL()
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_CULL_FACE);
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(45.0f, (GLfloat)_width/(GLfloat)_height, 0.1f, 100.0f);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
 	XUI_DrawScene();
 
 	glDisable(GL_DEPTH_TEST);
@@ -353,7 +346,6 @@ int XUI_AppMain()
 		return 0;
 	}
 
-	glEnable(GL_CULL_FACE);
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_LINE_SMOOTH);
 

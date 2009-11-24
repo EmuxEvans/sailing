@@ -4,6 +4,9 @@
 #include "stdafx.h"
 #include "Resource.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #include <io.h>
 #include <string.h>
 #include <assert.h>
@@ -46,6 +49,7 @@ public:
 
 	bool m_bDrawMesh;
 	MeshLoaderObj m_Mesh;
+	float camr, camx, camy, camz, rx, ry;
 
 public:
 	void OnWelcome_Close(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
@@ -75,6 +79,8 @@ public:
 		}
 		m_bDrawMesh = true;
 
+		float meshBMin[3], meshBMax[3];
+		rcCalcBounds(m_Mesh.getVerts(), m_Mesh.getVertCount(), meshBMin, meshBMax);
 		camr = sqrtf(rcSqr(meshBMax[0]-meshBMin[0]) +
 		rcSqr(meshBMax[1]-meshBMin[1]) +
 		rcSqr(meshBMax[2]-meshBMin[2])) / 2;
@@ -195,13 +201,20 @@ void XUIApp::AppFinal()
 
 void XUIApp::DrawScene()
 {
-	glLoadIdentity();
-	glTranslatef(-1.5f,0.0f,-6.0f);
-	glRotatef(0.0f,0.0f,1.0f,0.0f);
+	if(!m_bDrawMesh) return;
 
-	if(m_bDrawMesh) {
-		rcDebugDrawMesh(m_Mesh.m_verts, m_Mesh.m_vertCount, m_Mesh.m_tris, m_Mesh.m_normals, m_Mesh.m_triCount, 0);
-	}
+	glEnable(GL_DEPTH_TEST);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(50.0f, (float)800/(float)600, 1.0f, camr);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glRotatef(rx,1,0,0);
+	glRotatef(ry,0,1,0);
+	glTranslatef(-camx, -camy, -camz);
+
+	rcDebugDrawMesh(m_Mesh.m_verts, m_Mesh.m_vertCount, m_Mesh.m_tris, m_Mesh.m_normals, m_Mesh.m_triCount, 0);
+	rcDebugDrawMeshSlope(m_Mesh.m_verts, m_Mesh.m_vertCount, m_Mesh.m_tris, m_Mesh.m_normals, m_Mesh.m_triCount, 45);
 }
 
 void XUIApp::DoTick()

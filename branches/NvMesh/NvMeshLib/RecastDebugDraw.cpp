@@ -22,6 +22,43 @@
 #include <windows.h>
 #include <gl\glew.h>
 
+template<class T> inline T rcMin(T a, T b) { return a < b ? a : b; }
+template<class T> inline T rcMax(T a, T b) { return a > b ? a : b; }
+
+inline void vmin(float* mn, const float* v)
+{
+	mn[0] = rcMin(mn[0], v[0]);
+	mn[1] = rcMin(mn[1], v[1]);
+	mn[2] = rcMin(mn[2], v[2]);
+}
+
+inline void vmax(float* mx, const float* v)
+{
+	mx[0] = rcMax(mx[0], v[0]);
+	mx[1] = rcMax(mx[1], v[1]);
+	mx[2] = rcMax(mx[2], v[2]);
+}
+
+inline void vcopy(float* dest, const float* v)
+{
+	dest[0] = v[0];
+	dest[1] = v[1];
+	dest[2] = v[2];
+}
+
+void rcCalcBounds(const float* verts, int nv, float* bmin, float* bmax)
+{
+	// Calculate bounding box.
+	vcopy(bmin, verts);
+	vcopy(bmax, verts);
+	for (int i = 1; i < nv; ++i)
+	{
+		const float* v = &verts[i*3];
+		vmin(bmin, v);
+		vmax(bmax, v);
+	}
+}
+
 void rcDebugDrawMesh(const float* verts, int nverts,
 					 const int* tris, const float* normals, int ntris,
 					 const unsigned char* flags)
