@@ -36,9 +36,7 @@ MeshLoaderObj::MeshLoaderObj() :
 
 MeshLoaderObj::~MeshLoaderObj()
 {
-	delete [] m_verts;
-	delete [] m_normals;
-	delete [] m_tris;
+	clear();
 }
 		
 void MeshLoaderObj::addVertex(float x, float y, float z, int& cap)
@@ -161,6 +159,8 @@ static int parseFace(char* row, int* data, int n, int vcnt)
 
 bool MeshLoaderObj::load(const char* filename)
 {
+	clear();
+
 	char* buf = 0;
 	FILE* fp = fopen(filename, "rb");
 	if (!fp)
@@ -256,4 +256,16 @@ bool MeshLoaderObj::save(const char* filename)
 
 	fclose(fp);
 	return true;
+}
+
+void MeshLoaderObj::clear()
+{
+	delete [] m_verts;
+	delete [] m_normals;
+	delete [] m_tris;
+	m_verts = NULL;
+	m_normals = NULL;
+	m_tris = NULL;
+	m_vertCount = 0;
+	m_triCount = 0;
 }

@@ -29,6 +29,7 @@ public:
 	virtual ~XUILabel();
 
 	void SetText(const char* pText) { m_Text = pText; }
+	const char* GetText() { return m_Text.c_str(); }
 
 protected:
 	virtual void onRender(XUIDevice* pDevice);

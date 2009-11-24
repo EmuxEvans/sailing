@@ -19,6 +19,8 @@
 #include "XUIApp.h"
 
 #include <vector>
+#include "../NvMeshLib/MeshLoaderObj.h"
+#include "../NvMeshLib/RecastDebugDraw.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -33,16 +35,22 @@ public:
 
 class XUIApp {
 public:
+	XUIApp() {
+		m_bDrawMesh = false;
+	}
+
 	void AppInit();
 	void AppFinal();
 	void DoTick();
 	void DrawScene();
 
+	bool m_bDrawMesh;
+	MeshLoaderObj m_Mesh;
+
 public:
 	void OnWelcome_Close(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
 		m_pWelcome->SetVisable(!m_pWelcome->IsVisable());
 	}
-
 
 	void OnFileOpen_Select(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
 		m_pFileList->SetVisable(!m_pFileList->IsVisable());
@@ -58,7 +66,26 @@ public:
 	}
 
 	void OnFileOpen_Open(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
-		int i = 0;
+		char szFileName[300];
+		sprintf(szFileName, "meshes/%s", m_pFileName->GetText());
+		if(!m_Mesh.load(szFileName)) {
+			m_bDrawMesh = false;
+			MessageBox(NULL, "", "ERROR", MB_OK);
+			return;
+		}
+		m_bDrawMesh = true;
+
+		camr = sqrtf(rcSqr(meshBMax[0]-meshBMin[0]) +
+		rcSqr(meshBMax[1]-meshBMin[1]) +
+		rcSqr(meshBMax[2]-meshBMin[2])) / 2;
+		camx = (meshBMax[0] + meshBMin[0]) / 2 + camr;
+		camy = (meshBMax[1] + meshBMin[1]) / 2 + camr;
+		camz = (meshBMax[2] + meshBMin[2]) / 2 + camr;
+		camr *= 3;
+		rx = 45;
+		ry = -45;
+		glFogf(GL_FOG_START, camr*0.2f);
+		glFogf(GL_FOG_END, camr*1.25f);
 	}
 
 	void OnWidgetMove(XUIWidget* pWidget, int nLeft, int nTop)
@@ -146,7 +173,8 @@ void XUIApp::AppInit()
 	m_pFileList->m_bShowBoard = true;
 	m_pFileList->SetVisable(false);
 	XUI_GetXUI().GetRoot()->AddChild(m_pFileList);
-	m_pFileList->SetClientArea(m_pFileList->GetClientLeft()+5,
+	m_pFileList->SetClientArea(
+		m_pFileList->GetClientLeft()+5,
 		m_pFileList->GetClientTop()+5,
 		m_pFileList->GetClientRight()+5,
 		m_pFileList->GetClientBottom()+5);
@@ -167,32 +195,13 @@ void XUIApp::AppFinal()
 
 void XUIApp::DrawScene()
 {
-	static GLfloat	rtri = 0;
-	static GLfloat	rquad = 0;
-
 	glLoadIdentity();
 	glTranslatef(-1.5f,0.0f,-6.0f);
-	glRotatef(rtri,0.0f,1.0f,0.0f);
-	glBegin(GL_TRIANGLES);
-		glColor3f(1.0f,0.0f,0.0f);
-		glVertex3f( 0.0f, 1.0f, 0.0f);
-		glColor3f(0.0f,1.0f,0.0f);
-		glVertex3f(-1.0f,-1.0f, 0.0f);
-		glColor3f(0.0f,0.0f,1.0f);
-		glVertex3f( 1.0f,-1.0f, 0.0f);
-	glEnd();
-	glLoadIdentity();
-	glTranslatef(1.5f,0.0f,-6.0f);
-	glRotatef(rquad,1.0f,0.0f,0.0f);
-	glColor3f(0.5f,0.5f,1.0f);
-	glBegin(GL_QUADS);
-		glVertex3f(-1.0f, 1.0f, 0.0f);
-		glVertex3f( 1.0f, 1.0f, 0.0f);
-		glVertex3f( 1.0f,-1.0f, 0.0f);
-		glVertex3f(-1.0f,-1.0f, 0.0f);
-	glEnd();
-	rtri+=0.2f;
-	rquad-=0.15f;
+	glRotatef(0.0f,0.0f,1.0f,0.0f);
+
+	if(m_bDrawMesh) {
+		rcDebugDrawMesh(m_Mesh.m_verts, m_Mesh.m_vertCount, m_Mesh.m_tris, m_Mesh.m_normals, m_Mesh.m_triCount, 0);
+	}
 }
 
 void XUIApp::DoTick()
