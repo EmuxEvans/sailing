@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)Depends\xml&quot;;&quot;$(SolutionDir)Depends\glew\include&quot;;&quot;$(SolutionDir)XUI&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)Depends\xml&quot;;&quot;$(SolutionDir)Depends\glew\include&quot;;&quot;$(SolutionDir)XUI&quot;;&quot;$(SolutionDir)NvMeshLib&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -116,7 +116,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)Depends\xml&quot;;&quot;$(SolutionDir)Depends\glew\include&quot;;&quot;$(SolutionDir)XUI&quot;"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)Depends\xml&quot;;&quot;$(SolutionDir)Depends\glew\include&quot;;&quot;$(SolutionDir)XUI&quot;;&quot;$(SolutionDir)NvMeshLib&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -179,6 +179,26 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RecastDebugDraw.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -204,6 +224,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\RecastDebugDraw.h"
+				>
+			</File>
 			<File
 				RelativePath=".\stdafx.h"
 				>

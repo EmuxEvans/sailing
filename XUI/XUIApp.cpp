@@ -62,6 +62,7 @@ static int DrawGL()
 	glDisable(GL_TEXTURE_2D);
 	XUI_DrawScene();
 
+	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -361,7 +362,11 @@ int XUI_AppMain()
 			}
 		} else {
 
-			XUI_DoTick();
+			static DWORD dwLast = 0;
+			DWORD dwStart = GetCurrentTime();
+			DWORD dwDelta = dwStart - dwLast;
+			dwLast = dwStart;
+			XUI_DoTick(dwDelta);
 
 			if((active && !DrawGL()) || keys[VK_ESCAPE]) {
 				done = TRUE;

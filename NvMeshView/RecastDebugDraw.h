@@ -34,9 +34,6 @@ inline void intToCol(int i, float* col)
 	col[2] = 1 - b*63.0f/255.0f;
 }
 
-void rcCalcBounds(const float* verts, int nv, float* bmin, float* bmax);
-template<class T> inline T rcSqr(T a) { return a*a; }
-
 void rcDebugDrawHeightfieldSolid(const struct rcHeightfield& hf);
 void rcDebugDrawHeightfieldWalkable(const struct rcHeightfield& hf);
 

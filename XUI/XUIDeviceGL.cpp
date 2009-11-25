@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "XUIMisc.h"
+#include "XUIDelegate.h"
+#include "XUIWidget.h"
+#include "XUIDevice.h"
 #include "XUIDevice.h"
 #include "XUIDeviceGL.h"
 
@@ -245,9 +249,9 @@ static void drawText(float x, float y, const char *text, int align, unsigned int
 {
 	if (!g_ftex) return;
 	
-	if (align == 1)
+	if (align == XUIALIGN_CENTER)
 		x -= getTextLength(g_cdata, text)/2;
-	else if (align == 2)
+	else if (align == XUIALIGN_LEFT)
 		x -= getTextLength(g_cdata, text);
 	
 	glColor4ub(col&0xff, (col>>8)&0xff, (col>>16)&0xff, (col>>24)&0xff);

@@ -125,7 +125,6 @@ XUIWidget* XUIWidget::GetWidget(const char* pName)
 	XUIWidget* pWidget = GetFirstChild();
 	while(pWidget) {
 		if(pWidget->GetWidgetName()==pName) return pWidget;
-		if(!pWidget->m_bVisable) return false;
 		pWidget = pWidget->GetNext();
 	}
 	return NULL;
