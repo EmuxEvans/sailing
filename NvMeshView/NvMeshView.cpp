@@ -157,7 +157,7 @@ public:
 	void OnFileOpen_Open(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
 		char szFileName[300];
 		sprintf(szFileName, "meshes/%s", m_pFileName->GetText());
-		m_Mesh.setScale(1/1000.0f);
+//		m_Mesh.setScale(1/1000.0f);
 		if(!m_Mesh.load(szFileName)) {
 			m_bMesh = false;
 			MessageBox(NULL, "", "ERROR", MB_OK);
@@ -181,10 +181,15 @@ public:
 
 		if(!m_pBuildTool->IsVisable()) {
 			m_pBuildTool->SetVisable(true);
-			m_pFileOpen->SetWidgetSize(m_pFileOpen->GetWidgetWidth(), m_pFileOpen->GetWidgetHeight()+235);
+			m_pFileOpen->SetWidgetSize(m_pFileOpen->GetWidgetWidth(), m_pFileOpen->GetWidgetHeight()+260);
 			m_pFileOpen->GetWidget("BUILD")->SetVisable(true);
 			m_pFileOpen->GetWidget("SAVE")->SetVisable(true);
+			m_pFileOpen->GetWidget("TOOL")->SetVisable(true);
 		}
+	}
+
+	void OnFileOpen_ToolBox(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
+		m_pToolBox->SetVisable(dynamic_cast<XUICheckBox*>(pWidget)->GetCheck());
 	}
 
 	float GetValue(const char* pName) {
@@ -257,12 +262,15 @@ private:
 	XUIScrollPanel* m_pBuildTool;
 	XUILabel* m_pFileName;
 	XUIScrollPanel* m_pFileList;
+	XUIDialog* m_pToolBox;
+
 	int m_nFileListOffsetX, m_nFileListOffsetY;
 	eventMouseButtonClickImpl<XUIApp> m_eventWelcome_Close;
 	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Select;
 	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Open;
 	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Welcome;
 	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Build;
+	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_ToolBox;
 	eventWidgetMoveImpl<XUIApp> m_eventFileListMove;
 
 	std::vector<eventMouseButtonClickImpl<XUIApp>*> events;
@@ -346,9 +354,19 @@ void XUIApp::AppInit()
 	m_pFileOpen->AddChild(m_pBuildTool);
 	m_pFileOpen->AddChild(new XUIButton("BUILD", "Build", 0, 280, m_pFileOpen->GetClientWidth()/2-3, 20));
 	m_pFileOpen->AddChild(new XUIButton("SAVE", "Save", m_pFileOpen->GetClientWidth()/2+3, 280, m_pFileOpen->GetClientWidth()/2-3, 20));
+	m_pFileOpen->AddChild(new XUICheckBox("TOOL", "Tool Box", true, 0, 305, m_pFileOpen->GetClientWidth(), 20));
 	m_pFileOpen->GetWidget("BUILD")->SetVisable(false);
 	m_pFileOpen->GetWidget("SAVE")->SetVisable(false);
+	m_pFileOpen->GetWidget("TOOL")->SetVisable(false);
 	m_pFileOpen->GetWidget("BUILD")->_eventMouseButtonClick.Register(m_eventFileOpen_Build.R(this, &XUIApp::OnFileOpen_Build));
+	m_pFileOpen->GetWidget("TOOL")->_eventMouseButtonClick.Register(m_eventFileOpen_ToolBox.R(this, &XUIApp::OnFileOpen_ToolBox));
+
+	m_pToolBox = new XUIDialog("", "Tool Box", 10, 380, 200, 200);
+	m_pToolBox->AddChild(new XUILabel("", "Mode", XUIALIGN_LEFT, 0, 0, m_pToolBox->GetWidgetWidth(), 20));
+	XUI_GetXUI().GetRoot()->AddChild(m_pToolBox);
+	m_pToolBox->AddChild(new XUICheckBox("PATHFIND", "Path find", true, 0,									25, m_pFileOpen->GetClientWidth()/2-5, 20));
+	m_pToolBox->AddChild(new XUICheckBox("RAYCAST",  "Raycast",   true, m_pFileOpen->GetClientWidth()/2,	25, m_pFileOpen->GetClientWidth()/2-5, 20));
+	m_pToolBox->AddChild(new XUILabel("", "Mode", XUIALIGN_LEFT, 0, 80, m_pToolBox->GetWidgetWidth(), 20));
 }
 
 void XUIApp::AppFinal()
