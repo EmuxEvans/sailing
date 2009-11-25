@@ -27,8 +27,13 @@ public:
 	XUICheckBox(const char* pName, const char* pText, bool bCheck, int nLeft, int nTop, int nWidth, int nHeight);
 	virtual ~XUICheckBox();
 
+	void SetCheck(bool bCheck) { m_bCheck = bCheck; }
+	bool GetCheck() { return m_bCheck; }
+
 protected:
 	virtual void onRender(XUIDevice* pDevice);
+
+	virtual void onMouseButtonClick(const XUIPoint& Point, unsigned short nId);
 
 	bool m_bCheck;
 };

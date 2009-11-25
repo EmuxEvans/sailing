@@ -63,13 +63,26 @@ XUICheckBox::~XUICheckBox()
 
 void XUICheckBox::onRender(XUIDevice* pDevice)
 {
-	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), GetWidgetHeight()/2-1, XUI_RGBA(128, 128, 128, IsEnable()&&m_bOver?196:96));
+	const int cy = GetWidgetHeight() / 2;
 
-	if(IsEnable()) {
-		pDevice->AddText(15, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT, m_bOver?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_Caption.c_str());
-	} else {
-		pDevice->AddText(15, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT, XUI_RGBA(128,128,128,200), m_Caption.c_str());
+	pDevice->AddRect(0, cy-CHECK_SIZE/2-3, CHECK_SIZE+6, CHECK_SIZE+6, 4, XUI_RGBA(128,128,128, m_bOver?196:96));
+	if(m_bCheck) {
+		if(IsEnable())
+			pDevice->AddRect(3, cy-CHECK_SIZE/2, CHECK_SIZE, CHECK_SIZE, 4, XUI_RGBA(255,255,255,m_bOver?255:200));
+		else
+			pDevice->AddRect(3, cy-CHECK_SIZE/2, CHECK_SIZE, CHECK_SIZE, 4, XUI_RGBA(128,128,128,200));
 	}
+	if(IsEnable()) {
+		pDevice->AddText(CHECK_SIZE+10, cy-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT, m_bOver?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_Caption.c_str());
+	} else {
+		pDevice->AddText(CHECK_SIZE+10, cy-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT, XUI_RGBA(128,128,128,200), m_Caption.c_str());
+	}
+}
+
+void XUICheckBox::onMouseButtonClick(const XUIPoint& Point, unsigned short nId)
+{
+	m_bCheck = !m_bCheck;
+	XUIButton::onMouseButtonClick(Point, nId);
 }
 
 XUILabel::XUILabel(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
