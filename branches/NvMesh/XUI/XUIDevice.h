@@ -26,6 +26,7 @@ protected:
 
 	virtual void OnCmdRect(int x, int y, int w, int h, int r, XUIColor color) = 0;
 	virtual void OnCmdTriangle(int x, int y, int w, int h, int d, XUIColor color) = 0;
+	virtual void OnCmdEllipse(float x, float y, float w, float h, XUIColor color) = 0;
 	virtual void OnCmdText(int x, int y, int align, XUIColor color, const char* text) = 0;
 	virtual void OnCmdBeginScissor(int x, int y, int w, int h) = 0;
 	virtual void OnCmdEndScissor() = 0;
