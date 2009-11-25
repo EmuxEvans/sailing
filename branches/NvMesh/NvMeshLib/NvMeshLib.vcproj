@@ -155,7 +155,39 @@
 				>
 			</File>
 			<File
-				RelativePath=".\RecastDebugDraw.cpp"
+				RelativePath=".\Recast.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastContour.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastFilter.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastLog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastMesh.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastMeshDetail.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastRasterization.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastRegion.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastTimer.cpp"
 				>
 			</File>
 		</Filter>
@@ -169,7 +201,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\RecastDebugDraw.h"
+				RelativePath=".\Recast.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastLog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RecastTimer.h"
 				>
 			</File>
 		</Filter>

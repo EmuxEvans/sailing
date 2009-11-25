@@ -16,16 +16,28 @@ protected:
 	virtual void onMouseEnter() { m_bOver = true; }
 	virtual void onMouseLeave() { m_bOver = false; }
 
-private:
 	bool m_bOver;
 	XUIString m_Caption;
+};
+
+class XUICheckBox : public XUIButton
+{
+public:
+	XUICheckBox(const char* pName="", bool bManualFree=false);
+	XUICheckBox(const char* pName, const char* pText, bool bCheck, int nLeft, int nTop, int nWidth, int nHeight);
+	virtual ~XUICheckBox();
+
+protected:
+	virtual void onRender(XUIDevice* pDevice);
+
+	bool m_bCheck;
 };
 
 class XUILabel : public XUIWidget
 {
 public:
 	XUILabel(const char* pName="", bool bManualFree=false);
-	XUILabel(const char* pName, const char* pText, int nLeft, int nTop, int nWidth, int nHeight);
+	XUILabel(const char* pName, const char* pText, int nAlign, int nLeft, int nTop, int nWidth, int nHeight);
 	virtual ~XUILabel();
 
 	void SetText(const char* pText) { m_Text = pText; }
@@ -36,6 +48,7 @@ protected:
 
 private:
 	XUIString m_Text;
+	int m_nAlign;
 };
 
 class XUIPanel : public XUIWidget

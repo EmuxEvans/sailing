@@ -42,19 +42,46 @@ void XUIButton::onRender(XUIDevice* pDevice)
 	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), GetWidgetHeight()/2-1, XUI_RGBA(128, 128, 128, IsEnable()&&m_bOver?196:96));
 
 	if(IsEnable())
-		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, 1, m_bOver?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_Caption.c_str());
+		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_CENTER, m_bOver?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_Caption.c_str());
 	else
-		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, 1, XUI_RGBA(128,128,128,200), m_Caption.c_str());
+		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_CENTER, XUI_RGBA(128,128,128,200), m_Caption.c_str());
+}
+
+XUICheckBox::XUICheckBox(const char* pName, bool bManualFree) : XUIButton(pName, bManualFree)
+{
+	m_bCheck = false;
+}
+
+XUICheckBox::XUICheckBox(const char* pName, const char* pText, bool bCheck, int nLeft, int nTop, int nWidth, int nHeight) : XUIButton(pName, pText, nLeft, nTop, nWidth, nHeight)
+{
+	m_bCheck = bCheck;
+}
+
+XUICheckBox::~XUICheckBox()
+{
+}
+
+void XUICheckBox::onRender(XUIDevice* pDevice)
+{
+	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), GetWidgetHeight()/2-1, XUI_RGBA(128, 128, 128, IsEnable()&&m_bOver?196:96));
+
+	if(IsEnable()) {
+		pDevice->AddText(15, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT, m_bOver?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_Caption.c_str());
+	} else {
+		pDevice->AddText(15, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT, XUI_RGBA(128,128,128,200), m_Caption.c_str());
+	}
 }
 
 XUILabel::XUILabel(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
 {
 	if(bManualFree) ManualFree();
+	m_nAlign = XUIALIGN_CENTER;
 }
 
-XUILabel::XUILabel(const char* pName, const char* pText, int nLeft, int nTop, int nWidth, int nHeight) : XUIWidget(pName)
+XUILabel::XUILabel(const char* pName, const char* pText, int nAlign, int nLeft, int nTop, int nWidth, int nHeight) : XUIWidget(pName)
 {
 	SetText(pText);
+	m_nAlign = nAlign;
 	SetWidgetRect(nLeft, nTop, nWidth, nHeight);
 }
 
@@ -64,7 +91,17 @@ XUILabel::~XUILabel()
 
 void XUILabel::onRender(XUIDevice* pDevice)
 {
-	pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2, 1, XUI_RGBA(250, 250, 250, 255), m_Text.c_str());
+	switch(m_nAlign) {
+	case XUIALIGN_LEFT:
+		pDevice->AddText(0, GetWidgetHeight()/2-TEXT_HEIGHT/2, XUIALIGN_RIGHT, XUI_RGBA(250, 250, 250, 255), m_Text.c_str());
+		break;
+	case XUIALIGN_RIGHT:
+		pDevice->AddText(GetWidgetWidth(), GetWidgetHeight()/2-TEXT_HEIGHT/2, XUIALIGN_LEFT, XUI_RGBA(250, 250, 250, 255), m_Text.c_str());
+		break;
+	case XUIALIGN_CENTER:
+	default:
+		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2, m_nAlign, XUI_RGBA(250, 250, 250, 255), m_Text.c_str());
+	}
 }
 
 XUIPanel::XUIPanel(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
@@ -142,7 +179,7 @@ void XUISlider::SetValue(float fValue)
 {
 	if(fValue<=m_fMin) { m_fValue = m_fMin; return; }
 	if(fValue>=m_fMax) { m_fValue = m_fMax; return; }
-	float nStep = floor((fValue - m_fMin) / m_fInc);
+	float nStep = floor((fValue - m_fMin + m_fInc/2) / m_fInc);
 	m_fValue = m_fMin + nStep * m_fInc;
 }
 
@@ -162,8 +199,8 @@ void XUISlider::onRender(XUIDevice* pDevice)
 	sprintf(msg, fmt, m_fValue);
 
 	XUIColor color = m_bIn||m_nCaptureX>=0?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200);
-	pDevice->AddText(0, (GetWidgetHeight()-TEXT_HEIGHT)/2, 0, color, m_Title.c_str());
-	pDevice->AddText(GetWidgetWidth(), (GetWidgetHeight()-TEXT_HEIGHT)/2, 2, color, msg);
+	pDevice->AddText(0, (GetWidgetHeight()-TEXT_HEIGHT)/2, XUIALIGN_RIGHT, color, m_Title.c_str());
+	pDevice->AddText(GetWidgetWidth(), (GetWidgetHeight()-TEXT_HEIGHT)/2, XUIALIGN_LEFT, color, msg);
 }
 
 void XUISlider::onMouseMove(const XUIPoint& Point)
@@ -347,7 +384,7 @@ void XUIDialog::onRender(XUIDevice* pDevice)
 	pDevice->AddRect(SCROLL_AREA_PADDING, SCROLL_AREA_PADDING,
 		GetWidgetWidth()-SCROLL_AREA_PADDING*2, AREA_HEADER-SCROLL_AREA_PADDING*2,
 		2, m_bBarLight?XUI_RGBA(255, 150, 0, 192):XUI_RGBA(198, 112, 0, 192));
-	pDevice->AddText(AREA_HEADER/2, AREA_HEADER/2-TEXT_HEIGHT/2-1, 0,
+	pDevice->AddText(AREA_HEADER/2, AREA_HEADER/2-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT,
 		m_bBarLight?XUI_RGBA(255,255,255,255):XUI_RGBA(255,255,255,128), m_Title.c_str());
 
 	XUIWidget::onRender(pDevice);

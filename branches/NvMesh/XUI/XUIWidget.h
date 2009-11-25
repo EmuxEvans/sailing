@@ -21,6 +21,12 @@ XUI_DELEGATE_DEFINE2(eventKeyChar, unsigned short, unsigned int)
 XUI_DELEGATE_DEFINE2(eventWidgetMove, int, int)
 XUI_DELEGATE_DEFINE2(eventSizeChange, int, int)
 
+const int XUIALIGN_CENTER	= 0;
+const int XUIALIGN_LEFT		= 0x1;
+const int XUIALIGN_RIGHT	= 0x2;
+const int XUIALIGN_TOP		= 0x4;
+const int XUIALIGN_BOTTOM	= 0x8;
+
 class XUIWidget
 {
 	friend class XUI;
