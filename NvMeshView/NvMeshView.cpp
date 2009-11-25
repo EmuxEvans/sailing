@@ -131,6 +131,7 @@ public:
 
 	bool m_bMesh;
 	MeshLoaderObj m_Mesh;
+	float meshBMin[3], meshBMax[3];
 	float camr, camx, camy, camz, rx, ry;
 	bool m_bBuild;
 	rcConfig m_Config;
@@ -165,7 +166,6 @@ public:
 		}
 		m_bMesh = true;
 
-		float meshBMin[3], meshBMax[3];
 		rcCalcBounds(m_Mesh.getVerts(), m_Mesh.getVertCount(), meshBMin, meshBMax);
 		camr = sqrtf(rcSqr(meshBMax[0]-meshBMin[0]) +
 		rcSqr(meshBMax[1]-meshBMin[1]) +
@@ -185,11 +185,20 @@ public:
 			m_pFileOpen->GetWidget("BUILD")->SetVisable(true);
 			m_pFileOpen->GetWidget("SAVE")->SetVisable(true);
 			m_pFileOpen->GetWidget("TOOL")->SetVisable(true);
+			m_pFileOpen->GetWidget("LOG")->SetVisable(true);
 		}
+
+		OnFileOpen_ToolBox(NULL, XUIPoint(0, 0), 0);
 	}
 
 	void OnFileOpen_ToolBox(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
-		m_pToolBox->SetVisable(dynamic_cast<XUICheckBox*>(pWidget)->GetCheck());
+		if(m_bMesh) {
+			m_pToolBox->SetVisable(dynamic_cast<XUICheckBox*>(m_pFileOpen->GetWidget("TOOL"))->GetCheck());
+			m_pLogView->SetVisable(dynamic_cast<XUICheckBox*>(m_pFileOpen->GetWidget("LOG"))->GetCheck());
+		} else {
+			m_pToolBox->SetVisable(false);
+			m_pLogView->SetVisable(false);
+		}
 	}
 
 	float GetValue(const char* pName) {
@@ -263,6 +272,7 @@ private:
 	XUILabel* m_pFileName;
 	XUIScrollPanel* m_pFileList;
 	XUIDialog* m_pToolBox;
+	XUIDialog* m_pLogView;
 
 	int m_nFileListOffsetX, m_nFileListOffsetY;
 	eventMouseButtonClickImpl<XUIApp> m_eventWelcome_Close;
@@ -271,6 +281,7 @@ private:
 	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Welcome;
 	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Build;
 	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_ToolBox;
+	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_LogView;
 	eventWidgetMoveImpl<XUIApp> m_eventFileListMove;
 
 	std::vector<eventMouseButtonClickImpl<XUIApp>*> events;
@@ -354,19 +365,27 @@ void XUIApp::AppInit()
 	m_pFileOpen->AddChild(m_pBuildTool);
 	m_pFileOpen->AddChild(new XUIButton("BUILD", "Build", 0, 280, m_pFileOpen->GetClientWidth()/2-3, 20));
 	m_pFileOpen->AddChild(new XUIButton("SAVE", "Save", m_pFileOpen->GetClientWidth()/2+3, 280, m_pFileOpen->GetClientWidth()/2-3, 20));
-	m_pFileOpen->AddChild(new XUICheckBox("TOOL", "Tool Box", true, 0, 305, m_pFileOpen->GetClientWidth(), 20));
+	m_pFileOpen->AddChild(new XUICheckBox("TOOL", "Tool Box", true, 0, 305, m_pFileOpen->GetClientWidth()/2-3, 20));
+	m_pFileOpen->AddChild(new XUICheckBox("LOG", "Log View" , true, m_pFileOpen->GetClientWidth()/2+3, 305, m_pFileOpen->GetClientWidth()/2-3, 20));
 	m_pFileOpen->GetWidget("BUILD")->SetVisable(false);
 	m_pFileOpen->GetWidget("SAVE")->SetVisable(false);
 	m_pFileOpen->GetWidget("TOOL")->SetVisable(false);
+	m_pFileOpen->GetWidget("LOG")->SetVisable(false);
 	m_pFileOpen->GetWidget("BUILD")->_eventMouseButtonClick.Register(m_eventFileOpen_Build.R(this, &XUIApp::OnFileOpen_Build));
 	m_pFileOpen->GetWidget("TOOL")->_eventMouseButtonClick.Register(m_eventFileOpen_ToolBox.R(this, &XUIApp::OnFileOpen_ToolBox));
+	m_pFileOpen->GetWidget("LOG")->_eventMouseButtonClick.Register(m_eventFileOpen_LogView.R(this, &XUIApp::OnFileOpen_ToolBox));
 
 	m_pToolBox = new XUIDialog("", "Tool Box", 10, 380, 200, 200);
-	m_pToolBox->AddChild(new XUILabel("", "Mode", XUIALIGN_LEFT, 0, 0, m_pToolBox->GetWidgetWidth(), 20));
+	m_pToolBox->SetVisable(false);
 	XUI_GetXUI().GetRoot()->AddChild(m_pToolBox);
+	m_pToolBox->AddChild(new XUILabel("", "Mode", XUIALIGN_LEFT, 0, 0, m_pToolBox->GetWidgetWidth(), 20));
 	m_pToolBox->AddChild(new XUICheckBox("PATHFIND", "Path find", true, 0,									25, m_pFileOpen->GetClientWidth()/2-5, 20));
 	m_pToolBox->AddChild(new XUICheckBox("RAYCAST",  "Raycast",   true, m_pFileOpen->GetClientWidth()/2,	25, m_pFileOpen->GetClientWidth()/2-5, 20));
 	m_pToolBox->AddChild(new XUILabel("", "Mode", XUIALIGN_LEFT, 0, 80, m_pToolBox->GetWidgetWidth(), 20));
+
+	m_pLogView = new XUIDialog("", "Log view", 220, 380, 500, 200);
+	m_pLogView->SetVisable(false);
+	XUI_GetXUI().GetRoot()->AddChild(m_pLogView);
 }
 
 void XUIApp::AppFinal()
@@ -397,9 +416,9 @@ void XUIApp::DrawScene()
 //	rcDebugDrawMesh(m_Mesh.m_verts, m_Mesh.m_vertCount, m_Mesh.m_tris, m_Mesh.m_normals, m_Mesh.m_triCount, 0);
 	rcDebugDrawMeshSlope(m_Mesh.m_verts, m_Mesh.m_vertCount, m_Mesh.m_tris, m_Mesh.m_normals, m_Mesh.m_triCount, 45);
 
-//	float col[4];
-//	col[0] = 1; col[1] = 1; col[2] = 1; col[3] = 0.5f;
-//	rcDebugDrawBoxWire(m_bmin[0],m_bmin[1],m_bmin[2], m_bmax[0],m_bmax[1],m_bmax[2], col);
+	float col[4];
+	col[0] = 1; col[1] = 1; col[2] = 1; col[3] = 0.5f;
+	rcDebugDrawBoxWire(meshBMin[0], meshBMin[1], meshBMin[2], meshBMax[0], meshBMax[1], meshBMax[2], col);
 
 	if(m_bBuild) {
 		m_Export.toolRender();

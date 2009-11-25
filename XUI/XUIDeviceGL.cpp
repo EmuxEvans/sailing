@@ -414,6 +414,11 @@ void XUIDeviceGL::OnCmdTriangle(int x, int y, int w, int h, int d, XUIColor colo
 	}
 }
 
+void XUIDeviceGL::OnCmdEllipse(float x, float y, float w, float h, XUIColor color)
+{
+	drawEllipse(x, y, w, h, 1.0f, color);
+}
+
 void XUIDeviceGL::OnCmdText(int x, int y, int align, XUIColor color, const char* text)
 {
 	drawText((float)x, (float)y, text, align, color);
