@@ -401,7 +401,7 @@ XUIWidget* XUI::GetWidget(const XUIPoint& Point)
 
 		pWidget = pWidget->GetPrev();
 	}
-	return pReturn;
+	return pReturn?pReturn:&m_Root;
 }
 
 void XUI::SetCapture(XUIWidget* pWidget, bool bEnable)
