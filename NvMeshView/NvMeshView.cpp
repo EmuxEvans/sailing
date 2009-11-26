@@ -389,11 +389,19 @@ private:
 	GLdouble proj[16];
 	GLdouble model[16];
 	GLint view[4];
-	eventMouseButtonClickImpl<XUIApp> m_eventSceneClick;
+	eventMouseButtonClickImpl<XUIApp>		m_eventSceneClick;
 	int m_nPointCount;
 	struct {
 		float x, y, z;
 	} m_Points[2];
+
+	void OnScene_MouseMove(XUIWidget* pWidget, const XUIPoint& Point);
+	void OnScene_MousePressed(XUIWidget* pWidget, const XUIPoint&, unsigned short nId);
+	void OnScene_MouseReleased(XUIWidget* pWidget, const XUIPoint&, unsigned short nId);
+
+	eventMouseMoveImpl<XUIApp>				m_eventScene_MouseMove;
+	eventMouseButtonPressedImpl<XUIApp>		m_eventScene_MousePressed;
+	eventMouseButtonReleasedImpl<XUIApp>	m_eventScene_MouseReleased;
 
 	int									m_nViewMode;
 	XUICheckBox*						m_ViewModeWidget[6];
@@ -512,6 +520,10 @@ void XUIApp::AppInit()
 	XUI_GetXUI().GetRoot()->AddChild(m_pLogView);
 
 	XUI_GetXUI().GetRoot()->_eventMouseButtonClick.Register(m_eventSceneClick.R(this, &XUIApp::OnScene_Click));
+
+	XUI_GetXUI().GetRoot()->_eventMouseMove.Register(m_eventScene_MouseMove.R(this, &XUIApp::OnScene_MouseMove));
+	XUI_GetXUI().GetRoot()->_eventMouseButtonPressed.Register(m_eventScene_MousePressed.R(this, &XUIApp::OnScene_MousePressed));
+	XUI_GetXUI().GetRoot()->_eventMouseButtonReleased.Register(m_eventScene_MouseReleased.R(this, &XUIApp::OnScene_MouseReleased));
 }
 
 void XUIApp::AppFinal()
@@ -745,4 +757,32 @@ void XUI_DrawScene()
 void XUI_DoTick(unsigned int nDeltaTime)
 {
 	_App.DoTick(nDeltaTime);
+}
+
+bool m_bRotate = false;
+int m_nRotateX, m_nRotateY;
+float m_fRotateRX, m_fRotateRY;
+
+void XUIApp::OnScene_MouseMove(XUIWidget* pWidget, const XUIPoint& Point)
+{
+	if(m_bRotate) {
+		int dx = Point.x - m_nRotateX;
+		int dy = Point.y - m_nRotateY;
+		rx = m_fRotateRX - dy*0.25f;
+		ry = m_fRotateRY + dx*0.25f;
+	}
+}
+
+void XUIApp::OnScene_MousePressed(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId)
+{
+	m_bRotate = true;
+	m_nRotateX = Point.x;
+	m_nRotateY = Point.y;
+	m_fRotateRX = rx;
+	m_fRotateRY = ry;
+}
+
+void XUIApp::OnScene_MouseReleased(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId)
+{
+	m_bRotate = false;
 }
