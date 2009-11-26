@@ -204,6 +204,7 @@ public:
 
 	void OnFileOpen_Open(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
 		m_nPointCount = 0;
+		m_bBuild = false;
 		m_Export.Clear();
 		delete m_navMesh;
 		m_navMesh = NULL;
@@ -271,9 +272,9 @@ public:
 		m_Config.cs = GetValue("CELLSIZE");
 		m_Config.ch = GetValue("CELLHEIGHT");
 		m_Config.walkableSlopeAngle	= GetValue("SLOPE");
-		m_Config.walkableHeight		= ceilf(GetValue("HEIGHT")/m_Config.ch);
-		m_Config.walkableClimb		= ceilf(GetValue("CLIMB")/m_Config.ch);
-		m_Config.walkableRadius		= ceilf(GetValue("RADIUS")/m_Config.cs);
+		m_Config.walkableHeight		= (int)ceilf(GetValue("HEIGHT")/m_Config.ch);
+		m_Config.walkableClimb		= (int)ceilf(GetValue("CLIMB")/m_Config.ch);
+		m_Config.walkableRadius		= (int)ceilf(GetValue("RADIUS")/m_Config.cs);
 		m_Config.maxEdgeLen = (int)(GetValue("MAXEDGELENGTH")/ m_Config.cs);
 		m_Config.maxSimplificationError = GetValue("MAXEDGEERROR");
 		m_Config.minRegionSize = (int)rcSqr(GetValue("MAXREGIONSIZE"));
