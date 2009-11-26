@@ -151,6 +151,22 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\DetourCommon.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DetourNode.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DetourStatNavMesh.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\DetourStatNavMeshBuilder.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MeshLoaderObj.cpp"
 				>
 			</File>
@@ -196,6 +212,22 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\DetourCommon.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DetourNode.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DetourStatNavMesh.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DetourStatNavMeshBuilder.h"
+				>
+			</File>
 			<File
 				RelativePath=".\MeshLoaderObj.h"
 				>
