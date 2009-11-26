@@ -261,6 +261,7 @@ void XUISlider::onMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 {
 	if(nId==XUI_INPUT::MOUSE_LBUTTON) {
 		m_nCaptureX = -1;
+		GetXUI()->SetCapture(this, false);
 	}
 
 	XUIWidget::onMouseButtonReleased(Point, nId);
@@ -448,5 +449,6 @@ void XUIDialog::onMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 {
 	if(nId==XUI_INPUT::MOUSE_LBUTTON) {
 		m_bInMove = false;
+		GetXUI()->SetCapture(this, true);
 	}
 }

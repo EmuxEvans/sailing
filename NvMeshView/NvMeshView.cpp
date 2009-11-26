@@ -780,9 +780,11 @@ void XUIApp::OnScene_MousePressed(XUIWidget* pWidget, const XUIPoint& Point, uns
 	m_nRotateY = Point.y;
 	m_fRotateRX = rx;
 	m_fRotateRY = ry;
+	XUI_GetXUI().SetCapture(pWidget, true);
 }
 
 void XUIApp::OnScene_MouseReleased(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId)
 {
+	XUI_GetXUI().SetCapture(pWidget, false);
 	m_bRotate = false;
 }
