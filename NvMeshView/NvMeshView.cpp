@@ -775,16 +775,20 @@ void XUIApp::OnScene_MouseMove(XUIWidget* pWidget, const XUIPoint& Point)
 
 void XUIApp::OnScene_MousePressed(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId)
 {
-	m_bRotate = true;
-	m_nRotateX = Point.x;
-	m_nRotateY = Point.y;
-	m_fRotateRX = rx;
-	m_fRotateRY = ry;
-	XUI_GetXUI().SetCapture(pWidget, true);
+	if(nId==XUI_INPUT::MOUSE_RBUTTON) {
+		m_bRotate = true;
+		m_nRotateX = Point.x;
+		m_nRotateY = Point.y;
+		m_fRotateRX = rx;
+		m_fRotateRY = ry;
+		XUI_GetXUI().SetCapture(pWidget, true);
+	}
 }
 
 void XUIApp::OnScene_MouseReleased(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId)
 {
-	XUI_GetXUI().SetCapture(pWidget, false);
-	m_bRotate = false;
+	if(nId==XUI_INPUT::MOUSE_RBUTTON) {
+		XUI_GetXUI().SetCapture(pWidget, false);
+		m_bRotate = false;
+	}
 }
