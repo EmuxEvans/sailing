@@ -204,6 +204,8 @@ public:
 
 	void OnFileOpen_Open(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
 		m_nPointCount = 0;
+		m_npolys = 0;
+		m_nstraightPath = 0;
 		m_bBuild = false;
 		m_Export.Clear();
 		delete m_navMesh;
@@ -268,6 +270,8 @@ public:
 	}
 
 	void OnFileOpen_Build(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
+		m_npolys = 0;
+		m_nstraightPath = 0;
 		memset(&m_Config, 0, sizeof(m_Config));
 		m_Config.cs = GetValue("CELLSIZE");
 		m_Config.ch = GetValue("CELLHEIGHT");
