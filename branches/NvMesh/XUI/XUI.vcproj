@@ -151,10 +151,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\Delegate.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\stb_truetype.c"
 				>
 			</File>
@@ -187,6 +183,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XUIScriptBinding.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XUIWidget.cpp"
 				>
 			</File>
@@ -197,11 +197,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\Delegate.h"
-				>
-			</File>
-			<File
-				RelativePath=".\DelegateImpl.h"
+				RelativePath=".\sigslot.h"
 				>
 			</File>
 			<File
@@ -234,6 +230,10 @@
 			</File>
 			<File
 				RelativePath=".\XUIMisc.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XUIScriptBinding.h"
 				>
 			</File>
 			<File

@@ -153,7 +153,7 @@ public:
 
 #define MAX_POLYS 256
 
-class XUIApp {
+class XUIApp : public sigslot::has_slots<> {
 public:
 	XUIApp() {
 		m_bMesh = false;
@@ -338,21 +338,15 @@ public:
 		fh = _findfirst(pathWithExt, &dir);
 		if (fh == -1L) return;
 		do {
-			eventMouseButtonClickImpl<XUIApp>* pEvent = new eventMouseButtonClickImpl<XUIApp>();
 			XUIButton* pButton = new XUIButton("", dir.name, 0, 0, 100, 15);
 			m_pFileList->AddWidget(pButton);
-			pButton->_eventMouseButtonClick.Register(pEvent->R(this, &XUIApp::OnFileListClick));
-			events.push_back(new eventMouseButtonClickImpl<XUIApp>);
+			pButton->_eventMouseButtonClick.connect(this, &XUIApp::OnFileListClick);
 		} while (_findnext(fh, &dir) == 0);
 		_findclose(fh);
 	}
 
 	void clearFiles() {
-		for(size_t i=0; i<events.size(); i++) {
-			delete events[i];
-		}
 		m_pFileList->ClearWidgets();
-		events.clear();
 	}
 
 	void ComputPath()
@@ -381,19 +375,10 @@ private:
 	XUIDialog* m_pLogView;
 
 	int m_nFileListOffsetX, m_nFileListOffsetY;
-	eventMouseButtonClickImpl<XUIApp> m_eventWelcome_Close;
-	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Select;
-	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Open;
-	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Welcome;
-	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_Build;
-	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_ToolBox;
-	eventMouseButtonClickImpl<XUIApp> m_eventFileOpen_LogView;
-	eventWidgetMoveImpl<XUIApp> m_eventFileListMove;
 
 	GLdouble proj[16];
 	GLdouble model[16];
 	GLint view[4];
-	eventMouseButtonClickImpl<XUIApp>		m_eventSceneClick;
 	int m_nPointCount;
 	struct {
 		float x, y, z;
@@ -403,15 +388,8 @@ private:
 	void OnScene_MousePressed(XUIWidget* pWidget, const XUIPoint&, unsigned short nId);
 	void OnScene_MouseReleased(XUIWidget* pWidget, const XUIPoint&, unsigned short nId);
 
-	eventMouseMoveImpl<XUIApp>				m_eventScene_MouseMove;
-	eventMouseButtonPressedImpl<XUIApp>		m_eventScene_MousePressed;
-	eventMouseButtonReleasedImpl<XUIApp>	m_eventScene_MouseReleased;
-
 	int									m_nViewMode;
 	XUICheckBox*						m_ViewModeWidget[6];
-	eventMouseButtonClickImpl<XUIApp>	m_eventViewMode[6];
-
-	std::vector<eventMouseButtonClickImpl<XUIApp>*> events;
 };
 
 void XUIApp::AppInit()
@@ -421,7 +399,7 @@ void XUIApp::AppInit()
 	m_pWelcome->CenterWidget();
 	m_pWelcome->AddChild(new XUILabel("", "I'm Mr.XUI. Who are you?", XUIALIGN_CENTER, 0, 0, m_pWelcome->GetClientWidth(), 20));
 	m_pWelcome->AddChild(new XUIButton("CLOSE", "Close", 0, 35, m_pWelcome->GetClientWidth(), 20));
-	m_pWelcome->GetWidget("CLOSE")->_eventMouseButtonClick.Register(m_eventWelcome_Close.R(this, &XUIApp::OnWelcome_Close));
+	m_pWelcome->GetWidget("CLOSE")->_eventMouseButtonClick.connect(this, &XUIApp::OnWelcome_Close);
 
 	m_pFileOpen = new XUIDialog("", "Main Tool", 10, 10, 200, 101);
 	m_pFileName = new XUILabel("FILE", "", XUIALIGN_CENTER, 0, 0, m_pFileOpen->GetClientWidth()-20, 15);
@@ -430,9 +408,9 @@ void XUIApp::AppInit()
 	m_pFileOpen->AddChild(new XUICheckBox("LARGE", "Large Mode", false, 0, 20, m_pFileOpen->GetClientWidth(), 20));
 	m_pFileOpen->AddChild(new XUIButton("OPEN",		"Open", 0, 45, m_pFileOpen->GetClientWidth()/2-3, 20));
 	m_pFileOpen->AddChild(new XUIButton("SHOW",		"Show", m_pFileOpen->GetClientWidth()/2+3, 45, m_pFileOpen->GetClientWidth()/2-3, 20));
-	m_pFileOpen->GetWidget("SELECT")->_eventMouseButtonClick.Register(m_eventFileOpen_Select.R(this, &XUIApp::OnFileOpen_Select));
-	m_pFileOpen->GetWidget("OPEN")->_eventMouseButtonClick.Register(m_eventFileOpen_Open.R(this, &XUIApp::OnFileOpen_Open));
-	m_pFileOpen->GetWidget("SHOW")->_eventMouseButtonClick.Register(m_eventFileOpen_Welcome.R(this, &XUIApp::OnWelcome_Close));
+	m_pFileOpen->GetWidget("SELECT")->_eventMouseButtonClick.connect(this, &XUIApp::OnFileOpen_Select);
+	m_pFileOpen->GetWidget("OPEN")->_eventMouseButtonClick.connect(this, &XUIApp::OnFileOpen_Open);
+	m_pFileOpen->GetWidget("SHOW")->_eventMouseButtonClick.connect(this, &XUIApp::OnWelcome_Close);
 	XUI_GetXUI().GetRoot()->AddChild(m_pFileOpen);
 
 	m_pFileList = new XUIScrollPanel("", 0, 0, 200, 400);
@@ -452,7 +430,7 @@ void XUIApp::AppInit()
 	m_pFileList->SetWidgetPosition(P.x, P.y);
 	m_nFileListOffsetX = P.x - m_pFileOpen->GetWidgetLeft();
 	m_nFileListOffsetY = P.y - m_pFileOpen->GetWidgetTop();
-	m_pFileOpen->_eventWidgetMove.Register(m_eventFileListMove.R(this, &XUIApp::OnWidgetMove));
+	m_pFileOpen->_eventWidgetMove.connect(this, &XUIApp::OnWidgetMove);
 
 	m_pBuildTool = new XUIScrollPanel("", 0, 75, m_pFileOpen->GetClientWidth(), 200);
 	m_pBuildTool->AddWidget(new XUILabel("", "Rasterization", XUIALIGN_LEFT, 0, 0, 0, 20));
@@ -498,9 +476,9 @@ void XUIApp::AppInit()
 	m_pFileOpen->GetWidget("SAVE")->SetVisable(false);
 	m_pFileOpen->GetWidget("TOOL")->SetVisable(false);
 	m_pFileOpen->GetWidget("LOG")->SetVisable(false);
-	m_pFileOpen->GetWidget("BUILD")->_eventMouseButtonClick.Register(m_eventFileOpen_Build.R(this, &XUIApp::OnFileOpen_Build));
-	m_pFileOpen->GetWidget("TOOL")->_eventMouseButtonClick.Register(m_eventFileOpen_ToolBox.R(this, &XUIApp::OnFileOpen_ToolBox));
-	m_pFileOpen->GetWidget("LOG")->_eventMouseButtonClick.Register(m_eventFileOpen_LogView.R(this, &XUIApp::OnFileOpen_ToolBox));
+	m_pFileOpen->GetWidget("BUILD")->_eventMouseButtonClick.connect(this, &XUIApp::OnFileOpen_Build);
+	m_pFileOpen->GetWidget("TOOL")->_eventMouseButtonClick.connect(this, &XUIApp::OnFileOpen_ToolBox);
+	m_pFileOpen->GetWidget("LOG")->_eventMouseButtonClick.connect(this, &XUIApp::OnFileOpen_ToolBox);
 
 	m_pToolBox = new XUIDialog("", "Tool Box", 10, 380, 200, 200);
 	m_pToolBox->SetVisable(false);
@@ -512,10 +490,10 @@ void XUIApp::AppInit()
 
 	memset(m_ViewModeWidget, 0, sizeof(m_ViewModeWidget));
 	m_ViewModeWidget[0] = new XUICheckBox("", "Poly Mesh",        false, 0, 65, m_pFileOpen->GetClientWidth(), 20);
-	m_ViewModeWidget[0]->_eventMouseButtonClick.Register(m_eventViewMode[0].R(this, &XUIApp::OnToolBox_ViewMode));
+	m_ViewModeWidget[0]->_eventMouseButtonClick.connect(this, &XUIApp::OnToolBox_ViewMode);
 	m_pToolBox->AddChild(m_ViewModeWidget[0]);
 	m_ViewModeWidget[1] = new XUICheckBox("", "Poly Mesh Detail", false, 0, 85, m_pFileOpen->GetClientWidth(), 20);
-	m_ViewModeWidget[1]->_eventMouseButtonClick.Register(m_eventViewMode[1].R(this, &XUIApp::OnToolBox_ViewMode));
+	m_ViewModeWidget[1]->_eventMouseButtonClick.connect(this, &XUIApp::OnToolBox_ViewMode);
 	m_pToolBox->AddChild(m_ViewModeWidget[1]);
 	OnToolBox_ViewMode(m_ViewModeWidget[0], XUIPoint(0, 0), 0);
 
@@ -523,11 +501,11 @@ void XUIApp::AppInit()
 	m_pLogView->SetVisable(false);
 	XUI_GetXUI().GetRoot()->AddChild(m_pLogView);
 
-	XUI_GetXUI().GetRoot()->_eventMouseButtonClick.Register(m_eventSceneClick.R(this, &XUIApp::OnScene_Click));
+	XUI_GetXUI().GetRoot()->_eventMouseButtonClick.connect(this, &XUIApp::OnScene_Click);
 
-	XUI_GetXUI().GetRoot()->_eventMouseMove.Register(m_eventScene_MouseMove.R(this, &XUIApp::OnScene_MouseMove));
-	XUI_GetXUI().GetRoot()->_eventMouseButtonPressed.Register(m_eventScene_MousePressed.R(this, &XUIApp::OnScene_MousePressed));
-	XUI_GetXUI().GetRoot()->_eventMouseButtonReleased.Register(m_eventScene_MouseReleased.R(this, &XUIApp::OnScene_MouseReleased));
+	XUI_GetXUI().GetRoot()->_eventMouseMove.connect(this, &XUIApp::OnScene_MouseMove);
+	XUI_GetXUI().GetRoot()->_eventMouseButtonPressed.connect(this, &XUIApp::OnScene_MousePressed);
+	XUI_GetXUI().GetRoot()->_eventMouseButtonReleased.connect(this, &XUIApp::OnScene_MouseReleased);
 }
 
 void XUIApp::AppFinal()
