@@ -27,7 +27,7 @@ const int XUIALIGN_RIGHT	= 0x2;
 const int XUIALIGN_TOP		= 0x4;
 const int XUIALIGN_BOTTOM	= 0x8;
 
-class XUIWidget
+class XUIWidget : public sigslot::has_slots<>
 {
 	friend class XUI;
 	friend class XUIDevice;

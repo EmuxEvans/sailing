@@ -97,6 +97,26 @@ private:
 	float m_fCaptureValue;
 };
 
+class XUIScrollBar : public XUIWidget
+{
+public:
+	XUIScrollBar(const char* pName="", bool bManualFree=false);
+	XUIScrollBar(const char* pName, int nLeft, int nTop, int nWidth, int nHeight, bool bVertical);
+
+	bool IsVertical() { return m_bVertical; }
+	void SetVertical(bool bVertical) { m_bVertical = bVertical; }
+
+protected:
+	virtual void onMouseMove(const XUIPoint& Point);
+	virtual bool onMouseWheel(const XUIPoint& Point, int _rel);
+	virtual void onMouseLeave();
+	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
+	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
+
+private:
+	bool m_bVertical;
+};
+
 class XUIScrollPanel : public XUIPanel
 {
 public:
@@ -142,9 +162,60 @@ private:
 	int m_nInMoveX, m_nInMoveY;
 };
 
+class XUIList;
+
+class XUIListItem : public XUIWidget
+{
+	friend class XUIList;
+public:
+	XUIListItem(const char* pName="", bool bManualFree=false);
+	XUIListItem(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
+
+	void SetUserData(void* pUserData) { m_pUserData = pUserData; }
+	void* GetUserData() { return m_pUserData; }
+
+private:
+	XUIList* m_pList;
+	void* m_pUserData;
+	bool m_bSelected;
+};
+
 class XUIList : public XUIScrollPanel
 {
 public:
 	XUIList(const char* pName="", bool bManualFree=false);
 	XUIList(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
+
+	void AddItem(XUIListItem* pItem);
+	XUIListItem* AddString(const char* pName);
+
+	bool RemoveItem(XUIListItem* pItem);
+	void RemoveAllItem();
+
+	int GetItemCount();
+	XUIListItem* GetItem(int nIndex);
+
+	XUIListItem* GetSelectItem();
+	void SetMultiSelect(bool bMultiSelect);
+	bool GetMultiSelect() { return m_bMultiSelect; }
+
+private:
+	bool m_bMultiSelect;
+};
+
+class XUIEditLine : public XUIWidget
+{
+public:
+	XUIEditLine(const char* pName="", bool bManualFree=false);
+	XUIEditLine(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
+
+	const XUIString& GetText() { return m_sText; }
+
+protected:
+	virtual void onRender(XUIDevice* pDevice);
+
+	virtual void onKeyChar(unsigned short nKey, unsigned int Char);
+
+private:
+	XUIString m_sText;
 };

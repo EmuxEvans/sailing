@@ -120,13 +120,11 @@ void XUILabel::onRender(XUIDevice* pDevice)
 XUIPanel::XUIPanel(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
 {
 	m_nWidgetsHeight = 0;
-	SetClientArea(0, 0, SCROLL_AREA_PADDING*2, 0);
 }
 
 XUIPanel::XUIPanel(const char* pName, int nLeft, int nTop, int nWidth, int nHeight) : XUIWidget(pName)
 {
 	m_nWidgetsHeight = 0;
-	SetClientArea(0, 0, SCROLL_AREA_PADDING*2, 0);
 	SetWidgetRect(nLeft, nTop, nWidth, nHeight);
 }
 
@@ -267,15 +265,47 @@ void XUISlider::onMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 	XUIWidget::onMouseButtonReleased(Point, nId);
 }
 
+XUIScrollBar::XUIScrollBar(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
+{
+	m_bVertical = true;
+}
+
+XUIScrollBar::XUIScrollBar(const char* pName, int nLeft, int nTop, int nWidth, int nHeight, bool bVertical) : XUIWidget(pName)
+{
+	m_bVertical = bVertical;
+}
+
+void XUIScrollBar::onMouseMove(const XUIPoint& Point)
+{
+}
+
+bool XUIScrollBar::onMouseWheel(const XUIPoint& Point, int _rel)
+{
+	return true;
+}
+
+void XUIScrollBar::onMouseLeave()
+{
+}
+
+void XUIScrollBar::onMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
+{
+}
+
+void XUIScrollBar::onMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
+{
+}
+
 XUIScrollPanel::XUIScrollPanel(const char* pName, bool bManualFree) : XUIPanel(pName, bManualFree)
 {
-	if(bManualFree) ManualFree();
+	SetClientArea(0, 0, SCROLL_AREA_PADDING*2, 0);
 	EnableScroll(true);
 	m_bShowBoard = false;
 }
 
 XUIScrollPanel::XUIScrollPanel(const char* pName, int nLeft, int nTop, int nWidth, int nHeight) : XUIPanel(pName)
 {
+	SetClientArea(0, 0, SCROLL_AREA_PADDING*2, 0);
 	SetWidgetRect(nLeft, nTop, nWidth, nHeight);
 	EnableScroll(true);
 	m_bShowBoard = false;
@@ -451,4 +481,21 @@ void XUIDialog::onMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 		m_bInMove = false;
 		GetXUI()->SetCapture(this, true);
 	}
+}
+
+XUIEditLine::XUIEditLine(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
+{
+}
+
+XUIEditLine::XUIEditLine(const char* pName, int nLeft, int nTop, int nWidth, int nHeight) : XUIWidget(pName)
+{
+}
+
+void XUIEditLine::onRender(XUIDevice* pDevice)
+{
+	pDevice->AddText(0, 0, 0, XUI_RGB(255, 255, 255), m_sText.c_str());
+}
+
+void XUIEditLine::onKeyChar(unsigned short nKey, unsigned int Char)
+{
 }
