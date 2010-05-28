@@ -170,9 +170,33 @@ XUIWidget* XUIWidget::GetWidget(const char* pName)
 	return NULL;
 }
 
+bool XUIWidget::IsParent(XUIWidget* pWidget)
+{
+	while(pWidget) {
+		if(pWidget==this) return true;
+		pWidget = pWidget->GetParent();
+	}
+	return false;
+}
+
 bool XUIWidget::IsVisable()
 {
 	return m_bVisable;
+}
+
+void XUIWidget::SetFocus()
+{
+	GetXUI()->SetFocus(this);
+}
+
+bool XUIWidget::HasFocus()
+{
+	XUIWidget* pFocus = GetXUI()->GetFocus();
+	while(pFocus) {
+		if(pFocus==this) return true;
+		pFocus = pFocus->GetParent();
+	}
+	return false;
 }
 
 bool XUIWidget::IsEnable()
@@ -329,8 +353,6 @@ void XUIWidget::SetScrollBarWidth(int nWidth)
 
 void XUIWidget::OnRender(XUIDevice* pDevice)
 {
-	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,0,0,192));
-
 	if(m_bEnableScroll) {
 		if(m_bShowVerticalBar) {
 			int nBarStart, nBarHeight;
@@ -590,7 +612,22 @@ void XUI::SetCapture(XUIWidget* pWidget, bool bEnable)
 
 void XUI::SetFocus(XUIWidget* pWidget)
 {
-	m_pFocus = pWidget;
+	static int nStaticSeq = 0;
+	int nCurrentSeq = ++nStaticSeq;
+
+	if(pWidget!=m_pFocus) {
+		if(m_pFocus) {
+			m_pFocus->OnLostFocus(pWidget);
+			if(nCurrentSeq!=nStaticSeq) return;
+		}
+
+		XUIWidget* pOld = m_pFocus;
+		m_pFocus = pWidget;
+		if(m_pFocus) {
+			m_pFocus->ActiveWidget(m_pFocus);
+			m_pFocus->OnSetFocus(pOld);
+		}
+	}
 }
 
 void XUI::MouseMove(const XUIPoint& Point)
@@ -661,7 +698,8 @@ void XUI::MouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->OnMouseButtonReleased(pWidget->ScreenToWidget(Point, wp), nId);
+		pWidget->ScreenToWidget(Point, wp);
+		pWidget->OnMouseButtonReleased(wp, nId);
 
 		const XUIPoint* pOld = NULL;
 		switch(nId) {
@@ -739,8 +777,26 @@ void XUI::EndFrame()
 		pStack[nStack] = pStack[nStack]->GetPrev();
 
 		if(pWidget->m_bDelete) {
+			XUIWidget* pFocus = NULL;
+			if(pWidget->HasFocus()) {
+				m_pFocus = NULL;
+				pFocus = pWidget->GetParent();
+			}
+
+			if(pWidget->IsParent(m_pOver)) {
+				m_pOver = NULL;
+			}
+
+			if(pWidget->IsParent(m_pCapture)) {
+				m_pCapture = NULL;
+			}
+
 			DelWidget(pWidget->GetParent(), pWidget);
 			pWidget->Destroy();
+
+			if(pFocus) {
+				pFocus->ActiveWidget(pFocus);
+			}
 			continue;
 		}
 

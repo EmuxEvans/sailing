@@ -45,6 +45,23 @@ void XUIButton::OnRender(XUIDevice* pDevice)
 		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_CENTER, XUI_RGBA(128,128,128,200), m_Caption.c_str());
 }
 
+void XUIButton::OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
+{
+	GetXUI()->SetCapture(this, true);
+}
+
+void XUIButton::OnMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
+{
+	if(GetXUI()->GetCapture()==this) {
+		GetXUI()->SetCapture(this, false);
+		XUIWidget::OnMouseButtonClick(Point, nId);
+	}
+}
+
+void XUIButton::OnMouseButtonClick(const XUIPoint& Point, unsigned short nId)
+{
+}
+
 XUICheckBox::XUICheckBox(const char* pName, bool bManualFree) : XUIButton(pName, bManualFree)
 {
 	m_bCheck = false;
@@ -262,87 +279,6 @@ void XUISlider::OnMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 	XUIWidget::OnMouseButtonReleased(Point, nId);
 }
 
-XUIDialog::XUIDialog(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
-{
-	m_bInMove = false;
-	m_bBarLight = false;
-	SetClientArea(SCROLL_AREA_PADDING, SCROLL_AREA_PADDING, SCROLL_AREA_PADDING, SCROLL_AREA_PADDING);
-}
-
-XUIDialog::XUIDialog(const char* pName, const char* pTitle, int nLeft, int nTop, int nWidth, int nHeight) : XUIWidget(pName, nLeft, nTop, nWidth, nHeight)
-{
-	m_bInMove = false;
-	m_bBarLight = false;
-	m_Title = pTitle;
-	SetClientArea(SCROLL_AREA_PADDING, AREA_HEADER, SCROLL_AREA_PADDING, SCROLL_AREA_PADDING);
-}
-
-XUIDialog::~XUIDialog()
-{
-}
-
-void XUIDialog::OnRender(XUIDevice* pDevice)
-{
-	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,0,0,192));
-
-	pDevice->AddRect(SCROLL_AREA_PADDING, SCROLL_AREA_PADDING,
-		GetWidgetWidth()-SCROLL_AREA_PADDING*2, AREA_HEADER-SCROLL_AREA_PADDING*2,
-		2, m_bBarLight?XUI_RGBA(255, 150, 0, 192):XUI_RGBA(198, 112, 0, 192));
-	pDevice->AddText(AREA_HEADER/2, AREA_HEADER/2-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT,
-		m_bBarLight?XUI_RGBA(255,255,255,255):XUI_RGBA(255,255,255,128), m_Title.c_str());
-
-	XUIWidget::OnRender(pDevice);
-}
-
-void XUIDialog::OnMouseMove(const XUIPoint& Point)
-{
-	if(m_bInMove) {
-		XUIPoint InMovePoint(Point.x, Point.y);
-		WidgetToScreen(InMovePoint, InMovePoint);
-		SetWidgetPosition(GetWidgetLeft()+InMovePoint.x-m_InMovePoint.x, GetWidgetTop()+InMovePoint.y-m_InMovePoint.y);
-		m_InMovePoint.x = InMovePoint.x;
-		m_InMovePoint.y = InMovePoint.y;
-	}
-
-	if(		Point.x>=SCROLL_AREA_PADDING && Point.y>=SCROLL_AREA_PADDING
-		&&	Point.x<GetWidgetWidth()-SCROLL_AREA_PADDING
-		&&	Point.y<AREA_HEADER-SCROLL_AREA_PADDING) {
-		m_bBarLight = true;
-	} else {
-		m_bBarLight = false;
-	}
-}
-
-void XUIDialog::OnMouseLeave()
-{
-	m_bBarLight = false;
-}
-
-void XUIDialog::OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
-{
-	if(nId==XUI_INPUT::MOUSE_LBUTTON) {
-		if(		Point.x>=SCROLL_AREA_PADDING
-			&&	Point.y>=SCROLL_AREA_PADDING
-			&&	Point.x<GetWidgetWidth()-SCROLL_AREA_PADDING
-			&&	Point.y<AREA_HEADER-SCROLL_AREA_PADDING) {
-
-			m_bInMove = true;
-			m_InMovePoint.x = Point.x;
-			m_InMovePoint.y = Point.y;
-			WidgetToScreen(m_InMovePoint, m_InMovePoint);
-			GetXUI()->SetCapture(this, true);
-		}
-	}
-}
-
-void XUIDialog::OnMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
-{
-	if(nId==XUI_INPUT::MOUSE_LBUTTON) {
-		m_bInMove = false;
-		GetXUI()->SetCapture(this, true);
-	}
-}
-
 XUIListItem::XUIListItem(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
 {
 	m_pView = NULL;
@@ -365,15 +301,17 @@ void XUIListItem::SetSelect(bool bSelected)
 void XUIListItem::OnRender(XUIDevice* pDevice)
 {
 	if(m_bSelected) {
-		pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(255,0,0,192));
+		pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(255,0,0,255));
 	}
 
-	pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2, XUIALIGN_CENTER, XUI_RGBA(250, 250, 250, 255), m_sText.c_str());
+	if(!m_sText.empty()) {
+		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2, XUIALIGN_CENTER, XUI_RGBA(255, 255, 255, 255), m_sText.c_str());
+	}
 
 	XUIWidget::OnRender(pDevice);
 }
 
-void XUIListItem::OnMouseButtonClick(const XUIPoint& Point, unsigned short nId)
+void XUIListItem::OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
 {
 	if(m_pView->GetMultiSelect() && !m_bSelected) {
 		m_pView->SetSelectItem(this, false);
@@ -381,7 +319,11 @@ void XUIListItem::OnMouseButtonClick(const XUIPoint& Point, unsigned short nId)
 		m_pView->SetSelectItem(this, true);
 	}
 
-	XUIWidget::OnMouseButtonClick(Point, nId);
+	XUIPoint Out1, Out2;
+	WidgetToScreen(Point, Out1);
+	m_pView->ScreenToWidget(Out1, Out2);
+
+	m_pView->OnMouseButtonPressed(Out2, nId);
 }
 
 void XUIListItem::OnSizeChange(int nWidth, int nHeight)
@@ -486,6 +428,21 @@ void XUIListView::SetMultiSelect(bool bMultiSelect)
 void XUIListView::OnRender(XUIDevice* pDevice)
 {
 	XUIWidget::OnRender(pDevice);
+}
+
+void XUIListView::OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
+{
+	if(Point.x>=GetClientLeft() && Point.x<GetClientLeft()-GetClientWidth()) {
+		if(Point.y>=GetClientTop() && Point.y<GetClientTop()-GetClientHeight()) {
+			int nLeft = Point.x - GetClientLeft() + GetScrollPositionX();
+			int nTop  = Point.y - GetClientTop()  + GetScrollPositionY();
+			if(nLeft>=GetScrollWidth() || nTop>=GetScrollHeight()) {
+				return;
+			}
+		}
+	}
+
+	XUIWidget::OnMouseButtonPressed(Point, nId);
 }
 
 void XUIListView::SetSelectItem(XUIListItem* pItem, bool bSelected)

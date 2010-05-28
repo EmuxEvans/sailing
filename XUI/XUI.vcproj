@@ -175,6 +175,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XUIDialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XUIMain.cpp"
 				>
 			</File>
@@ -226,6 +230,10 @@
 			</File>
 			<File
 				RelativePath=".\XUIDeviceGL.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XUIDialog.h"
 				>
 			</File>
 			<File

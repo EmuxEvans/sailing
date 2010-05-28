@@ -15,6 +15,9 @@ protected:
 
 	virtual void OnMouseEnter() { m_bOver = true; }
 	virtual void OnMouseLeave() { m_bOver = false; }
+	virtual void OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseButtonClick(const XUIPoint& Point, unsigned short nId);
 
 	bool m_bOver;
 	XUIString m_Caption;
@@ -97,28 +100,6 @@ private:
 	float m_fCaptureValue;
 };
 
-class XUIDialog : public XUIWidget
-{
-public:
-	XUIDialog(const char* pName="", bool bManualFree=false);
-	XUIDialog(const char* pName, const char* pTitle, int nLeft, int nTop, int nWidth, int nHeight);
-	virtual ~XUIDialog();
-
-protected:
-	virtual void OnRender(XUIDevice* pDevice);
-
-	virtual void OnMouseMove(const XUIPoint& Point);
-	virtual void OnMouseLeave();
-	virtual void OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
-	virtual void OnMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
-
-private:
-	XUIString m_Title;
-	bool m_bInMove, m_bBarLight;
-	XUIPoint m_InMovePoint;
-	int m_nInMoveX, m_nInMoveY;
-};
-
 class XUIListView;
 
 class XUIListItem : public XUIWidget
@@ -140,7 +121,7 @@ public:
 protected:
 	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void OnMouseButtonClick(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
 	virtual void OnSizeChange(int nWidth, int nHeight);
 
 private:
@@ -172,6 +153,8 @@ public:
 
 protected:
 	virtual void OnRender(XUIDevice* pDevice);
+
+	virtual void OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
 
 private:
 	void SetSelectItem(XUIListItem* pItem, bool bSelected);
