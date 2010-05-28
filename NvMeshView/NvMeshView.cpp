@@ -368,9 +368,9 @@ public:
 private:
 	XUIDialog* m_pWelcome;
 	XUIDialog* m_pFileOpen;
-	XUIScrollPanel* m_pBuildTool;
+	XUIPanel* m_pBuildTool;
 	XUILabel* m_pFileName;
-	XUIScrollPanel* m_pFileList;
+	XUIPanel* m_pFileList;
 	XUIDialog* m_pToolBox;
 	XUIDialog* m_pLogView;
 
@@ -394,6 +394,40 @@ private:
 
 void XUIApp::AppInit()
 {
+	XUIListView* pWidget = new XUIListView("test");
+	pWidget->SetWidgetRect(470, 350, 479, 300);
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	pWidget->AddString("", "1111");
+	XUI_GetXUI().GetRoot()->AddChild(pWidget);
+
 	m_pWelcome = new XUIDialog("WELCOME", "Welcome", 0, 0, 200, 100);
 	XUI_GetXUI().GetRoot()->AddChild(m_pWelcome);
 	m_pWelcome->CenterWidget();
@@ -413,8 +447,8 @@ void XUIApp::AppInit()
 	m_pFileOpen->GetWidget("SHOW")->_eventMouseButtonClick.connect(this, &XUIApp::OnWelcome_Close);
 	XUI_GetXUI().GetRoot()->AddChild(m_pFileOpen);
 
-	m_pFileList = new XUIScrollPanel("", 0, 0, 200, 400);
-	m_pFileList->m_bShowBoard = true;
+	m_pFileList = new XUIPanel("", 0, 0, 200, 400);
+//	m_pFileList->m_bShowBoard = true;
 	m_pFileList->SetVisable(false);
 	XUI_GetXUI().GetRoot()->AddChild(m_pFileList);
 	m_pFileList->SetClientArea(
@@ -432,7 +466,7 @@ void XUIApp::AppInit()
 	m_nFileListOffsetY = P.y - m_pFileOpen->GetWidgetTop();
 	m_pFileOpen->_eventWidgetMove.connect(this, &XUIApp::OnWidgetMove);
 
-	m_pBuildTool = new XUIScrollPanel("", 0, 75, m_pFileOpen->GetClientWidth(), 200);
+	m_pBuildTool = new XUIPanel("", 0, 75, m_pFileOpen->GetClientWidth(), 200);
 	m_pBuildTool->AddWidget(new XUILabel("", "Rasterization", XUIALIGN_LEFT, 0, 0, 0, 20));
 	m_pBuildTool->AddWidget(new XUISlider("CELLSIZE",			"Cell Size",			0, 0, 0, 20, 0.1f, 1, 0.01f));
 	m_pBuildTool->AddWidget(new XUISlider("CELLHEIGHT",			"Cell Height",			0, 0, 0, 20, 0.1f, 1, 0.01f));

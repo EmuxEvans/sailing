@@ -73,7 +73,7 @@ static int DrawGL()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_LINE_SMOOTH);
-	_gXUIDevice.Render(_gXUI.GetRoot());
+	_gXUI.Render(&_gXUIDevice);
 	glEnable(GL_DEPTH_TEST);
 
 	return TRUE;									

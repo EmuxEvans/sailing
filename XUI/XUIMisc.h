@@ -3,6 +3,10 @@
 #include <string>
 typedef std::string XUIString;
 
+#include <list>
+#include <map>
+#include <set>
+
 class XUIPoint
 {
 public:

@@ -19,7 +19,7 @@ bool XUIDevice::Render(XUIWidget* pWidget)
 	m_nScissors = 0;
 	m_rx = m_ry = 0;
 	RenderBegin();
-	pWidget->onRender(this);
+	pWidget->OnRender(this);
 	RenderEnd();
 	assert(m_nScissors==0);
 	return true;
