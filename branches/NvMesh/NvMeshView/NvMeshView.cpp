@@ -18,6 +18,7 @@
 #include "XUIDelegate.h"
 #include "XUIWidget.h"
 #include "XUIControls.h"
+#include "XUIDialog.h"
 #include "XUIDevice.h"
 #include "XUIApp.h"
 
@@ -190,16 +191,19 @@ public:
 	}
 
 	void OnFileOpen_Select(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
-		m_pFileList->SetVisable(!m_pFileList->IsVisable());
-		if(m_pFileList->IsVisable()) {
-			m_pFileList->BringToTop();
+		m_pFileListPanel->SetVisable(!m_pFileListPanel->IsVisable());
+		if(m_pFileListPanel->IsVisable()) {
+			m_pFileListPanel->BringToTop();
 			scanDirectory("meshes", ".obj");
 		}
 	}
 
 	void OnFileListClick(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
-		m_pFileList->SetVisable(false);
-		m_pFileName->SetText(dynamic_cast<XUIButton*>(pWidget)->GetText());
+		XUIListItem* pItem = m_pFileListView->GetSelectItem();
+		if(pItem) {
+			m_pFileListPanel->SetVisable(false);
+			m_pFileName->SetText(pItem->GetText());
+		}
 	}
 
 	void OnFileOpen_Open(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
@@ -322,12 +326,13 @@ public:
 
 	void OnWidgetMove(XUIWidget* pWidget, int nLeft, int nTop)
 	{
-		m_pFileList->SetWidgetPosition(m_pFileOpen->GetWidgetLeft()+m_nFileListOffsetX, m_pFileOpen->GetWidgetTop()+m_nFileListOffsetY);
-		m_pFileList->BringToTop();
+		m_pFileListPanel->SetWidgetPosition(m_pFileOpen->GetWidgetLeft()+m_nFileListOffsetX, m_pFileOpen->GetWidgetTop()+m_nFileListOffsetY);
+		m_pFileListPanel->BringToTop();
 	}
 
-	void scanDirectory(const char* pPath, const char* ext) {
-		clearFiles();
+	void scanDirectory(const char* pPath, const char* ext)
+	{
+		m_pFileListView->RemoveAllItem();
 
 		_finddata_t dir;
 		char pathWithExt[MAX_PATH];
@@ -338,15 +343,9 @@ public:
 		fh = _findfirst(pathWithExt, &dir);
 		if (fh == -1L) return;
 		do {
-			XUIButton* pButton = new XUIButton("", dir.name, 0, 0, 100, 15);
-			m_pFileList->AddWidget(pButton);
-			pButton->_eventMouseButtonClick.connect(this, &XUIApp::OnFileListClick);
+			m_pFileListView->AddString("", dir.name);
 		} while (_findnext(fh, &dir) == 0);
 		_findclose(fh);
-	}
-
-	void clearFiles() {
-		m_pFileList->ClearWidgets();
 	}
 
 	void ComputPath()
@@ -370,7 +369,8 @@ private:
 	XUIDialog* m_pFileOpen;
 	XUIPanel* m_pBuildTool;
 	XUILabel* m_pFileName;
-	XUIPanel* m_pFileList;
+	XUIPanel* m_pFileListPanel;
+	XUIListView* m_pFileListView;
 	XUIDialog* m_pToolBox;
 	XUIDialog* m_pLogView;
 
@@ -447,21 +447,24 @@ void XUIApp::AppInit()
 	m_pFileOpen->GetWidget("SHOW")->_eventMouseButtonClick.connect(this, &XUIApp::OnWelcome_Close);
 	XUI_GetXUI().GetRoot()->AddChild(m_pFileOpen);
 
-	m_pFileList = new XUIPanel("", 0, 0, 200, 400);
-//	m_pFileList->m_bShowBoard = true;
-	m_pFileList->SetVisable(false);
-	XUI_GetXUI().GetRoot()->AddChild(m_pFileList);
-	m_pFileList->SetClientArea(
-		m_pFileList->GetClientLeft()+5,
-		m_pFileList->GetClientTop()+5,
-		m_pFileList->GetClientRight()+5,
-		m_pFileList->GetClientBottom()+5);
+	m_pFileListPanel = new XUIPanel("", 0, 0, 200, 400);
+	m_pFileListPanel->SetVisable(false);
+	m_pFileListPanel->EnableScroll(false);
+	XUI_GetXUI().GetRoot()->AddChild(m_pFileListPanel);
+	m_pFileListPanel->SetClientArea(
+		m_pFileListPanel->GetClientLeft()+5,
+		m_pFileListPanel->GetClientTop()+5,
+		m_pFileListPanel->GetClientRight()+5,
+		m_pFileListPanel->GetClientBottom()+5);
+	m_pFileListView = new XUIListView("", 0, 0, m_pFileListPanel->GetClientWidth(), m_pFileListPanel->GetClientHeight());
+	m_pFileListPanel->AddChild(m_pFileListView);
+	m_pFileListView->_eventMouseButtonPressed.connect(this, &XUIApp::OnFileListClick);
 
 	XUIWidget* pSelect = m_pFileOpen->GetWidget("SELECT");
 	XUIPoint P(pSelect->GetWidgetWidth() + 10, -5);
 	pSelect->WidgetToScreen(P, P);
-	m_pFileList->GetParent()->ScreenToWidget(P, P);
-	m_pFileList->SetWidgetPosition(P.x, P.y);
+	m_pFileListPanel->GetParent()->ScreenToWidget(P, P);
+	m_pFileListPanel->SetWidgetPosition(P.x, P.y);
 	m_nFileListOffsetX = P.x - m_pFileOpen->GetWidgetLeft();
 	m_nFileListOffsetY = P.y - m_pFileOpen->GetWidgetTop();
 	m_pFileOpen->_eventWidgetMove.connect(this, &XUIApp::OnWidgetMove);

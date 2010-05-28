@@ -1,22 +1,31 @@
 #pragma once
 
-class XUIScriptProperty
-{
-};
-
-class XUIScriptMethod
-{
-};
-
 class XUIScriptParam
 {
 };
 
-class XUIScriptBinding
+class XUIScriptProperty
 {
 public:
-	XUIScriptBinding();
-	~XUIScriptBinding();
+	virtual ~XUIScriptProperty() { }
+
+	virtual void Setter(XUIScriptParamObject* pObject, const XUIScriptParam* pParam) = 0;
+	virtual XUIScriptParam* Getter(XUIScriptParamObject* pObject) = 0;
+};
+
+class XUIScriptMethod
+{
+public:
+	virtual ~XUIScriptMethod() { }
+
+	virtual XUIScriptParam* Call(std::vector<XUIScriptParam*> Params);
+};
+
+class XUIScriptTemplate
+{
+public:
+	XUIScriptTemplate();
+	~XUIScriptTemplate();
 
 	void InsertProperty();
 	void DeleteProperty();

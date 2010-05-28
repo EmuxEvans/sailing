@@ -42,6 +42,7 @@ public:
 	const XUIString& GetWidgetName() { return m_sName; }
 	XUIWidget* GetWidget(const char* pName);
 
+	bool IsParent(XUIWidget* pWidget);
 	XUIWidget* GetParent() { return m_pParent; }
 	XUIWidget* GetFirstChild() { return m_pFirstChild; }
 	XUIWidget* GetLastChild() { return m_pLastChild; }
@@ -50,10 +51,14 @@ public:
 
 	void AddChild(XUIWidget* pWidget);
 	void BringToTop();
+
 	void Delete() { m_bDelete = true; }
 
 	void SetVisable(bool bVisable=true) { m_bVisable = bVisable; }
 	bool IsVisable();
+
+	void SetFocus();
+	bool HasFocus();
 
 	void SetEnable(bool bEnable=true) { m_bEnable = bEnable; }
 	bool IsEnable();
@@ -178,6 +183,7 @@ public:
 	XUIWidgetRoot* GetRoot() { return &m_Root; }
 	XUIWidget* GetFocus() { return m_pFocus; }
 	XUIWidget* GetOver() { return m_pOver; }
+	XUIWidget* GetCapture() { return m_pCapture; }
 
 	XUIWidget* GetWidget(const XUIPoint& Point);
 
