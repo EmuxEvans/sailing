@@ -23,7 +23,7 @@ public:
 	void DrawScene();
 
 public:
-	void onMouseButtonClick(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
+	void OnMouseButtonClick(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
 		int i = 0;
 	}
 
@@ -49,7 +49,7 @@ void XUIApp::AppInit()
 	pPanel->AddWidget(new XUILabel ("A012", "B12", 10,  60, 100, 40));
 	pPanel->AddWidget(new XUILabel ("A009", "END", 10, 160, 100, 40));
 	XUI_GetXUI().GetRoot()->AddChild(pPanel);
-	pPanel->GetWidget("A001")->_eventMouseButtonClick.Register(_eventA001.R(this, &XUIApp::onMouseButtonClick));
+	pPanel->GetWidget("A001")->_eventMouseButtonClick.Register(_eventA001.R(this, &XUIApp::OnMouseButtonClick));
 	pWelcome = new XUIScrollPanel("WELCOME", "Welcome", 0, 0, 200, 100);
 	pWelcome->AddWidget(new XUILabel("", "I'm Mr.XUI. Who are you?", 10, 20, 100, 20));
 	XUI_GetXUI().GetRoot()->AddChild(pWelcome);

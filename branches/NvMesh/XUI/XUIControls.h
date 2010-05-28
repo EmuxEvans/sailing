@@ -11,10 +11,10 @@ public:
 	const char* GetText() { return m_Caption.c_str(); }
 
 protected:
-	virtual void onRender(XUIDevice* pDevice);
+	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void onMouseEnter() { m_bOver = true; }
-	virtual void onMouseLeave() { m_bOver = false; }
+	virtual void OnMouseEnter() { m_bOver = true; }
+	virtual void OnMouseLeave() { m_bOver = false; }
 
 	bool m_bOver;
 	XUIString m_Caption;
@@ -31,9 +31,9 @@ public:
 	bool GetCheck() { return m_bCheck; }
 
 protected:
-	virtual void onRender(XUIDevice* pDevice);
+	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void onMouseButtonClick(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseButtonClick(const XUIPoint& Point, unsigned short nId);
 
 	bool m_bCheck;
 };
@@ -45,14 +45,14 @@ public:
 	XUILabel(const char* pName, const char* pText, int nAlign, int nLeft, int nTop, int nWidth, int nHeight);
 	virtual ~XUILabel();
 
-	void SetText(const char* pText) { m_Text = pText; }
-	const char* GetText() { return m_Text.c_str(); }
+	void SetText(const char* pText) { m_sText = pText; }
+	const char* GetText() { return m_sText.c_str(); }
 
 protected:
-	virtual void onRender(XUIDevice* pDevice);
+	virtual void OnRender(XUIDevice* pDevice);
 
 private:
-	XUIString m_Text;
+	XUIString m_sText;
 	int m_nAlign;
 };
 
@@ -66,7 +66,7 @@ public:
 	void ClearWidgets();
 
 protected:
-	virtual void onRender(XUIDevice* pDevice);
+	virtual void OnRender(XUIDevice* pDevice);
 	int m_nWidgetsHeight;
 };
 
@@ -81,13 +81,13 @@ public:
 	float GetValue() { return m_fValue; }
 
 protected:
-	virtual void onRender(XUIDevice* pDevice);
+	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void onMouseMove(const XUIPoint& Point);
-	virtual bool onMouseWheel(const XUIPoint& Point, int _rel);
-	virtual void onMouseLeave();
-	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
-	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseMove(const XUIPoint& Point);
+	virtual bool OnMouseWheel(const XUIPoint& Point, int _rel);
+	virtual void OnMouseLeave();
+	virtual void OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
 
 private:
 	XUIString m_Title;
@@ -95,47 +95,6 @@ private:
 	bool m_bIn;
 	int m_nCaptureX;
 	float m_fCaptureValue;
-};
-
-class XUIScrollBar : public XUIWidget
-{
-public:
-	XUIScrollBar(const char* pName="", bool bManualFree=false);
-	XUIScrollBar(const char* pName, int nLeft, int nTop, int nWidth, int nHeight, bool bVertical);
-
-	bool IsVertical() { return m_bVertical; }
-	void SetVertical(bool bVertical) { m_bVertical = bVertical; }
-
-protected:
-	virtual void onMouseMove(const XUIPoint& Point);
-	virtual bool onMouseWheel(const XUIPoint& Point, int _rel);
-	virtual void onMouseLeave();
-	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
-	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
-
-private:
-	bool m_bVertical;
-};
-
-class XUIScrollPanel : public XUIPanel
-{
-public:
-	XUIScrollPanel(const char* pName="", bool bManualFree=false);
-	XUIScrollPanel(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
-	virtual ~XUIScrollPanel();
-
-	bool m_bShowBoard;
-
-protected:
-	virtual void onRender(XUIDevice* pDevice);
-
-	virtual void onMouseMove(const XUIPoint& Point);
-	virtual bool onMouseWheel(const XUIPoint& Point, int _rel);
-	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
-	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
-
-private:
-	int m_nCaptureY, m_nCaptureScroll;
 };
 
 class XUIDialog : public XUIWidget
@@ -146,14 +105,12 @@ public:
 	virtual ~XUIDialog();
 
 protected:
-	virtual void ActiveWidget(XUIWidget* pWidget);
+	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void onRender(XUIDevice* pDevice);
-
-	virtual void onMouseMove(const XUIPoint& Point);
-	virtual void onMouseLeave();
-	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
-	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseMove(const XUIPoint& Point);
+	virtual void OnMouseLeave();
+	virtual void OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
 
 private:
 	XUIString m_Title;
@@ -162,11 +119,11 @@ private:
 	int m_nInMoveX, m_nInMoveY;
 };
 
-class XUIList;
+class XUIListView;
 
 class XUIListItem : public XUIWidget
 {
-	friend class XUIList;
+	friend class XUIListView;
 public:
 	XUIListItem(const char* pName="", bool bManualFree=false);
 	XUIListItem(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
@@ -174,22 +131,36 @@ public:
 	void SetUserData(void* pUserData) { m_pUserData = pUserData; }
 	void* GetUserData() { return m_pUserData; }
 
+	void SetSelect(bool bSelected);
+	bool IsSelected() { return m_bSelected; }
+
+	void SetText(const char* pText) { m_sText = pText; }
+	const char* GetText() { return m_sText.c_str(); }
+
+protected:
+	virtual void OnRender(XUIDevice* pDevice);
+
+	virtual void OnMouseButtonClick(const XUIPoint& Point, unsigned short nId);
+	virtual void OnSizeChange(int nWidth, int nHeight);
+
 private:
-	XUIList* m_pList;
+	XUIListView* m_pView;
 	void* m_pUserData;
 	bool m_bSelected;
+	XUIString m_sText;
 };
 
-class XUIList : public XUIScrollPanel
+class XUIListView : public XUIWidget
 {
+	friend class XUIListItem;
 public:
-	XUIList(const char* pName="", bool bManualFree=false);
-	XUIList(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
+	XUIListView(const char* pName="", bool bManualFree=false);
+	XUIListView(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
 
 	void AddItem(XUIListItem* pItem);
-	XUIListItem* AddString(const char* pName);
+	XUIListItem* AddString(const char* pName, const char* pText);
 
-	bool RemoveItem(XUIListItem* pItem);
+	bool RemoveItem(XUIListItem* pItem, bool bSilence=false);
 	void RemoveAllItem();
 
 	int GetItemCount();
@@ -199,7 +170,14 @@ public:
 	void SetMultiSelect(bool bMultiSelect);
 	bool GetMultiSelect() { return m_bMultiSelect; }
 
+protected:
+	virtual void OnRender(XUIDevice* pDevice);
+
 private:
+	void SetSelectItem(XUIListItem* pItem, bool bSelected);
+	void AdjustItems();
+
+	std::list<XUIListItem*> m_Items;
 	bool m_bMultiSelect;
 };
 
@@ -212,9 +190,9 @@ public:
 	const XUIString& GetText() { return m_sText; }
 
 protected:
-	virtual void onRender(XUIDevice* pDevice);
+	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void onKeyChar(unsigned short nKey, unsigned int Char);
+	virtual void OnKeyChar(unsigned short nKey, unsigned int Char);
 
 private:
 	XUIString m_sText;

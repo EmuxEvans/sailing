@@ -33,6 +33,7 @@ class XUIWidget : public sigslot::has_slots<>
 	friend class XUIDevice;
 public:
 	XUIWidget(const char* pName, bool bManualFree=false);
+	XUIWidget(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
 	virtual ~XUIWidget();
 
 	XUI* GetXUI();
@@ -40,7 +41,6 @@ public:
 
 	const XUIString& GetWidgetName() { return m_sName; }
 	XUIWidget* GetWidget(const char* pName);
-	void ManualFree() { m_bManualFree = true; }
 
 	XUIWidget* GetParent() { return m_pParent; }
 	XUIWidget* GetFirstChild() { return m_pFirstChild; }
@@ -77,13 +77,17 @@ public:
 	int GetClientTop() { return m_nClientTop; }
 	int GetClientRight() { return m_nClientRight; }
 	int GetClientBottom() { return m_nClientBottom; }
-	int GetClientWidth() { return m_nWidth-m_nClientLeft-m_nClientRight; }
-	int GetClientHeight() { return m_nHeight-m_nClientTop-m_nClientBottom; }
+	int GetClientWidth() { return m_nWidth-m_nClientLeft-m_nClientRight-(m_bEnableScroll&&m_bShowVerticalBar?m_nScrollBarWidth:0); }
+	int GetClientHeight() { return m_nHeight-m_nClientTop-m_nClientBottom-(m_bEnableScroll&&m_bShowHorizontalBar?m_nScrollBarWidth:0); }
 
 	void EnableScroll(bool bEnable);
 	void SetScrollPosition(const XUIPoint& Scroll);
 	void SetScrollSize(int nWidth, int nHeight);
-	void AdjustScroll();
+	void AdjustScroll(bool bSilence=false);
+
+	void ShowVerticalBar(bool bShow);
+	void ShowHorizontalBar(bool bShow);
+	void SetScrollBarWidth(int nWidth);
 
 	XUIPoint GetScrollPosition() { return XUIPoint(m_nScrollX, m_nScrollY); }
 	int GetScrollPositionX() { return m_nScrollX; }
@@ -112,21 +116,21 @@ protected:
 	virtual void ActiveWidget(XUIWidget* pWidget);
 	void Destroy();
 
-	virtual void onRender(XUIDevice* pDevice);
+	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void onLostFocus(XUIWidget* pNew);
-	virtual bool onSetFocus(XUIWidget* pOld);
-	virtual void onMouseMove(const XUIPoint& Point);
-	virtual void onMouseEnter();
-	virtual void onMouseLeave();
-	virtual bool onMouseWheel(const XUIPoint& Point, int _rel);
-	virtual void onMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
-	virtual void onMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
-	virtual void onMouseButtonClick(const XUIPoint& Point, unsigned short nId);
-	virtual void onMouseButtonDoubleClick(const XUIPoint& Point, unsigned short nId);
-	virtual void onKeyPressed(unsigned short nKey);
-	virtual void onKeyReleased(unsigned short nKey);
-	virtual void onKeyChar(unsigned short nKey, unsigned int Char);
+	virtual void OnLostFocus(XUIWidget* pNew);
+	virtual bool OnSetFocus(XUIWidget* pOld);
+	virtual void OnMouseMove(const XUIPoint& Point);
+	virtual void OnMouseEnter();
+	virtual void OnMouseLeave();
+	virtual bool OnMouseWheel(const XUIPoint& Point, int _rel);
+	virtual void OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseButtonClick(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseButtonDBClick(const XUIPoint& Point, unsigned short nId);
+	virtual void OnKeyPressed(unsigned short nKey);
+	virtual void OnKeyReleased(unsigned short nKey);
+	virtual void OnKeyChar(unsigned short nKey, unsigned int Char);
 
 	virtual void OnWidgetMove(int nLeft, int nTop);
 	virtual void OnSizeChange(int nWidth, int nHeight);
@@ -144,8 +148,13 @@ private:
 	int m_nLeft, m_nTop, m_nWidth, m_nHeight;
 	int m_nClientLeft, m_nClientTop, m_nClientRight, m_nClientBottom;
 
-	bool m_bScroll;
+	bool m_bEnableScroll;
 	int m_nScrollX, m_nScrollY, m_nScrollWidth, m_nScrollHeight;
+	bool m_bShowVerticalBar;
+	bool m_bShowHorizontalBar;
+	int m_nScrollBarWidth;
+	bool m_nCaptureVertical;
+	int m_nCaptureV, m_nCaptureScroll;
 };
 
 class XUIWidgetRoot : public XUIWidget

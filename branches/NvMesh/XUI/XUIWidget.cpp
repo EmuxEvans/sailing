@@ -46,12 +46,51 @@ XUIWidget::XUIWidget(const char* pName, bool bManualFree)
 	m_nClientRight = 0;
 	m_nClientBottom = 0;
 
-	m_bScroll = false;
+	m_bEnableScroll = false;
 	m_nScrollX = 0;
 	m_nScrollY = 0;
 	m_nScrollWidth = 1;
 	m_nScrollHeight = 1;
+	m_bShowVerticalBar = true;
+	m_bShowHorizontalBar = true;
+	m_nScrollBarWidth = 8;
 }
+
+XUIWidget::XUIWidget(const char* pName, int nLeft, int nTop, int nWidth, int nHeight)
+{
+	m_sName = pName;
+	m_bManualFree = false;
+
+	m_pParent = NULL;
+	m_pNext = NULL;
+	m_pPrev = NULL;
+	m_pFirstChild = NULL;
+	m_pLastChild = NULL;
+
+	m_bDelete = false;
+	m_bEnable = true;
+	m_bVisable = true;
+
+	m_nLeft = nLeft;
+	m_nTop = nTop;
+	m_nWidth = nWidth;
+	m_nHeight = nHeight;
+
+	m_nClientLeft = 0;
+	m_nClientTop = 0;
+	m_nClientRight = 0;
+	m_nClientBottom = 0;
+
+	m_bEnableScroll = false;
+	m_nScrollX = 0;
+	m_nScrollY = 0;
+	m_nScrollWidth = 1;
+	m_nScrollHeight = 1;
+	m_bShowVerticalBar = true;
+	m_bShowHorizontalBar = true;
+	m_nScrollBarWidth = 8;
+}
+
 
 XUIWidget::~XUIWidget()
 {
@@ -154,8 +193,8 @@ XUIPoint& XUIWidget::ScreenToWidget(const XUIPoint& In, XUIPoint& Out)
 		P.x -= pWidget->m_nLeft;
 		P.y -= pWidget->m_nTop;
 		if(pWidget!=this) {
-			P.x += (pWidget->m_bScroll?pWidget->m_nScrollX:0) - pWidget->m_nClientLeft;
-			P.y += (pWidget->m_bScroll?pWidget->m_nScrollY:0) - pWidget->m_nClientTop;
+			P.x += (pWidget->m_bEnableScroll?pWidget->m_nScrollX:0) - pWidget->m_nClientLeft;
+			P.y += (pWidget->m_bEnableScroll?pWidget->m_nScrollY:0) - pWidget->m_nClientTop;
 		}
 		pWidget = pWidget->GetParent();
 	}
@@ -171,8 +210,8 @@ XUIPoint& XUIWidget::WidgetToScreen(const XUIPoint& In, XUIPoint& Out)
 		P.x += pWidget->m_nLeft;
 		P.y += pWidget->m_nTop;
 		if(pWidget!=this) {
-			P.x -= (pWidget->m_bScroll?pWidget->m_nScrollX:0) - pWidget->m_nClientLeft;
-			P.y -= (pWidget->m_bScroll?pWidget->m_nScrollY:0) - pWidget->m_nClientTop;
+			P.x -= (pWidget->m_bEnableScroll?pWidget->m_nScrollX:0) - pWidget->m_nClientLeft;
+			P.y -= (pWidget->m_bEnableScroll?pWidget->m_nScrollY:0) - pWidget->m_nClientTop;
 		}
 		pWidget = pWidget->GetParent();
 	}
@@ -223,7 +262,7 @@ void XUIWidget::SetClientArea(int nLeft, int nTop, int nRight, int nBottom)
 
 void XUIWidget::EnableScroll(bool bEnable)
 {
-	m_bScroll = bEnable;
+	m_bEnableScroll = bEnable;
 	AdjustScroll();
 }
 
@@ -231,39 +270,102 @@ void XUIWidget::SetScrollPosition(const XUIPoint& Scroll)
 {
 	m_nScrollX = Scroll.x;
 	m_nScrollY = Scroll.y;
-	if(m_bScroll) AdjustScroll();
+	AdjustScroll();
 }
 
 void XUIWidget::SetScrollSize(int nWidth, int nHeight)
 {
 	m_nScrollWidth = nWidth;
 	m_nScrollHeight = nHeight;
-	if(m_bScroll) AdjustScroll();
+	AdjustScroll();
 }
 
-void XUIWidget::AdjustScroll()
+void XUIWidget::AdjustScroll(bool bSilence)
 {
-	if(m_nScrollWidth<GetClientWidth()) {
-		m_nScrollX = 0;
-	} else {
-		if(m_nScrollX<0) m_nScrollX = 0;
-		if(m_nScrollX+GetClientWidth()>m_nScrollWidth) m_nScrollX = m_nScrollWidth - GetClientWidth();
-	}
+	if(m_bEnableScroll) {
+		if(m_nScrollWidth<GetClientWidth() || !m_bShowHorizontalBar) {
+			m_nScrollX = 0;
+		} else {
+			if(m_nScrollX<0) m_nScrollX = 0;
+			if(m_nScrollX+GetClientWidth()>m_nScrollWidth) m_nScrollX = m_nScrollWidth - GetClientWidth();
+		}
 
-	if(m_nScrollHeight<GetClientHeight()) {
-		m_nScrollY = 0;
-	} else {
-		if(m_nScrollY<0) m_nScrollY = 0;
-		if(m_nScrollY+GetClientHeight()>m_nScrollHeight) m_nScrollY = m_nScrollHeight - GetClientHeight();
+		if(m_nScrollHeight<GetClientHeight() || !m_bShowVerticalBar) {
+			m_nScrollY = 0;
+		} else {
+			if(m_nScrollY<0) m_nScrollY = 0;
+			if(m_nScrollY+GetClientHeight()>m_nScrollHeight) m_nScrollY = m_nScrollHeight - GetClientHeight();
+		}
+
+		if(!bSilence) {
+			OnSizeChange(GetWidgetWidth(), GetWidgetHeight());
+		}
 	}
 }
 
-void XUIWidget::onRender(XUIDevice* pDevice)
+void XUIWidget::ShowVerticalBar(bool bShow)
 {
+	if(m_bShowVerticalBar!=bShow) {
+		m_bShowVerticalBar = bShow;
+		OnSizeChange(GetWidgetWidth(), GetWidgetHeight());
+	}
+}
+
+void XUIWidget::ShowHorizontalBar(bool bShow)
+{
+	if(m_bShowHorizontalBar!=bShow) {
+		m_bShowHorizontalBar = bShow;
+		OnSizeChange(GetWidgetWidth(), GetWidgetHeight());
+	}
+}
+
+void XUIWidget::SetScrollBarWidth(int nWidth)
+{
+	m_nScrollBarWidth = nWidth;
+	if(m_bShowVerticalBar || m_bShowHorizontalBar) {
+		OnSizeChange(GetWidgetWidth(), GetWidgetHeight());
+	}
+}
+
+void XUIWidget::OnRender(XUIDevice* pDevice)
+{
+	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,0,0,192));
+
+	if(m_bEnableScroll) {
+		if(m_bShowVerticalBar) {
+			int nBarStart, nBarHeight;
+			if(GetScrollHeight()>GetClientHeight()) {
+				nBarStart = (int)((float)GetScrollPositionY()/(float)GetScrollHeight() * GetClientHeight());
+				nBarHeight = (int)((float)(GetScrollPositionY()+GetClientHeight())/(float)GetScrollHeight() * GetClientHeight()) - nBarStart;
+				if(nBarStart+nBarHeight>GetClientHeight()) nBarHeight = GetClientHeight() - nBarStart;
+			} else {
+				nBarStart = 0;
+				nBarHeight = GetClientHeight();
+			}
+
+			pDevice->AddRect(m_nWidth-m_nClientRight-m_nScrollBarWidth, m_nClientTop,           m_nScrollBarWidth, GetClientHeight(), m_nScrollBarWidth/2-1, XUI_RGBA(0,0,0,255));
+			pDevice->AddRect(m_nWidth-m_nClientRight-m_nScrollBarWidth, m_nClientTop+nBarStart, m_nScrollBarWidth, nBarHeight,        m_nScrollBarWidth/2-1, XUI_RGBA(255,255,255,200));
+		}
+
+		if(m_bShowHorizontalBar) {
+			int nBarStart, nBarWidth;
+			if(GetScrollWidth()>GetClientWidth()) {
+				nBarStart = (int)((float)GetScrollPositionX()/(float)GetScrollWidth() * GetClientWidth());
+				nBarWidth = (int)((float)(GetScrollPositionX()+GetClientWidth())/(float)GetScrollWidth() * GetClientWidth()) - nBarStart;
+				if(nBarStart+nBarWidth>GetClientWidth()) nBarWidth = GetClientWidth() - nBarStart;
+			} else {
+				nBarStart = 0;
+				nBarWidth = GetClientWidth();
+			}
+
+			pDevice->AddRect(m_nClientLeft,			  m_nHeight-m_nClientBottom-m_nScrollBarWidth, GetClientWidth(), m_nScrollBarWidth, m_nScrollBarWidth/2-1, XUI_RGBA(0,0,0,255));
+			pDevice->AddRect(m_nClientLeft+nBarStart, m_nHeight-m_nClientBottom-m_nScrollBarWidth, nBarWidth       , m_nScrollBarWidth, m_nScrollBarWidth/2-1, XUI_RGBA(255,255,255,200));
+		}
+	}
+
 	XUIWidget* pWidget = GetFirstChild();
-
 	if(pWidget) {
-		if(m_bScroll) {
+		if(m_bEnableScroll) {
 			pDevice->AddBeginScissor(m_nClientLeft, m_nClientTop, GetClientWidth(), GetClientHeight());
 			pDevice->AddBeginScissor(m_nClientLeft-m_nScrollX, m_nClientTop-m_nScrollY);
 		} else {
@@ -273,13 +375,13 @@ void XUIWidget::onRender(XUIDevice* pDevice)
 		while(pWidget!=NULL) {
 			if(pWidget->IsVisable()) {
 				pDevice->AddBeginScissor(pWidget->m_nLeft, pWidget->m_nTop);
-				pWidget->onRender(pDevice);
+				pWidget->OnRender(pDevice);
 				pDevice->AddEndScissor();
 			}
 			pWidget = pWidget->GetNext();
 		}
 
-		if(m_bScroll) {
+		if(m_bEnableScroll) {
 			pDevice->AddEndScissor();
 			pDevice->AddEndScissor();
 		} else {
@@ -288,69 +390,139 @@ void XUIWidget::onRender(XUIDevice* pDevice)
 	}
 }
 
-void XUIWidget::onLostFocus(XUIWidget* pNew)
+void XUIWidget::OnLostFocus(XUIWidget* pNew)
 {
 	_eventLostFocus(this, pNew);
 }
 
-bool XUIWidget::onSetFocus(XUIWidget* pOld)
+bool XUIWidget::OnSetFocus(XUIWidget* pOld)
 {
 	_eventSetFocus(this, pOld);
 	return false;
 }
 
-void XUIWidget::onMouseMove(const XUIPoint& Point)
+void XUIWidget::OnMouseMove(const XUIPoint& Point)
 {
+	if(m_nCaptureScroll>=0) {
+		if(m_nCaptureVertical) {
+			int nScroll = m_nCaptureScroll + (int)(((float)Point.y-m_nCaptureV)/GetClientHeight()*GetScrollHeight());
+			SetScrollPosition(XUIPoint(m_nScrollX, nScroll));
+		} else {
+			int nScroll = m_nCaptureScroll + (int)(((float)Point.x-m_nCaptureV)/GetClientWidth()*GetScrollWidth());
+			SetScrollPosition(XUIPoint(nScroll, m_nScrollY));
+		}
+	}
+
 	_eventMouseMove(this, Point);
 }
 
-void XUIWidget::onMouseEnter()
+void XUIWidget::OnMouseEnter()
 {
 	_eventMouseEnter(this);
 }
 
-void XUIWidget::onMouseLeave()
+void XUIWidget::OnMouseLeave()
 {
 	_eventMouseLeave(this);
 }
 
-bool XUIWidget::onMouseWheel(const XUIPoint& Point, int _rel)
+bool XUIWidget::OnMouseWheel(const XUIPoint& Point, int _rel)
 {
+	if(m_bEnableScroll) {
+		if(m_bShowVerticalBar) {
+			SetScrollPosition(XUIPoint(m_nScrollX, m_nScrollY - _rel*20));
+			return true;
+		}
+		if(m_bShowHorizontalBar) {
+			SetScrollPosition(XUIPoint(m_nScrollX - _rel*20, m_nScrollX));
+			return true;
+		}
+	}
+
 	_eventMouseWheel(this, Point, _rel);
 	return false;
 }
 
-void XUIWidget::onMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
+void XUIWidget::OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
 {
+	if(nId==XUI_INPUT::MOUSE_LBUTTON) {
+		if(m_bShowVerticalBar && GetScrollHeight()>GetClientHeight()) {
+			int nLeft = Point.x - (m_nWidth - m_nClientRight - m_nScrollBarWidth);
+			int nTop  = Point.y - m_nClientTop;
+			if(nLeft>=0 && nLeft<m_nScrollBarWidth && nTop>0 && nTop<GetClientHeight()) {
+				int nBarStart = (int)((float)GetScrollPositionY()/(float)GetScrollHeight() * GetClientHeight());
+				int nBarHeight = (int)((float)(GetScrollPositionY()+GetClientHeight())/(float)GetScrollHeight() * GetClientHeight()) - nBarStart;
+				if(nTop>=nBarStart && nTop<nBarStart+nBarHeight) {
+					m_nCaptureScroll = GetScrollPositionY();
+					m_nCaptureV = Point.y;
+				} else {
+					m_nCaptureScroll = (int)((nTop-nBarHeight/2)/(float)GetClientHeight()*GetScrollHeight());
+					if(m_nCaptureScroll<0) m_nCaptureScroll = 0;
+					if(m_nCaptureScroll>=GetScrollHeight()-GetClientHeight()) m_nCaptureScroll = GetScrollHeight()-GetClientHeight();
+					m_nCaptureV = Point.y;
+					SetScrollPosition(XUIPoint(m_nScrollX, m_nCaptureScroll));
+				}
+
+				m_nCaptureVertical = true;
+				GetXUI()->SetCapture(this, true);
+			}
+		}
+		if(m_bShowHorizontalBar && GetScrollWidth()>GetClientWidth()) {
+			int nTop  = Point.y - (m_nHeight - m_nClientBottom - m_nScrollBarWidth);
+			int nLeft = Point.x - m_nClientLeft;
+			if(nTop>=0 && nTop<m_nScrollBarWidth && nLeft>0 && nLeft<GetClientWidth()) {
+				int nBarStart = (int)((float)GetScrollPositionX()/(float)GetScrollWidth() * GetClientWidth());
+				int nBarWidth = (int)((float)(GetScrollPositionX()+GetClientWidth())/(float)GetScrollWidth() * GetClientWidth()) - nBarStart;
+				if(nLeft>=nBarStart && nLeft<nBarStart+nBarWidth) {
+					m_nCaptureScroll = GetScrollPositionX();
+					m_nCaptureV = Point.x;
+				} else {
+					m_nCaptureScroll = (int)((nLeft-nBarWidth/2)/(float)GetClientWidth()*GetScrollWidth());
+					if(m_nCaptureScroll<0) m_nCaptureScroll = 0;
+					if(m_nCaptureScroll>=GetScrollWidth()-GetClientWidth()) m_nCaptureScroll = GetScrollWidth()-GetClientWidth();
+					m_nCaptureV = Point.x;
+					SetScrollPosition(XUIPoint(m_nCaptureScroll, m_nScrollY));
+				}
+
+				m_nCaptureVertical = false;
+				GetXUI()->SetCapture(this, true);
+			}
+		}
+	}
 	_eventMouseButtonPressed(this, Point, nId);
 }
 
-void XUIWidget::onMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
+void XUIWidget::OnMouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 {
+	if(nId==XUI_INPUT::MOUSE_LBUTTON) {
+		m_nCaptureScroll = -1;
+		GetXUI()->SetCapture(this, false);
+	}
+
 	_eventMouseButtonReleased(this, Point, nId);
 }
 
-void XUIWidget::onMouseButtonClick(const XUIPoint& Point, unsigned short nId)
+void XUIWidget::OnMouseButtonClick(const XUIPoint& Point, unsigned short nId)
 {
 	_eventMouseButtonClick(this, Point, nId);
 }
 
-void XUIWidget::onMouseButtonDoubleClick(const XUIPoint& Point, unsigned short nId)
+void XUIWidget::OnMouseButtonDBClick(const XUIPoint& Point, unsigned short nId)
 {
 	_eventMouseButtonDoubleClick(this, Point, nId);
 }
 
-void XUIWidget::onKeyPressed(unsigned short nKey)
+void XUIWidget::OnKeyPressed(unsigned short nKey)
 {
 	_eventKeyPressed(this, nKey);
 }
 
-void XUIWidget::onKeyReleased(unsigned short nKey)
+void XUIWidget::OnKeyReleased(unsigned short nKey)
 {
 	_eventKeyReleased(this, nKey);
 }
 
-void XUIWidget::onKeyChar(unsigned short nKey, unsigned int Char)
+void XUIWidget::OnKeyChar(unsigned short nKey, unsigned int Char)
 {
 	_eventKeyChar(this, nKey, Char);
 }
@@ -362,6 +534,7 @@ void XUIWidget::OnWidgetMove(int nLeft, int nTop)
 
 void XUIWidget::OnSizeChange(int nWidth, int nHeight)
 {
+	AdjustScroll(true);
 	_eventSizeChange(this, nWidth, nHeight);
 }
 
@@ -369,7 +542,6 @@ XUI::XUI()
 {
 	m_Root.m_pXUI = this;
 	m_Root.SetWidgetPosition(0, 0);
-	m_Root.ManualFree();
 }
 
 XUI::~XUI()
@@ -390,7 +562,7 @@ XUIWidget* XUI::GetWidget(const XUIPoint& Point)
 			P.x -= pWidget->m_nClientLeft;
 			P.y -= pWidget->m_nClientTop;
 			if(P.x<0 || P.y<0 || P.x>=pWidget->GetClientWidth() || P.y>=pWidget->GetClientHeight()) break;
-			if(pWidget->m_bScroll) {
+			if(pWidget->m_bEnableScroll) {
 				P.x += pWidget->m_nScrollX;
 				P.y += pWidget->m_nScrollY;
 			}
@@ -428,17 +600,17 @@ void XUI::MouseMove(const XUIPoint& Point)
 	XUIPoint wp;
 	if(pWidget) {
 		if(m_pOver!=pWidget) {
-			if(m_pOver) m_pOver->onMouseLeave();
-			pWidget->onMouseEnter();
+			if(m_pOver) m_pOver->OnMouseLeave();
+			pWidget->OnMouseEnter();
 		}
-		pWidget->onMouseMove(pWidget->ScreenToWidget(Point, wp));
+		pWidget->OnMouseMove(pWidget->ScreenToWidget(Point, wp));
 	} else {
 		if(m_pOver) {
-			m_pOver->onMouseLeave();
+			m_pOver->OnMouseLeave();
 		}
 	}
 	if(m_pCapture && m_pCapture!=pWidget) {
-		m_pCapture->onMouseMove(m_pCapture->ScreenToWidget(Point, wp));
+		m_pCapture->OnMouseMove(m_pCapture->ScreenToWidget(Point, wp));
 	}
 
 	m_pOver = pWidget;
@@ -449,7 +621,7 @@ void XUI::MouseWheel(const XUIPoint& Point, int _rel)
 	XUIWidget* pWidget = GetWidget(Point);
 	while(pWidget) {
 		XUIPoint wp;
-		if(pWidget->onMouseWheel(pWidget->ScreenToWidget(Point, wp), _rel)) break;
+		if(pWidget->OnMouseWheel(pWidget->ScreenToWidget(Point, wp), _rel)) break;
 		pWidget = pWidget->GetParent();
 	}
 }
@@ -466,12 +638,12 @@ void XUI::MouseButtonPressed(const XUIPoint& Point, unsigned short nId)
 
 	if(m_pCapture!=pWidget && m_pCapture!=NULL) {
 		XUIPoint wp;
-		m_pCapture->onMouseButtonPressed(m_pCapture->ScreenToWidget(Point, wp), nId);
+		m_pCapture->OnMouseButtonPressed(m_pCapture->ScreenToWidget(Point, wp), nId);
 	}
 
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseButtonPressed(pWidget->ScreenToWidget(Point, wp), nId);
+		pWidget->OnMouseButtonPressed(pWidget->ScreenToWidget(Point, wp), nId);
 		if(nId==XUI_INPUT::MOUSE_LBUTTON) {
 			pWidget->ActiveWidget(pWidget);
 		}
@@ -484,12 +656,12 @@ void XUI::MouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 
 	if(m_pCapture!=pWidget && m_pCapture!=NULL) {
 		XUIPoint wp;
-		m_pCapture->onMouseButtonReleased(m_pCapture->ScreenToWidget(Point, wp), nId);
+		m_pCapture->OnMouseButtonReleased(m_pCapture->ScreenToWidget(Point, wp), nId);
 	}
 
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseButtonReleased(pWidget->ScreenToWidget(Point, wp), nId);
+		pWidget->OnMouseButtonReleased(pWidget->ScreenToWidget(Point, wp), nId);
 
 		const XUIPoint* pOld = NULL;
 		switch(nId) {
@@ -501,7 +673,7 @@ void XUI::MouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 			int x = pOld->x - Point.x;
 			int y = pOld->y - Point.y;
 			if(x>=-1 && x<=1 && y>=-1 && y<=1) {
-				pWidget->onMouseButtonClick(wp, nId);
+				pWidget->OnMouseButtonClick(wp, nId);
 			}
 		}
 	}
@@ -512,7 +684,7 @@ void XUI::MouseButtonClick(const XUIPoint& Point, unsigned short nId)
 	XUIWidget* pWidget = GetWidget(Point);
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseButtonClick(pWidget->ScreenToWidget(Point, wp), nId);
+		pWidget->OnMouseButtonClick(pWidget->ScreenToWidget(Point, wp), nId);
 	}
 }
 
@@ -521,28 +693,28 @@ void XUI::MouseButtonDoubleClick(const XUIPoint& Point, unsigned short nId)
 	XUIWidget* pWidget = GetWidget(Point);
 	if(pWidget) {
 		XUIPoint wp;
-		pWidget->onMouseButtonDoubleClick(pWidget->ScreenToWidget(Point, wp), nId);
+		pWidget->OnMouseButtonDBClick(pWidget->ScreenToWidget(Point, wp), nId);
 	}
 }
 
 void XUI::KeyPressed(unsigned short nKey)
 {
 	if(m_pFocus) {
-		m_pFocus->onKeyPressed(nKey);
+		m_pFocus->OnKeyPressed(nKey);
 	}
 }
 
 void XUI::KeyReleased(unsigned short nKey)
 {
 	if(m_pFocus) {
-		m_pFocus->onKeyReleased(nKey);
+		m_pFocus->OnKeyReleased(nKey);
 	}
 }
 
 void XUI::KeyChar(unsigned short nKey, unsigned int Char)
 {
 	if(m_pFocus) {
-		m_pFocus->onKeyChar(nKey, Char);
+		m_pFocus->OnKeyChar(nKey, Char);
 	}
 }
 
@@ -580,7 +752,7 @@ void XUI::EndFrame()
 
 void XUI::Render(XUIDevice* pDevice)
 {
-	m_Root.onRender(pDevice);
+	pDevice->Render(&m_Root);
 }
 
 void XUI::Reset(int nWidth, int nHeight)
