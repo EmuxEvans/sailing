@@ -20,6 +20,7 @@ XUI_DELEGATE_DEFINE1(eventKeyReleased, unsigned short)
 XUI_DELEGATE_DEFINE2(eventKeyChar, unsigned short, unsigned int)
 XUI_DELEGATE_DEFINE2(eventWidgetMove, int, int)
 XUI_DELEGATE_DEFINE2(eventSizeChange, int, int)
+XUI_DELEGATE_DEFINE0(eventClose)
 
 const int XUIALIGN_CENTER	= 0;
 const int XUIALIGN_LEFT		= 0x1;
@@ -50,9 +51,8 @@ public:
 	XUIWidget* GetPrev() { return m_pPrev; }
 
 	void AddChild(XUIWidget* pWidget);
+	void Close();
 	void BringToTop();
-
-	void Delete() { m_bDelete = true; }
 
 	void SetVisable(bool bVisable=true) { m_bVisable = bVisable; }
 	bool IsVisable();
@@ -67,6 +67,7 @@ public:
 	XUIPoint& WidgetToScreen(const XUIPoint& In, XUIPoint& Out);
 
 	void CenterWidget();
+	void MaxiumWidget();
 	void SetWidgetRect(int nLeft, int nTop, int nWidth, int nHeight);
 	void SetWidgetPosition(int nLeft, int nTop);
 	void SetWidgetSize(int nWidth, int nHeight);
@@ -115,6 +116,7 @@ public:
 	eventKeyChar				_eventKeyChar;
 	eventWidgetMove				_eventWidgetMove;
 	eventSizeChange				_eventSizeChange;
+	eventClose					_eventClose;
 
 protected:
 
@@ -139,6 +141,7 @@ protected:
 
 	virtual void OnWidgetMove(int nLeft, int nTop);
 	virtual void OnSizeChange(int nWidth, int nHeight);
+	virtual void OnClose();
 
 private:
 	XUIString m_sName;

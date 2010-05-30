@@ -158,7 +158,7 @@ void XUIPanel::ClearWidgets()
 {
 	XUIWidget* pWidget = GetFirstChild();
 	while(pWidget) {
-		pWidget->Delete();
+		pWidget->Close();
 		pWidget = pWidget->GetNext();
 	}
 	m_nWidgetsHeight = 0;
@@ -374,7 +374,7 @@ bool XUIListView::RemoveItem(XUIListItem* pItem, bool bSilence)
 {
 	pItem->m_pView = NULL;
 	m_Items.remove(pItem);
-	pItem->Delete();
+	pItem->Close();
 	if(!bSilence) AdjustItems();
 	return true;
 }
@@ -390,7 +390,7 @@ void XUIListView::RemoveAllItem()
 
 int XUIListView::GetItemCount()
 {
-	return m_Items.size();
+	return (int)m_Items.size();
 }
 
 XUIListItem* XUIListView::GetItem(int nIndex)

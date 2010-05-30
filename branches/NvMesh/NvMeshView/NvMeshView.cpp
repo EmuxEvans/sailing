@@ -336,7 +336,7 @@ public:
 
 		_finddata_t dir;
 		char pathWithExt[MAX_PATH];
-		long fh;
+		intptr_t fh;
 		strcpy(pathWithExt, pPath);
 		strcat(pathWithExt, "/*");
 		strcat(pathWithExt, ext);
