@@ -330,7 +330,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 		keys[wParam] = FALSE;
 		return 0;
 	case WM_CHAR:
-		_gXUI.KeyChar((lParam>>16)&0xff, wParam);
+		_gXUI.KeyChar((lParam>>16)&0xff, (unsigned int)wParam);
 		break;
 	}
 
@@ -389,7 +389,7 @@ int XUI_AppMain()
 
 	KillGLWindow();
 
-	return (msg.wParam);
+	return (int)msg.wParam;
 }
 
 XUI& XUI_GetXUI()

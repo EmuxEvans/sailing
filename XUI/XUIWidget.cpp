@@ -131,6 +131,11 @@ void XUIWidget::AddChild(XUIWidget* pWidget)
 	}
 }
 
+void XUIWidget::Close()
+{
+	m_bDelete = true;
+}
+
 void XUIWidget::BringToTop()
 {
 	if(!m_pParent)
@@ -247,6 +252,13 @@ void XUIWidget::CenterWidget()
 {
 	if(m_pParent) {
 		SetWidgetPosition((m_pParent->GetClientWidth()-GetWidgetWidth())/2, (m_pParent->GetClientHeight()-GetWidgetHeight())/2);
+	}
+}
+
+void XUIWidget::MaxiumWidget()
+{
+	if(m_pParent) {
+		SetWidgetRect(0, 0, m_pParent->GetClientWidth(), m_pParent->GetClientHeight());
 	}
 }
 
@@ -558,6 +570,11 @@ void XUIWidget::OnSizeChange(int nWidth, int nHeight)
 {
 	AdjustScroll(true);
 	_eventSizeChange(this, nWidth, nHeight);
+}
+
+void XUIWidget::OnClose()
+{
+	_eventClose(this);
 }
 
 XUI::XUI()
