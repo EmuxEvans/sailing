@@ -20,6 +20,7 @@ XUI_DELEGATE_DEFINE1(eventKeyReleased, unsigned short)
 XUI_DELEGATE_DEFINE2(eventKeyChar, unsigned short, unsigned int)
 XUI_DELEGATE_DEFINE2(eventWidgetMove, int, int)
 XUI_DELEGATE_DEFINE2(eventSizeChange, int, int)
+XUI_DELEGATE_DEFINE1(eventCommand, int)
 XUI_DELEGATE_DEFINE0(eventClose)
 
 const int XUIALIGN_CENTER	= 0;
@@ -44,11 +45,11 @@ public:
 	XUIWidget* GetWidget(const char* pName);
 
 	bool IsParent(XUIWidget* pWidget);
-	XUIWidget* GetParent() { return m_pParent; }
-	XUIWidget* GetFirstChild() { return m_pFirstChild; }
-	XUIWidget* GetLastChild() { return m_pLastChild; }
-	XUIWidget* GetNext() { return m_pNext; }
-	XUIWidget* GetPrev() { return m_pPrev; }
+	XUIWidget* GetParent();
+	XUIWidget* GetFirstChild();
+	XUIWidget* GetLastChild();
+	XUIWidget* GetNext();
+	XUIWidget* GetPrev();
 
 	void AddChild(XUIWidget* pWidget);
 	void Close();
@@ -62,6 +63,7 @@ public:
 
 	void SetEnable(bool bEnable=true) { m_bEnable = bEnable; }
 	bool IsEnable();
+	bool MouseIn();
 
 	XUIPoint& ScreenToWidget(const XUIPoint& In, XUIPoint& Out);
 	XUIPoint& WidgetToScreen(const XUIPoint& In, XUIPoint& Out);
@@ -116,6 +118,9 @@ public:
 	eventKeyChar				_eventKeyChar;
 	eventWidgetMove				_eventWidgetMove;
 	eventSizeChange				_eventSizeChange;
+	eventCommand				_eventCommand;
+
+	void DoCommand(XUIWidget* pWidget, int nCode);
 	eventClose					_eventClose;
 
 protected:
@@ -151,7 +156,7 @@ private:
 	XUIWidget* m_pPrev;
 	XUIWidget* m_pFirstChild;
 	XUIWidget* m_pLastChild;
-	bool m_bDelete, m_bEnable, m_bVisable;
+	bool m_bDelete, m_bEnable, m_bVisable, m_bMouseIn;
 
 	int m_nLeft, m_nTop, m_nWidth, m_nHeight;
 	int m_nClientLeft, m_nClientTop, m_nClientRight, m_nClientBottom;
@@ -216,4 +221,7 @@ private:
 	XUIPoint m_LButtonPoint;
 	XUIPoint m_RButtonPoint;
 	XUIPoint m_MButtonPoint;
+	XUIWidget* m_pLButtonWidget;
+	XUIWidget* m_pRButtonWidget;
+	XUIWidget* m_pMButtonWidget;
 };

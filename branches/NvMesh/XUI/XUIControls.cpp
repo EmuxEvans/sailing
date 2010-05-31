@@ -300,8 +300,13 @@ void XUIListItem::SetSelect(bool bSelected)
 
 void XUIListItem::OnRender(XUIDevice* pDevice)
 {
-	if(m_bSelected) {
-		pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(255,0,0,255));
+	if(MouseIn()) {
+		pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,255,0,255));
+	} else {
+		if(m_bSelected) {
+			pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(255,0,0,255));
+		} else {
+		}
 	}
 
 	if(!m_sText.empty()) {
@@ -311,7 +316,7 @@ void XUIListItem::OnRender(XUIDevice* pDevice)
 	XUIWidget::OnRender(pDevice);
 }
 
-void XUIListItem::OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
+void XUIListItem::OnMouseButtonClick(const XUIPoint& Point, unsigned short nId)
 {
 	if(m_pView->GetMultiSelect() && !m_bSelected) {
 		m_pView->SetSelectItem(this, false);
@@ -319,11 +324,7 @@ void XUIListItem::OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId
 		m_pView->SetSelectItem(this, true);
 	}
 
-	XUIPoint Out1, Out2;
-	WidgetToScreen(Point, Out1);
-	m_pView->ScreenToWidget(Out1, Out2);
-
-	m_pView->OnMouseButtonPressed(Out2, nId);
+	m_pView->DoCommand(this, 0);
 }
 
 void XUIListItem::OnSizeChange(int nWidth, int nHeight)
@@ -430,21 +431,6 @@ void XUIListView::OnRender(XUIDevice* pDevice)
 	XUIWidget::OnRender(pDevice);
 }
 
-void XUIListView::OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId)
-{
-	if(Point.x>=GetClientLeft() && Point.x<GetClientLeft()-GetClientWidth()) {
-		if(Point.y>=GetClientTop() && Point.y<GetClientTop()-GetClientHeight()) {
-			int nLeft = Point.x - GetClientLeft() + GetScrollPositionX();
-			int nTop  = Point.y - GetClientTop()  + GetScrollPositionY();
-			if(nLeft>=GetScrollWidth() || nTop>=GetScrollHeight()) {
-				return;
-			}
-		}
-	}
-
-	XUIWidget::OnMouseButtonPressed(Point, nId);
-}
-
 void XUIListView::SetSelectItem(XUIListItem* pItem, bool bSelected)
 {
 	if(m_bMultiSelect) {
@@ -473,41 +459,54 @@ void XUIListView::AdjustItems()
 	SetScrollSize(GetClientWidth(), nHeight);
 }
 
+XUIMenuItem::XUIMenuItem(int nCode) : XUIListItem()
+{
+	SetWidgetSize(0, 20);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-XUIEditLine::XUIEditLine(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
+XUIMenuItem::~XUIMenuItem()
 {
 }
 
-XUIEditLine::XUIEditLine(const char* pName, int nLeft, int nTop, int nWidth, int nHeight) : XUIWidget(pName, nLeft, nTop, nWidth, nHeight)
+void XUIMenuItem::OnRender(XUIDevice* pDevice)
+{
+	XUIListItem::OnRender(pDevice);
+}
+
+XUIMenuItemSeparator::XUIMenuItemSeparator() : XUIMenuItem(-1)
+{
+	SetWidgetSize(0, 10);
+}
+
+XUIMenuItemSeparator::~XUIMenuItemSeparator()
 {
 }
 
-void XUIEditLine::OnRender(XUIDevice* pDevice)
+void XUIMenuItemSeparator::OnRender(XUIDevice* pDevice)
 {
-	pDevice->AddText(0, 0, 0, XUI_RGB(255, 255, 255), m_sText.c_str());
 }
 
-void XUIEditLine::OnKeyChar(unsigned short nKey, unsigned int Char)
+void XUIMenuItemSeparator::OnMouseButtonClick(const XUIPoint& Point, unsigned short nId)
 {
+}
+
+XUIPopMenu::XUIPopMenu(bool bManualFree) : XUIListView("", bManualFree)
+{
+}
+
+XUIPopMenu:: ~XUIPopMenu()
+{
+}
+
+void XUIPopMenu::AddMenu(const char* pName, const char* pText, int nCode)
+{
+	XUIMenuItem* pItem = new XUIMenuItem(nCode);
+	pItem->SetText(pText);
+	AddItem(pItem);
+}
+
+void XUIPopMenu::AddSeparator()
+{
+	XUIMenuItem* pItem = new XUIMenuItemSeparator();
+	AddItem(pItem);
 }

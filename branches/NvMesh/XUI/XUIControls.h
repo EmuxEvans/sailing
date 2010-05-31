@@ -121,7 +121,7 @@ public:
 protected:
 	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
+	virtual void OnMouseButtonClick(const XUIPoint& Point, unsigned short nId);
 	virtual void OnSizeChange(int nWidth, int nHeight);
 
 private:
@@ -154,8 +154,6 @@ public:
 protected:
 	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
-
 private:
 	void SetSelectItem(XUIListItem* pItem, bool bSelected);
 	void AdjustItems();
@@ -164,19 +162,37 @@ private:
 	bool m_bMultiSelect;
 };
 
-class XUIEditLine : public XUIWidget
+class XUIMenuItem : public XUIListItem
 {
 public:
-	XUIEditLine(const char* pName="", bool bManualFree=false);
-	XUIEditLine(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
-
-	const XUIString& GetText() { return m_sText; }
+	XUIMenuItem(int nCode);
+	virtual ~XUIMenuItem();
 
 protected:
 	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void OnKeyChar(unsigned short nKey, unsigned int Char);
-
 private:
-	XUIString m_sText;
+	int m_nCode;
+};
+
+class XUIMenuItemSeparator : public XUIMenuItem
+{
+public:
+	XUIMenuItemSeparator();
+	virtual ~XUIMenuItemSeparator();
+
+protected:
+	virtual void OnRender(XUIDevice* pDevice);
+
+	virtual void OnMouseButtonClick(const XUIPoint& Point, unsigned short nId);
+};
+
+class XUIPopMenu : public XUIListView
+{
+public:
+	XUIPopMenu(bool bManualFree=false);
+	virtual ~XUIPopMenu();
+
+	void AddMenu(const char* pName, const char* pText, int nCode);
+	void AddSeparator();
 };
