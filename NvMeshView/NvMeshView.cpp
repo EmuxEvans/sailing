@@ -198,7 +198,7 @@ public:
 		}
 	}
 
-	void OnFileListClick(XUIWidget* pWidget, const XUIPoint& Point, unsigned short nId) {
+	void OnFileListClick(XUIWidget* pWidget, int nCode) {
 		XUIListItem* pItem = m_pFileListView->GetSelectItem();
 		if(pItem) {
 			m_pFileListPanel->SetVisable(false);
@@ -458,7 +458,7 @@ void XUIApp::AppInit()
 		m_pFileListPanel->GetClientBottom()+5);
 	m_pFileListView = new XUIListView("", 0, 0, m_pFileListPanel->GetClientWidth(), m_pFileListPanel->GetClientHeight());
 	m_pFileListPanel->AddChild(m_pFileListView);
-	m_pFileListView->_eventMouseButtonPressed.connect(this, &XUIApp::OnFileListClick);
+	m_pFileListView->_eventCommand.connect(this, &XUIApp::OnFileListClick);
 
 	XUIWidget* pSelect = m_pFileOpen->GetWidget("SELECT");
 	XUIPoint P(pSelect->GetWidgetWidth() + 10, -5);

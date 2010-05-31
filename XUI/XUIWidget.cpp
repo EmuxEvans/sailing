@@ -35,6 +35,7 @@ XUIWidget::XUIWidget(const char* pName, bool bManualFree)
 	m_bDelete = false;
 	m_bEnable = true;
 	m_bVisable = true;
+	m_bMouseIn = false;
 
 	m_nLeft = 0;
 	m_nTop = 0;
@@ -70,6 +71,7 @@ XUIWidget::XUIWidget(const char* pName, int nLeft, int nTop, int nWidth, int nHe
 	m_bDelete = false;
 	m_bEnable = true;
 	m_bVisable = true;
+	m_bMouseIn = false;
 
 	m_nLeft = nLeft;
 	m_nTop = nTop;
@@ -94,55 +96,6 @@ XUIWidget::XUIWidget(const char* pName, int nLeft, int nTop, int nWidth, int nHe
 
 XUIWidget::~XUIWidget()
 {
-}
-
-void XUIWidget::ActiveWidget(XUIWidget* pWidget)
-{
-	if(m_pParent) {
-		m_pParent->ActiveWidget(pWidget);
-	}
-}
-
-void XUIWidget::Destroy()
-{
-	while(m_pFirstChild) {
-		XUIWidget* pWidget = m_pFirstChild;
-		DelWidget(this, pWidget);
-		pWidget->Destroy();
-	}
-
-	if(!m_bManualFree) delete this;
-}
-
-void XUIWidget::AddChild(XUIWidget* pWidget)
-{
-	if(m_pLastChild) {
-		pWidget->m_pParent = this;
-		pWidget->m_pNext = NULL;
-		pWidget->m_pPrev = m_pLastChild;
-		m_pLastChild->m_pNext = pWidget;
-		m_pLastChild = pWidget;
-	} else {
-		pWidget->m_pParent = this;
-		pWidget->m_pPrev = NULL;
-		pWidget->m_pNext = NULL;
-		m_pFirstChild = pWidget;
-		m_pLastChild = pWidget;
-	}
-}
-
-void XUIWidget::Close()
-{
-	m_bDelete = true;
-}
-
-void XUIWidget::BringToTop()
-{
-	if(!m_pParent)
-		return;
-
-	DelWidget(m_pParent, this);
-	m_pParent->AddChild(this);
 }
 
 XUI* XUIWidget::GetXUI()
@@ -184,6 +137,78 @@ bool XUIWidget::IsParent(XUIWidget* pWidget)
 	return false;
 }
 
+XUIWidget* XUIWidget::GetParent()
+{
+	return m_pParent;
+}
+
+XUIWidget* XUIWidget::GetFirstChild()
+{
+	XUIWidget* pWidget = m_pFirstChild;
+	while(pWidget!=NULL && pWidget->m_bDelete) {
+		pWidget = pWidget->m_pNext;
+	}
+	return pWidget;
+}
+
+XUIWidget* XUIWidget::GetLastChild()
+{
+	XUIWidget* pWidget = m_pLastChild;
+	while(pWidget!=NULL && pWidget->m_bDelete) {
+		pWidget = pWidget->m_pPrev;
+	}
+	return pWidget;
+}
+
+XUIWidget* XUIWidget::GetNext()
+{
+	XUIWidget* pWidget = m_pNext;
+	while(pWidget!=NULL && pWidget->m_bDelete) {
+		pWidget = pWidget->m_pNext;
+	}
+	return pWidget;
+}
+
+XUIWidget* XUIWidget::GetPrev()
+{
+	XUIWidget* pWidget = m_pPrev;
+	while(pWidget!=NULL && pWidget->m_bDelete) {
+		pWidget = pWidget->m_pPrev;
+	}
+	return pWidget;
+}
+
+void XUIWidget::AddChild(XUIWidget* pWidget)
+{
+	if(m_pLastChild) {
+		pWidget->m_pParent = this;
+		pWidget->m_pNext = NULL;
+		pWidget->m_pPrev = m_pLastChild;
+		m_pLastChild->m_pNext = pWidget;
+		m_pLastChild = pWidget;
+	} else {
+		pWidget->m_pParent = this;
+		pWidget->m_pPrev = NULL;
+		pWidget->m_pNext = NULL;
+		m_pFirstChild = pWidget;
+		m_pLastChild = pWidget;
+	}
+}
+
+void XUIWidget::Close()
+{
+	m_bDelete = true;
+}
+
+void XUIWidget::BringToTop()
+{
+	if(!m_pParent)
+		return;
+
+	DelWidget(m_pParent, this);
+	m_pParent->AddChild(this);
+}
+
 bool XUIWidget::IsVisable()
 {
 	return m_bVisable;
@@ -212,6 +237,11 @@ bool XUIWidget::IsEnable()
 		pWidget = pWidget->GetParent();
 	}
 	return true;
+}
+
+bool XUIWidget::MouseIn()
+{
+	return m_bMouseIn;
 }
 
 XUIPoint& XUIWidget::ScreenToWidget(const XUIPoint& In, XUIPoint& Out)
@@ -361,6 +391,30 @@ void XUIWidget::SetScrollBarWidth(int nWidth)
 	if(m_bShowVerticalBar || m_bShowHorizontalBar) {
 		OnSizeChange(GetWidgetWidth(), GetWidgetHeight());
 	}
+}
+
+void XUIWidget::DoCommand(XUIWidget* pWidget, int nCode)
+{
+	assert(this==pWidget->m_pParent);
+	_eventCommand(pWidget, nCode);
+}
+
+void XUIWidget::ActiveWidget(XUIWidget* pWidget)
+{
+	if(m_pParent) {
+		m_pParent->ActiveWidget(pWidget);
+	}
+}
+
+void XUIWidget::Destroy()
+{
+	while(m_pFirstChild) {
+		XUIWidget* pWidget = m_pFirstChild;
+		DelWidget(this, pWidget);
+		pWidget->Destroy();
+	}
+
+	if(!m_bManualFree) delete this;
 }
 
 void XUIWidget::OnRender(XUIDevice* pDevice)
@@ -581,6 +635,14 @@ XUI::XUI()
 {
 	m_Root.m_pXUI = this;
 	m_Root.SetWidgetPosition(0, 0);
+
+	m_pFocus	= NULL;
+	m_pOver		= NULL;
+	m_pCapture	= NULL;
+
+	m_pLButtonWidget = NULL;
+	m_pRButtonWidget = NULL;
+	m_pMButtonWidget = NULL;
 }
 
 XUI::~XUI()
@@ -654,12 +716,17 @@ void XUI::MouseMove(const XUIPoint& Point)
 	XUIPoint wp;
 	if(pWidget) {
 		if(m_pOver!=pWidget) {
-			if(m_pOver) m_pOver->OnMouseLeave();
+			if(m_pOver) {
+				m_pOver->m_bMouseIn = false;
+				m_pOver->OnMouseLeave();
+			}
+			pWidget->m_bMouseIn = true;
 			pWidget->OnMouseEnter();
 		}
 		pWidget->OnMouseMove(pWidget->ScreenToWidget(Point, wp));
 	} else {
 		if(m_pOver) {
+			m_pOver->m_bMouseIn = false;
 			m_pOver->OnMouseLeave();
 		}
 	}
@@ -682,13 +749,13 @@ void XUI::MouseWheel(const XUIPoint& Point, int _rel)
 
 void XUI::MouseButtonPressed(const XUIPoint& Point, unsigned short nId)
 {
-	switch(nId) {
-	case XUI_INPUT::MOUSE_LBUTTON: m_LButtonPoint = Point; break;
-	case XUI_INPUT::MOUSE_RBUTTON: m_RButtonPoint = Point; break;
-	case XUI_INPUT::MOUSE_MBUTTON: m_LButtonPoint = Point; break;
-	}
-
 	XUIWidget* pWidget = GetWidget(Point);
+
+	switch(nId) {
+	case XUI_INPUT::MOUSE_LBUTTON: m_pLButtonWidget = pWidget; m_LButtonPoint = Point; break;
+	case XUI_INPUT::MOUSE_RBUTTON: m_pRButtonWidget = pWidget; m_RButtonPoint = Point; break;
+	case XUI_INPUT::MOUSE_MBUTTON: m_pMButtonWidget = pWidget; m_MButtonPoint = Point; break;
+	}
 
 	if(m_pCapture!=pWidget && m_pCapture!=NULL) {
 		XUIPoint wp;
@@ -719,17 +786,23 @@ void XUI::MouseButtonReleased(const XUIPoint& Point, unsigned short nId)
 		pWidget->OnMouseButtonReleased(wp, nId);
 
 		const XUIPoint* pOld = NULL;
+		XUIWidget* pPressedWidget = pWidget;
 		switch(nId) {
-		case XUI_INPUT::MOUSE_LBUTTON: pOld = &m_LButtonPoint; break;
-		case XUI_INPUT::MOUSE_RBUTTON: pOld = &m_RButtonPoint; break;
-		case XUI_INPUT::MOUSE_MBUTTON: pOld = &m_MButtonPoint; break;
+		case XUI_INPUT::MOUSE_LBUTTON: pPressedWidget = m_pLButtonWidget; pOld = &m_LButtonPoint; break;
+		case XUI_INPUT::MOUSE_RBUTTON: pPressedWidget = m_pRButtonWidget; pOld = &m_RButtonPoint; break;
+		case XUI_INPUT::MOUSE_MBUTTON: pPressedWidget = m_pLButtonWidget; pOld = &m_MButtonPoint; break;
 		}
 		if(pOld) {
+			if(pPressedWidget==pWidget) {
+				pWidget->OnMouseButtonClick(wp, nId);
+			}
+			/*
 			int x = pOld->x - Point.x;
 			int y = pOld->y - Point.y;
 			if(x>=-1 && x<=1 && y>=-1 && y<=1) {
 				pWidget->OnMouseButtonClick(wp, nId);
 			}
+			*/
 		}
 	}
 }
