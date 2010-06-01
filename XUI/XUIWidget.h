@@ -58,6 +58,9 @@ public:
 	void SetVisable(bool bVisable=true) { m_bVisable = bVisable; }
 	bool IsVisable();
 
+	void SetTransparent(bool bTransparent) { m_bTransparent = bTransparent; }
+	bool GetTransparent() { return m_bTransparent; }
+
 	void SetFocus();
 	bool HasFocus();
 
@@ -157,7 +160,7 @@ private:
 	XUIWidget* m_pPrev;
 	XUIWidget* m_pFirstChild;
 	XUIWidget* m_pLastChild;
-	bool m_bDelete, m_bEnable, m_bVisable, m_bMouseIn;
+	bool m_bDelete, m_bEnable, m_bVisable, m_bTransparent, m_bMouseIn;
 
 	int m_nLeft, m_nTop, m_nWidth, m_nHeight;
 	int m_nClientLeft, m_nClientTop, m_nClientRight, m_nClientBottom;

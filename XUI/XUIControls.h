@@ -191,3 +191,13 @@ public:
 	void PopMenu(int nX=-1, int nY=-1);
 
 };
+
+class XUIComboBox : public XUIButton
+{
+public:
+	XUIComboBox(const char* pName="", bool bManualFree=false);
+	XUIComboBox(const char* pName, int nLeft, int nTop, int nWidth, int nHeight);
+
+private:
+	XUIPopMenu	m_PopMenu;
+};

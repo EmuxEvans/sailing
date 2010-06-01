@@ -394,40 +394,6 @@ private:
 
 void XUIApp::AppInit()
 {
-	XUIListView* pWidget = new XUIListView("test");
-	pWidget->SetWidgetRect(470, 350, 479, 300);
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	pWidget->AddString("", "1111");
-	XUI_GetXUI().GetRoot()->AddChild(pWidget);
-
 	m_pWelcome = new XUIDialog("WELCOME", "Welcome", 0, 0, 200, 100);
 	XUI_GetXUI().GetRoot()->AddChild(m_pWelcome);
 	m_pWelcome->CenterWidget();
@@ -459,6 +425,7 @@ void XUIApp::AppInit()
 	m_pFileListView = new XUIListView("", 0, 0, m_pFileListPanel->GetClientWidth(), m_pFileListPanel->GetClientHeight());
 	m_pFileListPanel->AddChild(m_pFileListView);
 	m_pFileListView->_eventCommand.connect(this, &XUIApp::OnFileListClick);
+	m_pFileListView->SetTransparent(true);
 
 	XUIWidget* pSelect = m_pFileOpen->GetWidget("SELECT");
 	XUIPoint P(pSelect->GetWidgetWidth() + 10, -5);

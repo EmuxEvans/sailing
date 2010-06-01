@@ -35,6 +35,7 @@ XUIWidget::XUIWidget(const char* pName, bool bManualFree)
 	m_bDelete = false;
 	m_bEnable = true;
 	m_bVisable = true;
+	m_bTransparent = false;
 	m_bMouseIn = false;
 
 	m_nLeft = 0;
@@ -71,6 +72,7 @@ XUIWidget::XUIWidget(const char* pName, int nLeft, int nTop, int nWidth, int nHe
 	m_bDelete = false;
 	m_bEnable = true;
 	m_bVisable = true;
+	m_bTransparent = false;
 	m_bMouseIn = false;
 
 	m_nLeft = nLeft;
@@ -467,7 +469,9 @@ void XUIWidget::OnRender(XUIDevice* pDevice)
 		while(pWidget!=NULL) {
 			if(pWidget->IsVisable()) {
 				pDevice->AddBeginScissor(pWidget->m_nLeft, pWidget->m_nTop);
-				pWidget->OnEraseBKGnd(pDevice);
+				if(!pWidget->m_bTransparent) {
+					pWidget->OnEraseBKGnd(pDevice);
+				}
 				pWidget->OnRender(pDevice);
 				pDevice->AddEndScissor();
 			}
