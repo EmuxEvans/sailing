@@ -165,7 +165,7 @@ private:
 class XUIMenuItem : public XUIListItem
 {
 public:
-	XUIMenuItem(int nCode);
+	XUIMenuItem(const char* pText, int nCode);
 	virtual ~XUIMenuItem();
 
 protected:
@@ -173,18 +173,6 @@ protected:
 
 private:
 	int m_nCode;
-};
-
-class XUIMenuItemSeparator : public XUIMenuItem
-{
-public:
-	XUIMenuItemSeparator();
-	virtual ~XUIMenuItemSeparator();
-
-protected:
-	virtual void OnRender(XUIDevice* pDevice);
-
-	virtual void OnMouseButtonClick(const XUIPoint& Point, unsigned short nId);
 };
 
 class XUIPopMenu : public XUIListView
@@ -195,4 +183,6 @@ public:
 
 	void AddMenu(const char* pName, const char* pText, int nCode);
 	void AddSeparator();
+	void PopMenu(int nX=-1, int nY=-1);
+
 };

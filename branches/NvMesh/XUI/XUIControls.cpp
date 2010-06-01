@@ -459,9 +459,10 @@ void XUIListView::AdjustItems()
 	SetScrollSize(GetClientWidth(), nHeight);
 }
 
-XUIMenuItem::XUIMenuItem(int nCode) : XUIListItem()
+XUIMenuItem::XUIMenuItem(const char* pText, int nCode) : XUIListItem()
 {
 	SetWidgetSize(0, 20);
+	SetText(pText);
 }
 
 XUIMenuItem::~XUIMenuItem()
@@ -473,7 +474,19 @@ void XUIMenuItem::OnRender(XUIDevice* pDevice)
 	XUIListItem::OnRender(pDevice);
 }
 
-XUIMenuItemSeparator::XUIMenuItemSeparator() : XUIMenuItem(-1)
+class XUIMenuItemSeparator : public XUIMenuItem
+{
+public:
+	XUIMenuItemSeparator();
+	virtual ~XUIMenuItemSeparator();
+
+protected:
+	virtual void OnRender(XUIDevice* pDevice);
+
+	virtual void OnMouseButtonClick(const XUIPoint& Point, unsigned short nId);
+};
+
+XUIMenuItemSeparator::XUIMenuItemSeparator() : XUIMenuItem("", -1)
 {
 	SetWidgetSize(0, 10);
 }
@@ -500,7 +513,7 @@ XUIPopMenu:: ~XUIPopMenu()
 
 void XUIPopMenu::AddMenu(const char* pName, const char* pText, int nCode)
 {
-	XUIMenuItem* pItem = new XUIMenuItem(nCode);
+	XUIMenuItem* pItem = new XUIMenuItem(pText, nCode);
 	pItem->SetText(pText);
 	AddItem(pItem);
 }
@@ -509,4 +522,8 @@ void XUIPopMenu::AddSeparator()
 {
 	XUIMenuItem* pItem = new XUIMenuItemSeparator();
 	AddItem(pItem);
+}
+
+void XUIPopMenu::PopMenu(int nX, int nY)
+{
 }
