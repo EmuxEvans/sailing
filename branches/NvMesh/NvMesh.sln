@@ -16,6 +16,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NvMeshMaker", "NvMeshMaker\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XUI", "XUI\XUI.vcproj", "{2A1F6C4B-8555-4706-B98D-F581972C3C3A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "skia", "Depends\skia\vs\Lib\skia.vcproj", "{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -56,6 +58,12 @@ Global
 		{2A1F6C4B-8555-4706-B98D-F581972C3C3A}.Release|Win32.Build.0 = Release|Win32
 		{2A1F6C4B-8555-4706-B98D-F581972C3C3A}.Release|x64.ActiveCfg = Release|x64
 		{2A1F6C4B-8555-4706-B98D-F581972C3C3A}.Release|x64.Build.0 = Release|x64
+		{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}.Debug|Win32.Build.0 = Debug|Win32
+		{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}.Debug|x64.ActiveCfg = Debug|Win32
+		{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}.Release|Win32.ActiveCfg = Release|Win32
+		{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}.Release|Win32.Build.0 = Release|Win32
+		{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
