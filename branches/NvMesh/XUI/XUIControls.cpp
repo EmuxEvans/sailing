@@ -22,12 +22,10 @@ static const int SLIDER_WIDTH = 8;
 
 XUIButton::XUIButton(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
 {
-	m_bOver = false;
 }
 
 XUIButton::XUIButton(const char* pName, const char* pText, int nLeft, int nTop, int nWidth, int nHeight) : XUIWidget(pName, nLeft, nTop, nWidth, nHeight)
 {
-	m_bOver = false;
 	SetText(pText);
 }
 
@@ -37,10 +35,10 @@ XUIButton::~XUIButton()
 
 void XUIButton::OnRender(XUIDevice* pDevice)
 {
-	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), GetWidgetHeight()/2-1, XUI_RGBA(128, 128, 128, IsEnable()&&m_bOver?196:96));
+	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), GetWidgetHeight()/2-1, XUI_RGBA(128, 128, 128, IsEnable()&&MouseIn()?196:96));
 
 	if(IsEnable())
-		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_CENTER, m_bOver?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_Caption.c_str());
+		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_CENTER, MouseIn()?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_Caption.c_str());
 	else
 		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_CENTER, XUI_RGBA(128,128,128,200), m_Caption.c_str());
 }
@@ -80,15 +78,15 @@ void XUICheckBox::OnRender(XUIDevice* pDevice)
 {
 	const int cy = GetWidgetHeight() / 2;
 
-	pDevice->AddRect(0, cy-CHECK_SIZE/2-3, CHECK_SIZE+6, CHECK_SIZE+6, 4, XUI_RGBA(128,128,128, m_bOver?196:96));
+	pDevice->AddRect(0, cy-CHECK_SIZE/2-3, CHECK_SIZE+6, CHECK_SIZE+6, 4, XUI_RGBA(128,128,128, MouseIn()?196:96));
 	if(m_bCheck) {
 		if(IsEnable())
-			pDevice->AddRect(3, cy-CHECK_SIZE/2, CHECK_SIZE, CHECK_SIZE, 4, XUI_RGBA(255,255,255,m_bOver?255:200));
+			pDevice->AddRect(3, cy-CHECK_SIZE/2, CHECK_SIZE, CHECK_SIZE, 4, XUI_RGBA(255,255,255,MouseIn()?255:200));
 		else
 			pDevice->AddRect(3, cy-CHECK_SIZE/2, CHECK_SIZE, CHECK_SIZE, 4, XUI_RGBA(128,128,128,200));
 	}
 	if(IsEnable()) {
-		pDevice->AddText(CHECK_SIZE+10, cy-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT, m_bOver?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_Caption.c_str());
+		pDevice->AddText(CHECK_SIZE+10, cy-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT, MouseIn()?XUI_RGBA(255,196,0,255):XUI_RGBA(255,255,255,200), m_Caption.c_str());
 	} else {
 		pDevice->AddText(CHECK_SIZE+10, cy-TEXT_HEIGHT/2-1, XUIALIGN_RIGHT, XUI_RGBA(128,128,128,200), m_Caption.c_str());
 	}
@@ -164,10 +162,9 @@ void XUIPanel::ClearWidgets()
 	m_nWidgetsHeight = 0;
 }
 
-void XUIPanel::OnRender(XUIDevice* pDevice)
+void XUIPanel::OnEraseBKGnd(XUIDevice* pDevice)
 {
 	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,0,0,192));
-	XUIWidget::OnRender(pDevice);
 }
 
 XUISlider::XUISlider(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
@@ -301,16 +298,14 @@ void XUIListItem::SetSelect(bool bSelected)
 void XUIListItem::OnRender(XUIDevice* pDevice)
 {
 	if(MouseIn()) {
-		pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,255,0,255));
-	} else {
-		if(m_bSelected) {
-			pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(255,0,0,255));
-		} else {
-		}
+		pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), GetWidgetHeight()/2-1, XUI_RGBA(128, 128, 128, IsEnable()&&MouseIn()?196:96));
 	}
 
 	if(!m_sText.empty()) {
-		pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2, XUIALIGN_CENTER, XUI_RGBA(255, 255, 255, 255), m_sText.c_str());
+		if(m_bSelected)
+			pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_CENTER, XUI_RGBA(255,196,0,255), m_sText.c_str());
+		else
+			pDevice->AddText(GetWidgetWidth()/2, GetWidgetHeight()/2-TEXT_HEIGHT/2-1, XUIALIGN_CENTER, XUI_RGBA(255,255,255,200), m_sText.c_str());
 	}
 
 	XUIWidget::OnRender(pDevice);
@@ -426,9 +421,9 @@ void XUIListView::SetMultiSelect(bool bMultiSelect)
 	}
 }
 
-void XUIListView::OnRender(XUIDevice* pDevice)
+void XUIListView::OnEraseBKGnd(XUIDevice* pDevice)
 {
-	XUIWidget::OnRender(pDevice);
+	pDevice->AddRect(0, 0, GetWidgetWidth(), GetWidgetHeight(), 6, XUI_RGBA(0,0,0,192));
 }
 
 void XUIListView::SetSelectItem(XUIListItem* pItem, bool bSelected)
@@ -522,6 +517,33 @@ void XUIPopMenu::AddSeparator()
 {
 	XUIMenuItem* pItem = new XUIMenuItemSeparator();
 	AddItem(pItem);
+}
+
+void XUIPopMenu::DelMenu(XUIMenuItem* pItem)
+{
+	assert(pItem->GetParent()==this);
+	if(pItem->GetParent()==this) {
+		RemoveItem(pItem);
+	}
+}
+
+void XUIPopMenu::DelMenu(int nCode)
+{
+	XUIMenuItem* pItem = GetMenuItem(nCode);
+	if(pItem) {
+		DelMenu(pItem);
+	}
+}
+
+XUIMenuItem* XUIPopMenu::GetMenuItem(int nCode)
+{
+	for(int i=0; i<GetItemCount(); i++) {
+		XUIMenuItem* pItem = (XUIMenuItem*)GetItem(i);
+		if(pItem->GetCode()==nCode) {
+			return pItem;
+		}
+	}
+	return NULL;
 }
 
 void XUIPopMenu::PopMenu(int nX, int nY)
