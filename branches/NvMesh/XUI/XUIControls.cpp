@@ -8,17 +8,18 @@
 #include "XUIWidget.h"
 #include "XUIControls.h"
 #include "XUIDevice.h"
-
+/*
 static const int BUTTON_HEIGHT = 20;
 static const int SLIDER_HEIGHT = 20;
 static const int SLIDER_MARKER_WIDTH = 10;
-static const int CHECK_SIZE = 8;
 static const int DEFAULT_SPACING = 4;
-static const int TEXT_HEIGHT = 8;
 static const int SCROLL_AREA_PADDING = 6;
-static const int INTEND_SIZE = 5;
 static const int AREA_HEADER = 30;
-static const int SLIDER_WIDTH = 8;
+*/
+static const int TEXT_HEIGHT = 8;	// 文本的高
+static const int CHECK_SIZE = 8;	// CheckBox圆点的大小
+static const int INTEND_SIZE = 5;	// Panel里空间之间的距离
+static const int SLIDER_WIDTH = 8;	// SLIDER空间中拖动块的宽度
 
 XUIButton::XUIButton(const char* pName, bool bManualFree) : XUIWidget(pName, bManualFree)
 {
@@ -547,5 +548,13 @@ XUIMenuItem* XUIPopMenu::GetMenuItem(int nCode)
 }
 
 void XUIPopMenu::PopMenu(int nX, int nY)
+{
+}
+
+XUIComboBox::XUIComboBox(const char* pName, bool bManualFree) : XUIButton(pName, bManualFree), m_PopMenu(true)
+{
+}
+
+XUIComboBox::XUIComboBox(const char* pName, int nLeft, int nTop, int nWidth, int nHeight) : XUIButton(pName, "", nLeft, nTop, nWidth, nHeight), m_PopMenu(true)
 {
 }

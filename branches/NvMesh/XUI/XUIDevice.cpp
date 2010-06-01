@@ -19,7 +19,9 @@ bool XUIDevice::Render(XUIWidget* pWidget)
 	m_nScissors = 0;
 	m_rx = m_ry = 0;
 	RenderBegin();
-	pWidget->OnEraseBKGnd(this);
+	if(!pWidget->m_bTransparent) {
+		pWidget->OnEraseBKGnd(this);
+	}
 	pWidget->OnRender(this);
 	RenderEnd();
 	assert(m_nScissors==0);
