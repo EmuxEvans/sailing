@@ -128,6 +128,7 @@ protected:
 	virtual void ActiveWidget(XUIWidget* pWidget);
 	void Destroy();
 
+	virtual void OnEraseBKGnd(XUIDevice* pDevice);
 	virtual void OnRender(XUIDevice* pDevice);
 
 	virtual void OnLostFocus(XUIWidget* pNew);

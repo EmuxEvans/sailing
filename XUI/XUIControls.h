@@ -13,13 +13,10 @@ public:
 protected:
 	virtual void OnRender(XUIDevice* pDevice);
 
-	virtual void OnMouseEnter() { m_bOver = true; }
-	virtual void OnMouseLeave() { m_bOver = false; }
 	virtual void OnMouseButtonPressed(const XUIPoint& Point, unsigned short nId);
 	virtual void OnMouseButtonReleased(const XUIPoint& Point, unsigned short nId);
 	virtual void OnMouseButtonClick(const XUIPoint& Point, unsigned short nId);
 
-	bool m_bOver;
 	XUIString m_Caption;
 };
 
@@ -69,7 +66,8 @@ public:
 	void ClearWidgets();
 
 protected:
-	virtual void OnRender(XUIDevice* pDevice);
+	virtual void OnEraseBKGnd(XUIDevice* pDevice);
+
 	int m_nWidgetsHeight;
 };
 
@@ -152,7 +150,7 @@ public:
 	bool GetMultiSelect() { return m_bMultiSelect; }
 
 protected:
-	virtual void OnRender(XUIDevice* pDevice);
+	virtual void OnEraseBKGnd(XUIDevice* pDevice);
 
 private:
 	void SetSelectItem(XUIListItem* pItem, bool bSelected);
@@ -167,6 +165,8 @@ class XUIMenuItem : public XUIListItem
 public:
 	XUIMenuItem(const char* pText, int nCode);
 	virtual ~XUIMenuItem();
+
+	int GetCode() { return m_nCode; }
 
 protected:
 	virtual void OnRender(XUIDevice* pDevice);
@@ -183,6 +183,11 @@ public:
 
 	void AddMenu(const char* pName, const char* pText, int nCode);
 	void AddSeparator();
+	void DelMenu(XUIMenuItem* pItem);
+	void DelMenu(int nCode);
+
+	XUIMenuItem* GetMenuItem(int nCode);
+
 	void PopMenu(int nX=-1, int nY=-1);
 
 };

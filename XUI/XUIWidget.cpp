@@ -417,6 +417,10 @@ void XUIWidget::Destroy()
 	if(!m_bManualFree) delete this;
 }
 
+void XUIWidget::OnEraseBKGnd(XUIDevice* pDevice)
+{
+}
+
 void XUIWidget::OnRender(XUIDevice* pDevice)
 {
 	if(m_bEnableScroll) {
@@ -463,6 +467,7 @@ void XUIWidget::OnRender(XUIDevice* pDevice)
 		while(pWidget!=NULL) {
 			if(pWidget->IsVisable()) {
 				pDevice->AddBeginScissor(pWidget->m_nLeft, pWidget->m_nTop);
+				pWidget->OnEraseBKGnd(pDevice);
 				pWidget->OnRender(pDevice);
 				pDevice->AddEndScissor();
 			}
