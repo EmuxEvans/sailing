@@ -18,6 +18,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XUI", "XUI\XUI.vcproj", "{2
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "skia", "Depends\skia\vs\Lib\skia.vcproj", "{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestSKIA_GL", "Depends\skia\vs\Lib\TestSKIA_GL.vcproj", "{896C1304-1E89-477B-9EB3-766C77E95C7E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5} = {A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -64,6 +69,12 @@ Global
 		{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}.Release|Win32.ActiveCfg = Release|Win32
 		{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}.Release|Win32.Build.0 = Release|Win32
 		{A03D1799-AEC0-45AC-B168-7D0AFC1A00D5}.Release|x64.ActiveCfg = Release|Win32
+		{896C1304-1E89-477B-9EB3-766C77E95C7E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{896C1304-1E89-477B-9EB3-766C77E95C7E}.Debug|Win32.Build.0 = Debug|Win32
+		{896C1304-1E89-477B-9EB3-766C77E95C7E}.Debug|x64.ActiveCfg = Debug|Win32
+		{896C1304-1E89-477B-9EB3-766C77E95C7E}.Release|Win32.ActiveCfg = Release|Win32
+		{896C1304-1E89-477B-9EB3-766C77E95C7E}.Release|Win32.Build.0 = Release|Win32
+		{896C1304-1E89-477B-9EB3-766C77E95C7E}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
