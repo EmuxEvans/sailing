@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\include\core;..\..\include\xml;..\..\include\utils;..\..\include\config;..\..\include\views;..\..\src\core;..\..\include\images;..\..\include\effects;..\..\..\glew\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SK_IGNORE_STDINT_DOT_H"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SK_IGNORE_STDINT_DOT_H;SK_GL_DEVICE_FBO;GLEW_STATIC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -106,7 +106,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="..\..\include\core;..\..\include\xml;..\..\include\utils;..\..\include\config;..\..\include\views;..\..\src\core;..\..\include\images;..\..\include\effects"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SK_IGNORE_STDINT_DOT_H"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SK_IGNORE_STDINT_DOT_H;SK_GL_DEVICE_FBO;GLEW_STATIC"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
@@ -408,6 +408,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\core\SkPoint.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\core\SkProcSpriteBlitter.cpp"
 					>
 				</File>
@@ -468,6 +472,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\core\SkShape.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\core\SkSpriteBlitter_ARGB32.cpp"
 					>
 				</File>
@@ -493,6 +501,10 @@
 				</File>
 				<File
 					RelativePath="..\..\src\core\SkTSearch.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\core\SkTypeface.cpp"
 					>
 				</File>
 				<File
@@ -532,35 +544,35 @@
 				Name="src"
 				>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGL.cpp"
+					RelativePath="..\..\src\gl\SkGL.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLCanvas.cpp"
+					RelativePath="..\..\src\gl\SkGLCanvas.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLDevice.cpp"
+					RelativePath="..\..\src\gl\SkGLDevice.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLDevice_FBO.cpp"
+					RelativePath="..\..\src\gl\SkGLDevice_FBO.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLDevice_SWLayer.cpp"
+					RelativePath="..\..\src\gl\SkGLDevice_SWLayer.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLState.cpp"
+					RelativePath="..\..\src\gl\SkGLState.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLTextCache.cpp"
+					RelativePath="..\..\src\gl\SkGLTextCache.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkTextureCache.cpp"
+					RelativePath="..\..\src\gl\SkTextureCache.cpp"
 					>
 				</File>
 			</Filter>
@@ -568,34 +580,82 @@
 				Name="inc"
 				>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGL.h"
+					RelativePath="..\..\src\gl\SkGL.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLDevice.h"
+					RelativePath="..\..\src\gl\SkGLDevice.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLDevice_FBO.h"
+					RelativePath="..\..\src\gl\SkGLDevice_FBO.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLDevice_SWLayer.h"
+					RelativePath="..\..\src\gl\SkGLDevice_SWLayer.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLState.h"
+					RelativePath="..\..\src\gl\SkGLState.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkGLTextCache.h"
+					RelativePath="..\..\src\gl\SkGLTextCache.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\..\skia\src\gl\SkTextureCache.h"
+					RelativePath="..\..\src\gl\SkTextureCache.h"
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="ports"
+			>
+			<File
+				RelativePath="..\..\src\ports\SkDebug_stdio.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ports\SkFontHost_win.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ports\SkGlobals_global.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ports\SkOSFile_stdio.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ports\SkThread_win.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\ports\SkTime_win.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="opts"
+			>
+			<File
+				RelativePath="..\..\src\opts\opts_check_SSE2.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\opts\SkBitmapProcState_opts_SSE2.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\opts\SkBlitRow_opts_SSE2.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\opts\SkUtils_opts_SSE2.cpp"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

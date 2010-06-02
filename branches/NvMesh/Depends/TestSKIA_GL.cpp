@@ -1,14 +1,9 @@
 #include <assert.h>
 #include <windows.h>
 #include <gl\glew.h>
-
-#include "XUIMisc.h"
-#include "XUIDelegate.h"
-#include "XUIWidget.h"
-#include "XUIControls.h"
-#include "XUIDevice.h"
-#include "XUIDeviceGL.h"
-#include "XUIApp.h"
+//#include <gl\gl.h>
+#include <SkGLCanvas.h>
+#include <SkGraphics.h>
 
 #define SCREEN_WIDTH		800
 #define SCREEN_HEIGHT		600
@@ -26,9 +21,6 @@ static GLsizei _width, _height;
 
 static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-static XUI _gXUI;
-static XUIDeviceGL _gXUIDevice;
-
 static GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
 {
 	if(height==0) {
@@ -37,9 +29,6 @@ static GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
 
 	_width = width;
 	_height = height;
-
-	_gXUI.Reset(width, height);
-	_gXUIDevice.ResetDevice(width, height);
 }
 
 static int InitGL()
@@ -60,7 +49,7 @@ static int DrawGL()
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 	glDisable(GL_TEXTURE_2D);
-	XUI_DrawScene();
+	//XUI_DrawScene();
 
 	glDisable(GL_CULL_FACE);
 	glDisable(GL_DEPTH_TEST);
@@ -73,7 +62,7 @@ static int DrawGL()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_LINE_SMOOTH);
-	_gXUI.Render(&_gXUIDevice);
+	//_gXUI.Render(&_gXUIDevice);
 	glEnable(GL_DEPTH_TEST);
 
 	return TRUE;									
@@ -263,84 +252,18 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 	case WM_SIZE:
 		ReSizeGLScene(LOWORD(lParam), HIWORD(lParam));
 		return 0;
-	case WM_MOUSEMOVE:
-		_gXUI.MouseMove(XUIPoint(LOWORD(lParam), HIWORD(lParam)));
-		{
-			DWORD mbClick = 0;
-			if(GetKeyState(VK_LBUTTON)&0x8000) mbClick |= 0x001;
-			if(GetKeyState(VK_RBUTTON)&0x8000) mbClick |= 0x010;
-			if(GetKeyState(VK_MBUTTON)&0x8000) mbClick |= 0x100;
-			mbClick = mbClick ^ g_mbClick;
-			if((mbClick&0x00f) && (g_mbClick&0x00f)) {
-				mbClick &= 0xff0;
-				_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
-			}
-			if((mbClick&0x0f0) && (g_mbClick&0x0f0)) {
-				mbClick &= 0xf0f;
-				_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_RBUTTON);
-			}
-			if((mbClick&0xf00) && (g_mbClick&0xf00)) {
-				mbClick &= 0x0ff;
-				_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
-			}
-		}
-		break;
-	case WM_MOUSEWHEEL:
-		POINT Point;
-		Point.x = LOWORD(lParam);
-		Point.y = HIWORD(lParam);
-		ScreenToClient(hWnd, &Point);
-		_gXUI.MouseWheel(XUIPoint(Point.x, Point.y), GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA);
-		break;
-	case WM_LBUTTONDOWN:
-		g_mbClick |= 0x001;
-		_gXUI.MouseButtonPressed(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
-		break;
-	case WM_RBUTTONDOWN:
-		g_mbClick |= 0x010;
-		_gXUI.MouseButtonPressed(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_RBUTTON);
-		break;
-	case WM_MBUTTONDOWN:
-		g_mbClick |= 0x100;
-		_gXUI.MouseButtonPressed(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
-		break;
-	case WM_LBUTTONUP:
-		g_mbClick &= 0xff0;
-		_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
-		break;
-	case WM_RBUTTONUP:
-		g_mbClick &= 0xf0f;
-		_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_RBUTTON);
-		break;
-	case WM_MBUTTONUP:
-		g_mbClick &= 0x0ff;
-		_gXUI.MouseButtonReleased(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
-		break;
-	case WM_LBUTTONDBLCLK:
-		_gXUI.MouseButtonDoubleClick(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_LBUTTON);
-		break;
-	case WM_RBUTTONDBLCLK:
-		_gXUI.MouseButtonDoubleClick(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_RBUTTON);
-		break;
-	case WM_MBUTTONDBLCLK:
-		_gXUI.MouseButtonDoubleClick(XUIPoint(LOWORD(lParam), HIWORD(lParam)), XUI_INPUT::MOUSE_MBUTTON);
-		break;
-	case WM_KEYDOWN:
-		keys[wParam] = TRUE;
-		return 0;
-	case WM_KEYUP:
-		keys[wParam] = FALSE;
-		return 0;
-	case WM_CHAR:
-		_gXUI.KeyChar((lParam>>16)&0xff, (unsigned int)wParam);
-		break;
 	}
 
 	return DefWindowProc(hWnd, uMsg, wParam, lParam);
 }
 
+SkGLCanvas Canvas;
+SkDevice* pDevice;
+//	SkDevice* pDevice = Canvas.createDevice(SkBitmap::kARGB_8888_Config, 100, 100, true, true);
+
 int XUI_AppMain()
 {
+
 	MSG		msg;
 	BOOL	done = FALSE;
 	fullscreen = FALSE;
@@ -352,7 +275,12 @@ int XUI_AppMain()
 	glEnable(GL_POINT_SMOOTH);
 	glEnable(GL_LINE_SMOOTH);
 
-	XUI_AppInit();
+	SkGraphics::Init();
+
+	//XUI_AppInit();
+	RECT rctClient;
+	GetClientRect(hWnd, &rctClient);
+	Canvas.setViewport(rctClient.right-rctClient.left, rctClient.bottom-rctClient.top);
 
 	while(!done) {
 		if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -368,13 +296,34 @@ int XUI_AppMain()
 			DWORD dwStart = GetCurrentTime();
 			DWORD dwDelta = dwStart - dwLast;
 			dwLast = dwStart;
-			XUI_DoTick(dwDelta);
-
+			//XUI_DoTick(dwDelta);
+/*
 			if((active && !DrawGL()) || keys[VK_ESCAPE]) {
 				done = TRUE;
 			} else {
 				SwapBuffers(hDC);
 			}
+*/
+			glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+//			glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
+			char szString[] = "welcome to china!";
+			SkPaint Paint;
+	        Paint.setAntiAlias(true);
+			Paint.setColor(SkColorSetARGB(255, 255, 255, 255));
+
+			SkRect Rect;
+			Rect.fLeft = 0;
+			Rect.fTop = 0;
+			Rect.fRight = 100;
+			Rect.fBottom = 100;
+
+			Canvas.drawRect(Rect, Paint);
+//			Canvas.drawText(szString, sizeof(szString)-1, 10, 10, Paint);
+
+
+
+			SwapBuffers(hDC);
 
 			if(keys[VK_F1]) {
 				keys[VK_F1] = FALSE;
@@ -387,14 +336,15 @@ int XUI_AppMain()
 		}
 	}
 
-	XUI_AppFinal();
+	//XUI_AppFinal();
+	SkGraphics::Term();
 
 	KillGLWindow();
 
 	return (int)msg.wParam;
 }
 
-XUI& XUI_GetXUI()
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	return _gXUI;
+	return XUI_AppMain();
 }
