@@ -282,339 +282,339 @@
 				Name="inc"
 				>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\Sk64.h"
+					RelativePath="..\..\include\core\Sk64.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkAutoKern.h"
+					RelativePath="..\..\include\core\SkAutoKern.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkBitmap.h"
+					RelativePath="..\..\include\core\SkBitmap.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkBlitRow.h"
+					RelativePath="..\..\include\core\SkBlitRow.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkBlitter.h"
+					RelativePath="..\..\include\core\SkBlitter.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkBounder.h"
+					RelativePath="..\..\include\core\SkBounder.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkBuffer.h"
+					RelativePath="..\..\include\core\SkBuffer.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkCanvas.h"
+					RelativePath="..\..\include\core\SkCanvas.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkChunkAlloc.h"
+					RelativePath="..\..\include\core\SkChunkAlloc.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkColor.h"
+					RelativePath="..\..\include\core\SkColor.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkColorFilter.h"
+					RelativePath="..\..\include\core\SkColorFilter.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkColorPriv.h"
+					RelativePath="..\..\include\core\SkColorPriv.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkColorShader.h"
+					RelativePath="..\..\include\core\SkColorShader.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkComposeShader.h"
+					RelativePath="..\..\include\core\SkComposeShader.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkDeque.h"
+					RelativePath="..\..\include\core\SkDeque.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkDescriptor.h"
+					RelativePath="..\..\include\core\SkDescriptor.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkDevice.h"
+					RelativePath="..\..\include\core\SkDevice.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkDither.h"
+					RelativePath="..\..\include\core\SkDither.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkDraw.h"
+					RelativePath="..\..\include\core\SkDraw.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkDrawFilter.h"
+					RelativePath="..\..\include\core\SkDrawFilter.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkDrawLooper.h"
+					RelativePath="..\..\include\core\SkDrawLooper.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkEdgeClipper.h"
+					RelativePath="..\..\include\core\SkEdgeClipper.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkEndian.h"
+					RelativePath="..\..\include\core\SkEndian.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkFDot6.h"
+					RelativePath="..\..\include\core\SkFDot6.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkFixed.h"
+					RelativePath="..\..\include\core\SkFixed.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkFlattenable.h"
+					RelativePath="..\..\include\core\SkFlattenable.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkFloatBits.h"
+					RelativePath="..\..\include\core\SkFloatBits.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkFloatingPoint.h"
+					RelativePath="..\..\include\core\SkFloatingPoint.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkFontHost.h"
+					RelativePath="..\..\include\core\SkFontHost.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkGeometry.h"
+					RelativePath="..\..\include\core\SkGeometry.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkGlobals.h"
+					RelativePath="..\..\include\core\SkGlobals.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkGraphics.h"
+					RelativePath="..\..\include\core\SkGraphics.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkLineClipper.h"
+					RelativePath="..\..\include\core\SkLineClipper.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkMallocPixelRef.h"
+					RelativePath="..\..\include\core\SkMallocPixelRef.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkMask.h"
+					RelativePath="..\..\include\core\SkMask.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkMaskFilter.h"
+					RelativePath="..\..\include\core\SkMaskFilter.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkMath.h"
+					RelativePath="..\..\include\core\SkMath.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkMatrix.h"
+					RelativePath="..\..\include\core\SkMatrix.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkMMapStream.h"
+					RelativePath="..\..\include\core\SkMMapStream.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkOSFile.h"
+					RelativePath="..\..\include\core\SkOSFile.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPackBits.h"
+					RelativePath="..\..\include\core\SkPackBits.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPaint.h"
+					RelativePath="..\..\include\core\SkPaint.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPath.h"
+					RelativePath="..\..\include\core\SkPath.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPathEffect.h"
+					RelativePath="..\..\include\core\SkPathEffect.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPathMeasure.h"
+					RelativePath="..\..\include\core\SkPathMeasure.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPerspIter.h"
+					RelativePath="..\..\include\core\SkPerspIter.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPicture.h"
+					RelativePath="..\..\include\core\SkPicture.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPixelRef.h"
+					RelativePath="..\..\include\core\SkPixelRef.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPoint.h"
+					RelativePath="..\..\include\core\SkPoint.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPostConfig.h"
+					RelativePath="..\..\include\core\SkPostConfig.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPreConfig.h"
+					RelativePath="..\..\include\core\SkPreConfig.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkPtrRecorder.h"
+					RelativePath="..\..\include\core\SkPtrRecorder.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkRandom.h"
+					RelativePath="..\..\include\core\SkRandom.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkRasterizer.h"
+					RelativePath="..\..\include\core\SkRasterizer.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkReader32.h"
+					RelativePath="..\..\include\core\SkReader32.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkRect.h"
+					RelativePath="..\..\include\core\SkRect.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkRefCnt.h"
+					RelativePath="..\..\include\core\SkRefCnt.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkRegion.h"
+					RelativePath="..\..\include\core\SkRegion.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkScalar.h"
+					RelativePath="..\..\include\core\SkScalar.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkScalarCompare.h"
+					RelativePath="..\..\include\core\SkScalarCompare.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkScalerContext.h"
+					RelativePath="..\..\include\core\SkScalerContext.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkScan.h"
+					RelativePath="..\..\include\core\SkScan.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkShader.h"
+					RelativePath="..\..\include\core\SkShader.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkShape.h"
+					RelativePath="..\..\include\core\SkShape.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkSize.h"
+					RelativePath="..\..\include\core\SkSize.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkStream.h"
+					RelativePath="..\..\include\core\SkStream.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkString.h"
+					RelativePath="..\..\include\core\SkString.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkStroke.h"
+					RelativePath="..\..\include\core\SkStroke.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkTDArray.h"
+					RelativePath="..\..\include\core\SkTDArray.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkTDict.h"
+					RelativePath="..\..\include\core\SkTDict.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkTDStack.h"
+					RelativePath="..\..\include\core\SkTDStack.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkTemplates.h"
+					RelativePath="..\..\include\core\SkTemplates.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkThread.h"
+					RelativePath="..\..\include\core\SkThread.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkThread_platform.h"
+					RelativePath="..\..\include\core\SkThread_platform.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkTime.h"
+					RelativePath="..\..\include\core\SkTime.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkTRegistry.h"
+					RelativePath="..\..\include\core\SkTRegistry.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkTSearch.h"
+					RelativePath="..\..\include\core\SkTSearch.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkTypeface.h"
+					RelativePath="..\..\include\core\SkTypeface.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkTypes.h"
+					RelativePath="..\..\include\core\SkTypes.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkUnitMapper.h"
+					RelativePath="..\..\include\core\SkUnitMapper.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkUnPreMultiply.h"
+					RelativePath="..\..\include\core\SkUnPreMultiply.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkUtils.h"
+					RelativePath="..\..\include\core\SkUtils.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkWriter32.h"
+					RelativePath="..\..\include\core\SkWriter32.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\core\SkXfermode.h"
+					RelativePath="..\..\include\core\SkXfermode.h"
 					>
 				</File>
 			</Filter>
@@ -1002,11 +1002,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\images\SkImageDecoder.h"
+					RelativePath="..\..\include\images\SkImageDecoder.h"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\include\images\SkImageEncoder.h"
+					RelativePath="..\..\include\images\SkImageEncoder.h"
 					>
 				</File>
 				<File
@@ -1022,27 +1022,27 @@
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\src\images\SkImageDecoder.cpp"
+					RelativePath="..\..\src\images\SkImageDecoder.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\src\images\SkImageDecoder_Factory.cpp"
+					RelativePath="..\..\src\images\SkImageDecoder_Factory.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\src\images\SkImageDecoder_libbmp.cpp"
+					RelativePath="..\..\src\images\SkImageDecoder_libbmp.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\src\images\SkImageDecoder_libico.cpp"
+					RelativePath="..\..\src\images\SkImageDecoder_libico.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\src\images\SkImageDecoder_wbmp.cpp"
+					RelativePath="..\..\src\images\SkImageDecoder_wbmp.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\..\..\..\skia\src\images\SkImageEncoder.cpp"
+					RelativePath="..\..\src\images\SkImageEncoder.cpp"
 					>
 				</File>
 				<File
