@@ -17,7 +17,6 @@
 #define STBTT_free(x)      free(x)
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
-#include "stb_truetype.h"
 
 static const unsigned TEMP_COORD_COUNT = 100;
 static float g_tempCoords[TEMP_COORD_COUNT*2];
