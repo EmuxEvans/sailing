@@ -38,6 +38,7 @@ static GLvoid ReSizeGLScene(GLsizei width, GLsizei height)
 void* sk_image_wbmp();
 void* sk_image_libbmp();
 void* sk_image_libico();
+void* sk_image_libpng();
 
 #include <SkStream.h>
 #include <SkImageDecoder.h>
@@ -47,6 +48,7 @@ static int InitGL()
 	sk_image_wbmp();
 	sk_image_libbmp();
 	sk_image_libico();
+	sk_image_libpng();
 
 	glShadeModel(GL_SMOOTH);
 	glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
@@ -56,12 +58,12 @@ static int InitGL()
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	{
-		SkFILEStream Stream("images/nono.bmp");
-
-		if (!SkImageDecoder::DecodeStream(&Stream, &g_Nono)) {//, SkBitmap::kARGB_8888_Config, SkImageDecoder::kDecodeBounds_Mode, NULL)) {
-			return -1;
+		SkFILEStream Stream("images/basketball.png");
+		if(Stream.isValid()) {
+			if (!SkImageDecoder::DecodeStream(&Stream, &g_Nono)) {//, SkBitmap::kARGB_8888_Config, SkImageDecoder::kDecodeBounds_Mode, NULL)) {
+				return -1;
+			}
 		}
-
 	}
 
 	return TRUE;
@@ -78,7 +80,6 @@ static int DrawGL()
 	Rect.fTop = 0;
 	Rect.fRight = 500;
 	Rect.fBottom = 500;
-	glEnableClientState(GL_VERTEX_ARRAY);
 	char szTextA[] = "abcdefghijklmnopqrstuvwxyz";
 	char szTextB[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	char szTextC[] = "0123456789";
@@ -95,7 +96,7 @@ static int DrawGL()
 	Canvas.drawText(szTextC, sizeof(szTextC)-1, 100, 600, Paint);
 	Paint.setColor(SkColorSetARGB(50, 0, 0, 0));
 	Canvas.drawRoundRect(Rect, 10, 10, Paint);
-//	Canvas.drawBitmap(g_Nono, 200, 200);
+	Canvas.drawBitmap(g_Nono, 200, 200);
 
 	return TRUE;									
 }
@@ -336,12 +337,11 @@ glEnable(GL_DEPTH_TEST);
 glDepthFunc(GL_LEQUAL);
 glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 */
-/*
-glEnable(GL_BLEND);
+
+			glEnable(GL_BLEND);
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 glEnable(GL_POINT_SMOOTH);
 glEnable(GL_LINE_SMOOTH);
-*/
 
 /*
 

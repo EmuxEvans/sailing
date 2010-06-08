@@ -328,10 +328,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\..\glew\src\glewinfo.c"
-			>
-		</File>
-		<File
 			RelativePath=".\TestSKIA_GL.cpp"
 			>
 		</File>
