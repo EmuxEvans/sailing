@@ -85,8 +85,9 @@ static int DrawGL()
 	char szTextC[] = "0123456789";
 //			char szText[] = "welcome to china";
 	Paint.setTextSize(40);
-	Canvas.drawText(szTextB, sizeof(szTextB)-1, 100, 200, Paint);
-	Canvas.drawText(szTextA, sizeof(szTextA)-1, 100, 100, Paint);
+
+	Canvas.drawText(szTextB, sizeof(szTextB)-1, 100, 100, Paint);
+	Canvas.drawText(szTextA, sizeof(szTextA)-1, 100, 200, Paint);
 	Canvas.drawText(szTextC, sizeof(szTextC)-1, 100, 300, Paint);
 
 	Paint.setColor(SkColorSetARGB(255, 255, 0, 0));
@@ -98,7 +99,8 @@ static int DrawGL()
 	Canvas.drawRoundRect(Rect, 10, 10, Paint);
 	Canvas.drawBitmap(g_Nono, 200, 200);
 
-	return TRUE;									
+
+	return TRUE;
 }
 
 static GLvoid KillGLWindow(GLvoid)
@@ -310,7 +312,6 @@ int XUI_AppMain()
 				DispatchMessage(&msg);
 			}
 		} else {
-
 			glDisable(GL_TEXTURE_2D);
 			glDisable(GL_CULL_FACE);
 			glDisable(GL_DEPTH_TEST);
@@ -329,43 +330,6 @@ int XUI_AppMain()
 			gluOrtho2D(0, _width, _height, 0);
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
-/*
-glShadeModel(GL_SMOOTH);
-glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
-glClearDepth(1.0f);
-glEnable(GL_DEPTH_TEST);
-glDepthFunc(GL_LEQUAL);
-glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-*/
-
-			glEnable(GL_BLEND);
-glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-glEnable(GL_POINT_SMOOTH);
-glEnable(GL_LINE_SMOOTH);
-
-/*
-
-			glEnable(GL_TEXTURE_2D);
-			glEnable(GL_SCISSOR_TEST);
-			glEnableClientState(GL_VERTEX_ARRAY);
-
-			glDisable(GL_DEPTH_TEST);
-
-			glLoadIdentity();
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			glMatrixMode(GL_PROJECTION);
-
-			glViewport(0, 0, _width, _height);
-			glScissor(0, 0, _width, _height);
-			gluOrtho2D(0, _width, _height, 0);
-			glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-*/
-//			glDisable(GL_TEXTURE_2D);
-//			glDisable(GL_CULL_FACE);
-
 
 			DrawGL();
 
