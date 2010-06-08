@@ -44,7 +44,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\core;..\..\include\xml;..\..\include\utils;..\..\include\config;..\..\include\views;..\..\src\core;..\..\include\images;..\..\include\effects;..\..\..\glew\include"
+				AdditionalIncludeDirectories="..\..\include\core;..\..\include\xml;..\..\include\utils;..\..\include\config;..\..\include\views;..\..\src\core;..\..\include\images;..\..\include\effects;..\..\..\glew\include;..\..\..\libpng-1.4.2;..\..\..\zlib-1.2.5"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SK_IGNORE_STDINT_DOT_H;SK_GL_DEVICE_FBO;GLEW_STATIC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -107,7 +107,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include\core;..\..\include\xml;..\..\include\utils;..\..\include\config;..\..\include\views;..\..\src\core;..\..\include\images;..\..\include\effects;..\..\..\glew\include"
+				AdditionalIncludeDirectories="..\..\include\core;..\..\include\xml;..\..\include\utils;..\..\include\config;..\..\include\views;..\..\src\core;..\..\include\images;..\..\include\effects;..\..\..\glew\include;..\..\..\libpng-1.4.2;..\..\..\zlib-1.2.5"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;SK_IGNORE_STDINT_DOT_H;SK_GL_DEVICE_FBO;GLEW_STATIC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -171,7 +171,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\include\core;..\..\include\xml;..\..\include\utils;..\..\include\config;..\..\include\views;..\..\src\core;..\..\include\images;..\..\include\effects;..\..\..\glew\include"
+				AdditionalIncludeDirectories="..\..\include\core;..\..\include\xml;..\..\include\utils;..\..\include\config;..\..\include\views;..\..\src\core;..\..\include\images;..\..\include\effects;..\..\..\glew\include;..\..\..\libpng-1.4.2;..\..\..\zlib-1.2.5"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SK_IGNORE_STDINT_DOT_H;SK_GL_DEVICE_FBO;GLEW_STATIC"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -235,7 +235,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\..\include\core;..\..\include\xml;..\..\include\utils;..\..\include\config;..\..\include\views;..\..\src\core;..\..\include\images;..\..\include\effects;..\..\..\glew\include"
+				AdditionalIncludeDirectories="..\..\include\core;..\..\include\xml;..\..\include\utils;..\..\include\config;..\..\include\views;..\..\src\core;..\..\include\images;..\..\include\effects;..\..\..\glew\include;..\..\..\libpng-1.4.2;..\..\..\zlib-1.2.5"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;SK_IGNORE_STDINT_DOT_H;SK_GL_DEVICE_FBO;GLEW_STATIC"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -1038,6 +1038,42 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\images\SkImageDecoder_libpng.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Debug|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|x64"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							AdditionalIncludeDirectories=""
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath="..\..\src\images\SkImageDecoder_wbmp.cpp"
 					>
 				</File>
@@ -1046,7 +1082,191 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\src\images\SkImageEncoder_Factory.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\images\SkScaledBitmapSampler.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="libpng"
+				>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\png.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\png.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngconf.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngerror.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngget.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngmem.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngpread.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngpriv.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngread.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngrio.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngrtran.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngrutil.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngset.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngtrans.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngwio.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngwrite.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngwtran.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\libpng-1.4.2\pngwutil.c"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="zlib"
+				>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\adler32.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\compress.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\crc32.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\crc32.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\deflate.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\deflate.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\gzclose.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\gzlib.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\gzread.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\gzwrite.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\infback.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\inffast.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\inffast.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\inffixed.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\inflate.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\inflate.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\inftrees.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\inftrees.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\trees.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\trees.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\uncompr.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\zconf.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\zlib.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\zutil.c"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\zlib-1.2.5\zutil.h"
 					>
 				</File>
 			</Filter>
