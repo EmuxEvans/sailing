@@ -349,9 +349,6 @@ int XUI_AppMain()
 		return 0;
 	}
 
-	glEnable(GL_POINT_SMOOTH);
-	glEnable(GL_LINE_SMOOTH);
-
 	XUI_AppInit();
 
 	while(!done) {
