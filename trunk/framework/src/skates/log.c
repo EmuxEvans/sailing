@@ -216,7 +216,7 @@ int stream_write(LOG_CTX* ctx, const char* buf, unsigned int len)
 {
 	int start;
 	if(ctx->stream.max < ctx->stream.len + len) return ERR_NO_ENOUGH_MEMORY;
-	start = ctx->stream.cur + ctx->stream.len;
+	start = (ctx->stream.cur + ctx->stream.len) % ctx->stream.max;
 	if(start + len > ctx->stream.max) {
 		memcpy(ctx->stream.buf+start, buf, ctx->stream.max - start);
 		memcpy(ctx->stream.buf, buf+ctx->stream.max-start, len - (ctx->stream.max - start));
@@ -231,11 +231,10 @@ int stream_read(LOG_CTX* ctx, char* buf, unsigned int len)
 {
 	if(ctx->stream.len<len) return ERR_NO_DATA;
 	if(ctx->stream.cur+len>ctx->stream.max) {
-		int elen = ctx->stream.max-ctx->stream.max - ctx->stream.max-ctx->stream.cur;
+		int elen = ctx->stream.max-ctx->stream.cur;
 		memcpy(buf, ctx->stream.buf+ctx->stream.cur, elen);
-		memcpy(buf+len, ctx->stream.buf, len-elen);
+		memcpy(buf+elen, ctx->stream.buf, len-elen);
 	} else {
-		//memcpy(ctx->stream.buf+ctx->stream.cur, buf, len);
 		memcpy(buf, ctx->stream.buf+ctx->stream.cur, len );
 	}
 	ctx->stream.cur = (ctx->stream.cur+len) % ctx->stream.max;
