@@ -311,7 +311,7 @@ int file_write(LOG_CTX* ctx, int level, const char* msg, unsigned int len)
 	time_t curtime;
 	curtime = time(NULL);
 
-	if(ctx->file->fp==NULL || (ctx->file->covertime>0 && ctx->file->covertime>curtime)) {
+	if(ctx->file->fp==NULL || (ctx->file->covertime>0 && ctx->file->covertime < curtime)) {
 		if(ctx->file->fp) fclose(ctx->file->fp);
 		ctx->file->fp = NULL;
 		ctx->file->fp = file_create(ctx->file);
